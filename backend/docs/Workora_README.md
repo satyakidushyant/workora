@@ -21,10 +21,12 @@ Workora is a modern, scalable, enterprise-grade Human Resource Management System
 | Mapping | AutoMapper |
 | Logging | Serilog |
 | Cache | Redis |
+| Message Broker | RabbitMQ / Kafka |
+| Load Balancer | NGINX / YARP |
 | Storage | Cloudinary |
 | Documentation | Swagger / OpenAPI |
 | Testing | xUnit, Moq, FluentAssertions |
-| Containerization | Docker |
+| Containerization | Docker & Kubernetes |
 
 ## Solution Structure
 
@@ -43,16 +45,9 @@ tests/
 └── Workora.IntegrationTests
 
 docs/
-├── 01-Architecture
-├── 02-Requirements
-├── 03-Database
-├── 04-API
-├── 05-Authentication
-├── 06-Authorization
-├── 07-Deployment
-├── 08-Coding-Standards
-├── 09-Development-Guidelines
-├── 10-Release-Notes
+├── Workora_Comprehensive_Docs.md
+├── Workora_Technical.md
+├── Workora_README.md
 └── assets/
 ```
 
@@ -60,29 +55,10 @@ docs/
 
 ```text
 docs/
-├── 01-Architecture/
-│   ├── CleanArchitecture.md
-│   ├── FolderStructure.md
-│   ├── ProjectFlow.md
-│   └── SequenceDiagram.md
-├── 02-Requirements/
-│   ├── FunctionalRequirements.md
-│   ├── NonFunctionalRequirements.md
-│   ├── BusinessRules.md
-│   └── UserStories.md
-├── 03-Database/
-│   ├── ERDiagram.md
-│   ├── DatabaseDesign.md
-│   ├── NamingConvention.md
-│   └── MigrationGuide.md
-├── 04-API/
-├── 05-Authentication/
-├── 06-Authorization/
-├── 07-Deployment/
-├── 08-Coding-Standards/
-├── 09-Development-Guidelines/
-├── 10-Release-Notes/
-└── assets/
+├── Workora_Comprehensive_Docs.md (Merged architecture & guidelines)
+├── Workora_Technical.md (SRS, API Spec, Database Design)
+├── Workora_README.md (This file)
+└── assets/ (Diagrams and images)
 ```
 
 ## Project Layers

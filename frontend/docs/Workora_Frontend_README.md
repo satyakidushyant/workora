@@ -10,15 +10,17 @@ This project follows a scalable Angular Clean Architecture using feature modules
 
 | Component | Technology |
 |---|---|
-| Framework | Angular 20+ |
+| Framework | Angular 20+ (with SSR & Hydration) |
 | Language | TypeScript |
 | UI | Angular Material + Tailwind CSS |
-| State Management | NgRx (or Angular Signals where appropriate) |
+| State Management | NgRx SignalStore / Angular Signals |
 | Authentication | JWT + Refresh Token |
+| Real-time | WebSockets / SignalR |
+| PWA | Angular PWA / Service Workers |
 | HTTP | HttpClient + Interceptors |
 | Forms | Reactive Forms |
 | Charts | ApexCharts |
-| Testing | Jasmine + Karma |
+| Testing | Cypress / Playwright (E2E), Jest (Unit) |
 
 ## Project Structure
 
@@ -146,14 +148,16 @@ employees/
 workora/
 ├── backend/
 ├── frontend/
+│   ├── docs/
+│   │   ├── Workora_Frontend_Comprehensive_Docs.md
+│   │   └── Workora_Frontend_README.md
+│   └── workora-ui/
 ├── database/
 ├── docker/
-├── docs/
 ├── scripts/
 ├── .github/
 ├── README.md
-├── CHANGELOG.md
-└── ROADMAP.md
+└── CHANGELOG.md
 ```
 
 ## Goal

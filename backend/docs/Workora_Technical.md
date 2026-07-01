@@ -383,6 +383,14 @@ Hangfire (or Quartz) workers, deployed as a separate process from the API tier:
 - Kubernetes manifests for staging/production (separate Deployments for API and workers, HPA on API tier).
 - CI/CD: build → test → migrate (guarded, reviewed) → deploy, per environment.
 
+## B.11 Load Balancing & Rate Limiting
+- **API Gateway / Load Balancer**: NGINX or YARP (Yet Another Reverse Proxy) sits at the edge, routing traffic to downstream API instances. Supports horizontal scaling and SSL termination.
+- **Rate Limiting**: Implemented at the API Gateway and application middleware level using Redis. Limits endpoints (e.g., `100 req/min/IP`, stricter for Auth endpoints) to prevent brute-forcing and noisy-neighbor issues in the multi-tenant environment.
+
+## B.12 Caching & Event-Driven Architecture
+- **Distributed Caching**: Redis is used for JWT token blacklisting, caching tenant configurations, and accelerating frequent queries (e.g., RBAC policies).
+- **Event Bus**: RabbitMQ or Kafka for asynchronous inter-service communication and background jobs (e.g., generating payroll, processing resume uploads). Ensures decoupling and high availability.
+
 ---
 
 # Part C — Database Design
@@ -743,7 +751,36 @@ Hangfire (or Quartz) workers, deployed as a separate process from the API tier:
 
 ---
 
-## D.17 Internal / System Endpoints
+## D.17 Module 16 — Webhooks (`FR-WHK`)
+
+| Method | Path | Permission | Description |
+|---|---|---|---|
+| GET | `/webhooks` | `Admin.ManageIntegrations` | List registered webhooks. |
+| POST | `/webhooks` | `Admin.ManageIntegrations` | Body: `{ eventType, url, secret }`. Subscribes to tenant events (e.g., `employee.created`, `leave.approved`). |
+| DELETE | `/webhooks/{id}` | `Admin.ManageIntegrations` | Unsubscribe webhook. |
+
+---
+
+## D.18 Module 17 — Integrations & SSO (`FR-INT`)
+
+| Method | Path | Permission | Description |
+|---|---|---|---|
+| GET | `/integrations/sso/config` | `Admin.ManageIntegrations` | Get SAML/OAuth2 configuration for tenant. |
+| POST | `/integrations/sso/config` | `Admin.ManageIntegrations` | Configure SSO provider details (IdP URL, Certificate). |
+| POST | `/integrations/slack/connect` | `Admin.ManageIntegrations` | Initiates Slack/Teams OAuth flow for tenant-wide notifications. |
+
+---
+
+## D.19 Module 18 — Bulk Operations (`FR-BLK`)
+
+| Method | Path | Permission | Description |
+|---|---|---|---|
+| POST | `/bulk/employees/import` | `Employee.Create` | Body: `{ file }` (CSV/Excel). Async processing, returns batch job ID. |
+| GET | `/bulk/jobs/{id}` | Authenticated | Polling endpoint for bulk operation status and error logs. |
+
+---
+
+## D.20 Internal / System Endpoints
 
 | Method | Path | Auth | Description |
 |---|---|---|---|
