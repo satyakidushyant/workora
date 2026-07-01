@@ -1,0 +1,12 @@
+{
+  "ExpandedNodes": [
+    "",
+    "\\backend\\docs",
+    "\\backend\\src",
+    "\\backend\\src\\Workora.API",
+    "\\backend\\src\\Workora.API\\Controllers",
+    "\\frontend\\workora-ui\\src",
+    "\\frontend\\workora-ui\\src\\environments"
+  ],
+  "PreviewInSolutionExplorer": false
+}
