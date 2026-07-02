@@ -1,0 +1,10 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/Workora.API/Workora.API.csproj" />
+    <Project Path="src/Workora.Application/Workora.Application.csproj" />
+    <Project Path="src/Workora.Domain/Workora.Domain.csproj" />
+    <Project Path="src/Workora.Infrastructure/Workora.Infrastructure.csproj" />
+    <Project Path="src/Workora.Persistence/Workora.Persistence.csproj" />
+    <Project Path="src/Workora.Shared/Workora.Shared.csproj" />
+  </Folder>
+</Solution>

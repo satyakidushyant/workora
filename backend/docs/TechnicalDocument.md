@@ -1,4 +1,4 @@
-# Workora HRMS
+﻿# Workora
 ## Backend Technical Documentation
 ### Version 1.0
 
@@ -8,7 +8,7 @@
 
 | Field | Value |
 |---|---|
-| **Project Name** | Workora HRMS (Human Resource Management System) |
+| **Project Name** | Workora (Human Resource Management System) |
 | **Document Title** | Backend Technical Documentation |
 | **Version** | 1.0 |
 | **Author** | Principal Solution Architecture Team |
@@ -30,7 +30,7 @@
 ## 1. Document Purpose
 
 ### 1.1 Objectives
-This document defines the complete backend technical architecture for **Workora HRMS**, an enterprise Human Resource Management and Payroll platform built on **ASP.NET Core 9** using **Clean Architecture**, **Domain-Driven Design (DDD)**, and **CQRS**. It serves as the authoritative technical reference for architects, backend engineers, QA engineers, DevOps engineers, and technical stakeholders throughout the system's lifecycle.
+This document defines the complete backend technical architecture for **Workora**, an enterprise Human Resource Management and Payroll platform built on **ASP.NET Core 9** using **Clean Architecture**, **Domain-Driven Design (DDD)**, and **CQRS**. It serves as the authoritative technical reference for architects, backend engineers, QA engineers, DevOps engineers, and technical stakeholders throughout the system's lifecycle.
 
 The objectives of this document are to:
 
@@ -121,7 +121,7 @@ This document covers the **backend system only** — the ASP.NET Core Web API, t
 ## 3. System Architecture
 
 ### 3.1 Architectural Style
-Workora HRMS follows **Clean Architecture** (Robert C. Martin) combined with **Domain-Driven Design** tactical patterns and **CQRS** for the application layer. The guiding principle is the **Dependency Rule**: source code dependencies must only point **inward**. Nothing in an inner circle can know anything about an outer circle.
+Workora follows **Clean Architecture** (Robert C. Martin) combined with **Domain-Driven Design** tactical patterns and **CQRS** for the application layer. The guiding principle is the **Dependency Rule**: source code dependencies must only point **inward**. Nothing in an inner circle can know anything about an outer circle.
 
 ```mermaid
 flowchart TB
@@ -205,28 +205,28 @@ flowchart LR
 
 ```mermaid
 graph TD
-    Root[Workora.HRMS.sln] --> API[src/Workora.HRMS.API]
-    Root --> Application[src/Workora.HRMS.Application]
-    Root --> Domain[src/Workora.HRMS.Domain]
-    Root --> Infrastructure[src/Workora.HRMS.Infrastructure]
-    Root --> Persistence[src/Workora.HRMS.Persistence]
-    Root --> Shared[src/Workora.HRMS.Shared]
+    Root[Workora.sln] --> API[src/Workora.API]
+    Root --> Application[src/Workora.Application]
+    Root --> Domain[src/Workora.Domain]
+    Root --> Infrastructure[src/Workora.Infrastructure]
+    Root --> Persistence[src/Workora.Persistence]
+    Root --> Shared[src/Workora.Shared]
     Root --> Tests[tests/]
 
-    Tests --> UnitTests[Workora.HRMS.UnitTests]
-    Tests --> IntegrationTests[Workora.HRMS.IntegrationTests]
+    Tests --> UnitTests[Workora.UnitTests]
+    Tests --> IntegrationTests[Workora.IntegrationTests]
 ```
 
 | Folder / Project | Responsibility |
 |---|---|
-| `Workora.HRMS.API` | ASP.NET Core Web API host: Controllers, Middleware, Swagger config, `Program.cs` composition root, appsettings |
-| `Workora.HRMS.Application` | CQRS Commands/Queries/Handlers, DTOs, Validators, MediatR Pipeline Behaviors, AutoMapper Profiles, service interfaces |
-| `Workora.HRMS.Domain` | Entities, Value Objects, Enums, Domain Events, Domain Exceptions, Repository interfaces, Specifications |
-| `Workora.HRMS.Infrastructure` | Implementations of Application-defined interfaces: Email (SMTP), File Storage, PDF (QuestPDF), Token Service, Background Jobs |
-| `Workora.HRMS.Persistence` | EF Core `DbContext`, Entity Configurations, Migrations, Repository implementations, Seeders |
-| `Workora.HRMS.Shared` | Cross-cutting constants, common response wrappers (`ApiResponse<T>`), extension methods, guard clauses |
-| `tests/Workora.HRMS.UnitTests` | xUnit unit tests for handlers, validators, domain logic (mocked dependencies) |
-| `tests/Workora.HRMS.IntegrationTests` | End-to-end API tests against a Testcontainers-provisioned PostgreSQL instance |
+| `Workora.API` | ASP.NET Core Web API host: Controllers, Middleware, Swagger config, `Program.cs` composition root, appsettings |
+| `Workora.Application` | CQRS Commands/Queries/Handlers, DTOs, Validators, MediatR Pipeline Behaviors, AutoMapper Profiles, service interfaces |
+| `Workora.Domain` | Entities, Value Objects, Enums, Domain Events, Domain Exceptions, Repository interfaces, Specifications |
+| `Workora.Infrastructure` | Implementations of Application-defined interfaces: Email (SMTP), File Storage, PDF (QuestPDF), Token Service, Background Jobs |
+| `Workora.Persistence` | EF Core `DbContext`, Entity Configurations, Migrations, Repository implementations, Seeders |
+| `Workora.Shared` | Cross-cutting constants, common response wrappers (`ApiResponse<T>`), extension methods, guard clauses |
+| `tests/Workora.UnitTests` | xUnit unit tests for handlers, validators, domain logic (mocked dependencies) |
+| `tests/Workora.IntegrationTests` | End-to-end API tests against a Testcontainers-provisioned PostgreSQL instance |
 
 > **Note:** `Persistence` is deliberately separated from `Infrastructure` so that database concerns (migrations, EF configurations) can evolve independently from external-service integrations (SMTP, file storage). Both implement interfaces owned by `Domain`/`Application`.
 
@@ -350,7 +350,7 @@ flowchart LR
 
 ## 7. Authorization
 
-Workora HRMS combines three complementary authorization models:
+Workora combines three complementary authorization models:
 
 ### 7.1 Role-Based Access Control (RBAC)
 Coarse-grained access based on named roles (`SuperAdmin`, `HRManager`, `PayrollOfficer`, `Employee`, `Manager`). Roles group permissions for ease of assignment.
@@ -480,7 +480,7 @@ A global EF Core query filter (`HasQueryFilter(e => !e.IsDeleted)`) is applied p
 
 ## 9. Module Architecture
 
-This section documents every functional module of Workora HRMS. Each module follows the same architectural template: **Purpose**, **Features**, **Database Tables**, **Relationships**, **Business Rules**, **API Endpoints**, **Flow Diagram**, **Validation**, **Permissions**, **Repository**, and **Services**.
+This section documents every functional module of Workora. Each module follows the same architectural template: **Purpose**, **Features**, **Database Tables**, **Relationships**, **Business Rules**, **API Endpoints**, **Flow Diagram**, **Validation**, **Permissions**, **Repository**, and **Services**.
 
 ---
 
@@ -1341,7 +1341,7 @@ sequenceDiagram
 
 ### 9.26 Company Module
 
-**Purpose:** Top-level tenant entity representing the organization using Workora HRMS (supports multi-company deployments under one instance).
+**Purpose:** Top-level tenant entity representing the organization using Workora (supports multi-company deployments under one instance).
 
 **Features:** Company profile, logo, legal/registration details, fiscal year configuration.
 
@@ -1968,8 +1968,8 @@ Response `200 OK`:
     "DefaultConnection": "Host=localhost;Database=workora;Username=app;Password=__set_via_env__"
   },
   "Jwt": {
-    "Issuer": "Workora.HRMS",
-    "Audience": "Workora.HRMS.Clients",
+    "Issuer": "Workora",
+    "Audience": "Workora.Clients",
     "AccessTokenExpiryMinutes": 15,
     "RefreshTokenExpiryDays": 7,
     "SigningKey": "__set_via_env__"
@@ -2057,4 +2057,8 @@ See Section 1.4 (Definitions) and Section 1.5 (Abbreviations).
 
 ---
 
-*End of Workora HRMS — Backend Technical Documentation v1.0*
+*End of Workora — Backend Technical Documentation v1.0*
+
+
+## 7. Commenting Standards
+- **Mandatory Comments**: Every class, method, property, and significant section of code MUST include descriptive comments (e.g., XML documentation comments in C#) explaining its purpose and behavior.
