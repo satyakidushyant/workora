@@ -44,6 +44,12 @@ public class GlobalExceptionMiddleware
         }
     }
 
+    /// <summary>
+    /// Handles the exception and formats the response as a standard API response.
+    /// </summary>
+    /// <param name="context">The HTTP context.</param>
+    /// <param name="exception">The caught exception.</param>
+    /// <returns>A task representing the asynchronous operation.</returns>
     private Task HandleExceptionAsync(HttpContext context, Exception exception)
     {
         context.Response.ContentType = "application/json";
@@ -52,6 +58,10 @@ public class GlobalExceptionMiddleware
 
         switch (exception)
         {
+            case ValidationException ex:
+                context.Response.StatusCode = (int)HttpStatusCode.BadRequest;
+                response = ApiResponse<object>.Fail("Validation failed", ex.Errors);
+                break;
             case UnauthorizedException ex:
                 context.Response.StatusCode = (int)HttpStatusCode.Unauthorized;
                 response = ApiResponse<object>.Fail(ex.Message);

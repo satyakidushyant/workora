@@ -4,8 +4,15 @@ using Workora.Domain.Entities;
 
 namespace Workora.Persistence.Configurations;
 
+/// <summary>
+/// Entity Framework configuration for the <see cref="RefreshToken"/> entity.
+/// </summary>
 public class RefreshTokenConfiguration : IEntityTypeConfiguration<RefreshToken>
 {
+    /// <summary>
+    /// Configures the entity properties and relationships.
+    /// </summary>
+    /// <param name="builder">The builder to be used to configure the entity type.</param>
     public void Configure(EntityTypeBuilder<RefreshToken> builder)
     {
         builder.HasKey(x => x.Id);

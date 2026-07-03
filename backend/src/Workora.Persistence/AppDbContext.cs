@@ -15,9 +15,24 @@ public class AppDbContext : DbContext, IUnitOfWork
     /// <param name="options">The context options.</param>
     public AppDbContext(DbContextOptions<AppDbContext> options) : base(options) { }
 
+    /// <summary>
+    /// Gets or sets the Users table.
+    /// </summary>
     public DbSet<User> Users { get; set; } = null!;
+
+    /// <summary>
+    /// Gets or sets the RefreshTokens table.
+    /// </summary>
     public DbSet<RefreshToken> RefreshTokens { get; set; } = null!;
+
+    /// <summary>
+    /// Gets or sets the PasswordResetTokens table.
+    /// </summary>
     public DbSet<PasswordResetToken> PasswordResetTokens { get; set; } = null!;
+
+    /// <summary>
+    /// Gets or sets the LoginAuditLogs table.
+    /// </summary>
     public DbSet<LoginAuditLog> LoginAuditLogs { get; set; } = null!;
 
     /// <summary>

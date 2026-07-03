@@ -1,6 +1,8 @@
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Configuration;
 using Workora.Application.Common.Interfaces;
 using Workora.Infrastructure.Authentication;
+using Workora.Infrastructure.Caching;
 using Workora.Infrastructure.Email;
 
 namespace Workora.Infrastructure;
@@ -15,11 +17,26 @@ public static class DependencyInjection
     /// </summary>
     /// <param name="services">The service collection.</param>
     /// <returns>The updated service collection.</returns>
-    public static IServiceCollection AddInfrastructure(this IServiceCollection services)
+    public static IServiceCollection AddInfrastructure(this IServiceCollection services, IConfiguration configuration)
     {
         services.AddSingleton<ITokenService, TokenService>();
         services.AddSingleton<IPasswordHasher, PasswordHasher>();
         services.AddScoped<IEmailService, SmtpEmailService>();
+
+        var useRedis = configuration.GetValue<bool>("CacheSettings:UseRedis");
+        if (useRedis)
+        {
+            services.AddStackExchangeRedisCache(options =>
+            {
+                options.Configuration = configuration.GetValue<string>("CacheSettings:RedisConnectionString");
+            });
+            services.AddSingleton<ICacheService, RedisCacheService>();
+        }
+        else
+        {
+            services.AddMemoryCache();
+            services.AddSingleton<ICacheService, MemoryCacheService>();
+        }
 
         return services;
     }

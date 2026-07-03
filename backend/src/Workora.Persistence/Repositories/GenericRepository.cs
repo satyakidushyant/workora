@@ -27,6 +27,7 @@ public class GenericRepository<T> : IRepository<T> where T : BaseEntity
         return await _dbContext.Set<T>().FindAsync(new object[] { id }, ct);
     }
 
+    /// <inheritdoc />
     public virtual async Task<T?> GetByUuidAsync(Guid uuid, CancellationToken ct = default)
     {
         return await _dbContext.Set<T>().FirstOrDefaultAsync(x => x.Uuid == uuid, ct);
@@ -38,6 +39,7 @@ public class GenericRepository<T> : IRepository<T> where T : BaseEntity
         return await _dbContext.Set<T>().ToListAsync(ct);
     }
 
+    /// <inheritdoc />
     public virtual async Task<T> AddAsync(T entity, CancellationToken ct = default)
     {
         await _dbContext.Set<T>().AddAsync(entity, ct);
@@ -50,6 +52,7 @@ public class GenericRepository<T> : IRepository<T> where T : BaseEntity
         _dbContext.Set<T>().Update(entity);
     }
 
+    /// <inheritdoc />
     public virtual void Remove(T entity)
     {
         _dbContext.Set<T>().Remove(entity);

@@ -35,7 +35,7 @@ builder.Services.AddSwaggerGen();
 
 // Clean Architecture Layers
 builder.Services.AddApplication();
-builder.Services.AddInfrastructure();
+builder.Services.AddInfrastructure(builder.Configuration);
 builder.Services.AddPersistence(builder.Configuration);
 
 // Authentication

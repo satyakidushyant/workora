@@ -1,4 +1,4 @@
-﻿# Workora
+# Workora
 ## Backend Technical Documentation
 ### Version 1.0
 
@@ -398,6 +398,173 @@ public async Task<IActionResult> CreateEmployee(CreateEmployeeCommand command)
 
 ```mermaid
 erDiagram
+    COMPANY {
+        int id PK
+        uuid uuid
+        string name
+        string code
+    }
+    BRANCH {
+        int id PK
+        uuid uuid
+        int company_id FK
+        string name
+        string location
+    }
+    DEPARTMENT {
+        int id PK
+        uuid uuid
+        int company_id FK
+        string code
+        string name
+        int head_employee_id FK
+    }
+    DESIGNATION {
+        int id PK
+        uuid uuid
+        int department_id FK
+        string title
+        int level
+        string grade
+    }
+    EMPLOYEE {
+        int id PK
+        uuid uuid
+        string first_name
+        string last_name
+        string email
+        string national_id
+        date date_of_birth
+        int department_id FK
+        int designation_id FK
+        int branch_id FK
+        int manager_id FK
+        int user_id FK
+        string employment_status
+        date termination_date
+    }
+    ATTENDANCE {
+        int id PK
+        uuid uuid
+        int employee_id FK
+        date attendance_date
+        timestamptz check_in_time
+        timestamptz check_out_time
+        string status
+    }
+    LEAVE_REQUEST {
+        int id PK
+        uuid uuid
+        int employee_id FK
+        int leave_type_id FK
+        date start_date
+        date end_date
+        string status
+        string reason
+    }
+    SALARY_STRUCTURE {
+        int id PK
+        uuid uuid
+        int employee_id FK
+        decimal base_salary
+        date effective_date
+    }
+    PAYROLL_RUN_DETAIL {
+        int id PK
+        uuid uuid
+        int payroll_run_id FK
+        int employee_id FK
+        decimal gross_pay
+        decimal net_pay
+        jsonb breakdown_json
+    }
+    PAYROLL_RUN {
+        int id PK
+        uuid uuid
+        date period_start
+        date period_end
+        string status
+        date processing_date
+    }
+    DOCUMENT {
+        int id PK
+        uuid uuid
+        int employee_id FK
+        string document_type
+        string file_path
+    }
+    ASSET_ASSIGNMENT {
+        int id PK
+        uuid uuid
+        int employee_id FK
+        string asset_type
+        string serial_number
+        date assigned_date
+    }
+    USER {
+        int id PK
+        uuid uuid
+        string email UK
+        string first_name
+        string last_name
+        string password_hash
+        int employee_id FK
+        int failed_login_attempts
+        timestamptz lockout_end
+    }
+    ROLE {
+        int id PK
+        uuid uuid
+        string name
+        string description
+    }
+    PERMISSION {
+        int id PK
+        uuid uuid
+        string name
+        string module
+    }
+    USER_ROLE {
+        int user_id FK
+        int role_id FK
+    }
+    ROLE_PERMISSION {
+        int role_id FK
+        int permission_id FK
+    }
+    JOB_POSTING {
+        int id PK
+        uuid uuid
+        string title
+        string description
+        string status
+    }
+    CANDIDATE {
+        int id PK
+        uuid uuid
+        int job_posting_id FK
+        string first_name
+        string last_name
+        string email
+        string resume_path
+    }
+    INTERVIEW {
+        int id PK
+        uuid uuid
+        int candidate_id FK
+        timestamptz scheduled_at
+        string interviewer_name
+        string status
+    }
+    OFFER_LETTER {
+        int id PK
+        uuid uuid
+        int candidate_id FK
+        decimal offered_salary
+        date joining_date
+        string status
+    }
+
     COMPANY ||--o{ BRANCH : has
     COMPANY ||--o{ DEPARTMENT : has
     DEPARTMENT ||--o{ DESIGNATION : has
@@ -475,6 +642,137 @@ A global EF Core query filter (`HasQueryFilter(e => !e.IsDeleted)`) is applied p
 - Concurrency conflicts raise `DbUpdateConcurrencyException`, translated by the Global Exception Middleware into a `409 Conflict` response with a machine-readable `ConcurrencyConflict` error code.
 
 > **Best Practice:** Long-running payroll processing runs use a **pessimistic** application-level lock (a `processing` status flag with a unique partial index) in addition to optimistic concurrency, since payroll runs must not be processed concurrently by two operators.
+
+### 8.9 Detailed Entity Schema (All Columns)
+
+**Note**: Most entities (all aggregate roots) derive from `AuditableEntity` (which inherits `BaseEntity`). Therefore, they implicitly contain the following standard audit columns:
+- `id` (int, Primary Key)
+- `uuid` (uuid, Unique)
+- `is_active` (boolean)
+- `created_at` (timestamptz)
+- `created_by` (uuid)
+- `updated_at` (timestamptz, nullable)
+- `updated_by` (uuid, nullable)
+- `is_deleted` (boolean, for soft-delete)
+- `deleted_at` (timestamptz, nullable)
+- `deleted_by` (uuid, nullable)
+
+The below schemas focus on the domain-specific columns.
+
+#### 1. users
+- `email` (varchar, unique)
+- `first_name` (varchar)
+- `last_name` (varchar)
+- `password_hash` (varchar)
+- `employee_id` (int, nullable FK to employees)
+- `failed_login_attempts` (int)
+- `lockout_end` (timestamptz, nullable)
+
+#### 2. login_audit_logs (Inherits BaseEntity only)
+- `email` (varchar)
+- `is_success` (boolean)
+- `ip_address` (varchar)
+- `user_agent` (varchar)
+- `details` (varchar, nullable)
+
+#### 3. password_reset_tokens
+- `user_id` (int, FK to users)
+- `token_hash` (varchar)
+- `expires_at` (timestamptz)
+- `is_used` (boolean)
+
+#### 4. refresh_tokens
+- `token_hash` (varchar)
+- `user_id` (int, FK to users)
+- `expires_at` (timestamptz)
+- `created_by_ip` (varchar)
+- `created_by_user_agent` (varchar)
+- `is_revoked` (boolean)
+- `revoked_at` (timestamptz, nullable)
+
+#### 5. employees
+- `first_name` (varchar)
+- `last_name` (varchar)
+- `email` (varchar)
+- `national_id` (varchar, unique)
+- `date_of_birth` (date)
+- `department_id` (int, FK to departments)
+- `designation_id` (int, FK to designations)
+- `branch_id` (int, FK to branches)
+- `manager_id` (int, nullable FK to employees - self)
+- `user_id` (int, nullable FK to users)
+- `employment_status` (varchar / enum)
+- `termination_date` (date, nullable)
+
+#### 6. departments
+- `company_id` (int, FK to companies)
+- `code` (varchar, unique)
+- `name` (varchar)
+- `head_employee_id` (int, nullable FK to employees)
+
+#### 7. designations
+- `department_id` (int, FK to departments)
+- `title` (varchar)
+- `level` (int)
+- `grade` (varchar)
+
+#### 8. branches
+- `company_id` (int, FK to companies)
+- `name` (varchar)
+- `location` (varchar)
+
+#### 9. companies
+- `name` (varchar)
+- `code` (varchar)
+
+#### 10. roles
+- `name` (varchar)
+- `description` (varchar)
+
+#### 11. permissions
+- `name` (varchar)
+- `module` (varchar)
+
+#### 12. user_roles (Junction Table)
+- `user_id` (int, FK to users)
+- `role_id` (int, FK to roles)
+
+#### 13. role_permissions (Junction Table)
+- `role_id` (int, FK to roles)
+- `permission_id` (int, FK to permissions)
+
+#### 14. attendance_records
+- `employee_id` (int, FK to employees)
+- `attendance_date` (date)
+- `check_in_time` (timestamptz, nullable)
+- `check_out_time` (timestamptz, nullable)
+- `status` (varchar)
+
+#### 15. leave_requests
+- `employee_id` (int, FK to employees)
+- `leave_type_id` (int, FK to leave_types)
+- `start_date` (date)
+- `end_date` (date)
+- `status` (varchar)
+- `reason` (varchar)
+
+#### 16. salary_structures
+- `employee_id` (int, FK to employees)
+- `base_salary` (decimal)
+- `effective_date` (date)
+
+#### 17. payroll_runs
+- `period_start` (date)
+- `period_end` (date)
+- `status` (varchar)
+- `processing_date` (date)
+
+#### 18. payroll_run_details
+- `payroll_run_id` (int, FK to payroll_runs)
+- `employee_id` (int, FK to employees)
+- `gross_pay` (decimal)
+- `net_pay` (decimal)
+- `breakdown_json` (jsonb)
 
 ---
 

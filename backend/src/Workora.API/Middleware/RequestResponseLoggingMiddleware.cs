@@ -11,12 +11,22 @@ public class RequestResponseLoggingMiddleware
     private readonly RequestDelegate _next;
     private readonly ILogger<RequestResponseLoggingMiddleware> _logger;
 
+    /// <summary>
+    /// Initializes a new instance of the <see cref="RequestResponseLoggingMiddleware"/> class.
+    /// </summary>
+    /// <param name="next">The next request delegate in the pipeline.</param>
+    /// <param name="logger">The logger instance.</param>
     public RequestResponseLoggingMiddleware(RequestDelegate next, ILogger<RequestResponseLoggingMiddleware> logger)
     {
         _next = next;
         _logger = logger;
     }
 
+    /// <summary>
+    /// Invokes the middleware to log the request and response.
+    /// </summary>
+    /// <param name="context">The HTTP context.</param>
+    /// <returns>A task representing the asynchronous operation.</returns>
     public async Task InvokeAsync(HttpContext context)
     {
         var stopwatch = Stopwatch.StartNew();
@@ -63,6 +73,11 @@ public class RequestResponseLoggingMiddleware
         }
     }
 
+    /// <summary>
+    /// Reads the request body safely for logging.
+    /// </summary>
+    /// <param name="request">The HTTP request.</param>
+    /// <returns>The request body as a string.</returns>
     private async Task<string> ReadRequestBodyAsync(HttpRequest request)
     {
         request.EnableBuffering();
@@ -72,6 +87,11 @@ public class RequestResponseLoggingMiddleware
         return string.IsNullOrWhiteSpace(body) ? "[Empty]" : body;
     }
 
+    /// <summary>
+    /// Reads the response body safely for logging.
+    /// </summary>
+    /// <param name="response">The HTTP response.</param>
+    /// <returns>The response body as a string.</returns>
     private async Task<string> ReadResponseBodyAsync(HttpResponse response)
     {
         response.Body.Seek(0, SeekOrigin.Begin);

@@ -10,6 +10,10 @@ public class SmtpEmailService : IEmailService
 {
     private readonly ILogger<SmtpEmailService> _logger;
 
+    /// <summary>
+    /// Initializes a new instance of the <see cref="SmtpEmailService"/> class.
+    /// </summary>
+    /// <param name="logger">The logger instance.</param>
     public SmtpEmailService(ILogger<SmtpEmailService> logger)
     {
         _logger = logger;
