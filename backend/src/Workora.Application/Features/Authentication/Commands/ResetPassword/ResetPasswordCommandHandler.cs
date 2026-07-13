@@ -42,7 +42,7 @@ public class ResetPasswordCommandHandler : IRequestHandler<ResetPasswordCommand>
     /// <param name="cancellationToken">The cancellation token.</param>
     public async Task Handle(ResetPasswordCommand request, CancellationToken cancellationToken)
     {
-        var user = await _userRepository.GetByEmailAsync(request.Email, cancellationToken);
+        var user = await _userRepository.GetByEmailAsync(Workora.Domain.ValueObjects.EmailAddress.Create(request.Email), cancellationToken);
         if (user == null || !user.IsActive)
         {
             throw new UnauthorizedException(ResponseMessage.InvalidToken.GetDescription());

@@ -1,4 +1,5 @@
 using Workora.Domain.Common;
+using Workora.Domain.ValueObjects;
 
 namespace Workora.Domain.Entities;
 
@@ -10,7 +11,7 @@ public class User : AuditableEntity
     /// <summary>
     /// The user's email address, used for login.
     /// </summary>
-    public string Email { get; private set; } = null!;
+    public EmailAddress Email { get; private set; } = null!;
 
     /// <summary>
     /// The user's first name.
@@ -58,7 +59,7 @@ public class User : AuditableEntity
     /// <param name="passwordHash">The hashed password.</param>
     /// <param name="employeeId">The optional employee ID.</param>
     /// <returns>A new User entity.</returns>
-    public static User Create(string email, string firstName, string lastName, string passwordHash, int? employeeId = null)
+    public static User Create(EmailAddress email, string firstName, string lastName, string passwordHash, int? employeeId = null)
     {
         return new User
         {

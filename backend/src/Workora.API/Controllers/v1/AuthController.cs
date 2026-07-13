@@ -64,7 +64,7 @@ public class AuthController : ControllerBase
     /// <param name="command">The logout command.</param>
     /// <returns>An API response indicating success.</returns>
     [HttpPost("logout")]
-    [Authorize]
+    [Authorize(Policy = "auth.logout")]
     public async Task<ActionResult<ApiResponse<LogoutResponseDto>>> Logout([FromBody] LogoutCommand command)
     {
         await _mediator.Send(command);
@@ -106,7 +106,7 @@ public class AuthController : ControllerBase
     /// <param name="command">The change password command.</param>
     /// <returns>An API response indicating success.</returns>
     [HttpPost("change-password")]
-    [Authorize]
+    [Authorize(Policy = "auth.change-password")]
     public async Task<ActionResult<ApiResponse<ChangePasswordResponseDto>>> ChangePassword([FromBody] ChangePasswordCommand command)
     {
         await _mediator.Send(command);

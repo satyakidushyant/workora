@@ -12,6 +12,7 @@ using NLog.Web;
 using Workora.API.Converters;
 using Microsoft.AspNetCore.RateLimiting;
 using System.Threading.RateLimiting;
+using System.Reflection;
 
 var logger = NLog.LogManager.Setup().LoadConfigurationFromAppSettings().GetCurrentClassLogger();
 logger.Debug("init main");
@@ -19,6 +20,9 @@ logger.Debug("init main");
 try
 {
     var builder = WebApplication.CreateBuilder(args);
+
+// Bind JwtSettings to configuration so infrastructure services can consume them via IOptions<JwtSettings>
+builder.Services.Configure<Workora.Infrastructure.Authentication.JwtSettings>(builder.Configuration.GetSection("JwtSettings"));
 
     // NLog: Setup NLog for Dependency injection
     builder.Logging.ClearProviders();
@@ -31,7 +35,12 @@ try
             options.JsonSerializerOptions.Converters.Add(new StringSanitizerJsonConverter());
         });
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+builder.Services.AddSwaggerGen(c =>
+{
+    var xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
+    var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
+    c.IncludeXmlComments(xmlPath);
+});
 
 // Clean Architecture Layers
 builder.Services.AddApplication();
@@ -39,6 +48,7 @@ builder.Services.AddInfrastructure(builder.Configuration);
 builder.Services.AddPersistence(builder.Configuration);
 
 // Authentication
+var jwtSettings = builder.Configuration.GetSection("JwtSettings");
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
     {
@@ -48,13 +58,20 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             ValidateAudience = true,
             ValidateLifetime = true,
             ValidateIssuerSigningKey = true,
-            ValidIssuer = "Workora",
-            ValidAudience = "WorkoraClient",
-            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes("super-secret-key-that-must-be-very-long-for-hmac-sha256-minimum-256-bits"))
+            ValidIssuer = jwtSettings["Issuer"],
+            ValidAudience = jwtSettings["Audience"],
+            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSettings["Secret"]!))
         };
     });
 
-builder.Services.AddAuthorization();
+builder.Services.AddAuthorization(options =>
+{
+    options.AddPolicy("auth.logout", policy => policy.RequireAuthenticatedUser());
+    options.AddPolicy("auth.change-password", policy => policy.RequireAuthenticatedUser());
+});
+
+builder.Services.AddHealthChecks()
+    .AddNpgSql(builder.Configuration.GetConnectionString("DefaultConnection")!);
 
 builder.Services.AddRateLimiter(options =>
 {
@@ -114,6 +131,7 @@ if (app.Environment.IsDevelopment())
     app.UseAuthorization();
 
     app.MapControllers();
+    app.MapHealthChecks("/health");
 
     app.Run();
 }

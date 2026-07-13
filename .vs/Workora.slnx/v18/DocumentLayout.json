@@ -1,12 +1,104 @@
 {
   "Version": 1,
-  "WorkspaceRootPath": "C:\\Dushyant\\Projects\\Workora\\",
-  "Documents": [],
+  "WorkspaceRootPath": "C:\\Dushyant\\Projects\\workora\\",
+  "Documents": [
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Dushyant\\Projects\\workora\\backend\\src\\Workora.Infrastructure\\Authentication\\TokenService.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:backend\\src\\Workora.Infrastructure\\Authentication\\TokenService.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Dushyant\\Projects\\workora\\backend\\src\\Workora.Infrastructure\\Authentication\\JwtSettings.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:backend\\src\\Workora.Infrastructure\\Authentication\\JwtSettings.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Dushyant\\Projects\\workora\\backend\\src\\Workora.API\\Program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:backend\\src\\Workora.API\\Program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Dushyant\\Projects\\workora\\backend\\src\\Workora.Application\\Features\\Authentication\\Commands\\ForgotPassword\\ForgotPasswordCommandHandler.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:backend\\src\\Workora.Application\\Features\\Authentication\\Commands\\ForgotPassword\\ForgotPasswordCommandHandler.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Dushyant\\Projects\\workora\\backend\\src\\Workora.API\\Controllers\\v1\\AuthController.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:backend\\src\\Workora.API\\Controllers\\v1\\AuthController.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    }
+  ],
   "DocumentGroupContainers": [
     {
       "Orientation": 0,
       "VerticalTabListWidth": 256,
-      "DocumentGroups": []
+      "DocumentGroups": [
+        {
+          "DockedWidth": 200,
+          "SelectedChildIndex": 2,
+          "Children": [
+            {
+              "$type": "Document",
+              "DocumentIndex": 2,
+              "Title": "Program.cs",
+              "DocumentMoniker": "C:\\Dushyant\\Projects\\workora\\backend\\src\\Workora.API\\Program.cs",
+              "RelativeDocumentMoniker": "backend\\src\\Workora.API\\Program.cs",
+              "ToolTip": "C:\\Dushyant\\Projects\\workora\\backend\\src\\Workora.API\\Program.cs",
+              "RelativeToolTip": "backend\\src\\Workora.API\\Program.cs",
+              "ViewState": "AgIAACUAAAAAAAAAAAAYwD8AAAAKAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-07-08T05:32:30.314Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 1,
+              "Title": "JwtSettings.cs",
+              "DocumentMoniker": "C:\\Dushyant\\Projects\\workora\\backend\\src\\Workora.Infrastructure\\Authentication\\JwtSettings.cs",
+              "RelativeDocumentMoniker": "backend\\src\\Workora.Infrastructure\\Authentication\\JwtSettings.cs",
+              "ToolTip": "C:\\Dushyant\\Projects\\workora\\backend\\src\\Workora.Infrastructure\\Authentication\\JwtSettings.cs",
+              "RelativeToolTip": "backend\\src\\Workora.Infrastructure\\Authentication\\JwtSettings.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAA0AAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-07-08T05:32:25.481Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "TokenService.cs",
+              "DocumentMoniker": "C:\\Dushyant\\Projects\\workora\\backend\\src\\Workora.Infrastructure\\Authentication\\TokenService.cs",
+              "RelativeDocumentMoniker": "backend\\src\\Workora.Infrastructure\\Authentication\\TokenService.cs",
+              "ToolTip": "C:\\Dushyant\\Projects\\workora\\backend\\src\\Workora.Infrastructure\\Authentication\\TokenService.cs",
+              "RelativeToolTip": "backend\\src\\Workora.Infrastructure\\Authentication\\TokenService.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAEkAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-07-08T05:32:19.523Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 3,
+              "Title": "ForgotPasswordCommandHandler.cs",
+              "DocumentMoniker": "C:\\Dushyant\\Projects\\workora\\backend\\src\\Workora.Application\\Features\\Authentication\\Commands\\ForgotPassword\\ForgotPasswordCommandHandler.cs",
+              "RelativeDocumentMoniker": "backend\\src\\Workora.Application\\Features\\Authentication\\Commands\\ForgotPassword\\ForgotPasswordCommandHandler.cs",
+              "ToolTip": "C:\\Dushyant\\Projects\\workora\\backend\\src\\Workora.Application\\Features\\Authentication\\Commands\\ForgotPassword\\ForgotPasswordCommandHandler.cs",
+              "RelativeToolTip": "backend\\src\\Workora.Application\\Features\\Authentication\\Commands\\ForgotPassword\\ForgotPasswordCommandHandler.cs",
+              "ViewState": "AgIAADkAAAAAAAAAAAAewBYAAAALAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-07-08T05:11:59.833Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 4,
+              "Title": "AuthController.cs",
+              "DocumentMoniker": "C:\\Dushyant\\Projects\\workora\\backend\\src\\Workora.API\\Controllers\\v1\\AuthController.cs",
+              "RelativeDocumentMoniker": "backend\\src\\Workora.API\\Controllers\\v1\\AuthController.cs",
+              "ToolTip": "C:\\Dushyant\\Projects\\workora\\backend\\src\\Workora.API\\Controllers\\v1\\AuthController.cs",
+              "RelativeToolTip": "backend\\src\\Workora.API\\Controllers\\v1\\AuthController.cs",
+              "ViewState": "AgIAAF8AAAAAAAAAAAAuwFUAAAAaAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-07-08T05:08:57.615Z"
+            }
+          ]
+        }
+      ]
     }
   ]
 }

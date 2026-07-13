@@ -45,7 +45,7 @@ public class LoginCommandHandler : IRequestHandler<LoginCommand, AuthResultDto>
     /// <returns>An AuthResultDto containing the tokens.</returns>
     public async Task<AuthResultDto> Handle(LoginCommand request, CancellationToken cancellationToken)
     {
-        var user = await _userRepository.GetByEmailAsync(request.Email, cancellationToken);
+        var user = await _userRepository.GetByEmailAsync(Workora.Domain.ValueObjects.EmailAddress.Create(request.Email), cancellationToken);
         
         if (user == null)
         {

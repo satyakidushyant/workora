@@ -7,4 +7,8 @@
     <Project Path="src/Workora.Persistence/Workora.Persistence.csproj" />
     <Project Path="src/Workora.Shared/Workora.Shared.csproj" />
   </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/Workora.Application.UnitTests/Workora.Application.UnitTests.csproj" />
+    <Project Path="tests/Workora.API.IntegrationTests/Workora.API.IntegrationTests.csproj" />
+  </Folder>
 </Solution>

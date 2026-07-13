@@ -1,12 +1,17 @@
 {
   "ExpandedNodes": [
     "",
-    "\\backend\\docs",
+    "\\backend",
     "\\backend\\src",
-    "\\backend\\src\\Workora.API",
-    "\\backend\\src\\Workora.API\\Controllers",
-    "\\frontend\\workora-ui\\src",
-    "\\frontend\\workora-ui\\src\\environments"
+    "\\backend\\src\\Workora.Application",
+    "\\backend\\src\\Workora.Application\\Features",
+    "\\backend\\src\\Workora.Application\\Features\\Authentication",
+    "\\backend\\src\\Workora.Application\\Features\\Authentication\\Commands",
+    "\\backend\\src\\Workora.Application\\Features\\Authentication\\Commands\\ForgotPassword",
+    "\\backend\\src\\Workora.Application\\Features\\Authentication\\DTOs",
+    "\\backend\\src\\Workora.Infrastructure",
+    "\\backend\\src\\Workora.Infrastructure\\Authentication"
   ],
+  "SelectedNode": "\\backend\\src\\Workora.Infrastructure\\Authentication\\TokenService.cs",
   "PreviewInSolutionExplorer": false
 }

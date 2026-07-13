@@ -2,6 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Workora.Application.Common.Interfaces;
 using Workora.Domain.Entities;
+using Workora.Domain.ValueObjects;
 
 namespace Workora.Persistence.Seeders;
 
@@ -33,11 +34,11 @@ public class DatabaseSeeder
         {
             if (await _context.Database.CanConnectAsync())
             {
-                if (!await _context.Users.AnyAsync(u => u.Email == "admin@workora.com"))
+                if (!await _context.Users.AnyAsync(u => u.Email.Value == "admin@workora.com"))
                 {
                     _logger.LogInformation("Seeding Super Admin user...");
                     var passwordHash = _passwordHasher.HashPassword("SuperSecureP@ssw0rd!");
-                    var admin = User.Create("admin@workora.com", "Super", "Admin", passwordHash);
+                    var admin = User.Create(EmailAddress.Create("admin@workora.com"), "Super", "Admin", passwordHash);
                     
                     await _context.Users.AddAsync(admin);
                     await _context.SaveChangesAsync();

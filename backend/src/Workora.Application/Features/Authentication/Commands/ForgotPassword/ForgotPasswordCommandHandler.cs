@@ -41,7 +41,7 @@ public class ForgotPasswordCommandHandler : IRequestHandler<ForgotPasswordComman
     /// <param name="cancellationToken">The cancellation token.</param>
     public async Task Handle(ForgotPasswordCommand request, CancellationToken cancellationToken)
     {
-        var user = await _userRepository.GetByEmailAsync(request.Email, cancellationToken);
+        var user = await _userRepository.GetByEmailAsync(Workora.Domain.ValueObjects.EmailAddress.Create(request.Email), cancellationToken);
         if (user == null || !user.IsActive)
         {
             // For security, don't reveal that the user does not exist
@@ -61,7 +61,7 @@ public class ForgotPasswordCommandHandler : IRequestHandler<ForgotPasswordComman
         await _unitOfWork.SaveChangesAsync(cancellationToken);
 
         // Normally you'd construct the link from appsettings/config
-        var resetLink = $"https://app.workora.com/auth/reset-password?token={Uri.EscapeDataString(resetTokenRaw)}&email={Uri.EscapeDataString(user.Email)}";
-        await _emailService.SendPasswordResetEmailAsync(user.Email, resetLink, cancellationToken);
+        var resetLink = $"https://app.workora.com/auth/reset-password?token={Uri.EscapeDataString(resetTokenRaw)}&email={Uri.EscapeDataString(user.Email.Value)}";
+        await _emailService.SendPasswordResetEmailAsync(user.Email.Value, resetLink, cancellationToken);
     }
 }

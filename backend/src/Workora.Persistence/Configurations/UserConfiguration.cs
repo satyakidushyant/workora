@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using Workora.Domain.Entities;
+using Workora.Domain.ValueObjects;
 
 namespace Workora.Persistence.Configurations;
 
@@ -16,6 +17,14 @@ public class UserConfiguration : IEntityTypeConfiguration<User>
     public void Configure(EntityTypeBuilder<User> builder)
     {
         builder.HasKey(x => x.Id);
+        
+        builder.Property(x => x.Email)
+            .HasConversion(
+                v => v.Value,
+                v => EmailAddress.Create(v))
+            .IsRequired()
+            .HasMaxLength(255);
+            
         builder.HasIndex(x => x.Email).IsUnique();
         builder.HasQueryFilter(x => !x.IsDeleted);
     }

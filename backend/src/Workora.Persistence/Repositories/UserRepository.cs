@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using Workora.Domain.Entities;
 using Workora.Domain.Interfaces;
+using Workora.Domain.ValueObjects;
 
 namespace Workora.Persistence.Repositories;
 
@@ -16,13 +17,13 @@ public class UserRepository : GenericRepository<User>, IUserRepository
     public UserRepository(AppDbContext dbContext) : base(dbContext) { }
 
     /// <inheritdoc />
-    public async Task<User?> GetByEmailAsync(string email, CancellationToken ct = default)
+    public async Task<User?> GetByEmailAsync(EmailAddress email, CancellationToken ct = default)
     {
         return await _dbContext.Users.FirstOrDefaultAsync(u => u.Email == email, ct);
     }
 
     /// <inheritdoc />
-    public async Task<bool> IsEmailUniqueAsync(string email, CancellationToken ct = default)
+    public async Task<bool> IsEmailUniqueAsync(EmailAddress email, CancellationToken ct = default)
     {
         return !await _dbContext.Users.AnyAsync(u => u.Email == email, ct);
     }
