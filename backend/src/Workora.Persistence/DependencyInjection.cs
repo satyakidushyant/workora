@@ -20,9 +20,12 @@ public static class DependencyInjection
     /// <returns>The updated service collection.</returns>
     public static IServiceCollection AddPersistence(this IServiceCollection services, IConfiguration configuration)
     {
-        services.AddDbContext<AppDbContext>(options =>
+        services.AddScoped<Workora.Persistence.Interceptors.PublishDomainEventsInterceptor>();
+
+        services.AddDbContext<AppDbContext>((provider, options) =>
             options.UseNpgsql(configuration.GetConnectionString("DefaultConnection"))
-                   .UseSnakeCaseNamingConvention());
+                   .UseSnakeCaseNamingConvention()
+                   .AddInterceptors(provider.GetRequiredService<Workora.Persistence.Interceptors.PublishDomainEventsInterceptor>()));
 
         services.AddScoped<IUnitOfWork>(provider => provider.GetRequiredService<AppDbContext>());
 

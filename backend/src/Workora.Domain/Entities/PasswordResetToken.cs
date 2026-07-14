@@ -38,20 +38,26 @@ public class PasswordResetToken : AuditableEntity
     private PasswordResetToken() { } // For EF Core
 
     /// <summary>
-    /// Creates a new password reset token.
+    /// Creates a new PasswordResetToken instance and raises a domain event.
     /// </summary>
-    /// <param name="userId">The ID of the user.</param>
-    /// <param name="tokenHash">The hashed token.</param>
-    /// <param name="expiresAt">The expiration timestamp.</param>
-    /// <returns>A new instance of PasswordResetToken.</returns>
-    public static PasswordResetToken Create(int userId, string tokenHash, DateTimeOffset expiresAt)
+    /// <param name="userId">The ID of the user requesting the reset.</param>
+    /// <param name="tokenHash">The hashed reset token.</param>
+    /// <param name="expiresAt">The expiration date and time.</param>
+    /// <param name="email">The user's email address.</param>
+    /// <param name="resetLink">The full reset link.</param>
+    /// <returns>A new PasswordResetToken entity.</returns>
+    public static PasswordResetToken Create(int userId, string tokenHash, DateTimeOffset expiresAt, string email, string resetLink)
     {
-        return new PasswordResetToken
+        var token = new PasswordResetToken
         {
             UserId = userId,
             TokenHash = tokenHash,
             ExpiresAt = expiresAt
         };
+
+        token.AddDomainEvent(new Workora.Domain.Events.Authentication.PasswordResetRequestedEvent(email, resetLink));
+        
+        return token;
     }
 
     /// <summary>

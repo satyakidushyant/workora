@@ -7,13 +7,12 @@ using System.Security.Cryptography;
 namespace Workora.Application.Features.Authentication.Commands.ForgotPassword;
 
 /// <summary>
-/// Handler for the <see cref="ForgotPasswordCommand"/>. Sends a reset password email.
+/// Handler for the <see cref="ForgotPasswordCommand"/>. Prepares the reset token and triggers a domain event.
 /// </summary>
 public class ForgotPasswordCommandHandler : IRequestHandler<ForgotPasswordCommand>
 {
     private readonly IUserRepository _userRepository;
     private readonly IPasswordResetTokenRepository _resetTokenRepository;
-    private readonly IEmailService _emailService;
     private readonly ITokenService _tokenService;
     private readonly IUnitOfWork _unitOfWork;
 
@@ -23,13 +22,11 @@ public class ForgotPasswordCommandHandler : IRequestHandler<ForgotPasswordComman
     public ForgotPasswordCommandHandler(
         IUserRepository userRepository,
         IPasswordResetTokenRepository resetTokenRepository,
-        IEmailService emailService,
         ITokenService tokenService,
         IUnitOfWork unitOfWork)
     {
         _userRepository = userRepository;
         _resetTokenRepository = resetTokenRepository;
-        _emailService = emailService;
         _tokenService = tokenService;
         _unitOfWork = unitOfWork;
     }
@@ -51,17 +48,18 @@ public class ForgotPasswordCommandHandler : IRequestHandler<ForgotPasswordComman
         var resetTokenRaw = Convert.ToBase64String(RandomNumberGenerator.GetBytes(64));
         var resetTokenHash = _tokenService.HashToken(resetTokenRaw);
 
+        // Normally you'd construct the link from appsettings/config
+        var resetLink = $"https://app.workora.com/auth/reset-password?token={Uri.EscapeDataString(resetTokenRaw)}&email={Uri.EscapeDataString(user.Email.Value)}";
+
         var resetTokenEntity = PasswordResetToken.Create(
             user.Id,
             resetTokenHash,
-            DateTimeOffset.UtcNow.AddMinutes(30)
+            DateTimeOffset.UtcNow.AddMinutes(30),
+            user.Email.Value,
+            resetLink
         );
 
         await _resetTokenRepository.AddAsync(resetTokenEntity, cancellationToken);
         await _unitOfWork.SaveChangesAsync(cancellationToken);
-
-        // Normally you'd construct the link from appsettings/config
-        var resetLink = $"https://app.workora.com/auth/reset-password?token={Uri.EscapeDataString(resetTokenRaw)}&email={Uri.EscapeDataString(user.Email.Value)}";
-        await _emailService.SendPasswordResetEmailAsync(user.Email.Value, resetLink, cancellationToken);
     }
 }
