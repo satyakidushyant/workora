@@ -22,4 +22,12 @@ public interface IRefreshTokenRepository : IRepository<RefreshToken>
     /// <param name="ct">The cancellation token.</param>
     /// <returns>A task representing the asynchronous operation.</returns>
     Task RevokeAllForUserAsync(int userId, CancellationToken ct = default);
+
+    /// <summary>
+    /// Gets all active refresh tokens for a specific user.
+    /// </summary>
+    /// <param name="userId">The ID of the user.</param>
+    /// <param name="ct">The cancellation token.</param>
+    /// <returns>A list of active refresh tokens.</returns>
+    Task<IReadOnlyList<RefreshToken>> GetActiveSessionsByUserIdAsync(int userId, CancellationToken ct = default);
 }

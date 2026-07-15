@@ -3,13 +3,17 @@ using Workora.Application.Common.Interfaces;
 using Workora.Domain.Entities;
 using Workora.Domain.Interfaces;
 using System.Security.Cryptography;
+using Workora.Application.Features.Authentication.DTOs;
+using Workora.Domain.Enums;
+using Workora.Domain.Extensions;
+using Workora.Shared.Responses;
 
 namespace Workora.Application.Features.Authentication.Commands.ForgotPassword;
 
 /// <summary>
 /// Handler for the <see cref="ForgotPasswordCommand"/>. Prepares the reset token and triggers a domain event.
 /// </summary>
-public class ForgotPasswordCommandHandler : IRequestHandler<ForgotPasswordCommand>
+public class ForgotPasswordCommandHandler : IRequestHandler<ForgotPasswordCommand, ApiResponse<ForgotPasswordResponseDto>>
 {
     private readonly IUserRepository _userRepository;
     private readonly IPasswordResetTokenRepository _resetTokenRepository;
@@ -36,13 +40,14 @@ public class ForgotPasswordCommandHandler : IRequestHandler<ForgotPasswordComman
     /// </summary>
     /// <param name="request">The forgot password command.</param>
     /// <param name="cancellationToken">The cancellation token.</param>
-    public async Task Handle(ForgotPasswordCommand request, CancellationToken cancellationToken)
+    /// <returns>A DTO containing the response message.</returns>
+    public async Task<ApiResponse<ForgotPasswordResponseDto>> Handle(ForgotPasswordCommand request, CancellationToken cancellationToken)
     {
         var user = await _userRepository.GetByEmailAsync(Workora.Domain.ValueObjects.EmailAddress.Create(request.Email), cancellationToken);
         if (user == null || !user.IsActive)
         {
             // For security, don't reveal that the user does not exist
-            return;
+            return ApiResponse<ForgotPasswordResponseDto>.Success(new ForgotPasswordResponseDto(ResponseMessage.Success.GetDescription()));
         }
 
         var resetTokenRaw = Convert.ToBase64String(RandomNumberGenerator.GetBytes(64));
@@ -61,5 +66,7 @@ public class ForgotPasswordCommandHandler : IRequestHandler<ForgotPasswordComman
 
         await _resetTokenRepository.AddAsync(resetTokenEntity, cancellationToken);
         await _unitOfWork.SaveChangesAsync(cancellationToken);
+
+        return ApiResponse<ForgotPasswordResponseDto>.Success(new ForgotPasswordResponseDto(ResponseMessage.Success.GetDescription()));
     }
 }

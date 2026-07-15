@@ -4,13 +4,15 @@ using Workora.Domain.Interfaces;
 using Workora.Application.Common.Exceptions;
 using Workora.Domain.Enums;
 using Workora.Domain.Extensions;
+using Workora.Application.Features.Authentication.DTOs;
+using Workora.Shared.Responses;
 
 namespace Workora.Application.Features.Authentication.Commands.ChangePassword;
 
 /// <summary>
 /// Handler for the <see cref="ChangePasswordCommand"/>. Verifies old password and updates it.
 /// </summary>
-public class ChangePasswordCommandHandler : IRequestHandler<ChangePasswordCommand>
+public class ChangePasswordCommandHandler : IRequestHandler<ChangePasswordCommand, ApiResponse<ChangePasswordResponseDto>>
 {
     private readonly IUserRepository _userRepository;
     private readonly IPasswordHasher _passwordHasher;
@@ -34,7 +36,8 @@ public class ChangePasswordCommandHandler : IRequestHandler<ChangePasswordComman
     /// </summary>
     /// <param name="request">The change password command.</param>
     /// <param name="cancellationToken">The cancellation token.</param>
-    public async Task Handle(ChangePasswordCommand request, CancellationToken cancellationToken)
+    /// <returns>A DTO containing the response message.</returns>
+    public async Task<ApiResponse<ChangePasswordResponseDto>> Handle(ChangePasswordCommand request, CancellationToken cancellationToken)
     {
         var user = await _userRepository.GetByIdAsync(request.UserId, cancellationToken);
         if (user == null || !user.IsActive)
@@ -51,5 +54,7 @@ public class ChangePasswordCommandHandler : IRequestHandler<ChangePasswordComman
         _userRepository.Update(user);
 
         await _unitOfWork.SaveChangesAsync(cancellationToken);
+
+        return ApiResponse<ChangePasswordResponseDto>.Success(new ChangePasswordResponseDto(ResponseMessage.Success.GetDescription()));
     }
 }

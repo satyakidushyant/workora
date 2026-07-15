@@ -4,13 +4,15 @@ using Workora.Domain.Interfaces;
 using Workora.Application.Common.Exceptions;
 using Workora.Domain.Enums;
 using Workora.Domain.Extensions;
+using Workora.Application.Features.Authentication.DTOs;
+using Workora.Shared.Responses;
 
 namespace Workora.Application.Features.Authentication.Commands.ResetPassword;
 
 /// <summary>
 /// Handler for the <see cref="ResetPasswordCommand"/>. Validates token and updates the password.
 /// </summary>
-public class ResetPasswordCommandHandler : IRequestHandler<ResetPasswordCommand>
+public class ResetPasswordCommandHandler : IRequestHandler<ResetPasswordCommand, ApiResponse<ResetPasswordResponseDto>>
 {
     private readonly IUserRepository _userRepository;
     private readonly IPasswordResetTokenRepository _resetTokenRepository;
@@ -40,7 +42,8 @@ public class ResetPasswordCommandHandler : IRequestHandler<ResetPasswordCommand>
     /// </summary>
     /// <param name="request">The reset password command.</param>
     /// <param name="cancellationToken">The cancellation token.</param>
-    public async Task Handle(ResetPasswordCommand request, CancellationToken cancellationToken)
+    /// <returns>A DTO containing the response message.</returns>
+    public async Task<ApiResponse<ResetPasswordResponseDto>> Handle(ResetPasswordCommand request, CancellationToken cancellationToken)
     {
         var user = await _userRepository.GetByEmailAsync(Workora.Domain.ValueObjects.EmailAddress.Create(request.Email), cancellationToken);
         if (user == null || !user.IsActive)
@@ -63,5 +66,7 @@ public class ResetPasswordCommandHandler : IRequestHandler<ResetPasswordCommand>
         _resetTokenRepository.Update(resetTokenEntity);
 
         await _unitOfWork.SaveChangesAsync(cancellationToken);
+
+        return ApiResponse<ResetPasswordResponseDto>.Success(new ResetPasswordResponseDto(ResponseMessage.Success.GetDescription()));
     }
 }

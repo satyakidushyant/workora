@@ -1,6 +1,6 @@
 # Workora
 ## Backend Code Structure Documentation
-### Version 1.0
+### Version 1.1
 
 ---
 
@@ -10,16 +10,23 @@
 |---|---|
 | **Project Name** | Workora |
 | **Document Title** | Backend Code Structure Documentation |
-| **Version** | 1.0 |
+| **Version** | 1.1 |
 | **Author** | Principal .NET Architecture Team |
 | **Created Date** | July 2, 2026 |
 | **Audience** | Backend Developers, New Team Members, Code Reviewers |
+
+### Revision History
+
+| Version | Date | Description |
+|---|---|---|
+| 1.0 | 2026-07-02 | Baseline release, companion to Technical Documentation v1.0 |
+| 1.1 | 2026-07-15 | Synced with Technical Documentation v1.1 — Sections 22–23 (worked module + all-modules command/query map) updated to reflect the ~202-endpoint API surface (up from ~120) after the full per-module API audit |
 
 ---
 
 ## 1. Introduction
 
-This document is the **developer-facing companion** to the *Workora HRMS Backend Technical Documentation*. Where the Technical Documentation explains **what** the system does and **why** it is architected the way it is, this document explains **how the code is organized**, down to individual files, classes, and naming conventions — with the explicit goal that a new developer can clone the repository, read this document, and start contributing without needing to ask a teammate "where does X go?"
+This document is the **developer-facing companion** to the *Workora Backend Technical Documentation*. Where the Technical Documentation explains **what** the system does and **why** it is architected the way it is, this document explains **how the code is organized**, down to individual files, classes, and naming conventions — with the explicit goal that a new developer can clone the repository, read this document, and start contributing without needing to ask a teammate "where does X go?"
 
 It covers the complete Clean Architecture solution structure, every project and folder's responsibility, DDD entity design, the CQRS/MediatR implementation, repository and Unit of Work patterns, validation and mapping pipelines, naming and coding standards, production-ready code templates, and the Git/CI developer workflow.
 
@@ -29,15 +36,15 @@ It covers the complete Clean Architecture solution structure, every project and 
 
 ```mermaid
 graph TD
-    SLN[Workora.HRMS.sln]
-    SLN --> API[Workora.HRMS.API]
-    SLN --> APP[Workora.HRMS.Application]
-    SLN --> DOM[Workora.HRMS.Domain]
-    SLN --> INF[Workora.HRMS.Infrastructure]
-    SLN --> PER[Workora.HRMS.Persistence]
-    SLN --> SHR[Workora.HRMS.Shared]
-    SLN --> UT[Workora.HRMS.UnitTests]
-    SLN --> IT[Workora.HRMS.IntegrationTests]
+    SLN[Workora.sln]
+    SLN --> API[Workora.API]
+    SLN --> APP[Workora.Application]
+    SLN --> DOM[Workora.Domain]
+    SLN --> INF[Workora.Infrastructure]
+    SLN --> PER[Workora.Persistence]
+    SLN --> SHR[Workora.Shared]
+    SLN --> UT[Workora.UnitTests]
+    SLN --> IT[Workora.IntegrationTests]
 
     API -->|references| APP
     API -.->|composition root only| INF
@@ -54,21 +61,21 @@ graph TD
 ```
 
 ```
-Workora.HRMS/
-├── Workora.HRMS.sln
+Workora/
+├── Workora.sln
 ├── Directory.Build.props
 ├── Directory.Packages.props
 ├── .editorconfig
 ├── src/
-│   ├── Workora.HRMS.API/
-│   ├── Workora.HRMS.Application/
-│   ├── Workora.HRMS.Domain/
-│   ├── Workora.HRMS.Infrastructure/
-│   ├── Workora.HRMS.Persistence/
-│   └── Workora.HRMS.Shared/
+│   ├── Workora.API/
+│   ├── Workora.Application/
+│   ├── Workora.Domain/
+│   ├── Workora.Infrastructure/
+│   ├── Workora.Persistence/
+│   └── Workora.Shared/
 ├── tests/
-│   ├── Workora.HRMS.UnitTests/
-│   └── Workora.HRMS.IntegrationTests/
+│   ├── Workora.UnitTests/
+│   └── Workora.IntegrationTests/
 └── docs/
     ├── Workora_Technical_Documentation.md
     └── Workora_Code_Structure_Documentation.md
@@ -82,14 +89,14 @@ Workora.HRMS/
 
 | Project | Type | Depends On | Responsibility |
 |---|---|---|---|
-| `Workora.HRMS.Domain` | Class Library | *(none)* | Entities, Value Objects, Enums, Domain Events, Domain Exceptions, Repository interfaces, Specifications |
-| `Workora.HRMS.Application` | Class Library | `Domain`, `Shared` | Commands, Queries, Handlers, DTOs, Validators, Pipeline Behaviors, AutoMapper Profiles, external-service interfaces |
-| `Workora.HRMS.Infrastructure` | Class Library | `Application`, `Domain` | Email, File Storage, PDF, Token Service, Background Jobs — implementations of Application interfaces |
-| `Workora.HRMS.Persistence` | Class Library | `Domain`, `Application` | `AppDbContext`, EF Core Entity Configurations, Migrations, Repository implementations, Seeders |
-| `Workora.HRMS.Shared` | Class Library | *(none)* | `ApiResponse<T>`, `PagedResponse<T>`, Guard clauses, common constants/extensions used by any layer |
-| `Workora.HRMS.API` | ASP.NET Core Web API | `Application` (+ `Infrastructure`/`Persistence` at composition root only) | Controllers, Middleware, `Program.cs`, Swagger, appsettings |
-| `Workora.HRMS.UnitTests` | xUnit Test Project | `Application`, `Domain` | Handler, validator, and domain-entity unit tests with mocked dependencies |
-| `Workora.HRMS.IntegrationTests` | xUnit Test Project | `API` | Full HTTP-pipeline tests against a Testcontainers PostgreSQL instance |
+| `Workora.Domain` | Class Library | *(none)* | Entities, Value Objects, Enums, Domain Events, Domain Exceptions, Repository interfaces, Specifications |
+| `Workora.Application` | Class Library | `Domain`, `Shared` | Commands, Queries, Handlers, DTOs, Validators, Pipeline Behaviors, AutoMapper Profiles, external-service interfaces |
+| `Workora.Infrastructure` | Class Library | `Application`, `Domain` | Email, File Storage, PDF, Token Service, Background Jobs — implementations of Application interfaces |
+| `Workora.Persistence` | Class Library | `Domain`, `Application` | `AppDbContext`, EF Core Entity Configurations, Migrations, Repository implementations, Seeders |
+| `Workora.Shared` | Class Library | *(none)* | `ApiResponse<T>`, `PagedResponse<T>`, Guard clauses, common constants/extensions used by any layer |
+| `Workora.API` | ASP.NET Core Web API | `Application` (+ `Infrastructure`/`Persistence` at composition root only) | Controllers, Middleware, `Program.cs`, Swagger, appsettings |
+| `Workora.UnitTests` | xUnit Test Project | `Application`, `Domain` | Handler, validator, and domain-entity unit tests with mocked dependencies |
+| `Workora.IntegrationTests` | xUnit Test Project | `API` | Full HTTP-pipeline tests against a Testcontainers PostgreSQL instance |
 
 > ⚠️ **Warning:** `Application` must **never** take a project reference to `Infrastructure` or `Persistence`. If a handler needs to send email, it depends on `Application.Common.Interfaces.IEmailService` — an interface defined in `Application` and implemented in `Infrastructure` — never the concrete `Infrastructure.Email.SmtpEmailService` type.
 
@@ -97,7 +104,7 @@ Workora.HRMS/
 
 ## 4. Folder Structure (Detailed, by Project)
 
-### 4.1 `Workora.HRMS.Domain`
+### 4.1 `Workora.Domain`
 
 ```
 Domain/
@@ -150,7 +157,7 @@ Domain/
 | `Interfaces/` | Repository contracts — Domain **owns** these interfaces; Persistence implements them (Dependency Inversion) |
 | `Specifications/` | Reusable, composable query specifications (Specification pattern) used by generic repository methods |
 
-### 4.2 `Workora.HRMS.Application`
+### 4.2 `Workora.Application`
 
 ```
 Application/
@@ -185,15 +192,25 @@ Application/
     │   │   │   ├── CreateEmployeeCommandHandler.cs
     │   │   │   └── CreateEmployeeCommandValidator.cs
     │   │   ├── UpdateEmployee/
-    │   │   └── TerminateEmployee/
+    │   │   ├── UpdateMyEmployeeProfile/
+    │   │   ├── TransferEmployee/
+    │   │   ├── TerminateEmployee/
+    │   │   ├── ReactivateEmployee/
+    │   │   ├── UpsertEmergencyContact/
+    │   │   └── UpsertBankDetails/
     │   ├── Queries/
     │   │   ├── GetEmployeeById/
-    │   │   └── GetEmployeesList/
+    │   │   ├── GetEmployeesList/
+    │   │   ├── GetMyEmployeeProfile/
+    │   │   ├── GetEmployeeOrgChart/
+    │   │   ├── GetEmployeeEmploymentHistory/
+    │   │   ├── GetEmployeeDirectReports/
+    │   │   └── ExportEmployees/
     │   └── DTOs/
     │       └── EmployeeDto.cs
     ├── Leave/
     ├── Payroll/
-    └── ... (one folder per module, mirroring Section 9 of the Technical Documentation)
+    └── ... (one folder per module, mirroring Section 9 of the Technical Documentation — every API endpoint added in Technical Documentation v1.1 has a corresponding Command/Query vertical slice under its module folder, following this same naming pattern: verb-first for Commands, `Get{Noun}`/`Export{Noun}` for Queries)
 ```
 
 | Folder | Explanation |
@@ -208,7 +225,7 @@ Application/
 
 > **Best Practice:** Workora uses the **vertical slice** folder convention (one folder per use case, containing its Command, Handler, and Validator together) rather than horizontal folders (`Commands/`, `Handlers/`, `Validators/` at the top level) — this keeps everything needed to understand or modify one use case in a single place.
 
-### 4.3 `Workora.HRMS.Infrastructure`
+### 4.3 `Workora.Infrastructure`
 
 ```
 Infrastructure/
@@ -232,7 +249,7 @@ Infrastructure/
 └── DependencyInjection.cs
 ```
 
-### 4.4 `Workora.HRMS.Persistence`
+### 4.4 `Workora.Persistence`
 
 ```
 Persistence/
@@ -257,7 +274,7 @@ Persistence/
 └── DependencyInjection.cs
 ```
 
-### 4.5 `Workora.HRMS.Shared`
+### 4.5 `Workora.Shared`
 
 ```
 Shared/
@@ -275,7 +292,7 @@ Shared/
     └── Guard.cs
 ```
 
-### 4.6 `Workora.HRMS.API`
+### 4.6 `Workora.API`
 
 ```
 API/
@@ -791,7 +808,7 @@ public class GlobalExceptionMiddleware : IMiddleware
 
 - **`AppDbContext`** exposes a `DbSet<T>` per aggregate root and applies all `IEntityTypeConfiguration<T>` classes via `modelBuilder.ApplyConfigurationsFromAssembly(...)`.
 - **Entity Configurations** (one file per entity in `Persistence/Configurations/`) define table names, keys, indexes, relationships, and value converters — keeping the `OnModelCreating` method itself tiny.
-- **Migrations** are stored under `Persistence/Migrations/` and generated via `dotnet ef migrations add {Name} --project src/Workora.HRMS.Persistence --startup-project src/Workora.HRMS.API`.
+- **Migrations** are stored under `Persistence/Migrations/` and generated via `dotnet ef migrations add {Name} --project src/Workora.Persistence --startup-project src/Workora.API`.
 - **Seeders** populate reference data (`Permission`, default `Role`s) on startup in Development/Staging and via a controlled one-time script in Production.
 
 ```csharp
@@ -841,7 +858,8 @@ public class EmployeeConfiguration : IEntityTypeConfiguration<Employee>
 
 ---
 
-## 21. Comments Standard (XML Documentation)
+## 21. Commenting Standards
+- **Mandatory Comments**: Every class, method, property, and significant section of code MUST include descriptive comments (e.g., XML documentation comments in C#) explaining its purpose and behavior.
 
 ```csharp
 /// <summary>
@@ -877,8 +895,12 @@ Application/Features/Employees/
 │   │   ├── UpdateEmployeeCommand.cs
 │   │   ├── UpdateEmployeeCommandHandler.cs
 │   │   └── UpdateEmployeeCommandValidator.cs
+│   ├── UpdateMyEmployeeProfile/
 │   ├── TransferEmployee/
-│   └── TerminateEmployee/
+│   ├── TerminateEmployee/
+│   ├── ReactivateEmployee/
+│   ├── UpsertEmergencyContact/
+│   └── UpsertBankDetails/
 ├── Queries/
 │   ├── GetEmployeeById/
 │   │   ├── GetEmployeeByIdQuery.cs
@@ -886,16 +908,23 @@ Application/Features/Employees/
 │   ├── ListEmployees/
 │   │   ├── ListEmployeesQuery.cs
 │   │   └── ListEmployeesQueryHandler.cs
-│   └── GetOrgChart/
+│   ├── GetMyEmployeeProfile/
+│   ├── GetOrgChart/
+│   ├── GetEmploymentHistory/
+│   ├── GetDirectReports/
+│   └── ExportEmployees/
 └── DTOs/
     ├── EmployeeDto.cs
     ├── EmployeeListItemDto.cs
-    └── OrgChartNodeDto.cs
+    ├── OrgChartNodeDto.cs
+    ├── EmploymentHistoryDto.cs
+    └── EmergencyContactDto.cs
 
 Domain/Entities/Employee.cs
 Domain/Interfaces/IEmployeeRepository.cs
 Domain/Events/EmployeeOnboardedEvent.cs
 Domain/Events/EmployeeTerminatedEvent.cs
+Domain/Events/EmployeeReactivatedEvent.cs
 
 Persistence/Configurations/EmployeeConfiguration.cs
 Persistence/Repositories/EmployeeRepository.cs
@@ -908,40 +937,56 @@ API/Controllers/v1/EmployeesController.cs
 | `CreateEmployeeCommand.cs` | Immutable record carrying the request shape; implements `IRequest<Guid>` |
 | `CreateEmployeeCommandHandler.cs` | Orchestrates entity creation, persistence, and event dispatch |
 | `CreateEmployeeCommandValidator.cs` | FluentValidation rules, auto-invoked by `ValidationBehavior` |
+| `UpdateMyEmployeeProfile*` | Self-service variant of `UpdateEmployee`; the handler ignores any incoming `EmployeeId` and instead resolves the target record from `ICurrentUserService`, then restricts the mapped fields to a whitelist (phone, address, emergency contact) so a non-privileged caller cannot elevate other fields |
+| `ReactivateEmployee*` | Rehire flow: validates the employee is currently `Terminated`, clears `termination_date`, raises `EmployeeReactivatedEvent` |
+| `UpsertEmergencyContact*` / `UpsertBankDetails*` | Insert-or-update commands scoped to the `employee_emergency_contacts` / `employee_bank_details` child tables; bank details are encrypted before persistence via a `IFieldEncryptionService` |
 | `EmployeeDto.cs` | Read shape returned by queries; mapped via AutoMapper |
-| `Employee.cs` (Domain) | Aggregate root; exposes `Employee.Create(...)` factory and behavior methods like `Terminate(DateOnly date)` |
+| `ExportEmployees*` | Query returning a stream (`FileResult`) built via `IExcelExportService`, sharing the same filter parameters as `ListEmployeesQuery` |
+| `Employee.cs` (Domain) | Aggregate root; exposes `Employee.Create(...)` factory and behavior methods like `Terminate(DateOnly date)` and `Reactivate()` |
 | `IEmployeeRepository.cs` | Contract owned by Domain, implemented by Persistence |
 | `EmployeeOnboardedEvent.cs` | Raised inside `Employee.Create(...)`, handled by Notification/Asset/User-provisioning listeners |
 | `EmployeeConfiguration.cs` | EF Core mapping: table, keys, indexes, relationships |
 | `EmployeeRepository.cs` | Concrete data access, extends `GenericRepository<Employee>` |
-| `EmployeesController.cs` | Thin HTTP entry point; one action per Command/Query, `[Authorize(Policy="...")]` per action |
+| `EmployeesController.cs` | Thin HTTP entry point; one action per Command/Query, `[Authorize(Policy="...")]` per action (self-service actions use `[Authorize]` only, with scope enforced inside the handler, not the controller) |
 
 ---
 
 ## 23. Complete Module Structure (All Modules)
 
-Every module below follows the identical `Commands/ Queries/ DTOs/` vertical-slice shape shown in Section 22. Only the aggregate-specific pieces are listed here to avoid repetition.
+Every module below follows the identical `Commands/ Queries/ DTOs/` vertical-slice shape shown in Section 22. Only the aggregate-specific pieces are listed here to avoid repetition. Following the Technical Documentation v1.1 API audit, every newly added endpoint in Section 9 of that document has a corresponding Command or Query listed here — the columns below are illustrative of the *pattern* (not the full ~202-endpoint enumeration); apply the same `Verb+Noun+Command` / `Get/List/Export+Noun+Query` naming convention for any endpoint not explicitly named.
 
 | Module | Key Commands | Key Queries | Domain Entity/Aggregate | Controller |
 |---|---|---|---|---|
-| Authentication | `LoginCommand`, `RefreshTokenCommand`, `LogoutCommand`, `ResetPasswordCommand` | — | *(uses User aggregate)* | `AuthController` |
-| Users | `CreateUserCommand`, `UpdateUserCommand`, `DeactivateUserCommand`, `AssignRolesCommand` | `GetUserByIdQuery`, `ListUsersQuery` | `User` | `UsersController` |
-| Roles | `CreateRoleCommand`, `UpdateRoleCommand`, `DeleteRoleCommand`, `SetRolePermissionsCommand` | `ListRolesQuery` | `Role` | `RolesController` |
+| Authentication | `LoginCommand`, `RefreshTokenCommand`, `LogoutCommand`, `LogoutAllCommand`, `ResetPasswordCommand` | `GetMyProfileQuery`, `ListMySessionsQuery` | *(uses User aggregate)* | `AuthController` |
+| Users | `CreateUserCommand`, `UpdateUserCommand`, `DeactivateUserCommand`, `ActivateUserCommand`, `DeleteUserCommand`, `AssignRolesCommand`, `AdminResetPasswordCommand` | `GetUserByIdQuery`, `ListUsersQuery`, `GetMyUserQuery` | `User` | `UsersController` |
+| Roles | `CreateRoleCommand`, `UpdateRoleCommand`, `DeleteRoleCommand`, `SetRolePermissionsCommand`, `CloneRoleCommand` | `ListRolesQuery`, `GetRoleByIdQuery` | `Role` | `RolesController` |
 | Permissions | — | `ListPermissionsQuery` | `Permission` | `PermissionsController` |
-| Departments | `CreateDepartmentCommand`, `UpdateDepartmentCommand`, `DeleteDepartmentCommand` | `ListDepartmentsQuery`, `GetDepartmentByIdQuery` | `Department` | `DepartmentsController` |
-| Employees | `CreateEmployeeCommand`, `UpdateEmployeeCommand`, `TransferEmployeeCommand`, `TerminateEmployeeCommand` | `GetEmployeeByIdQuery`, `ListEmployeesQuery`, `GetOrgChartQuery` | `Employee` | `EmployeesController` |
-| Payroll | `CreatePayrollRunCommand`, `ProcessPayrollRunCommand`, `ApprovePayrollRunCommand` | `GetPayrollRunByIdQuery`, `GetPayslipQuery` | `PayrollRun` | `PayrollController` |
-| Attendance | `CheckInCommand`, `CheckOutCommand`, `RequestCorrectionCommand`, `ApproveCorrectionCommand` | `GetAttendanceHistoryQuery`, `GetAttendanceSummaryQuery` | `AttendanceRecord` | `AttendanceController` |
-| Leave | `SubmitLeaveRequestCommand`, `ApproveLeaveCommand`, `RejectLeaveCommand`, `CancelLeaveCommand` | `ListLeaveRequestsQuery`, `GetLeaveBalancesQuery` | `LeaveRequest` | `LeaveController` |
-| Recruitment | *(aggregated from sub-modules)* | `GetPipelineQuery`, `GetHiringAnalyticsQuery` | — | `RecruitmentController` |
-| Training | `CreateTrainingProgramCommand`, `EnrollEmployeeCommand`, `MarkCompletedCommand` | `ListTrainingProgramsQuery` | `TrainingProgram` | `TrainingController` |
-| Performance | `CreateReviewCycleCommand`, `SetGoalsCommand`, `SubmitSelfAssessmentCommand`, `FinalizeReviewCommand` | `GetReviewQuery` | `PerformanceReview` | `PerformanceController` |
-| Documents | `UploadDocumentCommand`, `DeleteDocumentCommand` | `ListDocumentsQuery`, `DownloadDocumentQuery` | `Document` | `DocumentsController` |
-| Assets | `RegisterAssetCommand`, `AssignAssetCommand`, `ReturnAssetCommand` | `ListAssetsQuery` | `Asset` | `AssetsController` |
-| Reports | — | `HeadcountReportQuery`, `AttritionReportQuery`, `PayrollCostReportQuery` | — | `ReportsController` |
-| Settings | `UpdateSettingsCommand` | `GetSettingsQuery` | `CompanySettings` | `SettingsController` |
-| Audit | — | `SearchAuditLogsQuery`, `GetEntityHistoryQuery` | `AuditLog` | `AuditLogsController` |
-| Dashboard | — | `GetDashboardSummaryQuery` | — | `DashboardController` |
+| Departments | `CreateDepartmentCommand`, `UpdateDepartmentCommand`, `DeleteDepartmentCommand`, `AssignDepartmentHeadCommand` | `ListDepartmentsQuery`, `GetDepartmentByIdQuery` | `Department` | `DepartmentsController` |
+| Designations | `CreateDesignationCommand`, `UpdateDesignationCommand`, `DeleteDesignationCommand` | `ListDesignationsQuery`, `GetDesignationByIdQuery` | `Designation` | `DesignationsController` |
+| Employees | `CreateEmployeeCommand`, `UpdateEmployeeCommand`, `UpdateMyEmployeeProfileCommand`, `TransferEmployeeCommand`, `TerminateEmployeeCommand`, `ReactivateEmployeeCommand`, `UpsertEmergencyContactCommand`, `UpsertBankDetailsCommand` | `GetEmployeeByIdQuery`, `ListEmployeesQuery`, `GetMyEmployeeProfileQuery`, `GetOrgChartQuery`, `GetEmploymentHistoryQuery`, `GetDirectReportsQuery`, `ExportEmployeesQuery` | `Employee` | `EmployeesController` |
+| Attendance | `CheckInCommand`, `CheckOutCommand`, `RequestCorrectionCommand`, `ApproveCorrectionCommand`, `RejectCorrectionCommand`, `BulkImportAttendanceCommand` | `GetAttendanceHistoryQuery`, `GetAttendanceSummaryQuery`, `GetMyTodayAttendanceQuery`, `ListCorrectionsQuery` | `AttendanceRecord` | `AttendanceController` |
+| Leave | `SubmitLeaveRequestCommand`, `ApproveLeaveCommand`, `RejectLeaveCommand`, `CancelLeaveCommand`, `CreateLeaveTypeCommand`, `UpdateLeaveTypeCommand` | `ListLeaveRequestsQuery`, `GetLeaveBalancesQuery`, `ListLeaveTypesQuery`, `GetLeaveCalendarQuery` | `LeaveRequest` | `LeaveController` |
+| Payroll | `CreatePayrollRunCommand`, `ProcessPayrollRunCommand`, `ApprovePayrollRunCommand`, `DeletePayrollRunCommand`, `CreateAdjustmentRunCommand` | `ListPayrollRunsQuery`, `GetPayrollRunByIdQuery`, `GetPayslipQuery`, `ListPayslipsQuery` | `PayrollRun` | `PayrollController` |
+| Salary Structure | `CreateSalaryStructureCommand`, `DeleteSalaryStructureCommand`, `CreateSalaryComponentCommand`, `UpdateSalaryComponentCommand` | `GetSalaryStructuresQuery`, `ListSalaryComponentsQuery` | `SalaryStructure` | `SalaryStructuresController` |
+| Recruitment | `SetPipelineStagesCommand` | `GetPipelineQuery`, `GetHiringAnalyticsQuery` | — | `RecruitmentController` |
+| Job Posting | `CreateJobPostingCommand`, `UpdateJobPostingCommand`, `DeleteJobPostingCommand`, `PublishJobPostingCommand`, `CloseJobPostingCommand` | `ListJobPostingsQuery`, `GetJobPostingByIdQuery` | `JobPosting` | `JobPostingsController` |
+| Candidates | `RegisterCandidateCommand`, `UpdateCandidateCommand`, `MoveCandidateStageCommand`, `RejectCandidateCommand`, `UploadCandidateDocumentCommand`, `AddCandidateNoteCommand` | `ListCandidatesQuery`, `GetCandidateByIdQuery` | `Candidate` | `CandidatesController` |
+| Interview | `ScheduleInterviewCommand`, `RescheduleInterviewCommand`, `CancelInterviewCommand`, `SubmitInterviewFeedbackCommand` | `ListInterviewsQuery`, `GetInterviewByIdQuery` | `Interview` | `InterviewsController` |
+| Offer Letter | `GenerateOfferCommand`, `AcceptOfferCommand`, `DeclineOfferCommand`, `ResendOfferCommand` | `ListOfferLettersQuery`, `GetOfferLetterByIdQuery`, `GetOfferLetterPdfQuery` | `OfferLetter` | `OfferLettersController` |
+| Training | `CreateTrainingProgramCommand`, `UpdateTrainingProgramCommand`, `DeleteTrainingProgramCommand`, `EnrollEmployeeCommand`, `MarkCompletedCommand`, `CancelEnrollmentCommand` | `ListTrainingProgramsQuery`, `GetTrainingProgramByIdQuery`, `ListEnrollmentsQuery` | `TrainingProgram` | `TrainingController` |
+| Performance | `CreateReviewCycleCommand`, `SetGoalsCommand`, `DeleteGoalCommand`, `SubmitSelfAssessmentCommand`, `SubmitManagerAssessmentCommand`, `FinalizeReviewCommand` | `ListReviewCyclesQuery`, `ListReviewsQuery`, `GetReviewQuery` | `PerformanceReview` | `PerformanceController` |
+| Assets | `RegisterAssetCommand`, `UpdateAssetCommand`, `DeleteAssetCommand`, `AssignAssetCommand`, `ReturnAssetCommand`, `LogAssetMaintenanceCommand` | `ListAssetsQuery`, `GetAssetByIdQuery`, `ListAssetMaintenanceLogQuery` | `Asset` | `AssetsController` |
+| Documents | `UploadDocumentCommand`, `UpdateDocumentCommand`, `DeleteDocumentCommand` | `ListDocumentsQuery`, `DownloadDocumentQuery`, `ListExpiringDocumentsQuery` | `Document` | `DocumentsController` |
+| Notifications | `MarkNotificationReadCommand`, `MarkAllNotificationsReadCommand`, `DeleteNotificationCommand`, `UpdateNotificationPreferencesCommand` | `ListMyNotificationsQuery`, `GetUnreadCountQuery` | `Notification` | `NotificationsController` |
+| Reports | — | `HeadcountReportQuery`, `AttritionReportQuery`, `PayrollCostReportQuery`, `LeaveUtilizationReportQuery`, `EmployeeTurnoverReportQuery`, `ExportReportQuery` | — | `ReportsController` |
+| Dashboard | — | `GetDashboardSummaryQuery`, `GetDashboardWidgetQuery` | — | `DashboardController` |
+| Settings | `UpdateSettingsCommand`, `UpdateFeatureFlagsCommand` | `GetSettingsQuery`, `ListFeatureFlagsQuery` | `CompanySettings` | `SettingsController` |
+| Audit Logs | — | `SearchAuditLogsQuery`, `GetEntityHistoryQuery`, `ExportAuditLogsQuery` | `AuditLog` | `AuditLogsController` |
+| Company | `UpdateCompanyCommand`, `UploadCompanyLogoCommand` | `GetCompanyQuery`, `ListCompaniesQuery` | `Company` | `CompanyController` |
+| Branches | `CreateBranchCommand`, `UpdateBranchCommand`, `DeleteBranchCommand` | `ListBranchesQuery`, `GetBranchByIdQuery` | `Branch` | `BranchesController` |
+| Holiday | `CreateHolidayCommand`, `UpdateHolidayCommand`, `DeleteHolidayCommand` | `ListHolidaysQuery`, `GetHolidayByIdQuery` | `Holiday` | `HolidaysController` |
+| Shift | `CreateShiftCommand`, `UpdateShiftCommand`, `DeleteShiftCommand`, `AssignShiftCommand`, `UnassignShiftCommand` | `ListShiftsQuery`, `GetShiftByIdQuery` | `Shift` | `ShiftsController` |
+| Policy | `CreatePolicyCommand`, `DeletePolicyCommand`, `PublishPolicyVersionCommand`, `AcknowledgePolicyCommand` | `ListPoliciesQuery`, `GetPolicyByIdQuery`, `GetPolicyComplianceQuery` | `Policy` | `PoliciesController` |
 
 ---
 
@@ -1010,19 +1055,13 @@ public class {Module}Controller : ControllerBase
 
     [HttpGet("{id:guid}")]
     [Authorize(Policy = "{module}.view")]
-    public async Task<IActionResult> GetById(Guid id, CancellationToken ct)
-    {
-        var result = await _mediator.Send(new Get{Entity}ByIdQuery(id), ct);
-        return Ok(ApiResponse<{Entity}Dto>.Success(result));
-    }
+    public async Task<ApiResponse<{Entity}Dto>> GetById(Guid id)
+        => await _mediator.Send(new Get{Entity}ByIdQuery(id));
 
     [HttpPost]
     [Authorize(Policy = "{module}.create")]
-    public async Task<IActionResult> Create(Create{Entity}Command command, CancellationToken ct)
-    {
-        var id = await _mediator.Send(command, ct);
-        return CreatedAtAction(nameof(GetById), new { id }, ApiResponse<Guid>.Success(id));
-    }
+    public async Task<ApiResponse<Guid>> Create(Create{Entity}Command command)
+        => await _mediator.Send(command);
 }
 ```
 
@@ -1236,14 +1275,14 @@ Commit messages follow Conventional Commits (`feat:`, `fix:`, `refactor:`, `test
 
 ```
 tests/
-├── Workora.HRMS.UnitTests/
+├── Workora.UnitTests/
 │   ├── Features/
 │   │   └── Employees/
 │   │       ├── CreateEmployeeCommandHandlerTests.cs
 │   │       └── CreateEmployeeCommandValidatorTests.cs
 │   └── Domain/
 │       └── EmployeeTests.cs
-└── Workora.HRMS.IntegrationTests/
+└── Workora.IntegrationTests/
     ├── Controllers/
     │   └── EmployeesControllerTests.cs
     └── Fixtures/
@@ -1320,8 +1359,8 @@ tests/
 - FluentValidation — https://docs.fluentvalidation.net
 
 ### Glossary
-See the companion *Workora HRMS Backend Technical Documentation*, Section 1.4–1.5.
+See the companion *Workora Backend Technical Documentation*, Section 1.4–1.5.
 
 ---
 
-*End of Workora HRMS — Backend Code Structure Documentation v1.0*
+*End of Workora — Backend Code Structure Documentation v1.1*

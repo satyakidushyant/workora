@@ -33,4 +33,12 @@ public class RefreshTokenRepository : GenericRepository<RefreshToken>, IRefreshT
             token.Revoke();
         }
     }
+
+    /// <inheritdoc />
+    public async Task<IReadOnlyList<RefreshToken>> GetActiveSessionsByUserIdAsync(int userId, CancellationToken ct = default)
+    {
+        return await _dbContext.RefreshTokens
+            .Where(rt => rt.UserId == userId && !rt.IsRevoked && rt.ExpiresAt > DateTimeOffset.UtcNow)
+            .ToListAsync(ct);
+    }
 }

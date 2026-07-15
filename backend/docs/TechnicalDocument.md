@@ -1,6 +1,6 @@
 # Workora
 ## Backend Technical Documentation
-### Version 1.0
+### Version 1.1
 
 ---
 
@@ -10,7 +10,7 @@
 |---|---|
 | **Project Name** | Workora (Human Resource Management System) |
 | **Document Title** | Backend Technical Documentation |
-| **Version** | 1.0 |
+| **Version** | 1.1 |
 | **Author** | Principal Solution Architecture Team |
 | **Created Date** | July 2, 2026 |
 | **Classification** | Internal / Engineering |
@@ -24,6 +24,7 @@
 | 0.5 | 2026-05-28 | Solution Architecture Team | Added module architecture and DB design |
 | 0.9 | 2026-06-18 | Solution Architecture Team | Added security, deployment, CI/CD |
 | 1.0 | 2026-07-02 | Solution Architecture Team | Baseline release for development kickoff |
+| 1.1 | 2026-07-15 | Solution Architecture Team | Full API audit across all 30 modules — added missing CRUD, self-service (`/me`), lifecycle (cancel/reject/reactivate), and history/log endpoints; endpoint index expanded from ~120 to ~202 |
 
 ---
 
@@ -273,10 +274,10 @@ sequenceDiagram
     DB-->>EF: Result Set
     EF-->>Repo: Entities
     Repo-->>H: Domain Result
-    H-->>PB: Response DTO
-    PB-->>Med: Response DTO
-    Med-->>Ctrl: Response DTO
-    Ctrl-->>C: 200 OK (ApiResponse<T>)
+    H-->>PB: ApiResponse<DTO>
+    PB-->>Med: ApiResponse<DTO>
+    Med-->>Ctrl: ApiResponse<DTO>
+    Ctrl-->>C: 200 OK (ApiResponse<DTO>)
 ```
 
 ### 5.1 Pipeline Stages Explained
@@ -284,7 +285,7 @@ sequenceDiagram
 2. **Request Logging Middleware** — logs method, path, status code, and duration via Serilog with a correlation ID.
 3. **Authentication Middleware** — validates the JWT signature, expiry, and issuer/audience; populates `HttpContext.User`.
 4. **Authorization Middleware** — evaluates policy requirements (role and/or permission claims) against the route's `[Authorize]` metadata.
-5. **Controller Action** — a thin layer that maps the HTTP request to a MediatR `IRequest` and returns the result wrapped in `ApiResponse<T>`.
+5. **Controller Action** — a thin layer that maps the HTTP request to a MediatR `IRequest` and directly returns the resulting `ApiResponse<T>`.
 6. **MediatR Pipeline Behaviors** — execute in registered order: `ValidationBehavior` → `LoggingBehavior` → `TransactionBehavior` → `CachingBehavior` (for queries) → Handler.
 7. **Handler** — orchestrates domain logic, repository calls, and side effects (email, PDF, events).
 
@@ -381,11 +382,8 @@ flowchart TD
 // Example controller usage
 [Authorize(Policy = "employees.create")]
 [HttpPost]
-public async Task<IActionResult> CreateEmployee(CreateEmployeeCommand command)
-{
-    var result = await _mediator.Send(command);
-    return Ok(ApiResponse<EmployeeDto>.Success(result));
-}
+public async Task<ApiResponse<Guid>> CreateEmployee(CreateEmployeeCommand command)
+    => await _mediator.Send(command);
 ```
 
 > ⚠️ **Warning:** Never rely solely on UI-level hiding of buttons/menus for authorization. Every state-changing endpoint must independently enforce a permission policy server-side.
@@ -807,12 +805,15 @@ This section documents every functional module of Workora. Each module follows t
 | POST | `/api/v1/auth/forgot-password` | Request password reset email | Anonymous |
 | POST | `/api/v1/auth/reset-password` | Reset password with token | Anonymous |
 | POST | `/api/v1/auth/change-password` | Change password (logged in) | Authenticated |
+| GET | `/api/v1/auth/me` | Get current authenticated user profile + roles/permissions | Authenticated |
+| GET | `/api/v1/auth/sessions` | List active sessions/devices (by refresh token) | Authenticated |
+| POST | `/api/v1/auth/logout-all` | Revoke all refresh tokens/sessions for the current user | Authenticated |
 
 **Flow Diagram:** See Section 6.1 (JWT Authentication Flow).
 
 **Validation:** Email format, password complexity (min 8 chars, upper/lower/digit/symbol), token presence.
 
-**Permissions:** None required (public/self-service endpoints); `change-password` requires an authenticated identity only.
+**Permissions:** None required (public/self-service endpoints); `change-password`, `me`, `sessions`, and `logout-all` require an authenticated identity only.
 
 **Repository:** `IUserRepository`, `IRefreshTokenRepository`.
 
@@ -844,7 +845,11 @@ This section documents every functional module of Workora. Each module follows t
 | POST | `/api/v1/users` | Create user | Yes | `users.create` |
 | PUT | `/api/v1/users/{id}` | Update user | Yes | `users.update` |
 | PATCH | `/api/v1/users/{id}/deactivate` | Deactivate user | Yes | `users.deactivate` |
+| PATCH | `/api/v1/users/{id}/activate` | Reactivate a previously deactivated user | Yes | `users.deactivate` |
 | POST | `/api/v1/users/{id}/roles` | Assign roles | Yes | `users.assign-roles` |
+| DELETE | `/api/v1/users/{id}` | Hard-delete a user (only if never linked to audit-relevant activity) | Yes | `users.delete` |
+| POST | `/api/v1/users/{id}/reset-password` | Admin-triggered password reset (issues reset email) | Yes | `users.manage` |
+| GET | `/api/v1/users/me` | Get current user's own account record | Yes | Authenticated |
 
 ```mermaid
 flowchart LR
@@ -862,7 +867,7 @@ flowchart LR
 
 **Validation:** Unique email, valid role IDs, required first/last name.
 
-**Permissions:** `users.view`, `users.create`, `users.update`, `users.deactivate`, `users.assign-roles`.
+**Permissions:** `users.view`, `users.create`, `users.update`, `users.deactivate`, `users.assign-roles`, `users.delete`, `users.manage`.
 
 **Repository:** `IUserRepository`.
 
@@ -889,10 +894,12 @@ flowchart LR
 | Method | URL | Description | Permission |
 |---|---|---|---|
 | GET | `/api/v1/roles` | List roles | `roles.view` |
+| GET | `/api/v1/roles/{id}` | Get role detail (with assigned permissions) | `roles.view` |
 | POST | `/api/v1/roles` | Create role | `roles.create` |
 | PUT | `/api/v1/roles/{id}` | Update role | `roles.update` |
 | DELETE | `/api/v1/roles/{id}` | Delete role | `roles.delete` |
 | PUT | `/api/v1/roles/{id}/permissions` | Set role permissions | `roles.manage-permissions` |
+| POST | `/api/v1/roles/{id}/clone` | Clone an existing role (with its permission set) as a new role | `roles.create` |
 
 **Validation:** Unique role name per tenant; permission IDs must exist.
 
@@ -955,6 +962,7 @@ flowchart LR
 | POST | `/api/v1/departments` | Create department | `departments.create` |
 | PUT | `/api/v1/departments/{id}` | Update department | `departments.update` |
 | DELETE | `/api/v1/departments/{id}` | Delete department | `departments.delete` |
+| PATCH | `/api/v1/departments/{id}/assign-head` | Assign/change department head | `departments.update` |
 
 **Validation:** Unique code per company, required name, valid head employee ID.
 
@@ -983,6 +991,7 @@ flowchart LR
 | Method | URL | Description | Permission |
 |---|---|---|---|
 | GET | `/api/v1/designations` | List designations | `designations.view` |
+| GET | `/api/v1/designations/{id}` | Get designation detail | `designations.view` |
 | POST | `/api/v1/designations` | Create designation | `designations.create` |
 | PUT | `/api/v1/designations/{id}` | Update designation | `designations.update` |
 | DELETE | `/api/v1/designations/{id}` | Delete designation | `designations.delete` |
@@ -1022,6 +1031,14 @@ flowchart LR
 | PATCH | `/api/v1/employees/{id}/transfer` | Transfer department/branch | `employees.transfer` |
 | PATCH | `/api/v1/employees/{id}/terminate` | Terminate employment | `employees.terminate` |
 | GET | `/api/v1/employees/{id}/org-chart` | Get reporting chain | `employees.view` |
+| GET | `/api/v1/employees/me` | Get the caller's own employee profile | Authenticated |
+| PUT | `/api/v1/employees/me` | Self-update limited profile fields (phone, address, emergency contact) | Authenticated |
+| GET | `/api/v1/employees/{id}/employment-history` | Get employment history (transfers, promotions, designation changes) | `employees.view` |
+| POST | `/api/v1/employees/{id}/emergency-contacts` | Add/update emergency contact | `employees.update` |
+| PUT | `/api/v1/employees/{id}/bank-details` | Create/update bank details (encrypted at rest) | `employees.update` |
+| PATCH | `/api/v1/employees/{id}/reactivate` | Reactivate a previously terminated employee (rehire) | `employees.update` |
+| GET | `/api/v1/employees/{id}/direct-reports` | List employees reporting directly to this employee | `employees.view` |
+| GET | `/api/v1/employees/export` | Export filtered employee list (CSV/Excel) | `employees.view` |
 
 ```mermaid
 flowchart TD
@@ -1072,11 +1089,15 @@ flowchart TD
 | GET | `/api/v1/attendance/{employeeId}` | Get attendance history | `attendance.view` |
 | POST | `/api/v1/attendance/{id}/correction` | Request correction | `attendance.self` |
 | PATCH | `/api/v1/attendance/corrections/{id}/approve` | Approve correction | `attendance.approve` |
+| PATCH | `/api/v1/attendance/corrections/{id}/reject` | Reject correction | `attendance.approve` |
 | GET | `/api/v1/attendance/summary` | Monthly summary report | `attendance.view` |
+| GET | `/api/v1/attendance/today` | Get the caller's own check-in/check-out status for today | `attendance.self` |
+| GET | `/api/v1/attendance/corrections` | List pending/processed correction requests | `attendance.view` |
+| POST | `/api/v1/attendance/bulk-import` | Bulk-import attendance records (e.g., from biometric device export) | `attendance.manage` |
 
 **Validation:** Cannot check in twice without checking out; correction reason required (min 10 chars).
 
-**Permissions:** `attendance.self`, `attendance.view`, `attendance.approve`.
+**Permissions:** `attendance.self`, `attendance.view`, `attendance.approve`, `attendance.manage`.
 
 **Repository:** `IAttendanceRepository`.
 
@@ -1111,6 +1132,10 @@ flowchart TD
 | PATCH | `/api/v1/leave/requests/{id}/reject` | Reject leave | `leave.approve` |
 | PATCH | `/api/v1/leave/requests/{id}/cancel` | Cancel leave | `leave.apply` |
 | GET | `/api/v1/leave/balances/{employeeId}` | Get leave balances | `leave.view` |
+| GET | `/api/v1/leave/types` | List configured leave types | `leave.view` |
+| POST | `/api/v1/leave/types` | Create leave type | `leave.manage` |
+| PUT | `/api/v1/leave/types/{id}` | Update leave type (accrual rate, negative-balance policy, HR-approval flag) | `leave.manage` |
+| GET | `/api/v1/leave/calendar` | Team/company leave calendar for a date range | `leave.view` |
 
 ```mermaid
 flowchart TD
@@ -1132,7 +1157,7 @@ flowchart TD
 
 **Validation:** Start date ≤ end date, leave type active, reason required for certain leave types.
 
-**Permissions:** `leave.apply`, `leave.view`, `leave.approve`.
+**Permissions:** `leave.apply`, `leave.view`, `leave.approve`, `leave.manage`.
 
 **Repository:** `ILeaveRequestRepository`, `ILeaveBalanceRepository`.
 
@@ -1161,11 +1186,15 @@ flowchart TD
 
 | Method | URL | Description | Permission |
 |---|---|---|---|
+| GET | `/api/v1/payroll/runs` | List payroll runs (by company/date range/status) | `payroll.view` |
 | POST | `/api/v1/payroll/runs` | Create payroll run for a month | `payroll.create` |
 | POST | `/api/v1/payroll/runs/{id}/process` | Compute earnings/deductions | `payroll.process` |
 | GET | `/api/v1/payroll/runs/{id}` | View payroll run detail | `payroll.view` |
 | PATCH | `/api/v1/payroll/runs/{id}/approve` | Approve/lock run | `payroll.approve` |
+| DELETE | `/api/v1/payroll/runs/{id}` | Cancel/delete a run still in `Draft` status | `payroll.create` |
+| POST | `/api/v1/payroll/runs/{id}/adjustment` | Create an adjustment run against a locked run | `payroll.process` |
 | GET | `/api/v1/payroll/runs/{id}/payslips/{employeeId}` | Download payslip PDF | `payroll.view` |
+| GET | `/api/v1/payroll/runs/{id}/payslips` | List/download all payslips for a run (bulk ZIP) | `payroll.view` |
 | GET | `/api/v1/payroll/runs/{id}/export` | Bank disbursement export | `payroll.export` |
 
 ```mermaid
@@ -1227,7 +1256,10 @@ sequenceDiagram
 |---|---|---|---|
 | GET | `/api/v1/salary-structures/{employeeId}` | Get current/historical structures | `salary.view` |
 | POST | `/api/v1/salary-structures` | Create/revise structure | `salary.manage` |
+| DELETE | `/api/v1/salary-structures/{id}` | Retract a draft (not-yet-effective) structure revision | `salary.manage` |
 | GET | `/api/v1/salary-components` | List available components | `salary.view` |
+| POST | `/api/v1/salary-components` | Create a new salary component (allowance/deduction type) | `salary.manage` |
+| PUT | `/api/v1/salary-components/{id}` | Update a salary component definition | `salary.manage` |
 
 **Validation:** `effective_from` ≥ employee hire date; component amounts non-negative.
 
@@ -1255,8 +1287,9 @@ sequenceDiagram
 |---|---|---|---|
 | GET | `/api/v1/recruitment/pipeline` | Pipeline board view | `recruitment.view` |
 | GET | `/api/v1/recruitment/analytics` | Hiring funnel metrics | `recruitment.view` |
+| PUT | `/api/v1/recruitment/pipeline-stages` | Configure the company's pipeline stage order | `recruitment.manage` |
 
-**Permissions:** `recruitment.view`. **Repository:** composed from sub-module repositories. **Services:** `IRecruitmentPipelineService`.
+**Permissions:** `recruitment.view`, `recruitment.manage`. **Repository:** composed from sub-module repositories. **Services:** `IRecruitmentPipelineService`.
 
 ---
 
@@ -1277,7 +1310,10 @@ sequenceDiagram
 | Method | URL | Description | Permission |
 |---|---|---|---|
 | GET | `/api/v1/job-postings` | List postings | `recruitment.view` |
+| GET | `/api/v1/job-postings/{id}` | Get posting detail | `recruitment.view` |
 | POST | `/api/v1/job-postings` | Create posting | `recruitment.manage` |
+| PUT | `/api/v1/job-postings/{id}` | Update posting | `recruitment.manage` |
+| DELETE | `/api/v1/job-postings/{id}` | Delete a posting with no candidates yet | `recruitment.manage` |
 | PATCH | `/api/v1/job-postings/{id}/publish` | Publish posting | `recruitment.manage` |
 | PATCH | `/api/v1/job-postings/{id}/close` | Close posting | `recruitment.manage` |
 
@@ -1308,9 +1344,13 @@ sequenceDiagram
 | Method | URL | Description | Permission |
 |---|---|---|---|
 | GET | `/api/v1/candidates` | List/search candidates | `recruitment.view` |
+| GET | `/api/v1/candidates/{id}` | Get candidate detail | `recruitment.view` |
 | POST | `/api/v1/candidates` | Register candidate | `recruitment.manage` |
+| PUT | `/api/v1/candidates/{id}` | Update candidate profile | `recruitment.manage` |
 | PATCH | `/api/v1/candidates/{id}/stage` | Move pipeline stage | `recruitment.manage` |
+| PATCH | `/api/v1/candidates/{id}/reject` | Reject candidate (with reason) | `recruitment.manage` |
 | POST | `/api/v1/candidates/{id}/documents` | Upload resume/documents | `recruitment.manage` |
+| POST | `/api/v1/candidates/{id}/notes` | Add an evaluation note | `recruitment.manage` |
 
 **Validation:** Resume file type restricted to PDF/DOCX, max 5MB.
 
@@ -1339,8 +1379,10 @@ sequenceDiagram
 
 | Method | URL | Description | Permission |
 |---|---|---|---|
+| GET | `/api/v1/interviews` | List interviews (by candidate/date/panelist) | `recruitment.view` |
 | POST | `/api/v1/interviews` | Schedule interview | `recruitment.manage` |
 | PATCH | `/api/v1/interviews/{id}/reschedule` | Reschedule | `recruitment.manage` |
+| PATCH | `/api/v1/interviews/{id}/cancel` | Cancel interview | `recruitment.manage` |
 | POST | `/api/v1/interviews/{id}/feedback` | Submit feedback | `recruitment.interview` |
 | GET | `/api/v1/interviews/{id}` | Interview detail | `recruitment.view` |
 
@@ -1371,10 +1413,13 @@ sequenceDiagram
 
 | Method | URL | Description | Permission |
 |---|---|---|---|
+| GET | `/api/v1/offer-letters` | List offer letters (by candidate/status) | `recruitment.view` |
+| GET | `/api/v1/offer-letters/{id}` | Get offer letter detail | `recruitment.view` |
 | POST | `/api/v1/offer-letters` | Generate offer | `recruitment.offer` |
 | GET | `/api/v1/offer-letters/{id}/pdf` | Download offer PDF | `recruitment.view` |
 | PATCH | `/api/v1/offer-letters/{id}/accept` | Mark accepted | `recruitment.offer` |
 | PATCH | `/api/v1/offer-letters/{id}/decline` | Mark declined | `recruitment.offer` |
+| POST | `/api/v1/offer-letters/{id}/resend` | Resend the offer letter email/e-acceptance link | `recruitment.offer` |
 
 **Validation:** Offered salary within approved band, candidate not already hired.
 
@@ -1403,8 +1448,12 @@ sequenceDiagram
 
 | Method | URL | Description | Permission |
 |---|---|---|---|
+| GET | `/api/v1/performance/cycles` | List review cycles | `performance.manage` |
 | POST | `/api/v1/performance/cycles` | Create review cycle | `performance.manage` |
 | POST | `/api/v1/performance/goals` | Set employee goals | `performance.self` |
+| DELETE | `/api/v1/performance/goals/{id}` | Remove a goal (before cycle finalization) | `performance.self` |
+| GET | `/api/v1/performance/reviews` | List reviews (self/team/cycle) | `performance.review` |
+| GET | `/api/v1/performance/reviews/{id}` | Get review detail | `performance.self` |
 | POST | `/api/v1/performance/reviews/{id}/self-assessment` | Submit self-review | `performance.self` |
 | POST | `/api/v1/performance/reviews/{id}/manager-assessment` | Submit manager review | `performance.review` |
 | PATCH | `/api/v1/performance/reviews/{id}/finalize` | Finalize review | `performance.finalize` |
@@ -1434,9 +1483,14 @@ sequenceDiagram
 | Method | URL | Description | Permission |
 |---|---|---|---|
 | GET | `/api/v1/training/programs` | List programs | `training.view` |
+| GET | `/api/v1/training/programs/{id}` | Get program detail | `training.view` |
 | POST | `/api/v1/training/programs` | Create program | `training.manage` |
+| PUT | `/api/v1/training/programs/{id}` | Update program | `training.manage` |
+| DELETE | `/api/v1/training/programs/{id}` | Delete/cancel a program with no active enrollments | `training.manage` |
+| GET | `/api/v1/training/enrollments` | List enrollments (by employee/program) | `training.view` |
 | POST | `/api/v1/training/enrollments` | Enroll employee | `training.enroll` |
 | PATCH | `/api/v1/training/enrollments/{id}/complete` | Mark completed | `training.manage` |
+| PATCH | `/api/v1/training/enrollments/{id}/cancel` | Cancel enrollment | `training.manage` |
 
 **Validation:** Enrollment capacity not exceeded, program not expired.
 
@@ -1463,9 +1517,14 @@ sequenceDiagram
 | Method | URL | Description | Permission |
 |---|---|---|---|
 | GET | `/api/v1/assets` | List assets | `assets.view` |
+| GET | `/api/v1/assets/{id}` | Get asset detail (with assignment history) | `assets.view` |
 | POST | `/api/v1/assets` | Register asset | `assets.manage` |
+| PUT | `/api/v1/assets/{id}` | Update asset details | `assets.manage` |
+| DELETE | `/api/v1/assets/{id}` | Retire/delete an asset (must be `Available`) | `assets.manage` |
 | POST | `/api/v1/assets/{id}/assign` | Assign to employee | `assets.manage` |
 | PATCH | `/api/v1/assets/assignments/{id}/return` | Process return | `assets.manage` |
+| GET | `/api/v1/assets/{id}/maintenance-log` | List maintenance/service entries | `assets.view` |
+| POST | `/api/v1/assets/{id}/maintenance-log` | Log a maintenance/service event | `assets.manage` |
 
 **Validation:** Asset must be `Available` to assign.
 
@@ -1494,7 +1553,9 @@ sequenceDiagram
 | POST | `/api/v1/documents` | Upload document | `documents.upload` |
 | GET | `/api/v1/documents/{employeeId}` | List employee documents | `documents.view` |
 | GET | `/api/v1/documents/{id}/download` | Download file | `documents.view` |
+| PUT | `/api/v1/documents/{id}` | Update document metadata (category, expiry date) | `documents.upload` |
 | DELETE | `/api/v1/documents/{id}` | Delete document | `documents.delete` |
+| GET | `/api/v1/documents/expiring` | List documents nearing expiry (within N days) | `documents.view` |
 
 **Validation:** File type whitelist (PDF, JPG, PNG, DOCX), max size 10MB, virus scan hook (extensibility point).
 
@@ -1521,7 +1582,10 @@ sequenceDiagram
 | Method | URL | Description | Permission |
 |---|---|---|---|
 | GET | `/api/v1/notifications` | Get user's notifications | Authenticated |
+| GET | `/api/v1/notifications/unread-count` | Get count of unread notifications | Authenticated |
 | PATCH | `/api/v1/notifications/{id}/read` | Mark as read | Authenticated |
+| PATCH | `/api/v1/notifications/read-all` | Mark all notifications as read | Authenticated |
+| DELETE | `/api/v1/notifications/{id}` | Delete/dismiss a notification | Authenticated |
 | PUT | `/api/v1/notifications/preferences` | Update preferences | Authenticated |
 
 **Validation:** N/A beyond ownership check (users may only read/modify their own notifications).
@@ -1552,6 +1616,8 @@ sequenceDiagram
 | GET | `/api/v1/reports/attrition` | Attrition rate over period | `reports.view` |
 | GET | `/api/v1/reports/payroll-cost` | Payroll cost trend | `reports.view-financial` |
 | GET | `/api/v1/reports/leave-utilization` | Leave usage summary | `reports.view` |
+| GET | `/api/v1/reports/employee-turnover` | Turnover/retention analysis over period | `reports.view` |
+| GET | `/api/v1/reports/export/{reportType}` | Export a given report to PDF/Excel | `reports.view` |
 
 **Validation:** Date range required and bounded (max 24 months) to protect query performance.
 
@@ -1574,6 +1640,7 @@ sequenceDiagram
 | Method | URL | Description | Permission |
 |---|---|---|---|
 | GET | `/api/v1/dashboard/summary` | Role-aware dashboard payload | Authenticated |
+| GET | `/api/v1/dashboard/widgets/{widgetKey}` | Refresh a single widget's data (e.g., for polling/lazy-load) | Authenticated |
 
 **Business Rules:** The response shape adapts based on the caller's role/permissions (e.g., `payroll.view` gates the payroll-status widget); this is a single endpoint with server-side composition rather than N client-side calls, to minimize round trips.
 
@@ -1601,6 +1668,8 @@ sequenceDiagram
 |---|---|---|---|
 | GET | `/api/v1/settings` | Get company settings | `settings.view` |
 | PUT | `/api/v1/settings` | Update settings | `settings.manage` |
+| GET | `/api/v1/settings/feature-flags` | List feature flags and their current state | `settings.view` |
+| PUT | `/api/v1/settings/feature-flags` | Toggle feature flags | `settings.manage` |
 
 **Validation:** Setting-specific (e.g., currency must be a valid ISO 4217 code).
 
@@ -1628,6 +1697,7 @@ sequenceDiagram
 |---|---|---|---|
 | GET | `/api/v1/audit-logs` | Search audit trail | `audit.view` |
 | GET | `/api/v1/audit-logs/{entityType}/{entityId}` | Entity-specific history | `audit.view` |
+| GET | `/api/v1/audit-logs/export` | Export filtered audit trail (CSV) for compliance review | `audit.view` |
 
 **Validation:** N/A (read-only, system-generated).
 
@@ -1655,6 +1725,8 @@ sequenceDiagram
 |---|---|---|---|
 | GET | `/api/v1/company` | Get company profile | `company.view` |
 | PUT | `/api/v1/company` | Update company profile | `company.manage` |
+| POST | `/api/v1/company/logo` | Upload/replace company logo | `company.manage` |
+| GET | `/api/v1/companies` | List companies visible to the caller (multi-company `SuperAdmin` accounts only) | `company.view` |
 
 **Validation:** Required legal name, valid registration number format.
 
@@ -1681,6 +1753,7 @@ sequenceDiagram
 | Method | URL | Description | Permission |
 |---|---|---|---|
 | GET | `/api/v1/branches` | List branches | `branches.view` |
+| GET | `/api/v1/branches/{id}` | Get branch detail | `branches.view` |
 | POST | `/api/v1/branches` | Create branch | `branches.manage` |
 | PUT | `/api/v1/branches/{id}` | Update branch | `branches.manage` |
 | DELETE | `/api/v1/branches/{id}` | Delete branch | `branches.manage` |
@@ -1710,7 +1783,9 @@ sequenceDiagram
 | Method | URL | Description | Permission |
 |---|---|---|---|
 | GET | `/api/v1/holidays` | List holidays (by year) | `holidays.view` |
+| GET | `/api/v1/holidays/{id}` | Get holiday detail | `holidays.view` |
 | POST | `/api/v1/holidays` | Create holiday | `holidays.manage` |
+| PUT | `/api/v1/holidays/{id}` | Update holiday | `holidays.manage` |
 | DELETE | `/api/v1/holidays/{id}` | Remove holiday | `holidays.manage` |
 
 **Validation:** Date not already defined for the same scope.
@@ -1738,8 +1813,12 @@ sequenceDiagram
 | Method | URL | Description | Permission |
 |---|---|---|---|
 | GET | `/api/v1/shifts` | List shift definitions | `shifts.view` |
+| GET | `/api/v1/shifts/{id}` | Get shift detail | `shifts.view` |
 | POST | `/api/v1/shifts` | Create shift | `shifts.manage` |
+| PUT | `/api/v1/shifts/{id}` | Update shift | `shifts.manage` |
+| DELETE | `/api/v1/shifts/{id}` | Delete an unused shift definition | `shifts.manage` |
 | POST | `/api/v1/shifts/assign` | Assign shift to employee | `shifts.manage` |
+| POST | `/api/v1/shifts/unassign` | Remove an employee's active shift assignment | `shifts.manage` |
 
 **Validation:** End time after start time (accounting for overnight shifts via a `spans_midnight` flag).
 
@@ -1766,7 +1845,9 @@ sequenceDiagram
 | Method | URL | Description | Permission |
 |---|---|---|---|
 | GET | `/api/v1/policies` | List published policies | `policies.view` |
+| GET | `/api/v1/policies/{id}` | Get policy detail (with version history) | `policies.view` |
 | POST | `/api/v1/policies` | Create policy | `policies.manage` |
+| DELETE | `/api/v1/policies/{id}` | Archive/delete a policy with no acknowledgment history | `policies.manage` |
 | POST | `/api/v1/policies/{id}/versions` | Publish new version | `policies.manage` |
 | POST | `/api/v1/policies/versions/{id}/acknowledge` | Acknowledge policy | Authenticated |
 | GET | `/api/v1/policies/{id}/compliance` | Acknowledgment compliance report | `policies.manage` |
@@ -2054,39 +2135,41 @@ Per-module endpoint tables are provided in Section 9 (Module Architecture). This
 
 ### 20.1 Consolidated Endpoint Index
 
+> **Update note (v1.1):** This index and every per-module table in Section 9 were audited against standard HRMS functional coverage and expanded with the missing CRUD, self-service, and lifecycle endpoints each module needed (e.g., `GET/{id}` and `PUT` on modules that only had list/create, self-service `/me` endpoints, bulk import/export, cancel/reject counterparts to approve, and history/log sub-resources). New endpoints are marked inline in Section 9; the counts below reflect the expanded surface.
+
 | Module | Endpoint Count | Base Route |
 |---|---|---|
-| Authentication | 6 | `/api/v1/auth` |
-| Users | 6 | `/api/v1/users` |
-| Roles | 5 | `/api/v1/roles` |
+| Authentication | 9 | `/api/v1/auth` |
+| Users | 10 | `/api/v1/users` |
+| Roles | 7 | `/api/v1/roles` |
 | Permissions | 1 | `/api/v1/permissions` |
-| Departments | 5 | `/api/v1/departments` |
-| Designations | 4 | `/api/v1/designations` |
-| Employees | 7 | `/api/v1/employees` |
-| Attendance | 6 | `/api/v1/attendance` |
-| Leave | 6 | `/api/v1/leave` |
-| Payroll | 6 | `/api/v1/payroll` |
-| Salary Structure | 3 | `/api/v1/salary-structures` |
-| Recruitment | 2 | `/api/v1/recruitment` |
-| Job Posting | 4 | `/api/v1/job-postings` |
-| Candidates | 4 | `/api/v1/candidates` |
-| Interview | 4 | `/api/v1/interviews` |
-| Offer Letter | 4 | `/api/v1/offer-letters` |
-| Performance | 5 | `/api/v1/performance` |
-| Training | 4 | `/api/v1/training` |
-| Assets | 4 | `/api/v1/assets` |
-| Documents | 4 | `/api/v1/documents` |
-| Notifications | 3 | `/api/v1/notifications` |
-| Reports | 4 | `/api/v1/reports` |
-| Dashboard | 1 | `/api/v1/dashboard` |
-| Settings | 2 | `/api/v1/settings` |
-| Audit Logs | 2 | `/api/v1/audit-logs` |
-| Company | 2 | `/api/v1/company` |
-| Branches | 4 | `/api/v1/branches` |
-| Holiday | 3 | `/api/v1/holidays` |
-| Shift | 3 | `/api/v1/shifts` |
-| Policy | 5 | `/api/v1/policies` |
-| **Total** | **~120** | |
+| Departments | 6 | `/api/v1/departments` |
+| Designations | 5 | `/api/v1/designations` |
+| Employees | 15 | `/api/v1/employees` |
+| Attendance | 10 | `/api/v1/attendance` |
+| Leave | 10 | `/api/v1/leave` |
+| Payroll | 10 | `/api/v1/payroll` |
+| Salary Structure | 6 | `/api/v1/salary-structures` |
+| Recruitment | 3 | `/api/v1/recruitment` |
+| Job Posting | 7 | `/api/v1/job-postings` |
+| Candidates | 8 | `/api/v1/candidates` |
+| Interview | 6 | `/api/v1/interviews` |
+| Offer Letter | 7 | `/api/v1/offer-letters` |
+| Performance | 9 | `/api/v1/performance` |
+| Training | 9 | `/api/v1/training` |
+| Assets | 9 | `/api/v1/assets` |
+| Documents | 6 | `/api/v1/documents` |
+| Notifications | 6 | `/api/v1/notifications` |
+| Reports | 6 | `/api/v1/reports` |
+| Dashboard | 2 | `/api/v1/dashboard` |
+| Settings | 4 | `/api/v1/settings` |
+| Audit Logs | 3 | `/api/v1/audit-logs` |
+| Company | 4 | `/api/v1/company` |
+| Branches | 5 | `/api/v1/branches` |
+| Holiday | 5 | `/api/v1/holidays` |
+| Shift | 7 | `/api/v1/shifts` |
+| Policy | 7 | `/api/v1/policies` |
+| **Total** | **~202** | |
 
 ### 20.2 Worked Example — Authentication: Login
 
@@ -2335,7 +2418,75 @@ All secret-bearing values (`ConnectionStrings__DefaultConnection`, `Jwt__Signing
 
 ---
 
-## 26. Appendix
+## 27. Multi-Tenant SaaS Implementation
+
+For a multi-tenant system, tenant isolation is critical. Workora uses **Row-Level Security (RLS)** via a shared database, shared schema approach.
+
+- **Tenant Identification:** The `TenantId` is resolved from the JWT claim (`tenant_id`) or a custom header (`X-Tenant-Id`) by a `TenantResolverMiddleware`.
+- **Tenant Context:** `ICurrentTenantService` provides the scoped `TenantId` across the application.
+- **Data Isolation:** All aggregate roots implement `IMustHaveTenant`. The `AppDbContext` automatically applies a global query filter: `modelBuilder.Entity<IMustHaveTenant>().HasQueryFilter(e => e.TenantId == _currentTenantService.TenantId)`.
+- **Enforcement:** `AuditSaveChangesInterceptor` ensures every inserted record automatically receives the correct `TenantId`.
+
+---
+
+## 28. Event-Driven Architecture (Azure Service Bus)
+
+To decouple bounded contexts (e.g., HR and Payroll) and handle asynchronous background processing reliably, Workora employs an Event-Driven Architecture.
+
+- **Integration Events:** Unlike Domain Events (which are handled in-process via MediatR), Integration Events (e.g., `EmployeeTerminatedIntegrationEvent`) are published to **Azure Service Bus**.
+- **Publishing:** `IEventBus` (implemented in Infrastructure) publishes messages to a Service Bus Topic.
+- **Subscribing:** Azure Functions or Background Services (e.g., AKS Worker Service) subscribe to specific Subscriptions on the Topic to process events like Payroll proration, Email Notifications, and external integrations independently.
+- **Outbox Pattern:** To ensure atomic consistency between database commits and event publishing, Domain Events are saved to an `OutboxMessages` table in the same transaction as the business entity. A background worker polls this table and publishes to Azure Service Bus.
+
+---
+
+## 29. Azure Cloud Infrastructure Deployment Architecture
+
+Workora is deployed on a production-grade, highly available Azure ecosystem.
+
+```mermaid
+graph TD
+    Client[Web/Mobile Client] --> AFD[Azure Front Door / WAF]
+    AFD --> AppService[Azure App Service - API]
+    
+    subgraph Compute
+        AppService --> AKS[AKS - Background Workers]
+    end
+    
+    subgraph Data & Cache
+        AppService --> Redis[Azure Cache for Redis]
+        AKS --> Redis
+        AppService --> Db[(Azure Database for PostgreSQL)]
+        AKS --> Db
+    end
+    
+    subgraph Storage
+        AppService --> Blob[Azure Blob Storage - Documents]
+    end
+    
+    subgraph Messaging
+        AppService --> ASB[Azure Service Bus]
+        ASB --> AKS
+    end
+    
+    subgraph Observability
+        AppService --> AppInsights[Azure Application Insights]
+        AKS --> AppInsights
+        Db --> AppInsights
+    end
+```
+
+- **Azure App Service (Web App for Containers):** Hosts the `Workora.API`. It autoscales based on CPU/Memory usage.
+- **Azure Kubernetes Service (AKS):** Hosts decoupled background workers (Outbox processors, Report generators, Payroll batch processors) subscribing to Service Bus.
+- **Azure Database for PostgreSQL (Flexible Server):** The primary relational datastore. Provides High Availability (HA) across availability zones and automated backups.
+- **Azure Cache for Redis:** Caches read-heavy queries (e.g., Organization Hierarchy, Dropdown lists, User Permissions) and manages distributed locking.
+- **Azure Service Bus:** The enterprise message broker facilitating pub/sub communication for integration events.
+- **Azure Blob Storage:** Secure, scalable storage for employee documents, payslips, and compliance files, accessed via SAS tokens.
+- **Azure Application Insights (Log Analytics):** Centralized distributed tracing, metrics, exception tracking, and structured logging.
+
+---
+
+## 30. Appendix
 
 ### 26.1 Useful Links
 - ASP.NET Core Documentation — https://learn.microsoft.com/aspnet/core
@@ -2355,8 +2506,4 @@ See Section 1.4 (Definitions) and Section 1.5 (Abbreviations).
 
 ---
 
-*End of Workora — Backend Technical Documentation v1.0*
-
-
-## 7. Commenting Standards
-- **Mandatory Comments**: Every class, method, property, and significant section of code MUST include descriptive comments (e.g., XML documentation comments in C#) explaining its purpose and behavior.
+*End of Workora — Backend Technical Documentation v1.1*

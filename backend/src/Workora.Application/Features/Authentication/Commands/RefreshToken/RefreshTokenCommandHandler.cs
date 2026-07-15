@@ -6,13 +6,14 @@ using Workora.Domain.Interfaces;
 using Workora.Application.Common.Exceptions;
 using Workora.Domain.Enums;
 using Workora.Domain.Extensions;
+using Workora.Shared.Responses;
 
 namespace Workora.Application.Features.Authentication.Commands.RefreshToken;
 
 /// <summary>
 /// Handler for the <see cref="RefreshTokenCommand"/>. Generates new tokens based on a valid refresh token.
 /// </summary>
-public class RefreshTokenCommandHandler : IRequestHandler<RefreshTokenCommand, AuthResultDto>
+public class RefreshTokenCommandHandler : IRequestHandler<RefreshTokenCommand, ApiResponse<AuthResultDto>>
 {
     private readonly IUserRepository _userRepository;
     private readonly ITokenService _tokenService;
@@ -40,7 +41,7 @@ public class RefreshTokenCommandHandler : IRequestHandler<RefreshTokenCommand, A
     /// <param name="request">The refresh token command.</param>
     /// <param name="cancellationToken">The cancellation token.</param>
     /// <returns>A new AuthResultDto containing fresh tokens.</returns>
-    public async Task<AuthResultDto> Handle(RefreshTokenCommand request, CancellationToken cancellationToken)
+    public async Task<ApiResponse<AuthResultDto>> Handle(RefreshTokenCommand request, CancellationToken cancellationToken)
     {
         var hashedToken = _tokenService.HashToken(request.RefreshToken);
         var existingToken = await _refreshTokenRepository.GetByTokenHashAsync(hashedToken, cancellationToken);
@@ -79,6 +80,6 @@ public class RefreshTokenCommandHandler : IRequestHandler<RefreshTokenCommand, A
         await _refreshTokenRepository.AddAsync(newRefreshTokenEntity, cancellationToken);
         await _unitOfWork.SaveChangesAsync(cancellationToken);
 
-        return new AuthResultDto(accessToken, newRefreshTokenStr, 15 * 60);
+        return ApiResponse<AuthResultDto>.Success(new AuthResultDto(accessToken, newRefreshTokenStr, 15 * 60));
     }
 }

@@ -64,8 +64,10 @@ public class LoginCommandHandlerTests
 
         // Assert
         result.Should().NotBeNull();
-        result.AccessToken.Should().Be("access_token");
-        result.RefreshToken.Should().Be("refresh_token");
+        result.IsSuccess.Should().BeTrue();
+        result.Data.Should().NotBeNull();
+        result.Data!.AccessToken.Should().Be("access_token");
+        result.Data!.RefreshToken.Should().Be("refresh_token");
 
         _userRepositoryMock.Verify(repo => repo.Update(It.Is<User>(u => u.FailedLoginAttempts == 0)), Times.Once);
         _refreshTokenRepositoryMock.Verify(repo => repo.AddAsync(It.IsAny<RefreshToken>(), It.IsAny<CancellationToken>()), Times.Once);

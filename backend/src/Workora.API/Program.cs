@@ -34,7 +34,9 @@ builder.Services.Configure<Workora.Infrastructure.Authentication.JwtSettings>(bu
         {
             options.JsonSerializerOptions.Converters.Add(new StringSanitizerJsonConverter());
         });
-builder.Services.AddEndpointsApiExplorer();
+    builder.Services.AddEndpointsApiExplorer();
+    builder.Services.AddHttpContextAccessor();
+    builder.Services.AddScoped<Workora.Application.Common.Interfaces.ICurrentUserService, Workora.API.Services.CurrentUserService>();
 builder.Services.AddSwaggerGen(c =>
 {
     var xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
@@ -68,6 +70,9 @@ builder.Services.AddAuthorization(options =>
 {
     options.AddPolicy("auth.logout", policy => policy.RequireAuthenticatedUser());
     options.AddPolicy("auth.change-password", policy => policy.RequireAuthenticatedUser());
+    options.AddPolicy("auth.me", policy => policy.RequireAuthenticatedUser());
+    options.AddPolicy("auth.sessions", policy => policy.RequireAuthenticatedUser());
+    options.AddPolicy("auth.logout-all", policy => policy.RequireAuthenticatedUser());
 });
 
 builder.Services.AddHealthChecks()

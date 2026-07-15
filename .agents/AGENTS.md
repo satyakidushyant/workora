@@ -13,7 +13,7 @@ When creating an API or writing backend code for the Workora project, you MUST a
 ## 2. API Layer (Controllers)
 - Controllers must be extremely thin and act only as routers to MediatR.
 - **No Infrastructure in Controllers**: Never inject `DbContext`, Repositories, or Infrastructure services directly into a Controller. Only inject `IMediator`.
-- **Response Format**: Always wrap responses in `ApiResponse<T>.Success()` or `ApiResponse<T>.Fail()`. Return `PagedResponse<T>` for paginated lists.
+- **Response Format**: Handlers MUST return their payload wrapped in `ApiResponse<T>.Success()` or `ApiResponse<T>.Fail()`. Controllers should directly return this response without re-wrapping. Return `PagedResponse<T>` for paginated lists.
 - **Authorization**: Secure every state-changing endpoint using Policy-based permissions (e.g., `[Authorize(Policy = "employees.create")]`). Do not use raw Roles directly in the `[Authorize]` attribute.
 
 ## 3. Application Layer
@@ -49,6 +49,6 @@ When creating an API or writing backend code for the Workora project, you MUST a
 - **Exception Handling**: Use the Global Exception Middleware to translate application/domain exceptions into standardized `ErrorResponse` payloads.
 
 ## 10. API Responses and DTOs
-- **ApiResponse Wrapper**: Every controller action MUST return its payload wrapped in `ApiResponse<T>.Success()` or `ApiResponse<T>.Fail()`.
+- **ApiResponse Wrapper**: Every Command and Query Handler MUST return its payload wrapped in `ApiResponse<T>.Success()` or `ApiResponse<T>.Fail()`. Controllers must return this result directly without re-wrapping it.
 - **Paged Responses**: Use `PagedResponse<T>` for any endpoint returning a list or collection.
 - **Use DTOs**: Never return Domain Entities directly from an API. Always map entities to Data Transfer Objects (DTOs) using AutoMapper, and return the DTO.

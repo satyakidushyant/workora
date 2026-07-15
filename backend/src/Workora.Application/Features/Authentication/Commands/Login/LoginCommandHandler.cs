@@ -6,13 +6,14 @@ using Workora.Domain.Interfaces;
 using Workora.Application.Common.Exceptions;
 using Workora.Domain.Enums;
 using Workora.Domain.Extensions;
+using Workora.Shared.Responses;
 
 namespace Workora.Application.Features.Authentication.Commands.Login;
 
 /// <summary>
 /// Handler for the <see cref="LoginCommand"/>. Authenticates the user and generates tokens.
 /// </summary>
-public class LoginCommandHandler : IRequestHandler<LoginCommand, AuthResultDto>
+public class LoginCommandHandler : IRequestHandler<LoginCommand, ApiResponse<AuthResultDto>>
 {
     private readonly IUserRepository _userRepository;
     private readonly IPasswordHasher _passwordHasher;
@@ -43,7 +44,7 @@ public class LoginCommandHandler : IRequestHandler<LoginCommand, AuthResultDto>
     /// <param name="request">The login command containing email and password.</param>
     /// <param name="cancellationToken">The cancellation token.</param>
     /// <returns>An AuthResultDto containing the tokens.</returns>
-    public async Task<AuthResultDto> Handle(LoginCommand request, CancellationToken cancellationToken)
+    public async Task<ApiResponse<AuthResultDto>> Handle(LoginCommand request, CancellationToken cancellationToken)
     {
         var user = await _userRepository.GetByEmailAsync(Workora.Domain.ValueObjects.EmailAddress.Create(request.Email), cancellationToken);
         
@@ -87,6 +88,6 @@ public class LoginCommandHandler : IRequestHandler<LoginCommand, AuthResultDto>
         await _refreshTokenRepository.AddAsync(refreshTokenEntity, cancellationToken);
         await _unitOfWork.SaveChangesAsync(cancellationToken);
 
-        return new AuthResultDto(accessToken, refreshTokenStr, 15 * 60);
+        return ApiResponse<AuthResultDto>.Success(new AuthResultDto(accessToken, refreshTokenStr, 15 * 60));
     }
 }

@@ -1,5 +1,6 @@
 using MediatR;
 using Workora.Application.Features.Authentication.DTOs;
+using Workora.Shared.Responses;
 
 namespace Workora.Application.Features.Authentication.Commands.Login;
 
@@ -8,4 +9,4 @@ namespace Workora.Application.Features.Authentication.Commands.Login;
 /// </summary>
 /// <param name="Email">The user's email address.</param>
 /// <param name="Password">The user's password.</param>
-public record LoginCommand(string Email, string Password) : IRequest<AuthResultDto>;
+public record LoginCommand(string Email, string Password) : IRequest<ApiResponse<AuthResultDto>>;
