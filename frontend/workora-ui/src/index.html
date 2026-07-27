@@ -1,0 +1,121 @@
+<!doctype html>
+<html lang="en" class="light">
+<head>
+  <meta charset="utf-8">
+  <title>Workora | Enterprise HRMS Login</title>
+  <base href="/">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="icon" type="image/x-icon" href="favicon.ico">
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+
+  <!-- Google Fonts: Inter, Courier Prime & Material Symbols -->
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin=""/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&family=Courier+Prime&display=swap" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+
+  <!-- Tailwind Custom Design Tokens -->
+  <script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          "colors": {
+            "surface-container-high": "#e6e8ea",
+            "primary": "#16182c",
+            "secondary-fixed": "#dee1ff",
+            "primary-fixed": "#e0e0fc",
+            "on-secondary-container": "#fffbff",
+            "outline-variant": "#c7c5cd",
+            "surface-container-highest": "#e0e3e5",
+            "surface-container": "#eceef0",
+            "slate-text": "#475569",
+            "inverse-surface": "#2d3133",
+            "error": "#EF4444",
+            "tertiary": "#001a36",
+            "on-primary-fixed-variant": "#43455b",
+            "tertiary-container": "#002f5a",
+            "on-tertiary-container": "#4c98f2",
+            "on-secondary-fixed-variant": "#0031c4",
+            "secondary-fixed-dim": "#bac3ff",
+            "on-primary-fixed": "#181a2e",
+            "success": "#10B981",
+            "on-surface": "#191c1e",
+            "secondary": "#2b4cda",
+            "tertiary-fixed": "#d4e3ff",
+            "surface-dim": "#d8dadc",
+            "tertiary-fixed-dim": "#a4c9ff",
+            "border-subtle": "#E2E8F0",
+            "surface-container-low": "#f2f4f6",
+            "on-tertiary": "#ffffff",
+            "inverse-on-surface": "#eff1f3",
+            "background": "#f7f9fb",
+            "on-tertiary-fixed": "#001c39",
+            "on-tertiary-fixed-variant": "#004884",
+            "surface": "#f7f9fb",
+            "surface-variant": "#e0e3e5",
+            "on-error": "#ffffff",
+            "warning": "#F59E0B",
+            "on-primary": "#ffffff",
+            "inverse-primary": "#c4c4df",
+            "outline": "#77767d",
+            "on-surface-variant": "#46464d",
+            "on-secondary": "#ffffff",
+            "on-error-container": "#93000a",
+            "on-secondary-fixed": "#001159",
+            "on-primary-container": "#9394ae",
+            "info": "#3B82F6",
+            "primary-fixed-dim": "#c4c4df",
+            "error-container": "#ffdad6",
+            "primary-container": "#2b2d42",
+            "secondary-container": "#4967f4",
+            "surface-tint": "#5b5d74",
+            "surface-bright": "#f7f9fb",
+            "surface-container-lowest": "#ffffff",
+            "on-background": "#191c1e"
+          },
+          "borderRadius": {
+            "DEFAULT": "0.125rem",
+            "lg": "0.25rem",
+            "xl": "0.5rem",
+            "full": "0.75rem"
+          },
+          "spacing": {
+            "stack-md": "12px",
+            "base": "8px",
+            "container-margin": "24px",
+            "section-gap": "32px",
+            "stack-sm": "4px",
+            "gutter": "16px"
+          },
+          "fontFamily": {
+            "label-md": ["Inter", "sans-serif"],
+            "headline-sm": ["Inter", "sans-serif"],
+            "body-md": ["Inter", "sans-serif"],
+            "body-lg": ["Inter", "sans-serif"],
+            "headline-lg": ["Inter", "sans-serif"],
+            "headline-md": ["Inter", "sans-serif"],
+            "body-sm": ["Inter", "sans-serif"],
+            "code-sm": ["Courier Prime", "monospace"]
+          },
+          "fontSize": {
+            "label-md": ["12px", {"lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "600"}],
+            "headline-sm": ["20px", {"lineHeight": "28px", "fontWeight": "600"}],
+            "body-md": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+            "body-lg": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+            "headline-lg": ["32px", {"lineHeight": "40px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+            "headline-md": ["24px", {"lineHeight": "32px", "letterSpacing": "-0.01em", "fontWeight": "600"}],
+            "body-sm": ["12px", {"lineHeight": "16px", "fontWeight": "400"}],
+            "code-sm": ["13px", {"lineHeight": "18px", "fontWeight": "400"}]
+          }
+        },
+      },
+    }
+  </script>
+</head>
+<body class="bg-surface text-on-surface antialiased font-sans">
+  <app-root></app-root>
+</body>
+</html>

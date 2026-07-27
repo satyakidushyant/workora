@@ -34,7 +34,8 @@ public class DatabaseSeeder
         {
             if (await _context.Database.CanConnectAsync())
             {
-                if (!await _context.Users.AnyAsync(u => u.Email.Value == "admin@workora.com"))
+                var adminEmail = EmailAddress.Create("admin@workora.com");
+                if (!await _context.Users.AnyAsync(u => u.Email == adminEmail))
                 {
                     _logger.LogInformation("Seeding Super Admin user...");
                     var passwordHash = _passwordHasher.HashPassword("SuperSecureP@ssw0rd!");

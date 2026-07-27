@@ -30,7 +30,9 @@ public class RequestResponseLoggingMiddleware
     public async Task InvokeAsync(HttpContext context)
     {
         var stopwatch = Stopwatch.StartNew();
-        
+        var originalBodyStream = context.Response.Body;
+        using var responseBody = new MemoryStream();
+
         try
         {
             var requestBody = await ReadRequestBodyAsync(context.Request);
@@ -46,8 +48,6 @@ public class RequestResponseLoggingMiddleware
             _logger.LogInformation("HTTP Request: {Method} {Path} | Body: {Body}", 
                 context.Request.Method, context.Request.Path, requestBody);
 
-            var originalBodyStream = context.Response.Body;
-            using var responseBody = new MemoryStream();
             context.Response.Body = responseBody;
 
             await _next(context);
@@ -70,6 +70,10 @@ public class RequestResponseLoggingMiddleware
         {
             _logger.LogError(ex, "An error occurred during request/response logging.");
             throw; // Re-throw to allow GlobalExceptionMiddleware to handle it
+        }
+        finally
+        {
+            context.Response.Body = originalBodyStream;
         }
     }
 

@@ -91,6 +91,27 @@ builder.Services.AddRateLimiter(options =>
                 QueueLimit = 0,
                 Window = TimeSpan.FromMinutes(1)
             }));
+
+    // Configure specific LoginPolicy rate limiter for authentication endpoints
+    options.AddFixedWindowLimiter(policyName: "LoginPolicy", opt =>
+    {
+        opt.AutoReplenishment = true;
+        opt.PermitLimit = 5;
+        opt.QueueLimit = 0;
+        opt.Window = TimeSpan.FromMinutes(1);
+    });
+});
+
+// Configure CORS policy to allow Angular frontend origins in development
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowWorkoraUI", policy =>
+    {
+        policy.WithOrigins("http://localhost:4200", "https://localhost:4200")
+              .AllowAnyHeader()
+              .AllowAnyMethod()
+              .AllowCredentials();
+    });
 });
 
 var app = builder.Build();
@@ -130,6 +151,7 @@ if (app.Environment.IsDevelopment())
     app.UseHttpsRedirection();
     
     app.UseRateLimiter();
+    app.UseCors("AllowWorkoraUI");
 
     app.UseAuthentication();
     app.UseMiddleware<UserContextMiddleware>();
