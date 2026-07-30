@@ -8,8 +8,12 @@ import { rbacGuard } from './core/guards/rbac.guard';
 export const routes: Routes = [
   {
     path: '',
-    redirectTo: 'dashboard',
+    loadComponent: () => import('./presentation/features/landing/pages/landing-page.component').then(m => m.LandingPageComponent),
     pathMatch: 'full'
+  },
+  {
+    path: 'landing',
+    loadComponent: () => import('./presentation/features/landing/pages/landing-page.component').then(m => m.LandingPageComponent)
   },
   {
     path: 'login',

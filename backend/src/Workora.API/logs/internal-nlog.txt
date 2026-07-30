@@ -1650,3 +1650,18 @@
 2026-07-27 13:13:48.0089 Info LogFactory shutting down ...
 2026-07-27 13:13:48.0089 Info Closing old configuration.
 2026-07-27 13:13:48.0229 Info LogFactory shutdown completed.
+2026-07-30 10:43:58.5480 Info Registered target NLog.Targets.FileTarget(Name=allfile)
+2026-07-30 10:43:58.5480 Info Registered target NLog.Targets.FileTarget(Name=ownFile-web)
+2026-07-30 10:43:58.5639 Info Registered target NLog.Targets.ConsoleTarget(Name=lifetimeConsole)
+2026-07-30 10:43:58.5834 Info NLog, Version=6.0.0.0, Culture=neutral, PublicKeyToken=5120e14c03d0593c. File version: 6.1.3.5285. Product version: 6.1.3+7f18a90739535f5ddc71c48e0fa28c59e5ee8969. GlobalAssemblyCache: False
+2026-07-30 10:43:58.6597 Info Configuration initialized: TargetNames=allfile, lifetimeConsole, ownFile-web, ConfigItems=69, AutoReload=true, FilePath=C:\Dushyant\Projects\workora\backend\src\Workora.API\bin\Debug\net10.0\nlog.config
+2026-07-30 11:23:28.4236 Info Registered target NLog.Targets.FileTarget(Name=allfile)
+2026-07-30 11:23:28.4371 Info Registered target NLog.Targets.FileTarget(Name=ownFile-web)
+2026-07-30 11:23:28.4488 Info Registered target NLog.Targets.ConsoleTarget(Name=lifetimeConsole)
+2026-07-30 11:23:28.4790 Info NLog, Version=6.0.0.0, Culture=neutral, PublicKeyToken=5120e14c03d0593c. File version: 6.1.3.5285. Product version: 6.1.3+7f18a90739535f5ddc71c48e0fa28c59e5ee8969. GlobalAssemblyCache: False
+2026-07-30 11:23:28.5991 Info Configuration initialized: TargetNames=allfile, lifetimeConsole, ownFile-web, ConfigItems=69, AutoReload=true, FilePath=C:\Dushyant\Projects\workora\backend\src\Workora.API\bin\Debug\net10.0\nlog.config
+2026-07-30 15:21:48.1727 Info Registered target NLog.Targets.FileTarget(Name=allfile)
+2026-07-30 15:21:48.1930 Info Registered target NLog.Targets.FileTarget(Name=ownFile-web)
+2026-07-30 15:21:48.2022 Info Registered target NLog.Targets.ConsoleTarget(Name=lifetimeConsole)
+2026-07-30 15:21:48.2334 Info NLog, Version=6.0.0.0, Culture=neutral, PublicKeyToken=5120e14c03d0593c. File version: 6.1.3.5285. Product version: 6.1.3+7f18a90739535f5ddc71c48e0fa28c59e5ee8969. GlobalAssemblyCache: False
+2026-07-30 15:21:48.3947 Info Configuration initialized: TargetNames=allfile, lifetimeConsole, ownFile-web, ConfigItems=69, AutoReload=true, FilePath=C:\Dushyant\Projects\workora\backend\src\Workora.API\bin\Debug\net10.0\nlog.config

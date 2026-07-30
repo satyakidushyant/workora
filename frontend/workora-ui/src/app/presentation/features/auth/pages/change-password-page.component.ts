@@ -3,354 +3,380 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { AuthService } from '../../../../core/services/auth.service';
+import { AuthShaderComponent } from '../components/auth-shader.component';
 
 /**
  * Enterprise HRMS Change Password Page Component.
  * Enables authenticated employees and administrators to update their account passwords 
- * within the security settings workspace.
+ * within the security settings workspace with WebGL liquid mesh shader background and glassmorphism UI.
  */
 @Component({
   selector: 'app-change-password-page',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterLink],
+  imports: [CommonModule, FormsModule, RouterLink, AuthShaderComponent],
   template: `
-    <div class="min-h-screen font-body-md text-body-md overflow-hidden bg-background">
-      <!-- SideNavBar Anchor -->
-      <nav class="fixed left-0 top-0 h-full w-60 bg-primary flex flex-col py-gutter overflow-y-auto sidebar-scroll z-50 shadow-sm">
-        <div class="px-6 mb-8">
-          <h1 class="font-headline-md text-headline-md font-bold text-on-primary">Workora</h1>
-          <p class="font-label-md text-label-md text-on-primary-container opacity-80 uppercase tracking-widest mt-1 text-gray-300">Enterprise HRMS</p>
-        </div>
-        
-        <div class="flex flex-col gap-1 px-3">
-          <a routerLink="/dashboard" class="flex items-center gap-3 px-4 py-3 text-on-primary-container hover:bg-primary-container transition-colors rounded-lg text-gray-300">
-            <span class="material-symbols-outlined">groups</span>
-            <span class="font-label-md text-label-md">Core HR</span>
-          </a>
-          <a class="flex items-center gap-3 px-4 py-3 text-on-primary-container hover:bg-primary-container transition-colors rounded-lg text-gray-300 cursor-pointer">
-            <span class="material-symbols-outlined">payments</span>
-            <span class="font-label-md text-label-md">Payroll & Finance</span>
-          </a>
-          <a class="flex items-center gap-3 px-4 py-3 text-on-primary-container hover:bg-primary-container transition-colors rounded-lg text-gray-300 cursor-pointer">
-            <span class="material-symbols-outlined">psychology</span>
-            <span class="font-label-md text-label-md">Talent Management</span>
-          </a>
-          <a class="flex items-center gap-3 px-4 py-3 text-on-primary-container hover:bg-primary-container transition-colors rounded-lg text-gray-300 cursor-pointer">
-            <span class="material-symbols-outlined">conveyor_belt</span>
-            <span class="font-label-md text-label-md">Operations</span>
-          </a>
-          <a class="flex items-center gap-3 px-4 py-3 text-on-primary-container hover:bg-primary-container transition-colors rounded-lg text-gray-300 cursor-pointer">
-            <span class="material-symbols-outlined">schedule</span>
-            <span class="font-label-md text-label-md">Time & Attendance</span>
-          </a>
-          <a class="flex items-center gap-3 px-4 py-3 bg-secondary-container text-on-secondary-container rounded-lg opacity-90 transition-all font-semibold cursor-pointer">
-            <span class="material-symbols-outlined">settings</span>
-            <span class="font-label-md text-label-md">Settings</span>
-          </a>
-        </div>
+    <div class="font-body-md text-on-surface bg-[#060e20] min-h-screen relative overflow-x-hidden antialiased">
+      <!-- WebGL Shader Background & Interactive Atmospheric Orbs -->
+      <app-auth-shader></app-auth-shader>
 
-        <div class="mt-auto px-6 pt-8 border-t border-white/10">
-          <div class="flex items-center gap-3">
-            <div class="w-10 h-10 rounded-full bg-secondary-container flex items-center justify-center text-on-secondary-container font-bold">
-              AD
-            </div>
+      <!-- SideNavBar Anchor -->
+      <aside class="w-[240px] h-screen fixed left-0 top-0 z-50 bg-surface-container-low/70 backdrop-blur-2xl border-r border-white/10 shadow-2xl flex flex-col justify-between py-6">
+        <div class="space-y-4">
+          <div class="px-6 pb-4 flex items-center gap-3 cursor-pointer" routerLink="/">
+            <img alt="Workora Logo" class="w-9 h-9 object-contain drop-shadow-[0_0_12px_rgba(77,142,255,0.5)]" src="/workora.png"/>
             <div>
-              <p class="font-label-md text-label-md text-on-primary font-bold">Administrator</p>
-              <p class="text-[10px] text-on-primary-container text-gray-300">ID: 99283-W</p>
+              <span class="text-xl font-bold text-primary tracking-tighter block leading-none">WORKORA</span>
+              <p class="text-[10px] font-label-caps text-outline tracking-widest mt-1">HRMS SUITE</p>
             </div>
           </div>
+          <nav class="space-y-1">
+            <a routerLink="/dashboard" class="text-on-surface-variant hover:text-on-surface px-6 py-3 flex items-center gap-3 transition-all hover:bg-white/5">
+              <span class="material-symbols-outlined text-xl">dashboard</span>
+              <span class="text-xs font-semibold">Dashboard</span>
+            </a>
+            <a class="text-on-surface-variant hover:text-on-surface px-6 py-3 flex items-center gap-3 transition-all hover:bg-white/5 cursor-pointer">
+              <span class="material-symbols-outlined text-xl">payments</span>
+              <span class="text-xs font-semibold">Payroll</span>
+            </a>
+            <a class="text-on-surface-variant hover:text-on-surface px-6 py-3 flex items-center gap-3 transition-all hover:bg-white/5 cursor-pointer">
+              <span class="material-symbols-outlined text-xl">groups</span>
+              <span class="text-xs font-semibold">Employees</span>
+            </a>
+            <!-- Active Item: Settings -->
+            <a routerLink="/auth/change-password" class="text-primary bg-primary/10 border-r-4 border-primary px-6 py-3 flex items-center gap-3 transition-all font-bold cursor-pointer">
+              <span class="material-symbols-outlined text-xl">settings</span>
+              <span class="text-xs">Settings</span>
+            </a>
+            <a class="text-on-surface-variant hover:text-on-surface px-6 py-3 flex items-center gap-3 transition-all hover:bg-white/5 cursor-pointer">
+              <span class="material-symbols-outlined text-xl">assessment</span>
+              <span class="text-xs font-semibold">Reports</span>
+            </a>
+          </nav>
         </div>
-      </nav>
+        <div class="px-6 space-y-4">
+          <div class="pt-4 border-t border-white/10">
+            <a class="text-on-surface-variant hover:text-on-surface px-4 py-2 flex items-center gap-3 transition-all rounded-lg cursor-pointer">
+              <span class="material-symbols-outlined text-xl">help_outline</span>
+              <span class="text-xs font-semibold">Help Center</span>
+            </a>
+            <button routerLink="/login" class="w-full mt-3 px-4 py-2.5 bg-error/15 hover:bg-error/25 border border-error/30 text-error rounded-xl font-bold text-xs transition-all cursor-pointer">
+              Logout
+            </button>
+          </div>
+        </div>
+      </aside>
 
       <!-- TopNavBar Anchor -->
-      <header class="fixed top-0 right-0 w-[calc(100%-240px)] flex justify-between items-center h-16 px-container-margin z-40 bg-surface/80 backdrop-blur-md border-b border-border-subtle">
-        <div class="flex items-center gap-4 flex-1">
-          <div class="relative w-full max-w-md">
-            <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant text-sm">search</span>
+      <header class="h-16 w-[calc(100%-240px)] fixed top-0 right-0 z-40 bg-surface-container-low/60 border-b border-white/10 backdrop-blur-2xl shadow-sm flex items-center justify-between px-8 ml-[240px]">
+        <div class="flex items-center gap-4">
+          <div class="relative group">
+            <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline pointer-events-none text-xl">search</span>
             <input 
-              class="w-full bg-surface-container-low border-none rounded-lg pl-10 pr-4 py-2 text-body-sm focus:ring-2 focus:ring-secondary-container transition-all outline-none" 
-              placeholder="Search employee records, reports, or modules..." 
+              class="bg-surface-container-lowest/50 border border-white/10 rounded-full pl-10 pr-4 py-1.5 text-xs focus:ring-2 focus:ring-primary/50 focus:outline-none w-64 transition-all focus:w-80 text-on-surface" 
+              placeholder="Search security settings..." 
               type="text"
             />
           </div>
         </div>
-        
-        <div class="flex items-center gap-6">
-          <div class="flex items-center gap-4">
-            <button class="text-slate-text hover:text-primary transition-colors relative">
-              <span class="material-symbols-outlined">notifications</span>
-              <span class="absolute top-0 right-0 w-2 h-2 bg-error rounded-full"></span>
-            </button>
-            <button class="text-slate-text hover:text-primary transition-colors">
-              <span class="material-symbols-outlined">help_outline</span>
-            </button>
-          </div>
-          <div class="h-8 w-[1px] bg-border-subtle"></div>
-          <div class="flex items-center gap-3 cursor-pointer group">
+        <div class="flex items-center gap-2">
+          <button class="hover:bg-white/10 rounded-full p-2 transition-all text-on-surface-variant relative cursor-pointer">
+            <span class="material-symbols-outlined text-xl">notifications</span>
+            <span class="absolute top-2 right-2 w-2 h-2 bg-error rounded-full shadow-[0_0_8px_#ffb4ab]"></span>
+          </button>
+          <button class="hover:bg-white/10 rounded-full p-2 transition-all text-on-surface-variant cursor-pointer">
+            <span class="material-symbols-outlined text-xl">help</span>
+          </button>
+          <button class="hover:bg-white/10 rounded-full p-2 transition-all text-on-surface-variant cursor-pointer">
+            <span class="material-symbols-outlined text-xl">grid_view</span>
+          </button>
+          <div class="h-6 w-[1px] bg-white/10 mx-2"></div>
+          <div class="flex items-center gap-3 pl-2 cursor-pointer">
+            <div class="text-right">
+              <p class="text-xs font-bold text-on-surface">Administrator</p>
+              <p class="text-[10px] font-label-caps text-outline tracking-wider uppercase">ENTERPRISE ADMIN</p>
+            </div>
             <img 
-              class="w-8 h-8 rounded-full object-cover ring-2 ring-transparent group-hover:ring-secondary transition-all" 
-              src="https://lh3.googleusercontent.com/aida-public/AB6AXuAp5uH8Q263l9Q6Iib5tuhtTXDI-Z3edyEUcCkc06ZxT8ObU7y8Uf1scubN3mpW736eE-rAdlXI51s9xZMpfoCheUhvAigGPf0Xy9qIhu8jCBWzroP9TigoHKPhDwk8lllNH_2zZUMO7C_JsJSAjrAGY5DFvrm9dfT901CyG9pH7pKjHY2o63YnppXwKxNSrV1ii2ulHhyD7dfOVo4DNiGcgeIg0uRWYoDcAua30pb1dhjaaTqKhG2VFqS94EMTp8B0VICOq-VKL8RY" 
-              alt="Administrator Profile"
+              alt="User Profile Avatar" 
+              class="w-9 h-9 rounded-full border-2 border-primary/40 object-cover shadow-lg" 
+              src="https://lh3.googleusercontent.com/aida-public/AB6AXuBE2kOi1D-ymzSWCW5sFKPUpYrmf_D_kZQaafZ7xTJ3Vf1dBhhIthq2Cs5HzAMsS918c818iTRaIMSqfK14-nikNnF8fdECsJqcFCEBzq6gSLFLLHODkH1Kr4QT3qIKYT_ObCzoXJhN3QXFAU9Fmn0jqd9Bm6Y5unoq0M--bAuUHYbKr2st31xKR2y8vkKHJxjriZndgC3LHbRW4ryvo2e-wAqazsCK9zYIcQ6sEn5aOnfMzE81FTK2"
             />
-            <span class="font-label-md text-label-md text-primary font-bold">Administrator</span>
           </div>
         </div>
       </header>
 
-      <!-- Main Content Area -->
-      <main class="ml-60 pt-16 h-screen overflow-y-auto bg-background">
-        <div class="p-8 max-w-5xl mx-auto pb-16">
-          
-          <!-- Breadcrumbs -->
-          <nav class="flex items-center gap-2 text-on-surface-variant font-label-md text-[11px] mb-6">
-            <a class="hover:text-primary transition-colors cursor-pointer">SETTINGS</a>
-            <span class="material-symbols-outlined text-[12px]">chevron_right</span>
-            <a class="hover:text-primary transition-colors cursor-pointer">ACCOUNT SECURITY</a>
-            <span class="material-symbols-outlined text-[12px]">chevron_right</span>
-            <span class="text-primary font-bold">CHANGE PASSWORD</span>
-          </nav>
-
-          <!-- Page Header -->
-          <div class="mb-8">
-            <h2 class="font-headline-lg text-headline-lg text-primary mb-2 font-bold">Security Settings</h2>
-            <p class="text-on-surface-variant font-body-md max-w-2xl">
-              Manage your credentials and authentication methods to ensure your HRMS account remains secure. Regular password rotations are recommended by the corporate policy.
-            </p>
+      <!-- Main Content Canvas -->
+      <main class="ml-[240px] pt-20 pb-16 min-h-screen relative z-10">
+        <div class="px-8 max-w-7xl mx-auto space-y-6">
+          <!-- Header Section -->
+          <div>
+            <nav class="flex items-center gap-2 text-outline mb-2">
+              <span class="text-[10px] font-label-caps uppercase tracking-wider">WORKORA</span>
+              <span class="material-symbols-outlined text-xs">chevron_right</span>
+              <span class="text-[10px] font-label-caps uppercase tracking-wider">SETTINGS</span>
+              <span class="material-symbols-outlined text-xs">chevron_right</span>
+              <span class="text-[10px] font-label-caps text-primary font-bold uppercase tracking-wider">SECURITY</span>
+            </nav>
+            <h1 class="font-display-lg text-3xl font-extrabold text-on-surface tracking-tight">Security &amp; Authentication</h1>
+            <p class="text-on-surface-variant text-sm mt-1">Manage your password, login methods, and account safety.</p>
           </div>
 
           <!-- Error Alert Banner -->
           @if (errorMessage()) {
-            <div class="mb-6 p-4 rounded-lg bg-error/10 border border-error/20 flex items-start gap-3 text-error">
-              <span class="material-symbols-outlined text-xl shrink-0">error</span>
-              <div class="font-body-sm text-body-sm">{{ errorMessage() }}</div>
+            <div class="p-4 rounded-xl bg-error/10 border border-error/20 flex items-start gap-3 text-error animate-in fade-in duration-200">
+              <span class="material-symbols-outlined text-xl shrink-0 mt-0.5">error</span>
+              <div class="font-body-sm text-xs font-medium">{{ errorMessage() }}</div>
             </div>
           }
 
           <!-- Success Alert Banner -->
           @if (successMessage()) {
-            <div class="mb-6 p-4 rounded-lg bg-success/10 border border-success/20 flex items-start gap-3 text-success">
-              <span class="material-symbols-outlined text-xl shrink-0">check_circle</span>
-              <div class="font-body-sm text-body-sm">{{ successMessage() }}</div>
+            <div class="p-4 rounded-xl bg-secondary/10 border border-secondary/30 flex items-start gap-3 text-secondary animate-in fade-in duration-200">
+              <span class="material-symbols-outlined text-xl shrink-0 mt-0.5">check_circle</span>
+              <div class="font-body-sm text-xs font-medium">{{ successMessage() }}</div>
             </div>
           }
 
-          <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
-            
-            <!-- Change Password Form Container -->
-            <div class="lg:col-span-2 bg-surface-container-lowest border border-border-subtle rounded-xl shadow-sm overflow-hidden">
-              <div class="p-6 border-b border-border-subtle bg-surface-bright flex items-center justify-between">
-                <div class="flex items-center gap-3">
-                  <span class="material-symbols-outlined text-secondary">lock_reset</span>
-                  <h3 class="font-headline-sm text-headline-sm text-primary font-bold">Update Password</h3>
+          <!-- Bento Grid Layout -->
+          <div class="grid grid-cols-12 gap-8">
+            <!-- Main Update Password Form (8 Columns) -->
+            <div class="col-span-12 lg:col-span-8 space-y-6">
+              <section class="glass-panel rounded-2xl p-8">
+                <div class="flex items-center gap-3 mb-6">
+                  <div class="w-12 h-12 rounded-xl bg-primary/10 border border-primary/20 flex items-center justify-center text-primary shadow-lg shadow-primary/10">
+                    <span class="material-symbols-outlined text-2xl">lock_reset</span>
+                  </div>
+                  <div>
+                    <h2 class="font-headline-md text-xl font-bold text-on-surface">Update Password</h2>
+                    <p class="text-xs text-on-surface-variant">Ensure your account uses a long, random password to stay secure.</p>
+                  </div>
                 </div>
-                <span class="text-[10px] font-bold bg-warning/10 text-warning px-2 py-1 rounded uppercase tracking-tighter">Last changed: 45 days ago</span>
-              </div>
 
-              <form class="p-8 space-y-6" (ngSubmit)="onSubmit()">
-                <!-- Current Password -->
-                <div class="space-y-2">
-                  <label class="block font-label-md text-label-md text-on-surface font-semibold">Current Password</label>
-                  <div class="relative">
-                    <input 
-                      class="w-full border border-border-subtle bg-surface rounded-lg px-4 py-3 text-body-md focus:border-secondary focus:ring-1 focus:ring-secondary/20 transition-all outline-none" 
-                      name="currentPassword"
-                      [(ngModel)]="currentPassword"
-                      placeholder="••••••••••••" 
-                      [type]="showCurrentPassword() ? 'text' : 'password'"
-                      required
-                    />
+                <form class="space-y-6" (ngSubmit)="onSubmit()">
+                  <div class="space-y-4">
+                    <div class="space-y-1.5">
+                      <label class="text-xs text-outline uppercase tracking-wider font-semibold ml-1">Current Password</label>
+                      <div class="relative">
+                        <input 
+                          class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-on-surface text-sm focus:ring-2 focus:ring-primary/50 focus:border-transparent transition-all outline-none" 
+                          name="currentPassword"
+                          [(ngModel)]="currentPassword"
+                          placeholder="••••••••••••" 
+                          [type]="showCurrentPassword() ? 'text' : 'password'"
+                          required
+                        />
+                        <button 
+                          class="absolute right-3 top-1/2 -translate-y-1/2 text-outline hover:text-primary transition-colors cursor-pointer text-xl" 
+                          type="button"
+                          (click)="showCurrentPassword.set(!showCurrentPassword())"
+                        >
+                          <span class="material-symbols-outlined">{{ showCurrentPassword() ? 'visibility_off' : 'visibility' }}</span>
+                        </button>
+                      </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div class="space-y-1.5">
+                        <label class="text-xs text-outline uppercase tracking-wider font-semibold ml-1">New Password</label>
+                        <div class="relative">
+                          <input 
+                            class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-on-surface text-sm focus:ring-2 focus:ring-primary/50 focus:border-transparent transition-all outline-none" 
+                            name="newPassword"
+                            [(ngModel)]="newPassword"
+                            (ngModelChange)="onPasswordChange($event)"
+                            placeholder="Minimum 8 characters" 
+                            [type]="showNewPassword() ? 'text' : 'password'"
+                            required
+                          />
+                          <button 
+                            class="absolute right-3 top-1/2 -translate-y-1/2 text-outline hover:text-primary transition-colors cursor-pointer text-xl" 
+                            type="button"
+                            (click)="showNewPassword.set(!showNewPassword())"
+                          >
+                            <span class="material-symbols-outlined">{{ showNewPassword() ? 'visibility_off' : 'visibility' }}</span>
+                          </button>
+                        </div>
+                      </div>
+
+                      <div class="space-y-1.5">
+                        <label class="text-xs text-outline uppercase tracking-wider font-semibold ml-1">Confirm New Password</label>
+                        <div class="relative">
+                          <input 
+                            class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-on-surface text-sm focus:ring-2 focus:ring-primary/50 focus:border-transparent transition-all outline-none" 
+                            name="confirmPassword"
+                            [(ngModel)]="confirmPassword"
+                            placeholder="Repeat new password" 
+                            [type]="showConfirmPassword() ? 'text' : 'password'"
+                            required
+                          />
+                          <button 
+                            class="absolute right-3 top-1/2 -translate-y-1/2 text-outline hover:text-primary transition-colors cursor-pointer text-xl" 
+                            type="button"
+                            (click)="showConfirmPassword.set(!showConfirmPassword())"
+                          >
+                            <span class="material-symbols-outlined">{{ showConfirmPassword() ? 'visibility_off' : 'visibility' }}</span>
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="pt-4 flex items-center justify-end gap-4 border-t border-white/10">
                     <button 
-                      class="absolute right-3 top-1/2 -translate-y-1/2 text-on-surface-variant hover:text-primary transition-colors flex items-center" 
+                      class="px-6 py-3 text-xs font-bold text-outline hover:text-on-surface transition-colors cursor-pointer" 
                       type="button"
-                      (click)="showCurrentPassword.set(!showCurrentPassword())"
+                      (click)="onCancel()"
                     >
-                      <span class="material-symbols-outlined text-sm">{{ showCurrentPassword() ? 'visibility_off' : 'visibility' }}</span>
+                      Discard Changes
+                    </button>
+                    <button 
+                      [disabled]="isLoading()"
+                      class="button-glow px-8 py-3 bg-gradient-to-r from-primary-container to-secondary rounded-full text-on-primary-container font-bold text-xs transition-all active:scale-95 shadow-lg shadow-primary/20 flex items-center gap-2 cursor-pointer disabled:opacity-75" 
+                      type="submit"
+                    >
+                      @if (isLoading()) {
+                        <span class="material-symbols-outlined text-base animate-spin">progress_activity</span>
+                        <span>Saving...</span>
+                      } @else {
+                        <span>Update Security Credentials</span>
+                      }
+                    </button>
+                  </div>
+                </form>
+              </section>
+
+              <!-- Advanced Security Bento Cards -->
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="glass-panel rounded-2xl p-6 flex items-start gap-4">
+                  <div class="p-3 bg-secondary/10 border border-secondary/20 text-secondary rounded-xl shrink-0">
+                    <span class="material-symbols-outlined text-2xl">key</span>
+                  </div>
+                  <div>
+                    <h3 class="text-sm font-bold text-on-surface">Passkeys</h3>
+                    <p class="text-xs text-on-surface-variant mt-1 leading-relaxed">Use biometric or hardware keys for instant, safe login.</p>
+                    <button class="mt-4 text-secondary font-bold text-xs flex items-center gap-1 hover:underline cursor-pointer">
+                      MANAGE PASSKEYS <span class="material-symbols-outlined text-sm">arrow_forward</span>
                     </button>
                   </div>
                 </div>
 
-                <!-- New & Confirm Password Fields -->
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div class="space-y-2">
-                    <label class="block font-label-md text-label-md text-on-surface font-semibold">New Password</label>
-                    <div class="relative">
-                      <input 
-                        class="w-full border border-border-subtle bg-surface rounded-lg px-4 py-3 text-body-md focus:border-secondary focus:ring-1 focus:ring-secondary/20 transition-all outline-none" 
-                        name="newPassword"
-                        [(ngModel)]="newPassword"
-                        (ngModelChange)="onPasswordChange($event)"
-                        placeholder="••••••••••••" 
-                        [type]="showNewPassword() ? 'text' : 'password'"
-                        required
-                      />
-                      <button 
-                        class="absolute right-3 top-1/2 -translate-y-1/2 text-on-surface-variant hover:text-primary transition-colors flex items-center" 
-                        type="button"
-                        (click)="showNewPassword.set(!showNewPassword())"
-                      >
-                        <span class="material-symbols-outlined text-sm">{{ showNewPassword() ? 'visibility_off' : 'visibility' }}</span>
-                      </button>
-                    </div>
+                <div class="glass-panel rounded-2xl p-6 flex items-start gap-4">
+                  <div class="p-3 bg-tertiary/10 border border-tertiary/20 text-tertiary rounded-xl shrink-0">
+                    <span class="material-symbols-outlined text-2xl">devices</span>
                   </div>
-
-                  <div class="space-y-2">
-                    <label class="block font-label-md text-label-md text-on-surface font-semibold">Confirm New Password</label>
-                    <div class="relative">
-                      <input 
-                        class="w-full border border-border-subtle bg-surface rounded-lg px-4 py-3 text-body-md focus:border-secondary focus:ring-1 focus:ring-secondary/20 transition-all outline-none" 
-                        name="confirmPassword"
-                        [(ngModel)]="confirmPassword"
-                        placeholder="••••••••••••" 
-                        [type]="showConfirmPassword() ? 'text' : 'password'"
-                        required
-                      />
-                      <button 
-                        class="absolute right-3 top-1/2 -translate-y-1/2 text-on-surface-variant hover:text-primary transition-colors flex items-center" 
-                        type="button"
-                        (click)="showConfirmPassword.set(!showConfirmPassword())"
-                      >
-                        <span class="material-symbols-outlined text-sm">{{ showConfirmPassword() ? 'visibility_off' : 'visibility' }}</span>
-                      </button>
-                    </div>
+                  <div>
+                    <h3 class="text-sm font-bold text-on-surface">Active Sessions</h3>
+                    <p class="text-xs text-on-surface-variant mt-1 leading-relaxed">Review and manage devices currently logged into your account.</p>
+                    <button class="mt-4 text-tertiary font-bold text-xs flex items-center gap-1 hover:underline cursor-pointer">
+                      VIEW 3 ACTIVE DEVICES <span class="material-symbols-outlined text-sm">arrow_forward</span>
+                    </button>
                   </div>
                 </div>
-
-                <!-- Form Action Buttons -->
-                <div class="pt-6 flex items-center justify-end gap-4 border-t border-border-subtle">
-                  <button 
-                    class="px-6 py-2.5 rounded font-label-md text-label-md text-on-surface-variant hover:bg-surface-container transition-colors cursor-pointer" 
-                    type="button"
-                    (click)="onCancel()"
-                  >
-                    Cancel
-                  </button>
-                  <button 
-                    [disabled]="isLoading()"
-                    class="px-8 py-2.5 rounded bg-primary text-on-primary font-label-md text-label-md hover:bg-primary-container shadow-md transition-all active:scale-95 flex items-center gap-2 cursor-pointer disabled:opacity-75" 
-                    type="submit"
-                  >
-                    @if (isLoading()) {
-                      <span class="material-symbols-outlined text-sm animate-spin">sync</span>
-                      <span>Saving...</span>
-                    } @else {
-                      <span>Save Changes</span>
-                    }
-                  </button>
-                </div>
-              </form>
+              </div>
             </div>
 
-            <!-- Password Policy Sidebar -->
-            <div class="space-y-6">
-              <div class="bg-surface-container-lowest border border-border-subtle rounded-xl p-6 shadow-sm">
-                <h4 class="font-headline-sm text-headline-sm text-primary mb-4 flex items-center gap-2 font-bold">
-                  <span class="material-symbols-outlined text-info text-sm">verified_user</span>
-                  Password Policy
-                </h4>
-                <p class="text-body-sm text-on-surface-variant mb-6">
-                  Your password must meet these security requirements to be accepted by the Workora system.
-                </p>
-
-                <ul class="space-y-4">
-                  <li class="flex items-start gap-3">
-                    <span 
-                      [ngClass]="ruleMinLength() ? 'text-success' : 'text-on-surface-variant/30'" 
-                      class="material-symbols-outlined text-[18px]"
-                      style="font-variation-settings: 'FILL' 1;"
-                    >
-                      {{ ruleMinLength() ? 'check_circle' : 'radio_button_unchecked' }}
-                    </span>
-                    <div class="flex-1">
-                      <p class="font-label-md text-label-md text-on-surface font-semibold">Minimum length</p>
-                      <p class="text-[11px] text-on-surface-variant">At least 8 characters long</p>
-                    </div>
+            <!-- Sidebar Checklist & Promotion (4 Columns) -->
+            <div class="col-span-12 lg:col-span-4 space-y-6">
+              <!-- Password Policy Checklist -->
+              <section class="glass-panel rounded-2xl p-6 border-primary/20">
+                <h2 class="text-xs font-bold text-primary tracking-widest uppercase mb-4">PASSWORD POLICY</h2>
+                <ul class="space-y-3">
+                  <li [ngClass]="ruleMinLength() ? 'text-secondary font-semibold' : 'text-outline'" class="flex items-center gap-3 text-xs transition-all duration-300">
+                    <span class="material-symbols-outlined text-base">{{ ruleMinLength() ? 'check_circle' : 'circle' }}</span>
+                    <span>At least 8 characters long</span>
                   </li>
-
-                  <li class="flex items-start gap-3">
-                    <span 
-                      [ngClass]="ruleLetterVariation() ? 'text-success' : 'text-on-surface-variant/30'" 
-                      class="material-symbols-outlined text-[18px]"
-                      style="font-variation-settings: 'FILL' 1;"
-                    >
-                      {{ ruleLetterVariation() ? 'check_circle' : 'radio_button_unchecked' }}
-                    </span>
-                    <div class="flex-1">
-                      <p class="font-label-md text-label-md text-on-surface font-semibold">Letter variations</p>
-                      <p class="text-[11px] text-on-surface-variant">Must include Uppercase and Lowercase</p>
-                    </div>
+                  <li [ngClass]="ruleNumber() ? 'text-secondary font-semibold' : 'text-outline'" class="flex items-center gap-3 text-xs transition-all duration-300">
+                    <span class="material-symbols-outlined text-base">{{ ruleNumber() ? 'check_circle' : 'circle' }}</span>
+                    <span>Include at least one number</span>
                   </li>
-
-                  <li class="flex items-start gap-3">
-                    <span 
-                      [ngClass]="ruleNumber() ? 'text-success' : 'text-on-surface-variant/30'" 
-                      class="material-symbols-outlined text-[18px]"
-                      style="font-variation-settings: 'FILL' 1;"
-                    >
-                      {{ ruleNumber() ? 'check_circle' : 'radio_button_unchecked' }}
-                    </span>
-                    <div class="flex-1">
-                      <p class="font-label-md text-label-md text-on-surface font-semibold">Numeric requirement</p>
-                      <p class="text-[11px] text-on-surface-variant">At least one number (0-9)</p>
-                    </div>
+                  <li [ngClass]="ruleSymbol() ? 'text-secondary font-semibold' : 'text-outline'" class="flex items-center gap-3 text-xs transition-all duration-300">
+                    <span class="material-symbols-outlined text-base">{{ ruleSymbol() ? 'check_circle' : 'circle' }}</span>
+                    <span>One special character (!&#64;#$%^*)</span>
                   </li>
-
-                  <li class="flex items-start gap-3">
-                    <span 
-                      [ngClass]="ruleSymbol() ? 'text-success' : 'text-on-surface-variant/30'" 
-                      class="material-symbols-outlined text-[18px]"
-                      style="font-variation-settings: 'FILL' 1;"
-                    >
-                      {{ ruleSymbol() ? 'check_circle' : 'radio_button_unchecked' }}
-                    </span>
-                    <div class="flex-1">
-                      <p class="font-label-md text-label-md text-on-surface font-semibold">Special character</p>
-                      <p class="text-[11px] text-on-surface-variant">At least one symbol (e.g. !&#64;#$)</p>
-                    </div>
+                  <li [ngClass]="ruleLetterVariation() ? 'text-secondary font-semibold' : 'text-outline'" class="flex items-center gap-3 text-xs transition-all duration-300">
+                    <span class="material-symbols-outlined text-base">{{ ruleLetterVariation() ? 'check_circle' : 'circle' }}</span>
+                    <span>Uppercase &amp; Lowercase letters</span>
                   </li>
                 </ul>
 
-                <div class="mt-8 p-4 bg-secondary/5 rounded-lg border border-secondary/10">
-                  <div class="flex gap-3">
-                    <span class="material-symbols-outlined text-secondary text-sm">lightbulb</span>
-                    <div>
-                      <p class="font-label-md text-label-md text-secondary font-bold">Pro Tip</p>
-                      <p class="text-body-sm text-secondary/80 mt-1">Use a passphrase of 4 random words for better security and easier recall.</p>
-                    </div>
-                  </div>
+                <div class="mt-6 h-1.5 w-full bg-white/10 rounded-full overflow-hidden">
+                  <div 
+                    [ngClass]="{
+                      'w-1/4 bg-error': ruleMinLength() && !ruleNumber(),
+                      'w-2/4 bg-error-container': ruleMinLength() && ruleNumber() && !ruleSymbol(),
+                      'w-3/4 bg-primary': ruleMinLength() && ruleNumber() && ruleSymbol() && !ruleLetterVariation(),
+                      'w-full bg-secondary shadow-[0_0_10px_#5de6ff]': ruleMinLength() && ruleNumber() && ruleSymbol() && ruleLetterVariation()
+                    }"
+                    class="h-full transition-all duration-500"
+                  ></div>
                 </div>
-              </div>
+                <p class="text-[10px] font-bold text-outline mt-2 text-right uppercase tracking-wider">
+                  STRENGTH: {{ (ruleMinLength() && ruleNumber() && ruleSymbol() && ruleLetterVariation()) ? 'SECURE' : 'INCOMPLETE' }}
+                </p>
+              </section>
 
-              <!-- Security Alert Card -->
-              <div class="bg-primary p-6 rounded-xl text-on-primary relative overflow-hidden">
+              <!-- 2FA Promotion Card -->
+              <section class="relative overflow-hidden rounded-2xl bg-gradient-to-br from-primary-container/20 to-secondary-container/10 border border-primary/30 p-6 group">
+                <div class="absolute -top-12 -right-12 w-32 h-32 bg-primary/20 rounded-full blur-3xl animate-pulse"></div>
                 <div class="relative z-10">
-                  <h4 class="font-headline-sm text-headline-sm mb-2 font-bold text-white">Two-Factor Auth</h4>
-                  <p class="text-body-sm opacity-80 mb-4 text-gray-300">Adding 2FA increases your account security by up to 90% against unauthorized access.</p>
+                  <div class="inline-flex items-center justify-center p-3 bg-primary rounded-xl text-on-primary mb-4 shadow-lg shadow-primary/40 group-hover:scale-110 transition-transform">
+                    <span class="material-symbols-outlined text-xl" style="font-variation-settings: 'FILL' 1;">verified_user</span>
+                  </div>
+                  <h2 class="text-base font-bold text-on-surface leading-tight">Elevate Your Protection</h2>
+                  <p class="text-xs text-on-surface-variant mt-2 leading-relaxed">Users with Two-Factor Authentication (2FA) are 99% less likely to experience account theft.</p>
                   <button 
-                    class="w-full py-2 bg-on-primary text-primary font-bold text-[11px] rounded uppercase tracking-wider hover:bg-primary-fixed transition-colors cursor-pointer"
                     (click)="onEnable2FA()"
+                    class="w-full mt-6 px-6 py-3 bg-white text-on-primary-fixed font-bold text-xs rounded-full hover:bg-primary-fixed transition-all flex items-center justify-center gap-2 shadow-lg shadow-white/10 cursor-pointer"
                   >
-                    Enable 2FA Now
+                    <span>ACTIVATE 2FA NOW</span>
+                    <span class="material-symbols-outlined text-sm">bolt</span>
                   </button>
                 </div>
-                <div class="absolute -right-4 -bottom-4 w-24 h-24 bg-secondary-container rounded-full blur-2xl opacity-40"></div>
-                <div class="absolute -left-4 -top-4 w-16 h-16 bg-info rounded-full blur-xl opacity-20"></div>
+              </section>
+
+              <!-- Security Insights -->
+              <div class="p-2 text-center">
+                <p class="text-[10px] font-bold text-outline flex items-center justify-center gap-1.5 uppercase tracking-wider">
+                  <span class="material-symbols-outlined text-xs">info</span>
+                  LAST PASSWORD CHANGE: 45 DAYS AGO
+                </p>
               </div>
-            </div>
-
-          </div>
-
-          <!-- Footer Policy Links -->
-          <div class="mt-12 pt-4 border-t border-border-subtle flex flex-col sm:flex-row justify-between items-center text-[11px] text-on-surface-variant font-label-md uppercase tracking-widest gap-4">
-            <p>© 2026 Workora Enterprise HRMS • Secure Environment</p>
-            <div class="flex gap-4">
-              <a class="hover:text-primary transition-colors cursor-pointer">Privacy Policy</a>
-              <a class="hover:text-primary transition-colors cursor-pointer">Terms of Service</a>
             </div>
           </div>
         </div>
+
+        <!-- Footer -->
+        <footer class="w-full max-w-7xl mx-auto px-8 py-6 border-t border-white/10 flex justify-between items-center mt-12 opacity-70">
+          <div class="flex items-center gap-3">
+            <span class="text-primary font-bold text-xs">Workora</span>
+            <p class="text-xs text-outline">© 2026 Workora HRMS. All Rights Reserved.</p>
+          </div>
+          <div class="flex gap-6">
+            <a class="text-xs text-outline hover:text-secondary transition-colors cursor-pointer">Privacy Policy</a>
+            <a class="text-xs text-outline hover:text-secondary transition-colors cursor-pointer">Terms of Service</a>
+            <a class="text-xs text-outline hover:text-secondary transition-colors cursor-pointer">Security</a>
+          </div>
+        </footer>
       </main>
     </div>
-  `
+  `,
+  styles: [`
+    .glass-panel {
+      background: rgba(26, 32, 44, 0.45);
+      backdrop-filter: blur(24px);
+      -webkit-backdrop-filter: blur(24px);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      box-shadow: inset 1px 1px 0px rgba(255, 255, 255, 0.15), 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+    }
+
+    .button-glow {
+      box-shadow: 0 0 0px rgba(173, 198, 255, 0);
+      transition: all 0.3s ease;
+    }
+    
+    .button-glow:hover {
+      box-shadow: 0 0 25px rgba(173, 198, 255, 0.35);
+    }
+  `]
 })
 export class ChangePasswordPageComponent {
   private readonly authService: AuthService = inject(AuthService) as AuthService;
