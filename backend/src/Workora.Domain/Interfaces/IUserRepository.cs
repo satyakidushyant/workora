@@ -23,4 +23,33 @@ public interface IUserRepository : IRepository<User>
     /// <param name="ct">The cancellation token.</param>
     /// <returns>True if the email is unique; otherwise, false.</returns>
     Task<bool> IsEmailUniqueAsync(EmailAddress email, CancellationToken ct = default);
+
+    /// <summary>
+    /// Gets a paginated list of users with optional filtering.
+    /// </summary>
+    /// <param name="pageNumber">The 1-based page number.</param>
+    /// <param name="pageSize">The number of items per page.</param>
+    /// <param name="searchTerm">Optional search term for filtering by name or email.</param>
+    /// <param name="isActive">Optional active status filter.</param>
+    /// <param name="ct">The cancellation token.</param>
+    /// <returns>A list of users matching the criteria.</returns>
+    Task<IReadOnlyList<User>> GetPagedListAsync(int pageNumber, int pageSize, string? searchTerm = null, bool? isActive = null, CancellationToken ct = default);
+
+    /// <summary>
+    /// Gets the total count of users matching optional filters.
+    /// </summary>
+    /// <param name="searchTerm">Optional search term for filtering by name or email.</param>
+    /// <param name="isActive">Optional active status filter.</param>
+    /// <param name="ct">The cancellation token.</param>
+    /// <returns>The total matching user count.</returns>
+    Task<int> GetCountAsync(string? searchTerm = null, bool? isActive = null, CancellationToken ct = default);
+
+    /// <summary>
+    /// Checks if there is another SuperAdmin user besides the specified user ID.
+    /// </summary>
+    /// <param name="excludeUserId">The user ID to exclude.</param>
+    /// <param name="ct">The cancellation token.</param>
+    /// <returns>True if another SuperAdmin exists; otherwise, false.</returns>
+    Task<bool> HasOtherSuperAdminAsync(int excludeUserId, CancellationToken ct = default);
 }
+

@@ -3,7 +3,7 @@ import { authGuard } from './core/guards/auth.guard';
 import { rbacGuard } from './core/guards/rbac.guard';
 
 /**
- * Main application routing configuration enforcing lazy loading and RBAC guards.
+ * Main application routing configuration enforcing lazy loading, layout nesting, and RBAC guards.
  */
 export const routes: Routes = [
   {
@@ -28,18 +28,28 @@ export const routes: Routes = [
     loadComponent: () => import('./presentation/features/auth/pages/reset-password-page.component').then(m => m.ResetPasswordPageComponent)
   },
   {
-    path: 'change-password',
-    loadComponent: () => import('./presentation/features/auth/pages/change-password-page.component').then(m => m.ChangePasswordPageComponent),
-    canMatch: [authGuard]
-  },
-  {
-    path: 'dashboard',
-    loadComponent: () => import('./presentation/features/dashboard/pages/dashboard-page.component').then(m => m.DashboardPageComponent),
-    canMatch: [authGuard]
+    path: '',
+    loadComponent: () => import('./presentation/layouts/dashboard-layout.component').then(m => m.DashboardLayoutComponent),
+    canMatch: [authGuard],
+    children: [
+      {
+        path: 'dashboard',
+        loadComponent: () => import('./presentation/features/dashboard/pages/dashboard-page.component').then(m => m.DashboardPageComponent)
+      },
+      {
+        path: 'users',
+        loadComponent: () => import('./presentation/features/users/pages/user-list-page.component').then(m => m.UserListPageComponent),
+        canMatch: [rbacGuard],
+        data: { requiredPermission: 'users.view' }
+      },
+      {
+        path: 'change-password',
+        loadComponent: () => import('./presentation/features/auth/pages/change-password-page.component').then(m => m.ChangePasswordPageComponent)
+      }
+    ]
   },
   {
     path: '**',
     redirectTo: 'dashboard'
   }
 ];
-

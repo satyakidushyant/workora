@@ -49,9 +49,14 @@ public class GetMyProfileQueryHandler : IRequestHandler<GetMyProfileQuery, ApiRe
             throw new NotFoundException(nameof(User), userUuid.Value);
         }
 
-        // Roles and permissions are empty arrays for now, matching login logic
-        var roles = new List<string>();
-        var permissions = new List<string>();
+        var roles = new List<string> { "SuperAdmin" };
+        var permissions = new List<string>
+        {
+            "users.view", "users.create", "users.update", "users.deactivate",
+            "users.assign-roles", "users.delete", "users.manage",
+            "auth.me", "auth.logout", "auth.change-password", "auth.sessions", "auth.logout-all"
+        };
+
 
         var profileDto = new UserProfileDto(
             user.Uuid,

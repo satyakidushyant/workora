@@ -4,7 +4,10 @@ import { provideHttpClient, withInterceptors } from '@angular/common/http';
 import { routes } from './app.routes';
 import { AUTH_REPOSITORY } from './domain/repositories/i-auth.repository';
 import { AuthApiRepository } from './data/repositories/auth-api.repository';
+import { USER_REPOSITORY } from './domain/repositories/i-user.repository';
+import { UserApiRepository } from './data/repositories/user-api.repository';
 import { jwtInterceptor } from './core/interceptors/jwt.interceptor';
+
 import { refreshTokenInterceptor } from './core/interceptors/refresh-token.interceptor';
 import { globalErrorInterceptor } from './core/interceptors/global-error.interceptor';
 
@@ -25,6 +28,11 @@ export const appConfig: ApplicationConfig = {
     {
       provide: AUTH_REPOSITORY,
       useClass: AuthApiRepository
+    },
+    {
+      provide: USER_REPOSITORY,
+      useClass: UserApiRepository
     }
   ]
 };
+

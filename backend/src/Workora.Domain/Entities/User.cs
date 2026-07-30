@@ -103,7 +103,46 @@ public class User : AuditableEntity
     }
 
     /// <summary>
+    /// Updates the user's profile details.
+    /// </summary>
+    /// <param name="firstName">The updated first name.</param>
+    /// <param name="lastName">The updated last name.</param>
+    /// <param name="employeeId">The optional linked employee ID.</param>
+    public void UpdateProfile(string firstName, string lastName, int? employeeId = null)
+    {
+        FirstName = firstName;
+        LastName = lastName;
+        EmployeeId = employeeId;
+    }
+
+    /// <summary>
+    /// Deactivates the user account.
+    /// </summary>
+    public void Deactivate()
+    {
+        IsActive = false;
+    }
+
+    /// <summary>
+    /// Reactivates the user account.
+    /// </summary>
+    public void Activate()
+    {
+        IsActive = true;
+    }
+
+    /// <summary>
+    /// Links an employee record to this user account.
+    /// </summary>
+    /// <param name="employeeId">The employee ID.</param>
+    public void LinkEmployee(int employeeId)
+    {
+        EmployeeId = employeeId;
+    }
+
+    /// <summary>
     /// Checks if the user is currently locked out.
     /// </summary>
     public bool IsLockedOut => LockoutEnd.HasValue && LockoutEnd.Value > DateTimeOffset.UtcNow;
 }
+

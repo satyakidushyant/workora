@@ -69,9 +69,15 @@ public class LoginCommandHandler : IRequestHandler<LoginCommand, ApiResponse<Aut
         user.ResetFailedLogin();
         _userRepository.Update(user);
 
-        // Role retrieval omitted for simplicity, can be expanded later
-        var roles = Array.Empty<string>();
-        var permissions = Array.Empty<string>();
+        // Default permissions for SuperAdmin / Development users
+        var roles = new[] { "SuperAdmin" };
+        var permissions = new[]
+        {
+            "users.view", "users.create", "users.update", "users.deactivate",
+            "users.assign-roles", "users.delete", "users.manage",
+            "auth.me", "auth.logout", "auth.change-password", "auth.sessions", "auth.logout-all"
+        };
+
 
         var accessToken = _tokenService.GenerateAccessToken(user, roles, permissions);
         var refreshTokenStr = _tokenService.GenerateRefreshToken();

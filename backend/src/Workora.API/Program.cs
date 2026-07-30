@@ -3,6 +3,8 @@ using Workora.Infrastructure;
 using Workora.Persistence;
 using Workora.Persistence.Seeders;
 using Workora.API.Middleware;
+using Workora.API.Extensions;
+
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
@@ -66,14 +68,9 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
         };
     });
 
-builder.Services.AddAuthorization(options =>
-{
-    options.AddPolicy("auth.logout", policy => policy.RequireAuthenticatedUser());
-    options.AddPolicy("auth.change-password", policy => policy.RequireAuthenticatedUser());
-    options.AddPolicy("auth.me", policy => policy.RequireAuthenticatedUser());
-    options.AddPolicy("auth.sessions", policy => policy.RequireAuthenticatedUser());
-    options.AddPolicy("auth.logout-all", policy => policy.RequireAuthenticatedUser());
-});
+builder.Services.AddWorkoraAuthorization();
+
+
 
 builder.Services.AddHealthChecks()
     .AddNpgSql(builder.Configuration.GetConnectionString("DefaultConnection")!);

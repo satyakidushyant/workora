@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { AuthService } from '../../../../core/services/auth.service';
+import { NotificationService } from '../../../../core/services/notification.service';
 import { AuthShaderComponent } from '../components/auth-shader.component';
 
 /**
@@ -147,7 +148,9 @@ import { AuthShaderComponent } from '../components/auth-shader.component';
   `]
 })
 export class ForgotPasswordPageComponent {
+
   private readonly authService: AuthService = inject(AuthService) as AuthService;
+  private readonly notificationService: NotificationService = inject(NotificationService) as NotificationService;
   private readonly router: Router = inject(Router) as Router;
 
   /**
@@ -175,7 +178,9 @@ export class ForgotPasswordPageComponent {
    */
   onSubmit(): void {
     if (!this.email) {
-      this.errorMessage.set('Please enter your corporate email address.');
+      const msg = 'Please enter your corporate email address.';
+      this.errorMessage.set(msg);
+      this.notificationService.showWarning(msg);
       return;
     }
 
@@ -186,13 +191,17 @@ export class ForgotPasswordPageComponent {
       next: () => {
         this.isLoading.set(false);
         this.isSubmitted.set(true);
+        this.notificationService.showSuccess('Recovery link dispatched to your corporate email address.');
       },
       error: (err: any) => {
         this.isLoading.set(false);
-        this.errorMessage.set(err?.message || 'Unable to process recovery request. Please verify your email.');
+        const msg = err?.message || 'Unable to process recovery request. Please verify your email.';
+        this.errorMessage.set(msg);
+        this.notificationService.showError(msg);
       }
     });
   }
+
 
   /**
    * Handles contact administrator click action.

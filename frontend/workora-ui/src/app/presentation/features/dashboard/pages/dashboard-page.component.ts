@@ -14,126 +14,10 @@ import { AuthService } from '../../../../core/services/auth.service';
   standalone: true,
   imports: [CommonModule, RouterLink],
   template: `
-    <div class="dark selection:bg-primary/30 selection:text-on-primary font-body-md text-on-surface bg-[#0d1320] min-h-screen relative overflow-x-hidden antialiased">
-      <!-- Atmospheric Background Glow Orbs (Pure CSS & Parallax Mouse Drift - No Shader) -->
-      <div class="fixed inset-0 overflow-hidden pointer-events-none z-0">
-        <div #orb1 class="mesh-orb orb-1"></div>
-        <div #orb2 class="mesh-orb orb-2"></div>
-        <div #orb3 class="mesh-orb orb-3"></div>
-      </div>
+    <div class="p-8 space-y-8 flex-1 max-w-7xl mx-auto w-full">
+      <!-- Bento Grid Stats Cards -->
+      <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
 
-      <!-- SideNavBar -->
-      <aside class="h-screen w-64 fixed left-0 top-0 bg-surface-container-low/60 backdrop-blur-2xl border-r border-white/10 shadow-2xl flex flex-col py-6 z-[60]">
-        <!-- Brand Header with User Logo -->
-        <div class="px-6 mb-8 flex flex-col items-start gap-2 cursor-pointer" routerLink="/">
-          <img alt="Workora Logo" class="h-10 w-auto object-contain filter drop-shadow-[0_0_15px_rgba(77,142,255,0.5)]" src="/workora.png"/>
-          <div>
-            <h2 class="font-display-lg text-lg font-extrabold text-on-surface tracking-tight leading-tight">Workora Enterprise</h2>
-            <p class="font-label-sm text-[10px] text-outline uppercase tracking-widest">HRMS SUITE</p>
-          </div>
-        </div>
-
-        <!-- Navigation Links -->
-        <nav class="flex-1 space-y-1.5 px-4">
-          <!-- Active Item: Overview -->
-          <div routerLink="/dashboard" class="bg-primary/15 text-primary border-r-4 border-primary flex items-center px-4 py-3 rounded-l-xl cursor-pointer transition-all font-bold shadow-lg shadow-primary/10">
-            <span class="material-symbols-outlined mr-3 text-xl">dashboard</span>
-            <span class="font-label-sm text-xs">Overview</span>
-          </div>
-          <div class="text-on-surface-variant hover:bg-white/5 hover:text-on-surface flex items-center px-4 py-3 rounded-xl cursor-pointer transition-all">
-            <span class="material-symbols-outlined mr-3 text-xl">monitoring</span>
-            <span class="font-label-sm text-xs font-semibold">Analytics</span>
-          </div>
-          <div class="text-on-surface-variant hover:bg-white/5 hover:text-on-surface flex items-center px-4 py-3 rounded-xl cursor-pointer transition-all">
-            <span class="material-symbols-outlined mr-3 text-xl">group</span>
-            <span class="font-label-sm text-xs font-semibold">Employees</span>
-          </div>
-          <div routerLink="/auth/change-password" class="text-on-surface-variant hover:bg-white/5 hover:text-on-surface flex items-center px-4 py-3 rounded-xl cursor-pointer transition-all">
-            <span class="material-symbols-outlined mr-3 text-xl">settings</span>
-            <span class="font-label-sm text-xs font-semibold">Settings</span>
-          </div>
-          <div class="text-on-surface-variant hover:bg-white/5 hover:text-on-surface flex items-center px-4 py-3 rounded-xl cursor-pointer transition-all">
-            <span class="material-symbols-outlined mr-3 text-xl">verified_user</span>
-            <span class="font-label-sm text-xs font-semibold">Access Controls</span>
-          </div>
-        </nav>
-
-        <!-- Sidebar Action Footer -->
-        <div class="px-4 mt-auto space-y-3">
-          <button (click)="onNewReport()" class="w-full button-glow bg-gradient-to-r from-primary-container to-secondary text-on-primary-container py-3 rounded-full font-bold text-xs transition-all flex items-center justify-center gap-2 cursor-pointer shadow-lg shadow-primary/20">
-            <span class="material-symbols-outlined text-base">add</span>
-            New Report
-          </button>
-          <div (click)="onLogout()" class="text-on-surface-variant hover:bg-error/15 hover:text-error flex items-center px-4 py-3 rounded-xl cursor-pointer transition-all">
-            <span class="material-symbols-outlined mr-3 text-xl">logout</span>
-            <span class="font-label-sm text-xs font-semibold">Logout</span>
-          </div>
-        </div>
-      </aside>
-
-      <!-- Main Content Canvas Wrapper -->
-      <main class="ml-64 min-h-screen flex flex-col relative z-10">
-        <!-- TopNavBar Header -->
-        <header class="fixed top-0 right-0 left-64 z-50 bg-surface-container-low/60 backdrop-blur-2xl border-b border-white/10 h-20 flex items-center px-8 shadow-lg">
-          <div class="flex justify-between items-center w-full max-w-7xl mx-auto">
-            <div class="flex items-center gap-8">
-              <span class="font-display-lg text-2xl tracking-tight text-on-surface font-extrabold">Dashboard</span>
-              <nav class="hidden md:flex items-center gap-6">
-                <a routerLink="/dashboard" class="text-primary font-bold border-b-2 border-primary pb-1 text-xs transition-all cursor-pointer">Overview</a>
-                <a (click)="onNavItem('Personnel')" class="text-on-surface-variant hover:text-on-surface transition-colors text-xs cursor-pointer">Personnel</a>
-                <a (click)="onNavItem('Payroll')" class="text-on-surface-variant hover:text-on-surface transition-colors text-xs cursor-pointer">Payroll</a>
-                <a routerLink="/auth/change-password" class="text-on-surface-variant hover:text-on-surface transition-colors text-xs cursor-pointer">Security</a>
-              </nav>
-            </div>
-
-            <div class="flex items-center gap-4">
-              <!-- Search Input -->
-              <div class="relative group">
-                <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline pointer-events-none text-xl">search</span>
-                <input 
-                  class="bg-surface-container-lowest/50 border border-white/10 rounded-full py-2 pl-10 pr-4 text-xs focus:ring-2 focus:ring-primary/50 focus:outline-none transition-all w-64 text-on-surface" 
-                  placeholder="Search insights..." 
-                  type="text"
-                />
-              </div>
-
-              <!-- Notifications Toggle -->
-              <button (click)="onNotificationClick()" class="hover:bg-white/10 rounded-full p-2 transition-all text-on-surface-variant relative cursor-pointer">
-                <span class="material-symbols-outlined text-xl">notifications</span>
-                <span class="absolute top-2 right-2 w-2 h-2 bg-error rounded-full shadow-[0_0_8px_#ffb4ab]"></span>
-              </button>
-
-              <!-- Settings Direct Link -->
-              <button routerLink="/auth/change-password" class="hover:bg-white/10 rounded-full p-2 transition-all text-on-surface-variant cursor-pointer">
-                <span class="material-symbols-outlined text-xl">settings</span>
-              </button>
-
-              <div class="h-6 w-[1px] bg-white/10 mx-2"></div>
-              
-              <!-- User Executive Profile Pill -->
-              <div class="flex items-center gap-3 pl-2 cursor-pointer" routerLink="/auth/change-password">
-                <div class="text-right">
-                  <p class="text-xs font-bold text-on-surface">{{ currentUser()?.firstName || 'Executive' }} {{ currentUser()?.lastName || 'Admin' }}</p>
-                  <p class="text-[10px] text-primary opacity-90 uppercase tracking-widest font-semibold">{{ currentUser()?.roles?.[0] || 'HQ DIVISION' }}</p>
-                </div>
-                <div class="w-10 h-10 rounded-full bg-gradient-to-tr from-primary to-secondary p-[1px] shadow-lg">
-                  <div class="w-full h-full rounded-full bg-surface-container overflow-hidden">
-                    <img 
-                      alt="Executive User Profile" 
-                      class="w-full h-full object-cover" 
-                      src="https://lh3.googleusercontent.com/aida-public/AB6AXuBTOtgnJ1iazPSVN_CGkal0WO-xZ256kSVtaQuE8On9sCfmywhu6A7LtowosQlVtxkMZ1aUZ5sE6l7L67yBLsbTVZfg3bVWgCtc-iRCMb37da-a8XEOKqnW6jG9vtB8GV7TeKGdNCkgr8FfdS7crvQTFiVNG7S8DzV3KCCsmUup8BYwtaxDNtSbRTpglJ7zBFzKra0ae1pnZED9Kn7NLDlQeBdxugIGWR9RuoO-o8XcNrFYsgwWdHEa"
-                    />
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </header>
-
-        <!-- Executive Analytics Canvas -->
-        <div class="mt-20 p-8 space-y-8 flex-1 max-w-7xl mx-auto w-full">
-          <!-- Bento Grid Stats Cards -->
-          <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
             <!-- Total Workforce -->
             <div class="glass-card p-6 rounded-2xl hover:scale-[1.02] transition-all duration-300 group">
               <div class="flex justify-between items-start mb-4">
@@ -337,23 +221,9 @@ import { AuthService } from '../../../../core/services/auth.service';
                 </div>
                 <span class="text-outline text-[10px] uppercase font-bold tracking-widest">2 HOURS AGO</span>
               </div>
-            </div>
           </div>
         </div>
-
-        <!-- Dashboard Footer -->
-        <footer class="bg-surface-container-lowest/40 backdrop-blur-2xl border-t border-white/10 w-full py-6 mt-auto">
-          <div class="flex flex-col md:flex-row justify-between items-center px-8 max-w-7xl mx-auto gap-4 opacity-70">
-            <p class="text-xs text-outline">© 2026 Workora Enterprise. All rights reserved.</p>
-            <div class="flex gap-6">
-              <a class="text-xs text-outline hover:text-primary transition-colors cursor-pointer">Privacy Policy</a>
-              <a class="text-xs text-outline hover:text-primary transition-colors cursor-pointer">Terms of Service</a>
-              <a class="text-xs text-outline hover:text-primary transition-colors cursor-pointer">Security Audit</a>
-            </div>
-          </div>
-        </footer>
-      </main>
-    </div>
+      </div>
   `,
   styles: [`
     .glass-card {
