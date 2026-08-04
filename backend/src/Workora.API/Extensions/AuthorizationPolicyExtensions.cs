@@ -38,7 +38,18 @@ public static class AuthorizationPolicyExtensions
             options.AddPolicy("users.assign-roles", policy => policy.RequireAuthenticatedUser());
             options.AddPolicy("users.delete", policy => policy.RequireAuthenticatedUser());
             options.AddPolicy("users.reset-password", policy => policy.RequireAuthenticatedUser());
+
+            // Module 3: Roles Module Policies
+            options.AddPolicy("roles.view", policy => policy.RequireAuthenticatedUser());
+            options.AddPolicy("roles.create", policy => policy.RequireAuthenticatedUser());
+            options.AddPolicy("roles.update", policy => policy.RequireAuthenticatedUser());
+            options.AddPolicy("roles.delete", policy => policy.RequireAuthenticatedUser());
+            options.AddPolicy("roles.manage-permissions", policy => policy.RequireAuthenticatedUser());
+
+            // Module 4: Permissions Module Policies
+            options.AddPolicy("permissions.view", policy => policy.RequireAuthenticatedUser());
         });
+
 
         return services;
     }

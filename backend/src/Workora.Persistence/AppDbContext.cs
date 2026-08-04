@@ -36,6 +36,26 @@ public class AppDbContext : DbContext, IUnitOfWork
     public DbSet<LoginAuditLog> LoginAuditLogs { get; set; } = null!;
 
     /// <summary>
+    /// Gets or sets the Roles table.
+    /// </summary>
+    public DbSet<Role> Roles { get; set; } = null!;
+
+    /// <summary>
+    /// Gets or sets the Permissions table.
+    /// </summary>
+    public DbSet<Permission> Permissions { get; set; } = null!;
+
+    /// <summary>
+    /// Gets or sets the UserRoles table.
+    /// </summary>
+    public DbSet<UserRole> UserRoles { get; set; } = null!;
+
+    /// <summary>
+    /// Gets or sets the RolePermissions table.
+    /// </summary>
+    public DbSet<RolePermission> RolePermissions { get; set; } = null!;
+
+    /// <summary>
     /// Configures the database models.
     /// </summary>
     /// <param name="modelBuilder">The model builder.</param>

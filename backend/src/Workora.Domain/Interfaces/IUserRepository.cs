@@ -51,5 +51,14 @@ public interface IUserRepository : IRepository<User>
     /// <param name="ct">The cancellation token.</param>
     /// <returns>True if another SuperAdmin exists; otherwise, false.</returns>
     Task<bool> HasOtherSuperAdminAsync(int excludeUserId, CancellationToken ct = default);
+
+    /// <summary>
+    /// Updates the assigned roles for a target user.
+    /// </summary>
+    /// <param name="userId">The user ID.</param>
+    /// <param name="roleIds">The collection of role IDs.</param>
+    /// <param name="ct">The cancellation token.</param>
+    Task AssignUserRolesAsync(int userId, IEnumerable<int> roleIds, CancellationToken ct = default);
 }
+
 

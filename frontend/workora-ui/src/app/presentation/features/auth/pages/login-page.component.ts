@@ -70,40 +70,40 @@ import { AuthShaderComponent } from '../components/auth-shader.component';
             <!-- Credentials Form -->
             <form (ngSubmit)="onSubmit()" class="flex flex-col gap-5">
               <!-- Email Field -->
-              <div class="space-y-1 group">
+              <div class="space-y-1.5 group">
                 <label class="text-xs text-outline ml-1 uppercase tracking-wider font-semibold">Corporate Email</label>
-                <div class="relative input-focus-glow border-b-2 border-white/10 transition-all duration-300">
+                <div class="glass-input-box relative flex items-center px-4 py-3">
                   <input 
                     type="email" 
                     name="email"
                     [(ngModel)]="email"
                     required
-                    placeholder="name@company.com"
-                    class="w-full bg-transparent border-none focus:ring-0 text-on-surface py-3 px-1 placeholder:text-outline/40 font-body-md text-sm outline-none"
+                    placeholder="admin@workora.com"
+                    class="w-full bg-transparent border-none p-0 text-slate-100 placeholder:text-slate-500 text-sm focus:outline-none focus:ring-0 shadow-none appearance-none font-body-md"
                   />
-                  <span class="absolute right-2 top-1/2 -translate-y-1/2 material-symbols-outlined text-outline/50 group-focus-within:text-primary transition-colors text-xl pointer-events-none">alternate_email</span>
+                  <span class="material-symbols-outlined text-slate-400 group-focus-within:text-primary transition-colors text-xl pointer-events-none ml-2 shrink-0">alternate_email</span>
                 </div>
               </div>
 
               <!-- Password Field -->
-              <div class="space-y-1 group">
+              <div class="space-y-1.5 group">
                 <div class="flex justify-between items-end pr-1">
                   <label class="text-xs text-outline ml-1 uppercase tracking-wider font-semibold">Password</label>
                   <a routerLink="/forgot-password" class="text-xs text-primary/80 hover:text-primary transition-colors cursor-pointer">Forgot Password?</a>
                 </div>
-                <div class="relative input-focus-glow border-b-2 border-white/10 transition-all duration-300">
+                <div class="glass-input-box relative flex items-center px-4 py-3">
                   <input 
                     [type]="showPassword() ? 'text' : 'password'"
                     name="password"
                     [(ngModel)]="password"
                     required
                     placeholder="••••••••••••"
-                    class="w-full bg-transparent border-none focus:ring-0 text-on-surface py-3 px-1 placeholder:text-outline/40 font-body-md text-sm outline-none pr-10"
+                    class="w-full bg-transparent border-none p-0 text-slate-100 placeholder:text-slate-500 text-sm focus:outline-none focus:ring-0 shadow-none appearance-none font-body-md pr-2"
                   />
                   <button 
                     type="button"
                     (click)="showPassword.set(!showPassword())"
-                    class="absolute right-2 top-1/2 -translate-y-1/2 material-symbols-outlined text-outline/50 hover:text-primary transition-colors cursor-pointer text-xl"
+                    class="material-symbols-outlined text-slate-400 hover:text-primary transition-colors cursor-pointer text-xl ml-2 shrink-0 flex items-center justify-center"
                   >
                     {{ showPassword() ? 'visibility_off' : 'visibility' }}
                   </button>

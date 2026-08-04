@@ -1,6 +1,5 @@
 import { Component, ElementRef, AfterViewInit, OnDestroy, ViewChild, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterLink } from '@angular/router';
 import { AuthService } from '../../../../core/services/auth.service';
 
 /**
@@ -12,7 +11,7 @@ import { AuthService } from '../../../../core/services/auth.service';
 @Component({
   selector: 'app-dashboard-page',
   standalone: true,
-  imports: [CommonModule, RouterLink],
+  imports: [CommonModule],
   template: `
     <div class="p-8 space-y-8 flex-1 max-w-7xl mx-auto w-full">
       <!-- Bento Grid Stats Cards -->

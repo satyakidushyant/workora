@@ -43,8 +43,13 @@ public class User : AuditableEntity
     /// </summary>
     public DateTimeOffset? LockoutEnd { get; private set; }
 
-    // Navigation properties can be added here (e.g., RefreshTokens, UserRoles)
-    
+    private readonly List<UserRole> _userRoles = new();
+
+    /// <summary>
+    /// Gets the navigation collection of user role assignments.
+    /// </summary>
+    public IReadOnlyCollection<UserRole> UserRoles => _userRoles.AsReadOnly();
+
     /// <summary>
     /// Parameterless constructor for EF Core.
     /// </summary>

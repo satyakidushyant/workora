@@ -17,7 +17,17 @@ public class UserRepository : GenericRepository<User>, IUserRepository
     public UserRepository(AppDbContext dbContext) : base(dbContext) { }
 
     /// <inheritdoc />
+    public override async Task<User?> GetByIdAsync(int id, CancellationToken ct = default)
+    {
+        return await _dbContext.Users
+            .Include(u => u.UserRoles)
+            .ThenInclude(ur => ur.Role)
+            .FirstOrDefaultAsync(u => u.Id == id, ct);
+    }
+
+    /// <inheritdoc />
     public async Task<User?> GetByEmailAsync(EmailAddress email, CancellationToken ct = default)
+
     {
         return await _dbContext.Users.FirstOrDefaultAsync(u => u.Email == email, ct);
     }
@@ -81,5 +91,27 @@ public class UserRepository : GenericRepository<User>, IUserRepository
         // Checks if there are other users besides excludeUserId with active status
         return await _dbContext.Users.AnyAsync(u => u.Id != excludeUserId && u.IsActive, ct);
     }
+
+    /// <inheritdoc />
+    public async Task AssignUserRolesAsync(int userId, IEnumerable<int> roleIds, CancellationToken ct = default)
+    {
+        var existingUserRoles = await _dbContext.UserRoles
+            .Where(ur => ur.UserId == userId)
+            .ToListAsync(ct);
+
+        _dbContext.UserRoles.RemoveRange(existingUserRoles);
+
+        var validRoleIds = await _dbContext.Roles
+            .Where(r => roleIds.Contains(r.Id))
+            .Select(r => r.Id)
+            .ToListAsync(ct);
+
+        var newUserRoles = validRoleIds
+            .Select(rId => UserRole.Create(userId, rId))
+            .ToList();
+
+        await _dbContext.UserRoles.AddRangeAsync(newUserRoles, ct);
+    }
 }
+
 

@@ -18,8 +18,8 @@ import { LoadingService } from './core/services/loading.service';
     <!-- Global Route Transition Overlay with Workora Logo Loader -->
     <div
       *ngIf="loadingService.isRouteLoading()"
-      class="fixed inset-0 z-[9990] bg-slate-950/80 backdrop-blur-md flex items-center justify-center transition-all duration-300">
-      <app-logo-loader size="lg" label="Navigating Workspace..." sublabel="Workora HRMS"></app-logo-loader>
+      class="fixed inset-0 z-[9990] bg-slate-950/85 backdrop-blur-xl flex items-center justify-center transition-all duration-300">
+      <app-logo-loader size="sm" speed="normal" label="Navigating Workspace..." sublabel="Workora HRMS"></app-logo-loader>
     </div>
 
     <router-outlet></router-outlet>

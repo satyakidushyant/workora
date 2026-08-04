@@ -56,11 +56,11 @@ export type PasswordStrengthLevel = 'Minimal' | 'Warning' | 'Average' | 'Info' |
 
           <form class="space-y-5" (ngSubmit)="onSubmit()">
             <!-- New Password Field -->
-            <div class="relative">
+            <div class="space-y-1.5 group">
               <label class="block text-xs font-label-sm text-on-surface-variant mb-1 font-semibold uppercase tracking-wider" for="new_password">New Password</label>
-              <div class="relative">
+              <div class="glass-input-box relative flex items-center px-4 py-3">
                 <input 
-                  class="w-full bg-white/5 border-0 border-b-2 border-white/10 focus:border-primary focus:ring-0 transition-all duration-300 py-3 px-1 text-sm text-on-surface placeholder-on-surface-variant/30 input-glow outline-none pr-10" 
+                  class="w-full bg-transparent border-none p-0 text-slate-100 placeholder:text-slate-500 text-sm focus:outline-none focus:ring-0 shadow-none appearance-none pr-2 font-body-md" 
                   id="new_password" 
                   name="newPassword"
                   [(ngModel)]="newPassword"
@@ -70,11 +70,11 @@ export type PasswordStrengthLevel = 'Minimal' | 'Warning' | 'Average' | 'Info' |
                   required
                 />
                 <button 
-                  class="absolute right-1 bottom-3 text-on-surface-variant hover:text-primary transition-colors cursor-pointer" 
+                  class="material-symbols-outlined text-slate-400 hover:text-primary transition-colors cursor-pointer text-xl ml-2 shrink-0 flex items-center justify-center" 
                   type="button"
                   (click)="togglePasswordVisibility()"
                 >
-                  <span class="material-symbols-outlined text-xl">{{ showPassword() ? 'visibility_off' : 'visibility' }}</span>
+                  {{ showPassword() ? 'visibility_off' : 'visibility' }}
                 </button>
               </div>
             </div>

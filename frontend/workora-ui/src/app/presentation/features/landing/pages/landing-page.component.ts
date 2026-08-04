@@ -36,7 +36,7 @@ import { RouterLink } from '@angular/router';
             <img 
               alt="Workora Logo" 
               class="h-10 sm:h-12 w-auto object-contain relative z-10 filter drop-shadow-[0_0_20px_rgba(255,255,255,0.7)] group-hover:scale-110 transition-transform duration-300" 
-              src="/workora.svg"
+              src="/workora.png"
             />
           </div>
           <span class="font-display-lg text-xl sm:text-2xl font-bold text-[#dde2f4] group-hover:text-[#adc6ff] transition-colors">Workora</span>
@@ -285,7 +285,7 @@ import { RouterLink } from '@angular/router';
           <!-- Brand Info -->
           <div class="col-span-2 md:col-span-1">
             <div class="flex items-center gap-3 mb-4 cursor-pointer group" (click)="scrollToTop()">
-              <img alt="Workora Logo" class="h-8 w-auto object-contain filter drop-shadow-md group-hover:scale-110 transition-transform" src="/workora.svg"/>
+              <img alt="Workora Logo" class="h-8 w-auto object-contain filter drop-shadow-md group-hover:scale-110 transition-transform" src="/workora.png"/>
               <span class="font-display-lg text-xl text-[#dde2f4] font-bold">Workora</span>
             </div>
             <p class="font-body-md text-[#c2c6d6] opacity-80 text-xs leading-relaxed max-w-xs mb-4">

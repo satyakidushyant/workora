@@ -55,19 +55,19 @@ import { AuthShaderComponent } from '../components/auth-shader.component';
 
           <!-- Form -->
           <form class="space-y-6" (ngSubmit)="onSubmit()">
-            <div class="space-y-1">
+            <div class="space-y-1.5 group">
               <label class="font-label-sm text-xs text-on-surface-variant ml-1 uppercase tracking-wider font-semibold" for="email">Corporate Email</label>
-              <div class="input-focus-expand relative flex items-center border-b-2 border-white/10 py-2 transition-colors duration-300">
-                <span class="material-symbols-outlined text-outline absolute left-0 text-xl pointer-events-none">mail</span>
+              <div class="glass-input-box relative flex items-center px-4 py-3">
                 <input 
-                  class="w-full bg-transparent border-none focus:ring-0 text-sm text-on-surface pl-8 pr-2 placeholder:text-outline/50 outline-none" 
+                  class="w-full bg-transparent border-none p-0 text-slate-100 placeholder:text-slate-500 text-sm focus:outline-none focus:ring-0 shadow-none appearance-none" 
                   id="email" 
                   name="email"
                   [(ngModel)]="email"
-                  placeholder="name@company.com" 
+                  placeholder="admin@workora.com" 
                   required 
                   type="email"
                 />
+                <span class="material-symbols-outlined text-slate-400 group-focus-within:text-primary transition-colors text-xl pointer-events-none ml-2 shrink-0">mail</span>
               </div>
             </div>
 

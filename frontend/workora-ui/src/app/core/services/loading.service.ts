@@ -3,6 +3,7 @@ import { Router, NavigationStart, NavigationEnd, NavigationCancel, NavigationErr
 
 /**
  * Service managing global application loading indicators and route transition overlays.
+ * Enforces a smooth minimum visible display time (800ms) to prevent quick flickers.
  */
 @Injectable({
   providedIn: 'root'
@@ -15,28 +16,34 @@ export class LoadingService {
    */
   readonly isRouteLoading = signal<boolean>(false);
 
+  private startTime: number = 0;
+  private readonly minDisplayDurationMs: number = 800; // Enforce minimum 800ms display time
+
   constructor() {
     this.router.events.subscribe(event => {
       if (event instanceof NavigationStart) {
-        this.isRouteLoading.set(true);
+        this.show();
       } else if (
         event instanceof NavigationEnd ||
         event instanceof NavigationCancel ||
         event instanceof NavigationError
       ) {
-        // Small delay to ensure smooth transition
-        setTimeout(() => {
-          this.isRouteLoading.set(false);
-        }, 200);
+        this.hide();
       }
     });
   }
 
   show(): void {
+    this.startTime = Date.now();
     this.isRouteLoading.set(true);
   }
 
   hide(): void {
-    this.isRouteLoading.set(false);
+    const elapsed = Date.now() - this.startTime;
+    const remaining = Math.max(0, this.minDisplayDurationMs - elapsed);
+    setTimeout(() => {
+      this.isRouteLoading.set(false);
+    }, remaining);
   }
 }
+

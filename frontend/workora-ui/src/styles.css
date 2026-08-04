@@ -58,3 +58,43 @@ h1, h2, h3, .font-display-lg, .font-headline-md {
 .text-glow {
   text-shadow: 0 0 30px rgba(173, 198, 255, 0.4);
 }
+
+/* Global Form Input & Autofill Reset for Spatial Dark Glass Theme */
+input, textarea, select {
+  background-color: transparent !important;
+  color: #f8fafc !important;
+  color-scheme: dark;
+}
+
+/* WebKit / Chrome / Edge Autofill Override (Fixes solid white boxes on autofill) */
+input:-webkit-autofill,
+input:-webkit-autofill:hover, 
+input:-webkit-autofill:focus, 
+input:-webkit-autofill:active {
+  -webkit-background-clip: text !important;
+  -webkit-text-fill-color: #f8fafc !important;
+  transition: background-color 50000s ease-in-out 0s !important;
+  box-shadow: 0 0 0px 1000px #0f172a inset !important;
+}
+
+/* Custom Dark Glass Input Box Utility */
+.glass-input-box {
+  background-color: rgba(15, 23, 42, 0.65) !important;
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.12) !important;
+  border-radius: 0.75rem !important;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.glass-input-box:hover {
+  background-color: rgba(15, 23, 42, 0.85) !important;
+  border-color: rgba(255, 255, 255, 0.22) !important;
+}
+
+.glass-input-box:focus-within {
+  background-color: rgba(15, 23, 42, 0.95) !important;
+  border-color: rgba(77, 142, 255, 0.85) !important;
+  box-shadow: 0 0 0 3px rgba(77, 142, 255, 0.2), 0 0 25px rgba(77, 142, 255, 0.15) !important;
+}
+
