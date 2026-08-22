@@ -20,7 +20,14 @@ x86/
 bld/
 bin/
 obj/
+[Bb]in/
+[Oo]bj/
+# Logs
 [Ll]og/
+[Ll]ogs/
+*.log
+**/logs/
+**/internal-nlog.txt
 
 # Visual Studio folder
 .vs/

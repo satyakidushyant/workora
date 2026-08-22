@@ -120,7 +120,7 @@ public class DatabaseSeeder
         if (admin == null)
         {
             _logger.LogInformation("Seeding Super Admin user...");
-            var passwordHash = _passwordHasher.HashPassword("SuperSecureP@ssw0rd!");
+            var passwordHash = _passwordHasher.HashPassword("Admin@123");
             admin = User.Create(adminEmail, "Super", "Admin", passwordHash);
             
             await _context.Users.AddAsync(admin);
