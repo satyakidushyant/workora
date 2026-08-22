@@ -1,88 +1,86 @@
-import { Component, Input, Output, EventEmitter, OnInit, inject } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { Component, ElementRef, Input, Output, EventEmitter, OnInit, AfterViewInit, OnDestroy, inject, PLATFORM_ID } from '@angular/core';
+import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { gsap } from 'gsap';
 import { UserSummary, AdminResetPasswordParams } from '../../../../domain/models/user.model';
 
+/**
+ * Enterprise Workora Admin Reset Password Modal Component.
+ * Enables administrators to securely reset employee credentials with validation and GSAP motion.
+ */
 @Component({
   selector: 'app-admin-reset-password-modal',
   standalone: true,
   imports: [CommonModule, ReactiveFormsModule],
   template: `
-    <div class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-md animate-fade-in">
-      <div class="relative w-full max-w-md p-6 sm:p-8 bg-slate-900/90 border border-slate-800 rounded-3xl shadow-2xl shadow-purple-500/10 overflow-hidden">
-        <!-- Background Glow -->
-        <div class="absolute -top-24 -right-24 w-64 h-64 bg-purple-600/20 rounded-full blur-3xl pointer-events-none"></div>
-
+    <div class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-xs modal-backdrop">
+      <div class="relative w-full max-w-md p-6 sm:p-8 bg-white border border-[#DCEBE7] rounded-3xl shadow-2xl overflow-hidden modal-box">
+        
         <!-- Header -->
-        <div class="flex items-center justify-between pb-4 mb-6 border-b border-slate-800">
+        <div class="flex items-center justify-between pb-4 mb-6 border-b border-[#DCEBE7]">
           <div>
-            <h2 class="text-xl font-bold text-white tracking-tight">
+            <h2 class="text-xl font-extrabold text-[#063B39] tracking-tight font-heading">
               Reset User Password
             </h2>
-            <p class="text-xs text-slate-400 mt-1">
-              Override password for <span class="text-indigo-400 font-semibold">{{ targetUser?.email }}</span>
+            <p class="text-xs text-[#6B7F7C] mt-0.5">
+              Override credentials for <span class="text-[#0E6E68] font-bold">{{ targetUser?.email }}</span>
             </p>
           </div>
           <button
             (click)="onCancel()"
-            class="p-2 text-slate-400 hover:text-white rounded-xl hover:bg-slate-800/60 transition-colors"
+            class="p-1.5 text-slate-400 hover:text-[#063B39] rounded-xl hover:bg-[#DCEBE7]/40 transition-colors border-none bg-transparent cursor-pointer"
             aria-label="Close modal">
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-            </svg>
+            <span class="material-symbols-outlined text-xl">close</span>
           </button>
         </div>
 
         <!-- Form -->
         <form [formGroup]="resetForm" (ngSubmit)="onSubmit()" class="space-y-4">
           <!-- New Password -->
-          <div>
-            <label class="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-1.5">
+          <div class="space-y-1">
+            <label class="block text-xs font-bold text-[#063B39] uppercase tracking-wider">
               New Password
             </label>
             <input
               type="password"
               formControlName="newPassword"
               placeholder="Enter new strong password"
-              class="w-full px-4 py-3 bg-slate-950/60 border border-slate-800 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:border-purple-500 focus:ring-1 focus:ring-purple-500 transition-all" />
-            <div *ngIf="resetForm.get('newPassword')?.touched && resetForm.get('newPassword')?.invalid" class="text-red-400 text-xs mt-1">
+              class="workora-input text-xs" />
+            <div *ngIf="resetForm.get('newPassword')?.touched && resetForm.get('newPassword')?.invalid" class="text-red-600 text-xs mt-0.5">
               Password must be at least 8 characters long.
             </div>
           </div>
 
           <!-- Confirm Password -->
-          <div>
-            <label class="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-1.5">
+          <div class="space-y-1">
+            <label class="block text-xs font-bold text-[#063B39] uppercase tracking-wider">
               Confirm New Password
             </label>
             <input
               type="password"
               formControlName="confirmPassword"
               placeholder="Re-enter new password"
-              class="w-full px-4 py-3 bg-slate-950/60 border border-slate-800 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:border-purple-500 focus:ring-1 focus:ring-purple-500 transition-all" />
-            <div *ngIf="resetForm.errors?.['mismatch'] && resetForm.get('confirmPassword')?.touched" class="text-red-400 text-xs mt-1">
+              class="workora-input text-xs" />
+            <div *ngIf="resetForm.errors?.['mismatch'] && resetForm.get('confirmPassword')?.touched" class="text-red-600 text-xs mt-0.5">
               Passwords do not match.
             </div>
           </div>
 
           <!-- Actions -->
-          <div class="flex items-center justify-end space-x-3 pt-6 border-t border-slate-800 mt-6">
+          <div class="flex items-center justify-end gap-3 pt-5 border-t border-[#DCEBE7] mt-6">
             <button
               type="button"
               (click)="onCancel()"
-              class="px-5 py-2.5 rounded-xl border border-slate-700 text-slate-300 hover:bg-slate-800 hover:text-white transition-colors text-sm font-medium">
+              class="workora-btn-secondary px-4 py-2 text-xs">
               Cancel
             </button>
             <button
               type="submit"
               [disabled]="resetForm.invalid || isSubmitting"
-              class="px-6 py-2.5 rounded-xl bg-gradient-to-r from-purple-500 to-indigo-600 hover:from-purple-600 hover:to-indigo-700 text-white font-medium text-sm shadow-lg shadow-purple-500/25 transition-all disabled:opacity-50 disabled:cursor-not-allowed">
+              class="workora-btn-primary px-5 py-2 text-xs disabled:opacity-50 disabled:cursor-not-allowed">
               <span *ngIf="!isSubmitting">Reset Password</span>
-              <span *ngIf="isSubmitting" class="flex items-center space-x-2">
-                <svg class="animate-spin h-4 w-4 text-white" fill="none" viewBox="0 0 24 24">
-                  <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                  <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
-                </svg>
+              <span *ngIf="isSubmitting" class="flex items-center gap-1.5">
+                <span class="material-symbols-outlined text-sm animate-spin">progress_activity</span>
                 <span>Resetting...</span>
               </span>
             </button>
@@ -92,14 +90,18 @@ import { UserSummary, AdminResetPasswordParams } from '../../../../domain/models
     </div>
   `
 })
-export class AdminResetPasswordModalComponent implements OnInit {
+export class AdminResetPasswordModalComponent implements OnInit, AfterViewInit, OnDestroy {
   @Input() targetUser!: UserSummary | null;
   @Input() isSubmitting = false;
 
   @Output() resetPassword = new EventEmitter<AdminResetPasswordParams>();
   @Output() cancel = new EventEmitter<void>();
 
+  private readonly platformId = inject(PLATFORM_ID);
+  private readonly elementRef = inject(ElementRef);
   private readonly fb = inject(FormBuilder);
+
+  private ctx?: gsap.Context;
   resetForm!: FormGroup;
 
   ngOnInit(): void {
@@ -107,6 +109,30 @@ export class AdminResetPasswordModalComponent implements OnInit {
       newPassword: ['', [Validators.required, Validators.minLength(8)]],
       confirmPassword: ['', [Validators.required]]
     }, { validators: this.passwordMatchValidator });
+  }
+
+  ngAfterViewInit(): void {
+    if (!isPlatformBrowser(this.platformId)) return;
+
+    this.ctx = gsap.context(() => {
+      gsap.from('.modal-backdrop', {
+        opacity: 0,
+        duration: 0.25,
+        ease: 'power2.out'
+      });
+
+      gsap.from('.modal-box', {
+        scale: 0.94,
+        y: 15,
+        opacity: 0,
+        duration: 0.35,
+        ease: 'back.out(1.3)'
+      });
+    }, this.elementRef.nativeElement);
+  }
+
+  ngOnDestroy(): void {
+    this.ctx?.revert();
   }
 
   private passwordMatchValidator(group: FormGroup) {

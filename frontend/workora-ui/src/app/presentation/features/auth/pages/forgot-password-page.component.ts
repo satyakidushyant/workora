@@ -1,7 +1,8 @@
-import { Component, inject, signal } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { Component, ElementRef, AfterViewInit, OnDestroy, inject, signal, PLATFORM_ID } from '@angular/core';
+import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { Router, RouterLink } from '@angular/router';
+import { RouterLink } from '@angular/router';
+import { gsap } from 'gsap';
 import { AuthService } from '../../../../core/services/auth.service';
 import { NotificationService } from '../../../../core/services/notification.service';
 import { AuthShaderComponent } from '../components/auth-shader.component';
@@ -9,57 +10,58 @@ import { AuthShaderComponent } from '../components/auth-shader.component';
 /**
  * Enterprise HRMS Forgot Password Component.
  * Enables users to request account password recovery link via corporate email
- * with WebGL liquid mesh shader background and glassmorphic UI.
+ * with modern Workora SaaS aesthetic and GSAP entrance animations.
  */
 @Component({
   selector: 'app-forgot-password-page',
   standalone: true,
   imports: [CommonModule, FormsModule, RouterLink, AuthShaderComponent],
   template: `
-    <div class="min-h-screen flex flex-col items-center justify-center font-body-md text-on-surface selection:bg-primary/30 relative overflow-x-hidden bg-[#0d1320] antialiased">
-      <!-- WebGL Shader Background & Interactive Atmospheric Orbs -->
+    <div class="min-h-screen flex flex-col justify-between font-sans text-[#163331] bg-[#F4F8F7] relative overflow-x-hidden antialiased selection:bg-[#DCEBE7] selection:text-[#063B39]">
       <app-auth-shader></app-auth-shader>
 
-      <main class="relative z-10 w-full max-w-md px-6 py-12 my-auto">
-        <!-- Top Branding -->
-        <div class="flex flex-col items-center mb-8">
-          <div class="flex items-center gap-3 mb-2 cursor-pointer" routerLink="/">
-            <img alt="Workora Logo" class="h-10 w-auto object-contain filter drop-shadow-[0_0_15px_rgba(77,142,255,0.5)]" src="/workora.png"/>
-            <span class="font-display-lg text-2xl font-bold tracking-tight text-on-surface">Workora</span>
-          </div>
-        </div>
+      <!-- Header Navigation -->
+      <header class="relative z-10 w-full px-6 md:px-12 py-5 flex justify-between items-center max-w-7xl mx-auto">
+        <a routerLink="/" class="flex items-center gap-3 cursor-pointer group text-decoration-none">
+          <img alt="Workora Logo" class="h-9 w-auto object-contain transition-transform group-hover:scale-105 drop-shadow-xs" src="/workoraLogo.png"/>
+          <span class="text-2xl font-extrabold tracking-tight text-[#063B39] font-heading flex items-center">
+            Workora
+            <span class="w-1.5 h-1.5 rounded-full bg-[#0E6E68] ml-1"></span>
+          </span>
+        </a>
+      </header>
 
-        <!-- Central Glass Card -->
-        <div class="glass-card bg-surface-container-low/60 rounded-2xl p-8 relative overflow-hidden">
-          <!-- Icon Header -->
-          <div class="flex flex-col items-center text-center mb-8">
-            <div class="relative mb-4">
-              <div class="absolute inset-0 bg-secondary/20 blur-xl rounded-full"></div>
-              <div class="relative w-16 h-16 rounded-full bg-secondary-container/20 border border-secondary/30 flex items-center justify-center">
-                <span class="material-symbols-outlined text-secondary text-3xl" style="font-variation-settings: 'FILL' 1;">lock_reset</span>
-              </div>
+      <!-- Central Card Container -->
+      <main class="relative z-10 w-full max-w-md px-6 py-8 mx-auto my-auto">
+        
+        <div class="bg-white rounded-3xl p-8 sm:p-10 border border-[#DCEBE7] shadow-lg relative auth-card">
+          
+          <!-- Header -->
+          <div class="text-center mb-6 space-y-2">
+            <div class="inline-flex p-3 rounded-2xl bg-[#DCEBE7] text-[#0E6E68] mb-1">
+              <span class="material-symbols-outlined text-3xl">lock_reset</span>
             </div>
-            <h1 class="font-headline-md text-2xl font-bold text-on-surface mb-2">Forgot Password?</h1>
-            <p class="font-body-md text-sm text-on-surface-variant max-w-[280px]">
-              Enter your corporate email and we'll send you a link to reset your password.
+            <h1 class="text-2xl sm:text-3xl font-extrabold text-[#063B39] tracking-tight font-heading">Reset Password</h1>
+            <p class="text-xs sm:text-sm text-[#6B7F7C] leading-relaxed">
+              Enter your corporate email and we'll send you an encrypted recovery link.
             </p>
           </div>
 
           <!-- Error Alert Banner -->
           @if (errorMessage()) {
-            <div class="mb-6 p-4 rounded-xl bg-error/10 border border-error/20 flex items-start gap-3 text-error">
-              <span class="material-symbols-outlined text-xl shrink-0 mt-0.5">error</span>
-              <div class="font-body-sm text-xs">{{ errorMessage() }}</div>
+            <div class="mb-4 p-3.5 rounded-xl bg-red-50 border border-red-200/80 flex items-start gap-2.5 text-red-700 text-xs animate-in fade-in duration-200">
+              <span class="material-symbols-outlined text-lg shrink-0 mt-0.5 text-red-600">error</span>
+              <div class="font-medium leading-relaxed">{{ errorMessage() }}</div>
             </div>
           }
 
           <!-- Form -->
-          <form class="space-y-6" (ngSubmit)="onSubmit()">
-            <div class="space-y-1.5 group">
-              <label class="font-label-sm text-xs text-on-surface-variant ml-1 uppercase tracking-wider font-semibold" for="email">Corporate Email</label>
-              <div class="glass-input-box relative flex items-center px-4 py-3">
+          <form class="space-y-4" (ngSubmit)="onSubmit()">
+            <div class="space-y-1.5 auth-field">
+              <label class="text-xs font-bold text-[#063B39] uppercase tracking-wider" for="email">Corporate Email</label>
+              <div class="relative flex items-center">
                 <input 
-                  class="w-full bg-transparent border-none p-0 text-slate-100 placeholder:text-slate-500 text-sm focus:outline-none focus:ring-0 shadow-none appearance-none" 
+                  class="workora-input pr-10" 
                   id="email" 
                   name="email"
                   [(ngModel)]="email"
@@ -67,13 +69,13 @@ import { AuthShaderComponent } from '../components/auth-shader.component';
                   required 
                   type="email"
                 />
-                <span class="material-symbols-outlined text-slate-400 group-focus-within:text-primary transition-colors text-xl pointer-events-none ml-2 shrink-0">mail</span>
+                <span class="material-symbols-outlined text-[#3FA79B] absolute right-3.5 text-lg pointer-events-none">mail</span>
               </div>
             </div>
 
             <button 
               [disabled]="isLoading() || isSubmitted()" 
-              class="w-full bg-gradient-to-r from-primary-container to-secondary py-3.5 rounded-full font-bold text-on-primary-container hover:scale-[1.02] active:scale-95 transition-all duration-300 shadow-lg shadow-primary/20 flex items-center justify-center gap-2 cursor-pointer disabled:opacity-75" 
+              class="w-full h-12 workora-btn-primary disabled:opacity-75" 
               type="submit"
             >
               @if (isLoading()) {
@@ -83,7 +85,7 @@ import { AuthShaderComponent } from '../components/auth-shader.component';
                 <span class="material-symbols-outlined text-lg">check_circle</span>
                 <span>Reset Link Sent</span>
               } @else {
-                <span>Send Reset Link</span>
+                <span>Send Recovery Link</span>
                 <span class="material-symbols-outlined text-lg">send</span>
               }
             </button>
@@ -91,91 +93,68 @@ import { AuthShaderComponent } from '../components/auth-shader.component';
 
           <!-- Success Notification Banner -->
           @if (isSubmitted()) {
-            <div class="mt-6 p-4 rounded-xl bg-secondary/10 border border-secondary/30 flex items-start gap-3 animate-in fade-in duration-300">
-              <span class="material-symbols-outlined text-secondary shrink-0 mt-0.5">check_circle</span>
+            <div class="mt-4 p-3.5 rounded-xl bg-emerald-50 border border-emerald-200/80 flex items-start gap-2.5 text-emerald-800 text-xs animate-in fade-in duration-200">
+              <span class="material-symbols-outlined text-emerald-600 shrink-0 mt-0.5 text-lg">check_circle</span>
               <div>
-                <p class="font-label-sm text-xs text-secondary font-bold">Recovery link sent!</p>
-                <p class="font-body-sm text-xs text-on-surface-variant opacity-90 mt-0.5 leading-relaxed">
-                  Please check your corporate inbox and follow instructions to update password.
+                <p class="font-bold">Recovery email dispatched</p>
+                <p class="opacity-90 mt-0.5 leading-relaxed">
+                  Please check your inbox and follow the secure instructions to set a new password.
                 </p>
               </div>
             </div>
           }
 
           <!-- Back to Login -->
-          <div class="mt-8 pt-6 border-t border-white/5 text-center">
-            <a routerLink="/login" class="inline-flex items-center gap-2 font-label-sm text-xs text-on-surface-variant hover:text-primary transition-colors group cursor-pointer">
-              <span class="material-symbols-outlined text-lg transition-transform duration-300 group-hover:-translate-x-1">arrow_back</span>
-              <span>Back to Login</span>
+          <div class="mt-6 pt-4 border-t border-[#DCEBE7] text-center">
+            <a routerLink="/login" class="inline-flex items-center gap-2 text-xs font-bold text-[#0E6E68] hover:text-[#063B39] transition-colors cursor-pointer">
+              <span class="material-symbols-outlined text-base">arrow_back</span>
+              <span>Back to Sign In</span>
             </a>
           </div>
         </div>
 
-        <!-- Footer Support & Copyright -->
-        <div class="mt-8 text-center space-y-2">
-          <p class="font-body-sm text-xs text-on-surface-variant">
-            Having trouble? <a (click)="onContactAdmin($event)" class="text-secondary font-semibold hover:underline cursor-pointer">Contact System Administrator</a>
-          </p>
-          <p class="font-label-sm text-xs text-outline/60">
-            © 2026 Workora Enterprise. All rights reserved.
-          </p>
+        <div class="mt-6 text-center text-xs text-[#6B7F7C]">
+          Having trouble? <a (click)="onContactAdmin($event)" class="text-[#0E6E68] font-bold hover:underline cursor-pointer">Contact IT Support</a>
         </div>
       </main>
+
+      <!-- Footer -->
+      <footer class="relative z-10 w-full px-6 py-4 text-center text-xs text-[#6B7F7C]">
+        <p>© 2026 Workora HRMS. All rights reserved.</p>
+      </footer>
     </div>
-  `,
-  styles: [`
-    .glass-card {
-      background: rgba(26, 32, 44, 0.45);
-      backdrop-filter: blur(24px);
-      -webkit-backdrop-filter: blur(24px);
-      border: 1px solid rgba(255, 255, 255, 0.12);
-      box-shadow: inset 1px 1px 0px rgba(255, 255, 255, 0.15), 0 25px 50px -12px rgba(0, 0, 0, 0.5);
-      transition: border-color 0.3s ease;
-    }
-
-    .glass-card:hover {
-      border-color: rgba(255, 255, 255, 0.25);
-    }
-
-    .input-focus-expand {
-      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    }
-
-    .input-focus-expand:focus-within {
-      border-bottom-color: #adc6ff;
-      box-shadow: 0 10px 20px -10px rgba(173, 198, 255, 0.3);
-    }
-  `]
+  `
 })
-export class ForgotPasswordPageComponent {
-
+export class ForgotPasswordPageComponent implements AfterViewInit, OnDestroy {
+  private readonly platformId = inject(PLATFORM_ID);
+  private readonly elementRef = inject(ElementRef);
   private readonly authService: AuthService = inject(AuthService) as AuthService;
   private readonly notificationService: NotificationService = inject(NotificationService) as NotificationService;
-  private readonly router: Router = inject(Router) as Router;
 
-  /**
-   * Model storing input corporate email address.
-   */
+  private ctx?: gsap.Context;
+
   email = '';
-
-  /**
-   * Signal indicating active HTTP request.
-   */
   readonly isLoading = signal<boolean>(false);
-
-  /**
-   * Signal indicating successful reset link dispatch state.
-   */
   readonly isSubmitted = signal<boolean>(false);
-
-  /**
-   * Signal holding error feedback message.
-   */
   readonly errorMessage = signal<string | null>(null);
 
-  /**
-   * Submits password recovery link request.
-   */
+  ngAfterViewInit(): void {
+    if (!isPlatformBrowser(this.platformId)) return;
+
+    this.ctx = gsap.context(() => {
+      gsap.from('.auth-card', {
+        y: 25,
+        opacity: 0,
+        duration: 0.7,
+        ease: 'power3.out'
+      });
+    }, this.elementRef.nativeElement);
+  }
+
+  ngOnDestroy(): void {
+    this.ctx?.revert();
+  }
+
   onSubmit(): void {
     if (!this.email) {
       const msg = 'Please enter your corporate email address.';
@@ -202,12 +181,6 @@ export class ForgotPasswordPageComponent {
     });
   }
 
-
-  /**
-   * Handles contact administrator click action.
-   * 
-   * @param event DOM Event
-   */
   onContactAdmin(event: Event): void {
     event.preventDefault();
     this.errorMessage.set('Please contact IT Desk or HR Administrator for manual account recovery.');

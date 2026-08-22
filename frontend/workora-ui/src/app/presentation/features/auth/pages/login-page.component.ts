@@ -1,263 +1,266 @@
-import { Component, inject, signal } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { Component, ElementRef, AfterViewInit, OnDestroy, inject, signal, PLATFORM_ID } from '@angular/core';
+import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
+import { gsap } from 'gsap';
 import { AuthService } from '../../../../core/services/auth.service';
 import { NotificationService } from '../../../../core/services/notification.service';
 import { AuthShaderComponent } from '../components/auth-shader.component';
 
 /**
  * Enterprise HRMS Secure Login Page Component.
- * Features ultra-sleek spatial glassmorphism architecture, WebGL liquid mesh shader background,
- * multi-factor corporate credentials authentication, SSO integration, live error feedback,
- * and password visibility toggle.
+ * Features a modern split-screen SaaS layout, Workora brand showcase,
+ * GSAP entrance animations, corporate credentials authentication, and SSO support.
  */
 @Component({
   selector: 'app-login-page',
   standalone: true,
   imports: [CommonModule, FormsModule, RouterLink, AuthShaderComponent],
   template: `
-    <div class="dark selection:bg-primary/30 selection:text-on-primary font-body-md text-on-surface bg-[#0d1320] min-h-screen relative overflow-x-hidden flex flex-col antialiased">
-      <!-- WebGL Shader Background & Interactive Atmospheric Orbs -->
+    <div class="font-sans text-[#163331] bg-[#F4F8F7] min-h-screen relative overflow-x-hidden flex flex-col justify-between antialiased selection:bg-[#DCEBE7] selection:text-[#063B39]">
+      <!-- Soft Ambient Background Glows -->
       <app-auth-shader></app-auth-shader>
 
-      <!-- Header Navigation -->
-      <header class="relative z-10 w-full px-6 md:px-10 py-6 flex justify-between items-center max-w-7xl mx-auto">
-        <div class="flex items-center gap-3 cursor-pointer" routerLink="/">
-          <img alt="Workora Logo" class="h-10 w-auto object-contain filter drop-shadow-[0_0_15px_rgba(77,142,255,0.5)]" src="/workora.png"/>
-          <span class="font-display-lg text-2xl font-bold text-on-surface tracking-tight">Workora</span>
-        </div>
-        <a (click)="onHelpCenter($event)" class="text-on-surface-variant hover:text-primary transition-colors font-label-sm uppercase tracking-wider text-xs cursor-pointer" href="#">
-          Help Center
+      <!-- Top Simple Header Bar -->
+      <header class="relative z-10 w-full px-6 md:px-12 py-5 flex justify-between items-center max-w-7xl mx-auto">
+        <a routerLink="/" class="flex items-center gap-3 cursor-pointer group text-decoration-none">
+          <div class="relative flex items-center justify-center">
+            <img alt="Workora Logo" class="h-9 w-auto object-contain transition-transform group-hover:scale-105 drop-shadow-xs" src="/workoraLogo.png"/>
+          </div>
+          <span class="text-2xl font-extrabold tracking-tight text-[#063B39] font-heading flex items-center">
+            Workora
+            <span class="w-1.5 h-1.5 rounded-full bg-[#0E6E68] ml-1"></span>
+          </span>
         </a>
+        
+        <div class="flex items-center gap-6">
+          <a (click)="onHelpCenter($event)" class="text-xs font-bold text-[#0E6E68] hover:text-[#063B39] transition-colors uppercase tracking-wider cursor-pointer">
+            Help Center
+          </a>
+        </div>
       </header>
 
-      <!-- Main Login Content -->
-      <main class="flex-grow flex items-center justify-center p-4 md:p-8 relative z-10 my-auto">
-        <div class="w-full max-w-[480px]">
-          <!-- Login Glass Bento Card -->
-          <div class="glass-card rounded-2xl p-6 md:p-10 flex flex-col gap-6">
-            <div class="text-center space-y-2">
-              <h1 class="font-display-lg text-3xl md:text-4xl font-extrabold text-on-surface tracking-tight">Welcome Back</h1>
-              <p class="text-on-surface-variant font-body-md text-sm opacity-80">Access your workspace and data depth.</p>
+      <!-- Main Split-Screen Content Area -->
+      <main class="flex-grow flex items-center justify-center px-4 py-8 md:py-12 relative z-10 max-w-7xl mx-auto w-full">
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-16 items-center w-full">
+          
+          <!-- LEFT: Brand Showcase Banner (Visible on Desktop/Tablet) -->
+          <div class="lg:col-span-6 space-y-8 text-center lg:text-left auth-brand-side">
+            
+            <!-- Value Pill -->
+            <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#DCEBE7] border border-[rgba(14,110,104,0.2)] text-[#0E6E68] text-xs font-bold uppercase tracking-wider shadow-xs">
+              <span class="w-2 h-2 rounded-full bg-[#0E6E68] animate-pulse"></span>
+              <span>Next-Gen Enterprise HRMS</span>
             </div>
 
-            <!-- Error Alert Banner -->
-            @if (errorMessage()) {
-              <div class="p-4 rounded-xl bg-error/10 border border-error/20 flex items-start gap-3 text-error animate-in fade-in duration-200">
-                <span class="material-symbols-outlined text-xl shrink-0 mt-0.5">error</span>
-                <div class="font-body-sm text-xs font-medium">{{ errorMessage() }}</div>
-              </div>
-            }
-
-            <!-- Corporate SSO Button -->
-            <button 
-              type="button" 
-              (click)="onSsoLogin()"
-              class="w-full h-14 flex items-center justify-center gap-3 bg-white/10 hover:bg-white/15 border border-white/10 rounded-full transition-all duration-300 group cursor-pointer"
-            >
-              <span class="material-symbols-outlined text-secondary" style="font-variation-settings: 'FILL' 1;">lock_person</span>
-              <span class="font-label-sm text-sm font-semibold text-on-surface">Continue with Corporate SSO</span>
-            </button>
-
-            <!-- Divider -->
-            <div class="flex items-center gap-4 py-1">
-              <div class="h-px flex-grow bg-white/10"></div>
-              <span class="text-xs text-outline font-medium uppercase tracking-widest">Or credentials</span>
-              <div class="h-px flex-grow bg-white/10"></div>
-            </div>
-
-            <!-- Credentials Form -->
-            <form (ngSubmit)="onSubmit()" class="flex flex-col gap-5">
-              <!-- Email Field -->
-              <div class="space-y-1.5 group">
-                <label class="text-xs text-outline ml-1 uppercase tracking-wider font-semibold">Corporate Email</label>
-                <div class="glass-input-box relative flex items-center px-4 py-3">
-                  <input 
-                    type="email" 
-                    name="email"
-                    [(ngModel)]="email"
-                    required
-                    placeholder="admin@workora.com"
-                    class="w-full bg-transparent border-none p-0 text-slate-100 placeholder:text-slate-500 text-sm focus:outline-none focus:ring-0 shadow-none appearance-none font-body-md"
-                  />
-                  <span class="material-symbols-outlined text-slate-400 group-focus-within:text-primary transition-colors text-xl pointer-events-none ml-2 shrink-0">alternate_email</span>
-                </div>
-              </div>
-
-              <!-- Password Field -->
-              <div class="space-y-1.5 group">
-                <div class="flex justify-between items-end pr-1">
-                  <label class="text-xs text-outline ml-1 uppercase tracking-wider font-semibold">Password</label>
-                  <a routerLink="/forgot-password" class="text-xs text-primary/80 hover:text-primary transition-colors cursor-pointer">Forgot Password?</a>
-                </div>
-                <div class="glass-input-box relative flex items-center px-4 py-3">
-                  <input 
-                    [type]="showPassword() ? 'text' : 'password'"
-                    name="password"
-                    [(ngModel)]="password"
-                    required
-                    placeholder="••••••••••••"
-                    class="w-full bg-transparent border-none p-0 text-slate-100 placeholder:text-slate-500 text-sm focus:outline-none focus:ring-0 shadow-none appearance-none font-body-md pr-2"
-                  />
-                  <button 
-                    type="button"
-                    (click)="showPassword.set(!showPassword())"
-                    class="material-symbols-outlined text-slate-400 hover:text-primary transition-colors cursor-pointer text-xl ml-2 shrink-0 flex items-center justify-center"
-                  >
-                    {{ showPassword() ? 'visibility_off' : 'visibility' }}
-                  </button>
-                </div>
-              </div>
-
-              <!-- Submit Button -->
-              <button 
-                type="submit"
-                [disabled]="isLoading()"
-                class="button-glow mt-2 w-full h-14 bg-gradient-to-r from-primary-container to-tertiary-container rounded-full text-on-primary-container font-headline-md text-base font-bold flex items-center justify-center gap-2 group cursor-pointer disabled:opacity-75"
-              >
-                @if (isLoading()) {
-                  <span class="material-symbols-outlined text-xl animate-spin">progress_activity</span>
-                  <span>Authenticating...</span>
-                } @else {
-                  <span>Sign In to Workspace</span>
-                  <span class="material-symbols-outlined group-hover:translate-x-1 transition-transform">arrow_forward</span>
-                }
-              </button>
-            </form>
-
-            <div class="mt-2 text-center">
-              <p class="text-xs text-outline">
-                New to Workora? <a (click)="onContactAdmin($event)" class="text-secondary font-bold hover:underline cursor-pointer">Request Access</a>
+            <!-- Title & Subtitle -->
+            <div class="space-y-3">
+              <h1 class="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-[#063B39] tracking-tight leading-[1.15] font-heading">
+                Empower Your People. <br class="hidden sm:block"/>
+                <span class="text-[#0E6E68]">Simplify Your Work.</span>
+              </h1>
+              <p class="text-sm sm:text-base text-[#6B7F7C] max-w-lg leading-relaxed mx-auto lg:mx-0">
+                Log in to coordinate payroll, attendance tracking, team operations, and employee performance in one unified executive workspace.
               </p>
             </div>
-          </div>
 
-          <!-- Trust Footer -->
-          <div class="mt-10 text-center space-y-4">
-            <p class="text-xs text-outline uppercase tracking-[0.2em] font-semibold">Trusted by the world's most innovative teams</p>
-            <div class="flex justify-center items-center gap-8 opacity-50 grayscale contrast-125 hover:opacity-80 transition-opacity">
-              <div class="flex items-center gap-1.5">
-                <span class="material-symbols-outlined text-lg">rocket_launch</span>
-                <span class="font-bold text-xs tracking-wider">SPACE-X</span>
+            <!-- Floating Feature Highlights -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
+              <div class="bg-white/85 backdrop-blur-md p-4 rounded-2xl border border-[#DCEBE7] shadow-sm flex items-center gap-3">
+                <div class="w-10 h-10 rounded-xl bg-[#DCEBE7] text-[#0E6E68] flex items-center justify-center shrink-0">
+                  <span class="material-symbols-outlined text-xl">verified_user</span>
+                </div>
+                <div class="text-left">
+                  <h4 class="text-xs font-bold text-[#063B39]">SOC-2 &amp; GDPR</h4>
+                  <p class="text-[11px] text-[#6B7F7C]">256-bit encrypted data vault</p>
+                </div>
               </div>
-              <div class="flex items-center gap-1.5">
-                <span class="material-symbols-outlined text-lg">bolt</span>
-                <span class="font-bold text-xs tracking-wider">VOLT</span>
-              </div>
-              <div class="flex items-center gap-1.5">
-                <span class="material-symbols-outlined text-lg">cloud</span>
-                <span class="font-bold text-xs tracking-wider">NEBULA</span>
+
+              <div class="bg-white/85 backdrop-blur-md p-4 rounded-2xl border border-[#DCEBE7] shadow-sm flex items-center gap-3">
+                <div class="w-10 h-10 rounded-xl bg-[#DCEBE7] text-[#3FA79B] flex items-center justify-center shrink-0">
+                  <span class="material-symbols-outlined text-xl">speed</span>
+                </div>
+                <div class="text-left">
+                  <h4 class="text-xs font-bold text-[#063B39]">Real-Time Sync</h4>
+                  <p class="text-[11px] text-[#6B7F7C]">99.9% platform availability</p>
+                </div>
               </div>
             </div>
+
+            <!-- Trust Badge Subtext -->
+            <div class="pt-2 flex items-center justify-center lg:justify-start gap-2 text-xs text-[#0E6E68]/80 font-medium">
+              <span class="material-symbols-outlined text-base text-[#3FA79B]">lock</span>
+              <span>Protected by Workora Enterprise Shield</span>
+            </div>
+
           </div>
+
+          <!-- RIGHT: Login SaaS Card -->
+          <div class="lg:col-span-6 flex justify-center lg:justify-end">
+            <div class="w-full max-w-[460px] bg-white rounded-3xl p-8 sm:p-10 border border-[#DCEBE7] shadow-lg flex flex-col gap-6 auth-card">
+              
+              <!-- Card Header -->
+              <div class="text-center space-y-1.5">
+                <div class="inline-flex p-3 rounded-2xl bg-[#DCEBE7] text-[#0E6E68] mb-1">
+                  <span class="material-symbols-outlined text-3xl">lock_open</span>
+                </div>
+                <h2 class="text-2xl sm:text-3xl font-extrabold text-[#063B39] tracking-tight font-heading">Sign In to Workora</h2>
+                <p class="text-xs sm:text-sm text-[#6B7F7C]">Access your company's intelligent HR portal.</p>
+              </div>
+
+              <!-- Error Alert Banner -->
+              @if (errorMessage()) {
+                <div class="p-3.5 rounded-xl bg-red-50 border border-red-200/80 flex items-start gap-2.5 text-red-700 animate-in fade-in duration-200 text-xs">
+                  <span class="material-symbols-outlined text-lg shrink-0 mt-0.5 text-red-600">error</span>
+                  <div class="font-medium leading-relaxed">{{ errorMessage() }}</div>
+                </div>
+              }
+
+              <!-- Corporate SSO Button -->
+              <button 
+                type="button" 
+                (click)="onSsoLogin()"
+                class="w-full h-11 flex items-center justify-center gap-3 bg-[#FAFCFB] hover:bg-[#DCEBE7]/50 border border-[#DCEBE7] hover:border-[#3FA79B]/60 rounded-xl transition-all duration-200 group cursor-pointer text-xs font-bold text-[#063B39]"
+              >
+                <span class="material-symbols-outlined text-[#0E6E68] text-lg">domain</span>
+                <span>Continue with Corporate SSO</span>
+              </button>
+
+              <!-- Divider -->
+              <div class="flex items-center gap-4 py-0.5">
+                <div class="h-px flex-grow bg-[#DCEBE7]"></div>
+                <span class="text-[11px] text-[#6B7F7C] font-bold uppercase tracking-wider">Or with email</span>
+                <div class="h-px flex-grow bg-[#DCEBE7]"></div>
+              </div>
+
+              <!-- Credentials Form -->
+              <form (ngSubmit)="onSubmit()" class="flex flex-col gap-4">
+                
+                <!-- Email Field -->
+                <div class="space-y-1.5 auth-field">
+                  <label class="text-xs font-bold text-[#063B39] uppercase tracking-wider">Corporate Email</label>
+                  <div class="relative flex items-center">
+                    <input 
+                      type="email" 
+                      name="email"
+                      [(ngModel)]="email"
+                      required
+                      placeholder="admin@workora.com"
+                      class="workora-input pr-10"
+                    />
+                    <span class="material-symbols-outlined text-[#3FA79B] absolute right-3.5 text-lg pointer-events-none">alternate_email</span>
+                  </div>
+                </div>
+
+                <!-- Password Field -->
+                <div class="space-y-1.5 auth-field">
+                  <div class="flex justify-between items-center pr-0.5">
+                    <label class="text-xs font-bold text-[#063B39] uppercase tracking-wider">Password</label>
+                    <a routerLink="/forgot-password" class="text-xs font-semibold text-[#0E6E68] hover:text-[#063B39] transition-colors cursor-pointer">Forgot?</a>
+                  </div>
+                  <div class="relative flex items-center">
+                    <input 
+                      [type]="showPassword() ? 'text' : 'password'"
+                      name="password"
+                      [(ngModel)]="password"
+                      required
+                      placeholder="••••••••••••"
+                      class="workora-input pr-10"
+                    />
+                    <button 
+                      type="button"
+                      (click)="showPassword.set(!showPassword())"
+                      class="material-symbols-outlined text-slate-400 hover:text-[#063B39] transition-colors cursor-pointer text-lg absolute right-3.5 flex items-center justify-center border-none bg-transparent"
+                      aria-label="Toggle password visibility"
+                    >
+                      {{ showPassword() ? 'visibility_off' : 'visibility' }}
+                    </button>
+                  </div>
+                </div>
+
+                <!-- Submit Button -->
+                <button 
+                  type="submit" 
+                  [disabled]="isLoading()"
+                  class="mt-2 w-full h-12 workora-btn-primary disabled:opacity-75"
+                >
+                  @if (isLoading()) {
+                    <span class="material-symbols-outlined text-lg animate-spin">progress_activity</span>
+                    <span>Signing In...</span>
+                  } @else {
+                    <span>Sign In to Workspace</span>
+                    <span class="material-symbols-outlined text-lg group-hover:translate-x-0.5 transition-transform">arrow_forward</span>
+                  }
+                </button>
+              </form>
+
+              <!-- Footer Prompt -->
+              <div class="text-center pt-2 border-t border-[#DCEBE7]">
+                <p class="text-xs text-[#6B7F7C]">
+                  Need an account? <a (click)="onContactAdmin($event)" class="text-[#0E6E68] font-bold hover:underline cursor-pointer">Request Access</a>
+                </p>
+              </div>
+
+            </div>
+          </div>
+
         </div>
       </main>
 
-      <!-- Global Footer -->
-      <footer class="w-full mt-12 border-t border-white/10 bg-surface-container-low/40 backdrop-blur-3xl relative z-10">
-        <div class="max-w-7xl mx-auto px-6 md:px-10 py-10 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-          <div class="col-span-1 md:col-span-1 space-y-3">
-            <div class="flex items-center gap-2.5">
-              <img alt="Workora Logo" class="h-8 w-auto object-contain" src="/workora.png"/>
-              <span class="font-display-lg text-xl font-bold text-on-surface">Workora</span>
-            </div>
-            <p class="text-on-surface-variant text-xs leading-relaxed max-w-xs">
-              The spatial workforce platform designed for the future of work. Experience depth in every interaction.
-            </p>
-          </div>
-          <div class="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-3 col-span-1 md:col-span-3 gap-6">
-            <div class="space-y-2">
-              <h4 class="text-on-surface font-bold text-xs uppercase tracking-widest">Platform</h4>
-              <nav class="flex flex-col gap-1.5">
-                <a class="text-on-surface-variant hover:text-primary transition-colors text-xs" href="#">Payroll</a>
-                <a class="text-on-surface-variant hover:text-primary transition-colors text-xs" href="#">Benefits</a>
-                <a class="text-on-surface-variant hover:text-primary transition-colors text-xs" href="#">Compliance</a>
-              </nav>
-            </div>
-            <div class="space-y-2">
-              <h4 class="text-on-surface font-bold text-xs uppercase tracking-widest">Support</h4>
-              <nav class="flex flex-col gap-1.5">
-                <a class="text-on-surface-variant hover:text-primary transition-colors text-xs" href="#">Documentation</a>
-                <a class="text-on-surface-variant hover:text-primary transition-colors text-xs" href="#">API Status</a>
-                <a class="text-on-surface-variant hover:text-primary transition-colors text-xs" href="#">Support</a>
-              </nav>
-            </div>
-            <div class="space-y-2">
-              <h4 class="text-on-surface font-bold text-xs uppercase tracking-widest">Legal</h4>
-              <nav class="flex flex-col gap-1.5">
-                <a class="text-on-surface-variant hover:text-primary transition-colors text-xs" href="#">Privacy</a>
-                <a class="text-on-surface-variant hover:text-primary transition-colors text-xs" href="#">Terms</a>
-                <a class="text-on-surface-variant hover:text-primary transition-colors text-xs" href="#">Security</a>
-              </nav>
-            </div>
-          </div>
-        </div>
-        <div class="max-w-7xl mx-auto px-6 md:px-10 py-4 border-t border-white/5 flex flex-col md:flex-row justify-between items-center gap-4 opacity-60">
-          <p class="text-xs text-outline">© 2026 Workora Enterprise. All rights reserved.</p>
-          <div class="flex gap-4">
-            <span class="material-symbols-outlined text-lg hover:text-primary cursor-pointer transition-colors">language</span>
-            <span class="material-symbols-outlined text-lg hover:text-primary cursor-pointer transition-colors">public</span>
-            <span class="material-symbols-outlined text-lg hover:text-primary cursor-pointer transition-colors">mail</span>
-          </div>
-        </div>
+      <!-- Bottom Simple Footer -->
+      <footer class="relative z-10 w-full px-6 py-4 text-center text-xs text-[#6B7F7C]">
+        <p>© 2026 Workora HRMS. All rights reserved. Enterprise Workforce Cloud.</p>
       </footer>
+
     </div>
-  `,
-  styles: [`
-    .glass-card {
-      background: rgba(26, 32, 44, 0.45);
-      backdrop-filter: blur(24px);
-      -webkit-backdrop-filter: blur(24px);
-      border: 1px solid rgba(255, 255, 255, 0.12);
-      box-shadow: inset 1px 1px 0px rgba(255, 255, 255, 0.15), 0 25px 50px -12px rgba(0, 0, 0, 0.5);
-    }
-
-    .input-focus-glow:focus-within {
-      box-shadow: 0 0 15px rgba(173, 198, 255, 0.25);
-      border-color: rgba(173, 198, 255, 0.6);
-    }
-
-    .button-glow {
-      box-shadow: 0 0 0px rgba(173, 198, 255, 0);
-      transition: all 0.3s ease;
-    }
-    
-    .button-glow:hover {
-      box-shadow: 0 0 30px rgba(173, 198, 255, 0.35);
-      transform: translateY(-1px);
-    }
-  `]
+  `
 })
-export class LoginPageComponent {
+export class LoginPageComponent implements AfterViewInit, OnDestroy {
+  private readonly platformId = inject(PLATFORM_ID);
+  private readonly elementRef = inject(ElementRef);
   private readonly authService: AuthService = inject(AuthService) as AuthService;
   private readonly notificationService: NotificationService = inject(NotificationService) as NotificationService;
   private readonly router: Router = inject(Router) as Router;
 
-  /**
-   * Credentials form input parameters.
-   */
+  private ctx?: gsap.Context;
+
   email = '';
   password = '';
 
-  /**
-   * Password visibility toggle state signal.
-   */
   readonly showPassword = signal<boolean>(false);
-
-  /**
-   * API request loading status signal.
-   */
   readonly isLoading = signal<boolean>(false);
-
-  /**
-   * User feedback error message signal.
-   */
   readonly errorMessage = signal<string | null>(null);
 
-  /**
-   * Submits email and password credentials for user authentication.
-   */
+  ngAfterViewInit(): void {
+    if (!isPlatformBrowser(this.platformId)) return;
+
+    this.ctx = gsap.context(() => {
+      // Staggered Entrance Animation
+      const tl = gsap.timeline({ defaults: { ease: 'power3.out', duration: 0.7 } });
+
+      tl.from('.auth-brand-side', {
+        x: -30,
+        opacity: 0,
+        duration: 0.8
+      })
+      .from('.auth-card', {
+        x: 30,
+        opacity: 0,
+        duration: 0.8
+      }, '-=0.6')
+      .from('.auth-field', {
+        y: 15,
+        opacity: 0,
+        stagger: 0.1,
+        duration: 0.5
+      }, '-=0.4');
+    }, this.elementRef.nativeElement);
+  }
+
+  ngOnDestroy(): void {
+    this.ctx?.revert();
+  }
+
   onSubmit(): void {
     if (!this.email || !this.password) {
       const msg = 'Please enter both corporate email and password.';
@@ -287,29 +290,15 @@ export class LoginPageComponent {
     });
   }
 
-
-  /**
-   * Handles Single Sign-On (SSO) login flow.
-   */
   onSsoLogin(): void {
     this.errorMessage.set('Redirecting to corporate SSO provider portal...');
   }
 
-  /**
-   * Handles contact administrator or request access action.
-   * 
-   * @param event DOM Mouse Event.
-   */
   onContactAdmin(event: Event): void {
     event.preventDefault();
     this.errorMessage.set('Please contact your IT administrator at admin@workora.com to request access credentials.');
   }
 
-  /**
-   * Handles Help Center click action.
-   * 
-   * @param event DOM Mouse Event.
-   */
   onHelpCenter(event: Event): void {
     event.preventDefault();
     this.errorMessage.set('Help Center documentation is available at docs.workora.com.');

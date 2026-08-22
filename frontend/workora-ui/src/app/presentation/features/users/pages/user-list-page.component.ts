@@ -1,264 +1,261 @@
-import { Component, OnInit, inject, signal } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { Component, ElementRef, OnInit, AfterViewInit, OnDestroy, inject, signal, PLATFORM_ID } from '@angular/core';
+import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
+import { gsap } from 'gsap';
 import { USER_REPOSITORY, IUserRepository } from '../../../../domain/repositories/i-user.repository';
 import { UserSummary, UserQueryParams, CreateUserParams, UpdateUserParams, AdminResetPasswordParams } from '../../../../domain/models/user.model';
 import { PagedResponse } from '../../../../domain/models/api-response.model';
 import { UserFormModalComponent } from '../components/user-form-modal.component';
 import { AdminResetPasswordModalComponent } from '../components/admin-reset-password-modal.component';
-
-import { LogoLoaderComponent } from '../../../shared/components/logo-loader.component';
 import { NotificationService } from '../../../../core/services/notification.service';
 
+/**
+ * Enterprise HRMS User Management Page Component.
+ * Styled with modern Workora SaaS design system, real-time filters, search,
+ * user status management, password override, CRUD modal operations, and GSAP motion.
+ */
 @Component({
   selector: 'app-user-list-page',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterLink, UserFormModalComponent, AdminResetPasswordModalComponent, LogoLoaderComponent],
+  imports: [CommonModule, FormsModule, RouterLink, UserFormModalComponent, AdminResetPasswordModalComponent],
   template: `
     <div class="p-6 lg:p-8 space-y-6 max-w-7xl mx-auto w-full relative z-10">
+      
       <!-- Top Navigation / Breadcrumb -->
-
-        <div class="flex items-center justify-between">
-          <div class="flex items-center space-x-3 text-sm text-slate-400">
-            <a routerLink="/dashboard" class="hover:text-indigo-400 transition-colors flex items-center space-x-1">
-              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
-              </svg>
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 user-header">
+        <div>
+          <div class="flex items-center gap-2 text-xs text-[#0E6E68]/70 mb-1">
+            <a routerLink="/dashboard" class="hover:text-[#0E6E68] transition-colors flex items-center gap-1">
+              <span class="material-symbols-outlined text-sm">dashboard</span>
               <span>Dashboard</span>
             </a>
             <span>/</span>
-            <span class="text-slate-200 font-medium">User Management</span>
+            <span class="text-[#063B39] font-bold">User Management</span>
           </div>
+          <h1 class="text-2xl sm:text-3xl font-extrabold text-[#063B39] tracking-tight font-heading">User Directory</h1>
+          <p class="text-xs sm:text-sm text-[#6B7F7C] mt-0.5">Manage system access, employee roles, and directory credentials.</p>
+        </div>
 
+        <button
+          (click)="openCreateModal()"
+          class="workora-btn-primary px-5 py-2.5 text-xs">
+          <span class="material-symbols-outlined text-base">person_add</span>
+          <span>Add User</span>
+        </button>
+      </div>
+
+      <!-- Metric Cards -->
+      <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 user-stats-grid">
+        
+        <div class="p-5 bg-white border border-[#DCEBE7] rounded-2xl shadow-sm flex items-center justify-between workora-card">
+          <div>
+            <p class="text-xs font-bold text-[#6B7F7C] uppercase tracking-wider">Total Users</p>
+            <h3 class="text-2xl font-extrabold text-[#063B39] mt-1 font-heading">{{ totalUsersCount() }}</h3>
+          </div>
+          <div class="p-3 bg-[#DCEBE7] text-[#0E6E68] rounded-xl">
+            <span class="material-symbols-outlined text-2xl">groups</span>
+          </div>
+        </div>
+
+        <div class="p-5 bg-white border border-[#DCEBE7] rounded-2xl shadow-sm flex items-center justify-between workora-card">
+          <div>
+            <p class="text-xs font-bold text-[#6B7F7C] uppercase tracking-wider">Active Accounts</p>
+            <h3 class="text-2xl font-extrabold text-emerald-600 mt-1 font-heading">{{ activeUsersCount() }}</h3>
+          </div>
+          <div class="p-3 bg-emerald-50 text-emerald-600 rounded-xl">
+            <span class="material-symbols-outlined text-2xl">how_to_reg</span>
+          </div>
+        </div>
+
+        <div class="p-5 bg-white border border-[#DCEBE7] rounded-2xl shadow-sm flex items-center justify-between workora-card">
+          <div>
+            <p class="text-xs font-bold text-[#6B7F7C] uppercase tracking-wider">Inactive Accounts</p>
+            <h3 class="text-2xl font-extrabold text-rose-600 mt-1 font-heading">{{ inactiveUsersCount() }}</h3>
+          </div>
+          <div class="p-3 bg-rose-50 text-rose-600 rounded-xl">
+            <span class="material-symbols-outlined text-2xl">person_off</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Filter & Search Bar -->
+      <div class="p-4 bg-white border border-[#DCEBE7] rounded-2xl shadow-sm flex flex-col sm:flex-row items-center justify-between gap-4 workora-card">
+        
+        <!-- Filter Tabs -->
+        <div class="flex items-center gap-1 bg-[#FAFCFB] border border-[#DCEBE7] p-1 rounded-xl w-full sm:w-auto">
           <button
-            (click)="openCreateModal()"
-            class="px-5 py-2.5 bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 text-white font-medium text-sm rounded-2xl shadow-lg shadow-indigo-500/25 hover:shadow-indigo-500/40 transition-all flex items-center space-x-2">
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
-            </svg>
-            <span>Add User</span>
+            (click)="onFilterStatus(null)"
+            class="px-3.5 py-1.5 text-xs font-bold rounded-lg transition-all border-none cursor-pointer"
+            [ngClass]="activeFilter() === null ? 'bg-[#0E6E68] text-white shadow-xs' : 'text-slate-600 hover:text-[#0E6E68] bg-transparent'">
+            All Users
+          </button>
+          <button
+            (click)="onFilterStatus(true)"
+            class="px-3.5 py-1.5 text-xs font-bold rounded-lg transition-all border-none cursor-pointer"
+            [ngClass]="activeFilter() === true ? 'bg-[#0E6E68] text-white shadow-xs' : 'text-slate-600 hover:text-emerald-600 bg-transparent'">
+            Active
+          </button>
+          <button
+            (click)="onFilterStatus(false)"
+            class="px-3.5 py-1.5 text-xs font-bold rounded-lg transition-all border-none cursor-pointer"
+            [ngClass]="activeFilter() === false ? 'bg-[#0E6E68] text-white shadow-xs' : 'text-slate-600 hover:text-rose-600 bg-transparent'">
+            Inactive
           </button>
         </div>
 
-        <!-- Metric Cards -->
-        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-          <div class="p-5 bg-slate-900/60 border border-slate-800/80 rounded-3xl backdrop-blur-xl flex items-center justify-between">
-            <div>
-              <p class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Total Users</p>
-              <h3 class="text-2xl font-bold text-white mt-1">{{ totalUsersCount() }}</h3>
-            </div>
-            <div class="p-3 bg-indigo-500/10 text-indigo-400 rounded-2xl border border-indigo-500/20">
-              <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
-              </svg>
-            </div>
-          </div>
+        <!-- Search Input -->
+        <div class="relative w-full sm:w-72">
+          <input
+            type="text"
+            [(ngModel)]="searchQuery"
+            (ngModelChange)="onSearchChange()"
+            placeholder="Search by name or email..."
+            class="workora-input pl-9 text-xs" />
+          <span class="material-symbols-outlined text-slate-400 absolute left-3 top-2.5 text-base pointer-events-none">search</span>
+        </div>
+      </div>
 
-          <div class="p-5 bg-slate-900/60 border border-slate-800/80 rounded-3xl backdrop-blur-xl flex items-center justify-between">
-            <div>
-              <p class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Active Accounts</p>
-              <h3 class="text-2xl font-bold text-emerald-400 mt-1">{{ activeUsersCount() }}</h3>
-            </div>
-            <div class="p-3 bg-emerald-500/10 text-emerald-400 rounded-2xl border border-emerald-500/20">
-              <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-              </svg>
-            </div>
-          </div>
-
-          <div class="p-5 bg-slate-900/60 border border-slate-800/80 rounded-3xl backdrop-blur-xl flex items-center justify-between">
-            <div>
-              <p class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Inactive Accounts</p>
-              <h3 class="text-2xl font-bold text-rose-400 mt-1">{{ inactiveUsersCount() }}</h3>
-            </div>
-            <div class="p-3 bg-rose-500/10 text-rose-400 rounded-2xl border border-rose-500/20">
-              <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636" />
-              </svg>
-            </div>
-          </div>
+      <!-- Table Container -->
+      <div class="bg-white border border-[#DCEBE7] rounded-2xl shadow-sm overflow-hidden workora-card user-table-card">
+        
+        <!-- Subtle Loading Indicator Bar -->
+        <div *ngIf="isLoading()" class="p-12 flex flex-col items-center justify-center gap-3 text-xs font-bold text-[#0E6E68]">
+          <span class="material-symbols-outlined animate-spin text-2xl">progress_activity</span>
+          <span>Loading user directory...</span>
         </div>
 
-        <!-- Filter & Search Bar -->
-        <div class="p-4 bg-slate-900/60 border border-slate-800/80 rounded-3xl backdrop-blur-xl flex flex-col sm:flex-row items-center justify-between gap-4">
-          <!-- Filter Tabs -->
-          <div class="flex items-center space-x-1 bg-slate-950/80 p-1.5 rounded-2xl border border-slate-800 w-full sm:w-auto">
-            <button
-              (click)="onFilterStatus(null)"
-              class="px-4 py-2 text-xs font-semibold rounded-xl transition-all"
-              [ngClass]="activeFilter() === null ? 'bg-indigo-600 text-white shadow-md' : 'text-slate-400 hover:text-white'">
-              All Users
-            </button>
-            <button
-              (click)="onFilterStatus(true)"
-              class="px-4 py-2 text-xs font-semibold rounded-xl transition-all"
-              [ngClass]="activeFilter() === true ? 'bg-emerald-600 text-white shadow-md' : 'text-slate-400 hover:text-white'">
-              Active
-            </button>
-            <button
-              (click)="onFilterStatus(false)"
-              class="px-4 py-2 text-xs font-semibold rounded-xl transition-all"
-              [ngClass]="activeFilter() === false ? 'bg-rose-600 text-white shadow-md' : 'text-slate-400 hover:text-white'">
-              Inactive
-            </button>
+        <!-- Empty State -->
+        <div *ngIf="!isLoading() && users().length === 0" class="p-16 text-center space-y-3">
+          <div class="w-14 h-14 rounded-2xl bg-[#DCEBE7] text-[#0E6E68] flex items-center justify-center mx-auto">
+            <span class="material-symbols-outlined text-3xl">person_search</span>
           </div>
-
-          <!-- Search Input -->
-          <div class="relative w-full sm:w-72">
-            <input
-              type="text"
-              [(ngModel)]="searchQuery"
-              (ngModelChange)="onSearchChange()"
-              placeholder="Search by name or email..."
-              class="w-full pl-10 pr-4 py-2.5 bg-slate-950/80 border border-slate-800 rounded-2xl text-sm text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-all" />
-            <svg class="w-4 h-4 text-slate-500 absolute left-3.5 top-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-            </svg>
-          </div>
+          <h4 class="text-sm font-bold text-[#063B39]">No Users Found</h4>
+          <p class="text-xs text-[#6B7F7C] max-w-sm mx-auto">There are currently no user accounts matching your filter or search query.</p>
+          <button (click)="openCreateModal()" class="workora-btn-primary px-4 py-2 text-xs">
+            <span class="material-symbols-outlined text-sm">add</span>
+            <span>Create New User</span>
+          </button>
         </div>
 
-        <!-- Table Container -->
-        <div class="bg-slate-900/60 border border-slate-800/80 rounded-3xl backdrop-blur-xl overflow-hidden shadow-xl">
-          <!-- Loading State with Workora Logo Loader -->
-          <div *ngIf="isLoading()" class="p-12">
-            <app-logo-loader size="full" label="Loading User Accounts..." sublabel="Connecting to Workora HRMS"></app-logo-loader>
-          </div>
-
-
-          <!-- Empty State -->
-          <div *ngIf="!isLoading() && users().length === 0" class="p-12 text-center">
-            <svg class="w-12 h-12 text-slate-600 mx-auto mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
-            </svg>
-            <h4 class="text-base font-medium text-slate-300">No User Accounts Found</h4>
-            <p class="text-xs text-slate-500 mt-1">Try refining your search query or status filter.</p>
-          </div>
-
-          <!-- Data Table -->
-          <div *ngIf="!isLoading() && users().length > 0" class="overflow-x-auto">
-            <table class="w-full text-left text-sm text-slate-300">
-              <thead class="bg-slate-950/60 border-b border-slate-800 text-xs font-semibold text-slate-400 uppercase tracking-wider">
-                <tr>
-                  <th class="px-6 py-4">User</th>
-                  <th class="px-6 py-4">Status</th>
-                  <th class="px-6 py-4">Linked Employee</th>
-                  <th class="px-6 py-4">Created Date</th>
-                  <th class="px-6 py-4 text-right">Actions</th>
-                </tr>
-              </thead>
-              <tbody class="divide-y divide-slate-800/60">
-                <tr *ngFor="let u of users()" class="hover:bg-slate-800/30 transition-colors group">
-                  <!-- User Column -->
-                  <td class="px-6 py-4">
-                    <div class="flex items-center space-x-3">
-                      <div class="w-10 h-10 rounded-2xl bg-gradient-to-tr from-indigo-600 to-purple-600 flex items-center justify-center font-bold text-white shadow-md shadow-indigo-500/20 text-xs">
-                        {{ getInitials(u.firstName, u.lastName) }}
-                      </div>
-                      <div>
-                        <div class="font-semibold text-slate-100">{{ u.fullName }}</div>
-                        <div class="text-xs text-slate-400">{{ u.email }}</div>
-                      </div>
+        <!-- Data Table -->
+        <div *ngIf="!isLoading() && users().length > 0" class="overflow-x-auto">
+          <table class="w-full text-left text-xs text-[#334155]">
+            <thead class="bg-[#FAFCFB] border-b border-[#DCEBE7] text-[11px] font-bold text-[#0E6E68] uppercase tracking-wider">
+              <tr>
+                <th class="px-6 py-4">User</th>
+                <th class="px-6 py-4">Status</th>
+                <th class="px-6 py-4">Linked Employee</th>
+                <th class="px-6 py-4">Created Date</th>
+                <th class="px-6 py-4 text-right">Actions</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-[#DCEBE7]/60">
+              <tr *ngFor="let u of users()" class="hover:bg-[#DCEBE7]/20 transition-colors group user-row">
+                <!-- User Column -->
+                <td class="px-6 py-3.5">
+                  <div class="flex items-center gap-3">
+                    <div class="w-9 h-9 rounded-xl bg-[#DCEBE7] text-[#0E6E68] flex items-center justify-center font-bold text-xs shrink-0 shadow-2xs">
+                      {{ getInitials(u.firstName, u.lastName) }}
                     </div>
-                  </td>
+                    <div>
+                      <div class="font-bold text-[#063B39]">{{ u.fullName }}</div>
+                      <div class="text-[11px] text-[#6B7F7C]">{{ u.email }}</div>
+                    </div>
+                  </div>
+                </td>
 
-                  <!-- Status Column -->
-                  <td class="px-6 py-4">
-                    <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium border"
-                          [ngClass]="u.isActive ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-400' : 'bg-rose-500/10 border-rose-500/30 text-rose-400'">
-                      <span class="w-1.5 h-1.5 rounded-full mr-1.5" [ngClass]="u.isActive ? 'bg-emerald-400 animate-pulse' : 'bg-rose-400'"></span>
-                      {{ u.isActive ? 'Active' : 'Deactivated' }}
-                    </span>
-                  </td>
+                <!-- Status Column -->
+                <td class="px-6 py-3.5">
+                  <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-bold"
+                        [ngClass]="u.isActive ? 'bg-emerald-50 text-emerald-700 border border-emerald-200/60' : 'bg-rose-50 text-rose-700 border border-rose-200/60'">
+                    <span class="w-1.5 h-1.5 rounded-full mr-1.5" [ngClass]="u.isActive ? 'bg-emerald-500' : 'bg-rose-500'"></span>
+                    {{ u.isActive ? 'Active' : 'Deactivated' }}
+                  </span>
+                </td>
 
-                  <!-- Linked Employee Column -->
-                  <td class="px-6 py-4">
-                    <span *ngIf="u.employeeId" class="px-2.5 py-1 bg-slate-800/80 text-indigo-300 rounded-lg text-xs font-mono border border-slate-700">
-                      EMP-{{ u.employeeId }}
-                    </span>
-                    <span *ngIf="!u.employeeId" class="text-xs text-slate-500 italic">
-                      Unlinked
-                    </span>
-                  </td>
+                <!-- Linked Employee Column -->
+                <td class="px-6 py-3.5">
+                  <span *ngIf="u.employeeId" class="px-2.5 py-1 bg-[#FAFCFB] border border-[#DCEBE7] text-slate-700 rounded-lg font-mono text-[11px]">
+                    EMP-{{ u.employeeId }}
+                  </span>
+                  <span *ngIf="!u.employeeId" class="text-[11px] text-slate-400 italic">
+                    Unlinked
+                  </span>
+                </td>
 
-                  <!-- Created Date Column -->
-                  <td class="px-6 py-4 text-xs text-slate-400">
-                    {{ u.createdAt | date:'mediumDate' }}
-                  </td>
+                <!-- Created Date Column -->
+                <td class="px-6 py-3.5 text-[11px] text-[#6B7F7C]">
+                  {{ u.createdAt | date:'mediumDate' }}
+                </td>
 
-                  <!-- Actions Column -->
-                  <td class="px-6 py-4 text-right space-x-1">
-                    <!-- Edit Button -->
-                    <button
-                      (click)="openEditModal(u)"
-                      class="p-2 text-slate-400 hover:text-indigo-400 hover:bg-slate-800/60 rounded-xl transition-all"
-                      title="Edit User">
-                      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                      </svg>
-                    </button>
+                <!-- Actions Column -->
+                <td class="px-6 py-3.5 text-right space-x-1">
+                  <!-- Edit Button -->
+                  <button
+                    (click)="openEditModal(u)"
+                    class="p-1.5 text-[#0E6E68] hover:text-[#063B39] hover:bg-[#DCEBE7]/50 rounded-lg transition-colors border-none bg-transparent cursor-pointer"
+                    title="Edit User">
+                    <span class="material-symbols-outlined text-base">edit</span>
+                  </button>
 
-                    <!-- Toggle Activate/Deactivate -->
-                    <button
-                      (click)="toggleStatus(u)"
-                      class="p-2 rounded-xl transition-all"
-                      [ngClass]="u.isActive ? 'text-slate-400 hover:text-amber-400 hover:bg-amber-500/10' : 'text-slate-400 hover:text-emerald-400 hover:bg-emerald-500/10'"
-                      [title]="u.isActive ? 'Deactivate Account' : 'Reactivate Account'">
-                      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636" />
-                      </svg>
-                    </button>
+                  <!-- Toggle Status -->
+                  <button
+                    (click)="toggleStatus(u)"
+                    class="p-1.5 rounded-lg transition-colors border-none bg-transparent cursor-pointer"
+                    [ngClass]="u.isActive ? 'text-slate-400 hover:text-amber-600 hover:bg-amber-50' : 'text-slate-400 hover:text-emerald-600 hover:bg-emerald-50'"
+                    [title]="u.isActive ? 'Deactivate Account' : 'Reactivate Account'">
+                    <span class="material-symbols-outlined text-base">{{ u.isActive ? 'block' : 'check_circle' }}</span>
+                  </button>
 
-                    <!-- Reset Password Trigger -->
-                    <button
-                      (click)="openResetPasswordModal(u)"
-                      class="p-2 text-slate-400 hover:text-purple-400 hover:bg-slate-800/60 rounded-xl transition-all"
-                      title="Reset Password">
-                      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z" />
-                      </svg>
-                    </button>
+                  <!-- Reset Password Trigger -->
+                  <button
+                    (click)="openResetPasswordModal(u)"
+                    class="p-1.5 text-[#0E6E68] hover:text-[#063B39] hover:bg-[#DCEBE7]/50 rounded-lg transition-colors border-none bg-transparent cursor-pointer"
+                    title="Reset Password">
+                    <span class="material-symbols-outlined text-base">key</span>
+                  </button>
 
-                    <!-- Delete Button -->
-                    <button
-                      (click)="onDeleteUser(u)"
-                      class="p-2 text-slate-400 hover:text-rose-400 hover:bg-slate-800/60 rounded-xl transition-all"
-                      title="Delete User">
-                      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                      </svg>
-                    </button>
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-
-          <!-- Pagination Footer -->
-          <div *ngIf="!isLoading() && users().length > 0" class="p-4 bg-slate-950/60 border-t border-slate-800 flex items-center justify-between">
-            <span class="text-xs text-slate-400">
-              Showing Page <span class="text-white font-medium">{{ pageNumber() }}</span> of <span class="text-white font-medium">{{ totalPages() }}</span>
-            </span>
-
-            <div class="flex items-center space-x-2">
-              <button
-                (click)="changePage(pageNumber() - 1)"
-                [disabled]="pageNumber() <= 1"
-                class="px-3 py-1.5 rounded-xl border border-slate-800 text-xs font-medium text-slate-300 hover:bg-slate-800 hover:text-white transition-all disabled:opacity-40 disabled:cursor-not-allowed">
-                Previous
-              </button>
-              <button
-                (click)="changePage(pageNumber() + 1)"
-                [disabled]="pageNumber() >= totalPages()"
-                class="px-3 py-1.5 rounded-xl border border-slate-800 text-xs font-medium text-slate-300 hover:bg-slate-800 hover:text-white transition-all disabled:opacity-40 disabled:cursor-not-allowed">
-                Next
-              </button>
-            </div>
+                  <!-- Delete Button -->
+                  <button
+                    (click)="onDeleteUser(u)"
+                    class="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-colors border-none bg-transparent cursor-pointer"
+                    title="Delete User">
+                    <span class="material-symbols-outlined text-base">delete</span>
+                  </button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
         </div>
+
+        <!-- Pagination Footer -->
+        <div *ngIf="!isLoading() && users().length > 0" class="p-4 bg-[#FAFCFB] border-t border-[#DCEBE7] flex items-center justify-between text-xs text-[#6B7F7C]">
+          <span>
+            Showing Page <span class="text-[#063B39] font-bold">{{ pageNumber() }}</span> of <span class="text-[#063B39] font-bold">{{ totalPages() }}</span>
+          </span>
+
+          <div class="flex items-center gap-2">
+            <button
+              (click)="changePage(pageNumber() - 1)"
+              [disabled]="pageNumber() <= 1"
+              class="workora-btn-secondary px-3 py-1.5 text-xs disabled:opacity-40 disabled:cursor-not-allowed">
+              Previous
+            </button>
+            <button
+              (click)="changePage(pageNumber() + 1)"
+              [disabled]="pageNumber() >= totalPages()"
+              class="workora-btn-secondary px-3 py-1.5 text-xs disabled:opacity-40 disabled:cursor-not-allowed">
+              Next
+            </button>
+          </div>
+        </div>
+
+      </div>
+
     </div>
 
     <!-- User Form Modal (Create / Edit) -->
-
     <app-user-form-modal
       *ngIf="showFormModal()"
       [userToEdit]="selectedUser()"
@@ -277,11 +274,14 @@ import { NotificationService } from '../../../../core/services/notification.serv
     </app-admin-reset-password-modal>
   `
 })
-export class UserListPageComponent implements OnInit {
+export class UserListPageComponent implements OnInit, AfterViewInit, OnDestroy {
+  private readonly platformId = inject(PLATFORM_ID);
+  private readonly elementRef = inject(ElementRef);
   private readonly userRepo: IUserRepository = inject(USER_REPOSITORY);
   private readonly notificationService = inject(NotificationService);
 
-  // State Signals
+  private ctx?: gsap.Context;
+
   users = signal<UserSummary[]>([]);
   isLoading = signal<boolean>(true);
   pageNumber = signal<number>(1);
@@ -290,7 +290,6 @@ export class UserListPageComponent implements OnInit {
   totalCount = signal<number>(0);
   activeFilter = signal<boolean | null>(null);
 
-  // Modal Control Signals
   showFormModal = signal<boolean>(false);
   showResetPasswordModal = signal<boolean>(false);
   selectedUser = signal<UserSummary | null>(null);
@@ -299,13 +298,38 @@ export class UserListPageComponent implements OnInit {
   searchQuery = '';
   private searchTimeout: any;
 
-  // Computed Metrics
   totalUsersCount = signal<number>(0);
   activeUsersCount = signal<number>(0);
   inactiveUsersCount = signal<number>(0);
 
   ngOnInit(): void {
     this.loadUsers();
+  }
+
+  ngAfterViewInit(): void {
+    if (!isPlatformBrowser(this.platformId)) return;
+
+    this.ctx = gsap.context(() => {
+      gsap.from('.user-header', {
+        y: -15,
+        opacity: 0,
+        duration: 0.5,
+        ease: 'power3.out'
+      });
+
+      gsap.from('.user-stats-grid > *', {
+        y: 20,
+        opacity: 0,
+        stagger: 0.1,
+        duration: 0.5,
+        ease: 'power3.out',
+        delay: 0.1
+      });
+    }, this.elementRef.nativeElement);
+  }
+
+  ngOnDestroy(): void {
+    this.ctx?.revert();
   }
 
   loadUsers(): void {
@@ -325,7 +349,6 @@ export class UserListPageComponent implements OnInit {
         this.totalCount.set(response.totalCount);
         this.totalUsersCount.set(response.totalCount);
 
-        // Update counts
         const activeCount = response.items.filter((u: UserSummary) => u.isActive).length;
         this.activeUsersCount.set(activeCount);
         this.inactiveUsersCount.set(response.items.length - activeCount);
@@ -381,7 +404,6 @@ export class UserListPageComponent implements OnInit {
     this.isSubmittingModal.set(true);
 
     if ('id' in payload) {
-      // Update User
       this.userRepo.updateUser(payload as UpdateUserParams).subscribe({
         next: () => {
           this.notificationService.showSuccess('User profile updated successfully.');
@@ -395,7 +417,6 @@ export class UserListPageComponent implements OnInit {
         }
       });
     } else {
-      // Create User
       this.userRepo.createUser(payload as CreateUserParams).subscribe({
         next: () => {
           this.notificationService.showSuccess('User account created successfully.');
@@ -464,4 +485,3 @@ export class UserListPageComponent implements OnInit {
     return `${f}${l}` || 'U';
   }
 }
-
