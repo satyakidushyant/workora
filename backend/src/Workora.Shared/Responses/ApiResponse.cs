@@ -11,7 +11,7 @@ public class ApiResponse<T>
     /// <summary>
     /// Creates a successful API response.
     /// </summary>
-    public static ApiResponse<T> Success(T data) => new() { IsSuccess = true, Data = data };
+    public static ApiResponse<T> Success(T data, string? message = null) => new() { IsSuccess = true, Data = data, Message = message };
 
     /// <summary>
     /// Creates a failed API response.

@@ -27,7 +27,22 @@ public class PagedResponse<T>
     public int TotalCount { get; init; }
 
     /// <summary>
-    /// Gets the total number of pages available.
+    /// Parameterless constructor for deserialization.
     /// </summary>
-    public int TotalPages => (int)Math.Ceiling(TotalCount / (double)PageSize);
+    public PagedResponse() { }
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="PagedResponse{T}"/> class.
+    /// </summary>
+    /// <param name="items">The items in current page.</param>
+    /// <param name="totalCount">The total count of items across all pages.</param>
+    /// <param name="pageNumber">The 1-based page number.</param>
+    /// <param name="pageSize">The requested page size.</param>
+    public PagedResponse(IReadOnlyList<T> items, int totalCount, int pageNumber, int pageSize)
+    {
+        Items = items;
+        TotalCount = totalCount;
+        PageNumber = pageNumber;
+        PageSize = pageSize;
+    }
 }

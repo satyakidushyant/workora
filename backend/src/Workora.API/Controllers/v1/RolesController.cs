@@ -54,23 +54,23 @@ public class RolesController : ControllerBase
     /// <summary>
     /// Creates a new custom or system role.
     /// </summary>
-    /// <param name="dto">The role creation parameters.</param>
+    /// <param name="command">The role creation command payload.</param>
     /// <returns>The newly created role summary.</returns>
     [HttpPost]
     [Authorize(Policy = "roles.create")]
-    public async Task<ApiResponse<RoleDto>> CreateRole([FromBody] CreateRoleRequestDto dto)
-        => await _mediator.Send(new CreateRoleCommand(dto.Name, dto.Description, dto.PermissionIds));
+    public async Task<ApiResponse<RoleDto>> CreateRole([FromBody] CreateRoleCommand command)
+        => await _mediator.Send(command);
 
     /// <summary>
     /// Updates an existing role's name and description.
     /// </summary>
     /// <param name="id">The role ID.</param>
-    /// <param name="dto">The update parameters.</param>
+    /// <param name="command">The update command payload.</param>
     /// <returns>The updated role summary.</returns>
     [HttpPut("{id:int}")]
     [Authorize(Policy = "roles.update")]
-    public async Task<ApiResponse<RoleDto>> UpdateRole(int id, [FromBody] UpdateRoleRequestDto dto)
-        => await _mediator.Send(new UpdateRoleCommand(id, dto.Name, dto.Description));
+    public async Task<ApiResponse<RoleDto>> UpdateRole(int id, [FromBody] UpdateRoleCommand command)
+        => await _mediator.Send(command with { Id = id });
 
     /// <summary>
     /// Deletes a custom role (protected system roles and in-use roles cannot be deleted).
@@ -86,21 +86,21 @@ public class RolesController : ControllerBase
     /// Sets the full list of permissions assigned to a role.
     /// </summary>
     /// <param name="id">The target role ID.</param>
-    /// <param name="dto">The permission IDs payload.</param>
+    /// <param name="command">The permission IDs command payload.</param>
     /// <returns>A confirmation response.</returns>
     [HttpPut("{id:int}/permissions")]
     [Authorize(Policy = "roles.manage-permissions")]
-    public async Task<ApiResponse<bool>> SetRolePermissions(int id, [FromBody] SetRolePermissionsDto dto)
-        => await _mediator.Send(new SetRolePermissionsCommand(id, dto.PermissionIds));
+    public async Task<ApiResponse<bool>> SetRolePermissions(int id, [FromBody] SetRolePermissionsCommand command)
+        => await _mediator.Send(command with { RoleId = id });
 
     /// <summary>
     /// Clones an existing role along with its assigned permissions as a new role.
     /// </summary>
     /// <param name="id">The source role ID.</param>
-    /// <param name="dto">The clone parameters.</param>
+    /// <param name="command">The clone command payload.</param>
     /// <returns>The new cloned role summary.</returns>
     [HttpPost("{id:int}/clone")]
     [Authorize(Policy = "roles.create")]
-    public async Task<ApiResponse<RoleDto>> CloneRole(int id, [FromBody] CloneRoleRequestDto dto)
-        => await _mediator.Send(new CloneRoleCommand(id, dto.NewName, dto.Description));
+    public async Task<ApiResponse<RoleDto>> CloneRole(int id, [FromBody] CloneRoleCommand command)
+        => await _mediator.Send(command with { SourceRoleId = id });
 }

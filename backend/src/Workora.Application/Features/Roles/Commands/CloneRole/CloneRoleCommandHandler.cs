@@ -2,6 +2,8 @@ using AutoMapper;
 using MediatR;
 using Workora.Application.Features.Roles.DTOs;
 using Workora.Domain.Entities;
+using Workora.Domain.Enums;
+using Workora.Domain.Extensions;
 using Workora.Domain.Interfaces;
 using Workora.Shared.Responses;
 
@@ -32,7 +34,7 @@ public class CloneRoleCommandHandler : IRequestHandler<CloneRoleCommand, ApiResp
         var sourceRole = await _roleRepository.GetByIdWithPermissionsAsync(request.SourceRoleId, ct);
         if (sourceRole == null)
         {
-            return ApiResponse<RoleDto>.Fail($"Source role with ID {request.SourceRoleId} was not found.");
+            return ApiResponse<RoleDto>.Fail(ResponseMessage.RoleNotFound.GetDescription());
         }
 
         var isUnique = await _roleRepository.IsNameUniqueAsync(request.NewName, ct: ct);
@@ -56,6 +58,6 @@ public class CloneRoleCommandHandler : IRequestHandler<CloneRoleCommand, ApiResp
 
         var resultRole = await _roleRepository.GetByIdWithPermissionsAsync(newRole.Id, ct) ?? newRole;
         var dto = _mapper.Map<RoleDto>(resultRole);
-        return ApiResponse<RoleDto>.Success(dto);
+        return ApiResponse<RoleDto>.Success(dto, ResponseMessage.RoleCreated.GetDescription());
     }
 }

@@ -2,6 +2,8 @@ using AutoMapper;
 using MediatR;
 using Workora.Application.Features.Roles.DTOs;
 using Workora.Domain.Entities;
+using Workora.Domain.Enums;
+using Workora.Domain.Extensions;
 using Workora.Domain.Interfaces;
 using Workora.Shared.Responses;
 
@@ -50,6 +52,6 @@ public class CreateRoleCommandHandler : IRequestHandler<CreateRoleCommand, ApiRe
 
         var createdRole = await _roleRepository.GetByIdWithPermissionsAsync(role.Id, ct) ?? role;
         var dto = _mapper.Map<RoleDto>(createdRole);
-        return ApiResponse<RoleDto>.Success(dto);
+        return ApiResponse<RoleDto>.Success(dto, ResponseMessage.RoleCreated.GetDescription());
     }
 }

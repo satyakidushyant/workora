@@ -1,4 +1,6 @@
 using MediatR;
+using Workora.Domain.Enums;
+using Workora.Domain.Extensions;
 using Workora.Domain.Interfaces;
 using Workora.Shared.Responses;
 
@@ -29,12 +31,12 @@ public class SetRolePermissionsCommandHandler : IRequestHandler<SetRolePermissio
         var role = await _roleRepository.GetByIdAsync(request.RoleId, ct);
         if (role == null)
         {
-            return ApiResponse<bool>.Fail($"Role with ID {request.RoleId} was not found.");
+            return ApiResponse<bool>.Fail(ResponseMessage.RoleNotFound.GetDescription());
         }
 
         await _roleRepository.SetRolePermissionsAsync(request.RoleId, request.PermissionIds, ct);
         await _unitOfWork.SaveChangesAsync(ct);
 
-        return ApiResponse<bool>.Success(true);
+        return ApiResponse<bool>.Success(true, ResponseMessage.RolePermissionsUpdated.GetDescription());
     }
 }

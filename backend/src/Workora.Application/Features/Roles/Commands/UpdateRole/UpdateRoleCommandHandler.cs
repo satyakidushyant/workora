@@ -1,6 +1,8 @@
 using AutoMapper;
 using MediatR;
 using Workora.Application.Features.Roles.DTOs;
+using Workora.Domain.Enums;
+using Workora.Domain.Extensions;
 using Workora.Domain.Interfaces;
 using Workora.Shared.Responses;
 
@@ -31,7 +33,7 @@ public class UpdateRoleCommandHandler : IRequestHandler<UpdateRoleCommand, ApiRe
         var role = await _roleRepository.GetByIdWithPermissionsAsync(request.Id, ct);
         if (role == null)
         {
-            return ApiResponse<RoleDto>.Fail($"Role with ID {request.Id} was not found.");
+            return ApiResponse<RoleDto>.Fail(ResponseMessage.RoleNotFound.GetDescription());
         }
 
         var isUnique = await _roleRepository.IsNameUniqueAsync(request.Name, request.Id, ct);
@@ -44,8 +46,7 @@ public class UpdateRoleCommandHandler : IRequestHandler<UpdateRoleCommand, ApiRe
         _roleRepository.Update(role);
         await _unitOfWork.SaveChangesAsync(ct);
 
-
         var dto = _mapper.Map<RoleDto>(role);
-        return ApiResponse<RoleDto>.Success(dto);
+        return ApiResponse<RoleDto>.Success(dto, ResponseMessage.RoleUpdated.GetDescription());
     }
 }

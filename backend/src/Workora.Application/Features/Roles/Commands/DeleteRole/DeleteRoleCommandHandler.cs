@@ -1,4 +1,6 @@
 using MediatR;
+using Workora.Domain.Enums;
+using Workora.Domain.Extensions;
 using Workora.Domain.Interfaces;
 using Workora.Shared.Responses;
 
@@ -27,12 +29,12 @@ public class DeleteRoleCommandHandler : IRequestHandler<DeleteRoleCommand, ApiRe
         var role = await _roleRepository.GetByIdAsync(request.Id, ct);
         if (role == null)
         {
-            return ApiResponse<bool>.Fail($"Role with ID {request.Id} was not found.");
+            return ApiResponse<bool>.Fail(ResponseMessage.RoleNotFound.GetDescription());
         }
 
         if (role.IsSystemRole)
         {
-            return ApiResponse<bool>.Fail($"System role '{role.Name}' is protected and cannot be deleted.");
+            return ApiResponse<bool>.Fail(ResponseMessage.SystemRoleImmutable.GetDescription());
         }
 
         var inUse = await _roleRepository.IsInUseAsync(request.Id, ct);
@@ -44,7 +46,6 @@ public class DeleteRoleCommandHandler : IRequestHandler<DeleteRoleCommand, ApiRe
         _roleRepository.Remove(role);
         await _unitOfWork.SaveChangesAsync(ct);
 
-
-        return ApiResponse<bool>.Success(true);
+        return ApiResponse<bool>.Success(true, ResponseMessage.RoleDeleted.GetDescription());
     }
 }
