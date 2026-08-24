@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using Workora.Domain.Common;
 using Workora.Domain.Entities;
 using Workora.Domain.Interfaces;
 
@@ -249,6 +250,32 @@ public class AppDbContext : DbContext, IUnitOfWork
     /// Gets or sets the AuditLogs table.
     /// </summary>
     public DbSet<AuditLog> AuditLogs { get; set; } = null!;
+
+    /// <summary>
+    /// Saves all changes made in this context to the database, populating CreatedAt/UpdatedAt timestamps.
+    /// </summary>
+    public override Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
+    {
+        var entries = ChangeTracker.Entries<AuditableEntity>();
+        var now = DateTimeOffset.UtcNow;
+
+        foreach (var entry in entries)
+        {
+            if (entry.State == EntityState.Added)
+            {
+                if (entry.Entity.CreatedAt == default)
+                {
+                    entry.Entity.CreatedAt = now;
+                }
+            }
+            else if (entry.State == EntityState.Modified)
+            {
+                entry.Entity.UpdatedAt = now;
+            }
+        }
+
+        return base.SaveChangesAsync(cancellationToken);
+    }
 
     /// <summary>
     /// Configures the database models.

@@ -5,7 +5,7 @@ namespace Workora.Domain.Common;
 /// </summary>
 public abstract class ValueObject
 {
-    protected static bool EqualOperator(ValueObject left, ValueObject right)
+    protected static bool EqualOperator(ValueObject? left, ValueObject? right)
     {
         if (ReferenceEquals(left, null) ^ ReferenceEquals(right, null))
         {
@@ -14,9 +14,19 @@ public abstract class ValueObject
         return ReferenceEquals(left, null) || left.Equals(right);
     }
 
-    protected static bool NotEqualOperator(ValueObject left, ValueObject right)
+    protected static bool NotEqualOperator(ValueObject? left, ValueObject? right)
     {
         return !(EqualOperator(left, right));
+    }
+
+    public static bool operator ==(ValueObject? left, ValueObject? right)
+    {
+        return EqualOperator(left, right);
+    }
+
+    public static bool operator !=(ValueObject? left, ValueObject? right)
+    {
+        return NotEqualOperator(left, right);
     }
 
     protected abstract IEnumerable<object> GetEqualityComponents();

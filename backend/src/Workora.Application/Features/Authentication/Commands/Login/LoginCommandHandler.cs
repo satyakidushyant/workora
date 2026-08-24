@@ -6,6 +6,7 @@ using Workora.Domain.Interfaces;
 using Workora.Application.Common.Exceptions;
 using Workora.Domain.Enums;
 using Workora.Domain.Extensions;
+using Workora.Domain.ValueObjects;
 using Workora.Shared.Responses;
 
 namespace Workora.Application.Features.Authentication.Commands.Login;
@@ -46,7 +47,17 @@ public class LoginCommandHandler : IRequestHandler<LoginCommand, ApiResponse<Aut
     /// <returns>An AuthResultDto containing the tokens.</returns>
     public async Task<ApiResponse<AuthResultDto>> Handle(LoginCommand request, CancellationToken cancellationToken)
     {
-        var user = await _userRepository.GetByEmailAsync(Workora.Domain.ValueObjects.EmailAddress.Create(request.Email), cancellationToken);
+        EmailAddress emailAddress;
+        try
+        {
+            emailAddress = EmailAddress.Create(request.Email?.Trim() ?? string.Empty);
+        }
+        catch (ArgumentException)
+        {
+            throw new UnauthorizedException(ResponseMessage.InvalidCredentials.GetDescription());
+        }
+
+        var user = await _userRepository.GetByEmailAsync(emailAddress, cancellationToken);
         
         if (user == null)
         {
@@ -78,7 +89,6 @@ public class LoginCommandHandler : IRequestHandler<LoginCommand, ApiResponse<Aut
             "auth.me", "auth.logout", "auth.change-password", "auth.sessions", "auth.logout-all"
         };
 
-
         var accessToken = _tokenService.GenerateAccessToken(user, roles, permissions);
         var refreshTokenStr = _tokenService.GenerateRefreshToken();
         var hashedRefreshToken = _tokenService.HashToken(refreshTokenStr);
@@ -87,7 +97,7 @@ public class LoginCommandHandler : IRequestHandler<LoginCommand, ApiResponse<Aut
             user.Id, 
             hashedRefreshToken, 
             DateTimeOffset.UtcNow.AddDays(7), 
-            "127.0.0.1", // Ideally via ICurrentUserService
+            "127.0.0.1",
             "Unknown"
         );
 

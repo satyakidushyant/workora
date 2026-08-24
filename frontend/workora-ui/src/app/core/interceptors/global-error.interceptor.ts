@@ -6,15 +6,19 @@ import { NotificationService } from '../services/notification.service';
 import { ApiResponseDto } from '../../data/dtos/api-response.dto';
 
 /**
- * Functional HTTP Interceptor providing centralized error handling for failed API requests.
+ * Centralized HTTP Error Interceptor.
+ * Captures all API failure responses and extracts backend-provided messages
+ * and validation field details, displaying them cleanly in global toaster notifications.
  */
 export const globalErrorInterceptor: HttpInterceptorFn = (req: HttpRequest<unknown>, next: HttpHandlerFn) => {
   const notificationService = inject(NotificationService);
 
   return next(req).pipe(
     catchError((error: HttpErrorResponse) => {
-      // 401 response handling is delegated to RefreshTokenInterceptor
-      if (error.status === 401) {
+      const isAuthEndpoint = req.url.includes('/auth/login') || req.url.includes('/auth/refresh-token');
+
+      // 401 on non-auth requests will be handled by RefreshTokenInterceptor
+      if (error.status === 401 && !isAuthEndpoint) {
         return throwError(() => error);
       }
 
@@ -29,8 +33,20 @@ export const globalErrorInterceptor: HttpInterceptorFn = (req: HttpRequest<unkno
         }
 
         if (apiResponse.errors && Array.isArray(apiResponse.errors)) {
-          fieldDetails = apiResponse.errors.map(err => `${err.field}: ${err.message}`);
+          fieldDetails = apiResponse.errors.map(err => {
+            if (typeof err === 'string') return err;
+            if (err?.field && err?.message) return `${err.field}: ${err.message}`;
+            return err?.message || String(err);
+          });
         }
+      } else if (typeof error.error === 'string' && error.error.trim().length > 0) {
+        errorMessage = error.error;
+      } else if (error.status === 0) {
+        errorMessage = 'Unable to connect to the Workora server. Please check your network connection or verify the backend is running.';
+      } else if (error.status === 400) {
+        errorMessage = 'Invalid request. Please verify the submitted data.';
+      } else if (error.status === 401) {
+        errorMessage = 'Invalid email or password. Please verify your credentials.';
       } else if (error.status === 403) {
         errorMessage = 'Access denied. You do not possess the required permissions.';
       } else if (error.status === 404) {
@@ -39,6 +55,7 @@ export const globalErrorInterceptor: HttpInterceptorFn = (req: HttpRequest<unkno
         errorMessage = 'Internal server error occurred. Please try again later.';
       }
 
+      // Display the exact backend error in toaster notification
       notificationService.showError(errorMessage, fieldDetails.length > 0 ? fieldDetails : undefined);
       return throwError(() => error);
     })

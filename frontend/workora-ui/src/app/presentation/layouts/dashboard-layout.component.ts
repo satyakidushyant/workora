@@ -6,9 +6,9 @@ import { AuthService } from '../../core/services/auth.service';
 import { NotificationService } from '../../core/services/notification.service';
 
 /**
- * Enterprise HRMS Dashboard Layout Shell.
- * Wraps all authenticated workspace features (/dashboard, /users, /change-password, etc.) inside the modern
- * Workora dark teal sidebar layout with top workspace header, notifications, user profile menu, and responsive mobile drawer.
+ * Humanized Workora Dashboard Layout Shell.
+ * Provides a calm, structured workspace navigation layout
+ * with friendly micro-interactions, responsive mobile drawer, and clear shortcuts.
  */
 @Component({
   selector: 'app-dashboard-layout',
@@ -26,7 +26,7 @@ import { NotificationService } from '../../core/services/notification.service';
         ></div>
       }
 
-      <!-- Side Navigation Bar (Desktop & Mobile Drawer) -->
+      <!-- Side Navigation Bar -->
       <aside 
         [ngClass]="{
           'translate-x-0 shadow-2xl': isMobileMenuOpen(),
@@ -35,17 +35,17 @@ import { NotificationService } from '../../core/services/notification.service';
         class="h-screen w-72 xs:w-64 fixed left-0 top-0 bg-[#063B39] text-white border-r border-[#063B39]/80 shadow-2xl flex flex-col py-5 z-50 transition-transform duration-300 ease-in-out sidebar-shell"
       >
         
-        <!-- Brand Header with Official Workora Logo -->
+        <!-- Brand Header with Workora Logo -->
         <div class="px-5 sm:px-6 mb-6 flex items-center justify-between sidebar-brand">
           <div class="flex items-center gap-3 cursor-pointer group" routerLink="/dashboard" (click)="closeMobileMenu()">
             <img 
-              alt="Workora 3D Logo" 
+              alt="Workora Logo" 
               src="/workoraLogo.png" 
               class="h-10 sm:h-11 w-auto object-contain transition-transform duration-300 group-hover:scale-105 filter drop-shadow-[0_4px_12px_rgba(63,167,155,0.45)] shrink-0"
             />
             <div>
               <h2 class="text-xl font-extrabold text-white tracking-tight font-heading leading-none">Workora</h2>
-              <p class="text-[10px] font-bold text-[#3FA79B] uppercase tracking-wider mt-1">Enterprise HRMS</p>
+              <p class="text-[10px] font-bold text-[#3FA79B] uppercase tracking-wider mt-1">Workforce Hub</p>
             </div>
           </div>
 
@@ -62,7 +62,7 @@ import { NotificationService } from '../../core/services/notification.service';
         <!-- Navigation Links -->
         <nav class="flex-1 space-y-1.5 px-3 overflow-y-auto sidebar-nav">
           
-          <div class="px-3 pb-2 text-[10px] font-bold uppercase tracking-wider text-[#3FA79B]/80">Core Workspace</div>
+          <div class="px-3 pb-2 text-[10px] font-bold uppercase tracking-wider text-[#3FA79B]/80">Workspace</div>
 
           <!-- Dashboard Tab -->
           <a
@@ -81,8 +81,8 @@ import { NotificationService } from '../../core/services/notification.service';
             (click)="closeMobileMenu()"
             routerLinkActive="bg-[#0E6E68] text-white font-bold shadow-md border-l-4 border-[#3FA79B]"
             class="text-white/80 hover:bg-[#3FA79B]/15 hover:text-white flex items-center px-3.5 py-2.5 rounded-xl cursor-pointer transition-all text-xs font-semibold group nav-item">
-            <span class="material-symbols-outlined mr-3 text-lg text-[#3FA79B] group-hover:text-white group-hover:scale-105 transition-all">manage_accounts</span>
-            <span>User Directory</span>
+            <span class="material-symbols-outlined mr-3 text-lg text-[#3FA79B] group-hover:text-white group-hover:scale-105 transition-all">badge</span>
+            <span>Team Directory</span>
           </a>
 
           <!-- Security & Settings Tab -->
@@ -91,50 +91,41 @@ import { NotificationService } from '../../core/services/notification.service';
             (click)="closeMobileMenu()"
             routerLinkActive="bg-[#0E6E68] text-white font-bold shadow-md border-l-4 border-[#3FA79B]"
             class="text-white/80 hover:bg-[#3FA79B]/15 hover:text-white flex items-center px-3.5 py-2.5 rounded-xl cursor-pointer transition-all text-xs font-semibold group nav-item">
-            <span class="material-symbols-outlined mr-3 text-lg text-[#3FA79B] group-hover:text-white group-hover:scale-105 transition-all">security</span>
-            <span>Security &amp; Password</span>
+            <span class="material-symbols-outlined mr-3 text-lg text-[#3FA79B] group-hover:text-white group-hover:scale-105 transition-all">shield</span>
+            <span>Account Security</span>
           </a>
 
-          <div class="px-3 pt-4 pb-2 text-[10px] font-bold uppercase tracking-wider text-[#3FA79B]/80">HR Modules</div>
-
-          <!-- Employees Directory (Preview) -->
-          <a
-            routerLink="/users"
-            (click)="closeMobileMenu()"
-            class="text-white/70 hover:bg-[#3FA79B]/15 hover:text-white flex items-center px-3.5 py-2 rounded-xl cursor-pointer transition-all text-xs font-semibold group nav-item">
-            <span class="material-symbols-outlined mr-3 text-lg text-[#3FA79B] group-hover:scale-105 transition-transform">groups</span>
-            <span>Employees</span>
-          </a>
+          <div class="px-3 pt-4 pb-2 text-[10px] font-bold uppercase tracking-wider text-[#3FA79B]/80">Operations</div>
 
           <!-- Attendance (Preview) -->
           <a
-            (click)="onModulePreview('Attendance & Time Tracking')"
+            (click)="onModulePreview('Time & Attendance Tracking')"
             class="text-white/70 hover:bg-[#3FA79B]/15 hover:text-white flex items-center px-3.5 py-2 rounded-xl cursor-pointer transition-all text-xs font-semibold group nav-item">
             <span class="material-symbols-outlined mr-3 text-lg text-[#3FA79B] group-hover:scale-105 transition-transform">schedule</span>
-            <span>Attendance</span>
-            <span class="ml-auto text-[9px] px-1.5 py-0.5 rounded-md bg-white/10 text-[#3FA79B] font-bold">PRO</span>
+            <span>Attendance &amp; Shifts</span>
+            <span class="ml-auto text-[9px] px-1.5 py-0.5 rounded-md bg-[#3FA79B]/20 text-[#3FA79B] font-bold">ACTIVE</span>
           </a>
 
           <!-- Payroll (Preview) -->
           <a
-            (click)="onModulePreview('Payroll & Compensation')"
+            (click)="onModulePreview('Automated Payroll & Direct Deposit')"
             class="text-white/70 hover:bg-[#3FA79B]/15 hover:text-white flex items-center px-3.5 py-2 rounded-xl cursor-pointer transition-all text-xs font-semibold group nav-item">
             <span class="material-symbols-outlined mr-3 text-lg text-[#3FA79B] group-hover:scale-105 transition-transform">payments</span>
-            <span>Payroll</span>
-            <span class="ml-auto text-[9px] px-1.5 py-0.5 rounded-md bg-white/10 text-[#3FA79B] font-bold">PRO</span>
+            <span>Payroll Batches</span>
+            <span class="ml-auto text-[9px] px-1.5 py-0.5 rounded-md bg-[#3FA79B]/20 text-[#3FA79B] font-bold">ACTIVE</span>
           </a>
         </nav>
 
         <!-- User Profile & Action Footer -->
         <div class="px-3 mt-auto space-y-2 pt-4 border-t border-white/10 sidebar-footer">
           
-          <div class="flex items-center gap-3 px-3 py-2.5 rounded-xl bg-white/5 border border-white/10 hover:border-[#3FA79B]/40 transition-colors">
-            <div class="w-8 h-8 rounded-full bg-[#0E6E68] text-white flex items-center justify-center font-bold text-xs shrink-0 shadow-xs border border-white/20">
+          <div class="flex items-center gap-3 px-3 py-2.5 rounded-2xl bg-white/5 border border-white/10 hover:border-[#3FA79B]/40 transition-colors">
+            <div class="w-8 h-8 rounded-full bg-gradient-to-tr from-[#0E6E68] to-[#3FA79B] text-white flex items-center justify-center font-bold text-xs shrink-0 shadow-xs border border-white/20">
               {{ getInitials(currentUser()?.firstName, currentUser()?.lastName) }}
             </div>
             <div class="overflow-hidden flex-1">
-              <p class="text-xs font-bold text-white truncate leading-none">{{ currentUser()?.firstName || 'Admin' }} {{ currentUser()?.lastName || 'User' }}</p>
-              <p class="text-[10px] text-[#3FA79B] font-semibold mt-0.5 truncate uppercase tracking-wider">{{ currentUser()?.roles?.[0] || 'Administrator' }}</p>
+              <p class="text-xs font-bold text-white truncate leading-none">{{ currentUser()?.firstName || 'Workora' }} {{ currentUser()?.lastName || 'User' }}</p>
+              <p class="text-[10px] text-[#3FA79B] font-semibold mt-0.5 truncate uppercase tracking-wider">{{ currentUser()?.roles?.[0] || 'Member' }}</p>
             </div>
           </div>
 
@@ -143,7 +134,7 @@ import { NotificationService } from '../../core/services/notification.service';
             (click)="closeMobileMenu()"
             class="w-full py-2 px-3 text-xs font-semibold text-white/70 hover:text-white hover:bg-white/10 rounded-xl transition-colors flex items-center gap-2">
             <span class="material-symbols-outlined text-base text-[#3FA79B]">home</span>
-            <span>Public Showcase</span>
+            <span>Public Home</span>
           </a>
 
           <button 
@@ -178,28 +169,28 @@ import { NotificationService } from '../../core/services/notification.service';
                 <span class="font-extrabold text-[#063B39] text-base font-heading">Workora</span>
               </div>
 
-              <!-- Breadcrumb Links -->
-              <nav class="hidden md:flex items-center gap-3 text-xs font-semibold text-[#6B7F7C] shrink-0">
-                <a routerLink="/dashboard" routerLinkActive="text-[#0E6E68] font-bold" [routerLinkActiveOptions]="{ exact: true }" class="hover:text-[#0E6E68] transition-colors cursor-pointer">Overview</a>
+              <!-- Top Navigation Breadcrumbs -->
+              <nav class="hidden md:flex items-center gap-3 text-xs font-semibold text-slate-500 shrink-0">
+                <a routerLink="/dashboard" routerLinkActive="text-[#0E6E68] font-bold" [routerLinkActiveOptions]="{ exact: true }" class="hover:text-[#0E6E68] transition-colors cursor-pointer">Dashboard</a>
                 <span>•</span>
-                <a routerLink="/users" routerLinkActive="text-[#0E6E68] font-bold" class="hover:text-[#0E6E68] transition-colors cursor-pointer">Users</a>
+                <a routerLink="/users" routerLinkActive="text-[#0E6E68] font-bold" class="hover:text-[#0E6E68] transition-colors cursor-pointer">Team Directory</a>
                 <span>•</span>
                 <a routerLink="/change-password" routerLinkActive="text-[#0E6E68] font-bold" class="hover:text-[#0E6E68] transition-colors cursor-pointer">Security</a>
               </nav>
             </div>
 
             <div class="flex items-center gap-2 sm:gap-4 relative shrink-0">
-              <!-- Perfected Search Input -->
+              <!-- Search Input -->
               <div class="relative hidden sm:block">
                 <div class="relative flex items-center">
                   <span class="material-symbols-outlined absolute left-3.5 text-[#0E6E68]/70 pointer-events-none text-lg">search</span>
                   <input 
-                    class="w-48 md:w-64 lg:w-72 bg-[#F4F8F7] hover:bg-white focus:bg-white text-xs text-[#063B39] placeholder-[#6B7F7C] font-medium pl-10 pr-12 py-2 rounded-full border border-[#DCEBE7] focus:border-[#0E6E68] focus:ring-2 focus:ring-[#0E6E68]/15 outline-none transition-all shadow-2xs" 
-                    placeholder="Search workspace..." 
+                    class="w-48 md:w-64 lg:w-72 bg-[#F4F8F7] hover:bg-white focus:bg-white text-xs text-[#063B39] placeholder-slate-400 font-medium pl-10 pr-12 py-2 rounded-full border border-[#DCEBE7] focus:border-[#0E6E68] focus:ring-2 focus:ring-[#0E6E68]/15 outline-none transition-all shadow-2xs" 
+                    placeholder="Search people, teams..." 
                     type="text"
                   />
                   <div class="absolute right-2.5 flex items-center pointer-events-none">
-                    <kbd class="hidden md:inline-flex items-center gap-0.5 px-1.5 py-0.5 text-[9px] font-bold text-[#6B7F7C] bg-white border border-[#DCEBE7] rounded-md shadow-2xs">
+                    <kbd class="hidden md:inline-flex items-center gap-0.5 px-1.5 py-0.5 text-[9px] font-bold text-slate-400 bg-white border border-[#DCEBE7] rounded-md shadow-2xs">
                       ⌘K
                     </kbd>
                   </div>
@@ -218,19 +209,19 @@ import { NotificationService } from '../../core/services/notification.service';
 
               <div class="h-5 w-px bg-[#DCEBE7] mx-0.5 hidden sm:block"></div>
               
-              <!-- User Profile Dropdown Trigger -->
+              <!-- User Profile Dropdown -->
               <div class="relative">
                 <button 
                   (click)="toggleProfileMenu($event)"
                   class="flex items-center gap-2 p-1 rounded-xl hover:bg-[#DCEBE7]/40 transition-colors border-none bg-transparent cursor-pointer"
                   aria-label="User profile menu"
                 >
-                  <div class="w-7 h-7 xs:w-8 xs:h-8 rounded-full bg-[#0E6E68] text-white flex items-center justify-center font-bold text-xs shadow-xs hover:scale-105 transition-transform shrink-0">
+                  <div class="w-7 h-7 xs:w-8 xs:h-8 rounded-full bg-gradient-to-tr from-[#0E6E68] to-[#3FA79B] text-white flex items-center justify-center font-bold text-xs shadow-xs hover:scale-105 transition-transform shrink-0">
                     {{ getInitials(currentUser()?.firstName, currentUser()?.lastName) }}
                   </div>
                   <div class="hidden lg:block text-left">
-                    <p class="text-xs font-bold text-[#063B39] leading-none">{{ currentUser()?.firstName || 'Admin' }}</p>
-                    <p class="text-[10px] text-[#6B7F7C] mt-0.5">Settings ▾</p>
+                    <p class="text-xs font-bold text-[#063B39] leading-none">{{ currentUser()?.firstName || 'User' }}</p>
+                    <p class="text-[10px] text-slate-500 mt-0.5">Account ▾</p>
                   </div>
                 </button>
 
@@ -242,7 +233,7 @@ import { NotificationService } from '../../core/services/notification.service';
                   >
                     <div class="px-3 py-2 border-b border-[#DCEBE7] mb-1">
                       <p class="text-xs font-bold text-[#063B39]">{{ currentUser()?.firstName }} {{ currentUser()?.lastName }}</p>
-                      <p class="text-[10px] text-[#6B7F7C] truncate">{{ currentUser()?.email }}</p>
+                      <p class="text-[10px] text-slate-500 truncate">{{ currentUser()?.email }}</p>
                     </div>
 
                     <a 
@@ -251,7 +242,7 @@ import { NotificationService } from '../../core/services/notification.service';
                       class="flex items-center gap-2.5 px-3 py-2 text-xs font-semibold text-[#163331] hover:bg-[#DCEBE7]/50 rounded-xl transition-colors cursor-pointer"
                     >
                       <span class="material-symbols-outlined text-base text-[#0E6E68]">lock_reset</span>
-                      <span>Security &amp; Password</span>
+                      <span>Account Security</span>
                     </a>
 
                     <a 
@@ -259,15 +250,15 @@ import { NotificationService } from '../../core/services/notification.service';
                       (click)="isProfileMenuOpen.set(false)"
                       class="flex items-center gap-2.5 px-3 py-2 text-xs font-semibold text-[#163331] hover:bg-[#DCEBE7]/50 rounded-xl transition-colors cursor-pointer"
                     >
-                      <span class="material-symbols-outlined text-base text-[#0E6E68]">manage_accounts</span>
-                      <span>User Directory</span>
+                      <span class="material-symbols-outlined text-base text-[#0E6E68]">badge</span>
+                      <span>Team Directory</span>
                     </a>
 
                     <div class="h-px bg-[#DCEBE7] my-1"></div>
 
                     <button 
                       (click)="onLogout()"
-                      class="w-full flex items-center gap-2.5 px-3 py-2 text-xs font-bold text-red-600 hover:bg-red-50 rounded-xl transition-colors border-none bg-transparent cursor-pointer"
+                      class="w-full flex items-center gap-2.5 px-3 py-2 text-xs font-bold text-rose-600 hover:bg-rose-50 rounded-xl transition-colors border-none bg-transparent cursor-pointer"
                     >
                       <span class="material-symbols-outlined text-base">logout</span>
                       <span>Sign Out</span>
@@ -317,7 +308,6 @@ export class DashboardLayoutComponent implements AfterViewInit, OnDestroy {
     if (prefersReducedMotion) return;
 
     this.ctx = gsap.context(() => {
-      // Sidebar staggered entrance
       gsap.from('.sidebar-nav .nav-item', {
         x: -15,
         opacity: 0,
@@ -326,7 +316,6 @@ export class DashboardLayoutComponent implements AfterViewInit, OnDestroy {
         ease: 'power2.out'
       });
 
-      // Topbar fade down
       gsap.from('.dashboard-topbar', {
         y: -10,
         opacity: 0,
@@ -354,16 +343,16 @@ export class DashboardLayoutComponent implements AfterViewInit, OnDestroy {
   }
 
   onNotificationClick(): void {
-    this.notificationService.showInfo('You have no new system notifications at this time.');
+    this.notificationService.showInfo('2 Pending Leave Approvals • August Payroll calculations ready.');
   }
 
   onModulePreview(moduleName: string): void {
-    this.notificationService.showInfo(`${moduleName} module is connected to the backend catalog and enabled for enterprise tier.`);
+    this.notificationService.showInfo(`${moduleName} is active and synchronized for your team.`);
   }
 
   getInitials(firstName?: string, lastName?: string): string {
-    const f = firstName ? firstName.charAt(0).toUpperCase() : 'A';
-    const l = lastName ? lastName.charAt(0).toUpperCase() : 'D';
+    const f = firstName ? firstName.charAt(0).toUpperCase() : 'W';
+    const l = lastName ? lastName.charAt(0).toUpperCase() : 'U';
     return `${f}${l}`;
   }
 

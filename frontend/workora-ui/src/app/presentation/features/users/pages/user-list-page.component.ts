@@ -15,9 +15,9 @@ import { WorkoraConfirmDialogComponent } from '../../../shared/components/workor
 import { NotificationService } from '../../../../core/services/notification.service';
 
 /**
- * Enterprise HRMS User Management Page Component.
- * Styled with the unified Workora SaaS design system, real-time filters, search,
- * user status management, password override, CRUD modal operations, and GSAP motion.
+ * Humanized Workora Team Directory & User Management Component.
+ * Enables people managers and admins to manage team credentials,
+ * directory roles, and permissions with empathetic UI cues and fast search.
  */
 @Component({
   selector: 'app-user-list-page',
@@ -45,49 +45,49 @@ import { NotificationService } from '../../../../core/services/notification.serv
               <span>Dashboard</span>
             </a>
             <span>/</span>
-            <span class="text-[#063B39] font-bold">User Directory</span>
+            <span class="text-[#063B39] font-bold">Team Directory</span>
           </div>
-          <h1 class="text-xl xs:text-2xl sm:text-3xl font-extrabold text-[#063B39] tracking-tight font-heading">User Directory</h1>
-          <p class="text-xs sm:text-sm text-[#6B7F7C] mt-0.5">Manage system access, corporate roles, directory permissions, and credential security.</p>
+          <h1 class="text-xl xs:text-2xl sm:text-3xl font-extrabold text-[#063B39] tracking-tight font-heading">Team Directory</h1>
+          <p class="text-xs sm:text-sm text-slate-600 mt-0.5">Manage team members, corporate roles, and login access.</p>
         </div>
 
         <button
           (click)="openCreateModal()"
-          class="workora-btn-primary px-4 sm:px-5 py-2 sm:py-2.5 text-xs shadow-teal w-full sm:w-auto">
+          class="workora-btn-primary px-5 py-2.5 text-xs shadow-md w-full sm:w-auto flex items-center justify-center gap-2 cursor-pointer">
           <span class="material-symbols-outlined text-base">person_add</span>
-          <span>Add User Account</span>
+          <span>Add Team Member</span>
         </button>
       </div>
 
       <!-- Metric Cards (3 Cards) -->
       <div class="grid grid-cols-1 xs:grid-cols-3 gap-3 sm:gap-4 user-stats-grid">
         
-        <div class="p-4 sm:p-5 bg-white border border-[#DCEBE7] rounded-2xl shadow-xs flex items-center justify-between workora-card">
+        <div class="p-4 sm:p-5 bg-white border border-[#DCEBE7] rounded-3xl shadow-xs flex items-center justify-between workora-card">
           <div>
-            <p class="text-[11px] sm:text-xs font-bold text-[#6B7F7C] uppercase tracking-wider">Total Accounts</p>
+            <p class="text-[11px] sm:text-xs font-bold text-slate-500 uppercase tracking-wider">Total Accounts</p>
             <h3 class="text-xl sm:text-2xl font-extrabold text-[#063B39] mt-1 font-heading">{{ totalUsersCount() }}</h3>
           </div>
-          <div class="p-2.5 sm:p-3 bg-[#DCEBE7] text-[#0E6E68] rounded-xl shrink-0">
+          <div class="p-3 bg-[#DCEBE7] text-[#0E6E68] rounded-2xl shrink-0">
             <span class="material-symbols-outlined text-xl sm:text-2xl">groups</span>
           </div>
         </div>
 
-        <div class="p-4 sm:p-5 bg-white border border-[#DCEBE7] rounded-2xl shadow-xs flex items-center justify-between workora-card">
+        <div class="p-4 sm:p-5 bg-white border border-[#DCEBE7] rounded-3xl shadow-xs flex items-center justify-between workora-card">
           <div>
-            <p class="text-[11px] sm:text-xs font-bold text-[#6B7F7C] uppercase tracking-wider">Active Access</p>
+            <p class="text-[11px] sm:text-xs font-bold text-slate-500 uppercase tracking-wider">Active Today</p>
             <h3 class="text-xl sm:text-2xl font-extrabold text-emerald-600 mt-1 font-heading">{{ activeUsersCount() }}</h3>
           </div>
-          <div class="p-2.5 sm:p-3 bg-emerald-50 text-emerald-600 rounded-xl shrink-0">
+          <div class="p-3 bg-emerald-50 text-emerald-600 rounded-2xl shrink-0">
             <span class="material-symbols-outlined text-xl sm:text-2xl">how_to_reg</span>
           </div>
         </div>
 
-        <div class="p-4 sm:p-5 bg-white border border-[#DCEBE7] rounded-2xl shadow-xs flex items-center justify-between workora-card">
+        <div class="p-4 sm:p-5 bg-white border border-[#DCEBE7] rounded-3xl shadow-xs flex items-center justify-between workora-card">
           <div>
-            <p class="text-[11px] sm:text-xs font-bold text-[#6B7F7C] uppercase tracking-wider">Deactivated</p>
-            <h3 class="text-xl sm:text-2xl font-extrabold text-rose-600 mt-1 font-heading">{{ inactiveUsersCount() }}</h3>
+            <p class="text-[11px] sm:text-xs font-bold text-slate-500 uppercase tracking-wider">Inactive / Deactivated</p>
+            <h3 class="text-xl sm:text-2xl font-extrabold text-slate-600 mt-1 font-heading">{{ inactiveUsersCount() }}</h3>
           </div>
-          <div class="p-2.5 sm:p-3 bg-rose-50 text-rose-600 rounded-xl shrink-0">
+          <div class="p-3 bg-slate-100 text-slate-500 rounded-2xl shrink-0">
             <span class="material-symbols-outlined text-xl sm:text-2xl">person_off</span>
           </div>
         </div>
@@ -101,35 +101,35 @@ import { NotificationService } from '../../../../core/services/notification.serv
           <button
             type="button"
             (click)="onFilterStatus(null)"
-            class="flex-1 sm:flex-none px-3 sm:px-3.5 py-1.5 text-xs font-bold rounded-lg transition-all border-none cursor-pointer text-center"
+            class="flex-1 sm:flex-none px-3.5 py-1.5 text-xs font-bold rounded-lg transition-all border-none cursor-pointer text-center"
             [ngClass]="activeFilter() === null ? 'bg-[#0E6E68] text-white shadow-xs' : 'text-slate-600 hover:text-[#0E6E68] bg-transparent'">
-            All Users
+            All Members
           </button>
           <button
             type="button"
             (click)="onFilterStatus(true)"
-            class="flex-1 sm:flex-none px-3 sm:px-3.5 py-1.5 text-xs font-bold rounded-lg transition-all border-none cursor-pointer text-center"
+            class="flex-1 sm:flex-none px-3.5 py-1.5 text-xs font-bold rounded-lg transition-all border-none cursor-pointer text-center"
             [ngClass]="activeFilter() === true ? 'bg-[#0E6E68] text-white shadow-xs' : 'text-slate-600 hover:text-emerald-600 bg-transparent'">
             Active
           </button>
           <button
             type="button"
             (click)="onFilterStatus(false)"
-            class="flex-1 sm:flex-none px-3 sm:px-3.5 py-1.5 text-xs font-bold rounded-lg transition-all border-none cursor-pointer text-center"
-            [ngClass]="activeFilter() === false ? 'bg-[#0E6E68] text-white shadow-xs' : 'text-slate-600 hover:text-rose-600 bg-transparent'">
+            class="flex-1 sm:flex-none px-3.5 py-1.5 text-xs font-bold rounded-lg transition-all border-none cursor-pointer text-center"
+            [ngClass]="activeFilter() === false ? 'bg-[#0E6E68] text-white shadow-xs' : 'text-slate-600 hover:text-slate-900 bg-transparent'">
             Inactive
           </button>
         </div>
 
         <!-- Search Input with Clear Action -->
-        <div class="relative w-full sm:w-72">
+        <div class="relative w-full sm:w-80">
           <span class="material-symbols-outlined text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2 text-base pointer-events-none">search</span>
           <input
             type="text"
             [(ngModel)]="searchQuery"
             (ngModelChange)="onSearchChange()"
-            placeholder="Search by name or email..."
-            class="workora-input pl-10 pr-9 text-xs !py-2.5" 
+            placeholder="Search by name, email, or role..."
+            class="workora-input pl-10 pr-9 text-xs !py-2.5 w-full" 
           />
           @if (searchQuery) {
             <button 
@@ -145,20 +145,20 @@ import { NotificationService } from '../../../../core/services/notification.serv
       </div>
 
       <!-- Table Container -->
-      <div class="bg-white border border-[#DCEBE7] rounded-2xl shadow-xs overflow-hidden workora-card user-table-card">
+      <div class="bg-white border border-[#DCEBE7] rounded-3xl shadow-xs overflow-hidden workora-card user-table-card">
         
-        <!-- Loading State via Reusable Skeleton Component -->
+        <!-- Loading State -->
         @if (isLoading()) {
           <app-workora-skeleton type="table" [count]="5"></app-workora-skeleton>
         }
 
-        <!-- Empty State via Reusable Component -->
+        <!-- Empty State -->
         @if (!isLoading() && users().length === 0) {
           <app-workora-empty-state
             icon="person_search"
-            title="No Users Matching Query"
-            description="There are currently no user accounts matching your active filter or search terms."
-            actionLabel="Add New User"
+            title="No Team Members Found"
+            description="We couldn't find anyone matching your current search or filter. Try adjusting your search term or add a new team member."
+            actionLabel="Add Team Member"
             actionIcon="person_add"
             (actionClicked)="openCreateModal()"
           ></app-workora-empty-state>
@@ -170,10 +170,10 @@ import { NotificationService } from '../../../../core/services/notification.serv
             <table class="workora-table">
               <thead>
                 <tr>
-                  <th>User Profile</th>
+                  <th>Team Member</th>
                   <th>Status</th>
-                  <th>Linked Employee</th>
-                  <th>Created Date</th>
+                  <th>Employee ID</th>
+                  <th>Member Since</th>
                   <th class="text-right">Actions</th>
                 </tr>
               </thead>
@@ -183,12 +183,12 @@ import { NotificationService } from '../../../../core/services/notification.serv
                     <!-- User Profile & Avatar -->
                     <td>
                       <div class="flex items-center gap-3">
-                        <div class="w-9 h-9 rounded-full bg-[#0E6E68] text-white flex items-center justify-center font-bold text-xs shrink-0 shadow-xs border border-white">
+                        <div class="w-9 h-9 rounded-full bg-gradient-to-tr from-[#0E6E68] to-[#3FA79B] text-white flex items-center justify-center font-bold text-xs shrink-0 shadow-xs border border-white">
                           {{ getInitials(user.firstName, user.lastName) }}
                         </div>
                         <div>
                           <div class="font-bold text-[#063B39]">{{ user.fullName }}</div>
-                          <div class="text-[11px] text-[#6B7F7C] mt-0.5">
+                          <div class="text-[11px] text-slate-500 mt-0.5">
                             <span>{{ user.email }}</span>
                           </div>
                         </div>
@@ -203,8 +203,8 @@ import { NotificationService } from '../../../../core/services/notification.serv
                           <span>Active</span>
                         </span>
                       } @else {
-                        <span class="workora-badge-danger">
-                          <span class="w-1.5 h-1.5 rounded-full bg-rose-500"></span>
+                        <span class="workora-badge-neutral">
+                          <span class="w-1.5 h-1.5 rounded-full bg-slate-400"></span>
                           <span>Inactive</span>
                         </span>
                       }
@@ -215,15 +215,15 @@ import { NotificationService } from '../../../../core/services/notification.serv
                       @if (user.employeeId) {
                         <span class="inline-flex items-center gap-1 text-xs font-semibold text-[#0E6E68]">
                           <span class="material-symbols-outlined text-sm">badge</span>
-                          <span>Linked (ID: {{ user.employeeId }})</span>
+                          <span>ID: {{ user.employeeId }}</span>
                         </span>
                       } @else {
-                        <span class="text-[11px] text-slate-400 italic">Not Linked</span>
+                        <span class="text-[11px] text-slate-400 italic">Direct User</span>
                       }
                     </td>
 
                     <!-- Created Date -->
-                    <td class="text-[#6B7F7C] text-xs">
+                    <td class="text-slate-500 text-xs">
                       {{ user.createdAt | date:'mediumDate' }}
                     </td>
 
@@ -235,7 +235,7 @@ import { NotificationService } from '../../../../core/services/notification.serv
                           type="button"
                           (click)="openEditModal(user)"
                           class="workora-btn-icon !w-8 !h-8"
-                          title="Edit User Profile"
+                          title="Edit Profile"
                           aria-label="Edit user"
                         >
                           <span class="material-symbols-outlined text-base">edit</span>
@@ -246,7 +246,7 @@ import { NotificationService } from '../../../../core/services/notification.serv
                           type="button"
                           (click)="openResetPasswordModal(user)"
                           class="workora-btn-icon !w-8 !h-8"
-                          title="Reset Password"
+                          title="Set Password"
                           aria-label="Reset password"
                         >
                           <span class="material-symbols-outlined text-base">key</span>
@@ -261,7 +261,7 @@ import { NotificationService } from '../../../../core/services/notification.serv
                           [attr.aria-label]="user.isActive ? 'Deactivate account' : 'Activate account'"
                         >
                           <span class="material-symbols-outlined text-base" [ngClass]="user.isActive ? 'text-amber-600' : 'text-emerald-600'">
-                            {{ user.isActive ? 'block' : 'check_circle' }}
+                            {{ user.isActive ? 'pause_circle' : 'play_circle' }}
                           </span>
                         </button>
 
@@ -270,7 +270,7 @@ import { NotificationService } from '../../../../core/services/notification.serv
                           type="button"
                           (click)="promptDeleteUser(user)"
                           class="workora-btn-icon workora-btn-icon-danger !w-8 !h-8"
-                          title="Delete User"
+                          title="Remove Account"
                           aria-label="Delete user"
                         >
                           <span class="material-symbols-outlined text-base">delete</span>
@@ -283,7 +283,7 @@ import { NotificationService } from '../../../../core/services/notification.serv
             </table>
           </div>
 
-          <!-- Reusable Pagination Component -->
+          <!-- Pagination Component -->
           <app-workora-pagination
             [pageNumber]="pageNumber()"
             [pageSize]="pageSize()"
@@ -320,10 +320,10 @@ import { NotificationService } from '../../../../core/services/notification.serv
     <!-- Destructive Delete Confirmation Dialog -->
     <app-workora-confirm-dialog
       [isOpen]="showDeleteConfirm()"
-      title="Delete User Account?"
+      title="Remove Team Member Account?"
       [message]="deleteConfirmMessage"
-      confirmText="Delete Account"
-      cancelText="Cancel"
+      confirmText="Remove Account"
+      cancelText="Keep Account"
       variant="danger"
       [isLoading]="isDeletingUser()"
       (confirm)="confirmDeleteUser()"
@@ -423,7 +423,7 @@ export class UserListPageComponent implements OnInit, AfterViewInit, OnDestroy {
         this.isLoading.set(false);
       },
       error: (err: any) => {
-        const msg = err?.error?.message || err?.message || 'Failed to load user accounts.';
+        const msg = err?.error?.message || err?.message || 'Failed to load team directory.';
         this.notificationService.showError(msg);
         this.isLoading.set(false);
       }
@@ -453,7 +453,7 @@ export class UserListPageComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   changePage(newPage: number): void {
-    if (newPage >= 1 && newPage <= this.totalPages()) {
+    if (newPage >= 1 && newPage <= this.totalPages() && newPage !== this.pageNumber()) {
       this.pageNumber.set(newPage);
       this.loadUsers();
     }
@@ -477,75 +477,78 @@ export class UserListPageComponent implements OnInit, AfterViewInit, OnDestroy {
   onSaveUser(payload: CreateUserParams | UpdateUserParams): void {
     this.isSubmittingModal.set(true);
 
-    if ('id' in payload) {
-      this.userRepo.updateUser(payload as UpdateUserParams).subscribe({
+    if (this.selectedUser()) {
+      const updatePayload = payload as UpdateUserParams;
+      this.userRepo.updateUser(updatePayload).subscribe({
         next: () => {
-          this.notificationService.showSuccess('User profile updated successfully.');
           this.isSubmittingModal.set(false);
           this.showFormModal.set(false);
+          this.notificationService.showSuccess('Team member profile updated successfully.');
           this.loadUsers();
         },
         error: (err: any) => {
-          const msg = err?.error?.message || err?.message || 'Failed to update user profile.';
-          this.notificationService.showError(msg);
           this.isSubmittingModal.set(false);
+          const msg = err?.error?.message || err?.message || 'Failed to update member profile.';
+          this.notificationService.showError(msg);
         }
       });
     } else {
-      this.userRepo.createUser(payload as CreateUserParams).subscribe({
+      const createPayload = payload as CreateUserParams;
+      this.userRepo.createUser(createPayload).subscribe({
         next: () => {
-          this.notificationService.showSuccess('User account created successfully.');
           this.isSubmittingModal.set(false);
           this.showFormModal.set(false);
+          this.notificationService.showSuccess('New team member added to directory!');
           this.loadUsers();
         },
         error: (err: any) => {
-          const msg = err?.error?.message || err?.message || 'Failed to create user account.';
-          this.notificationService.showError(msg);
           this.isSubmittingModal.set(false);
+          const msg = err?.error?.message || err?.message || 'Failed to add team member.';
+          this.notificationService.showError(msg);
         }
       });
     }
   }
 
-  toggleStatus(user: UserSummary): void {
-    const action$ = user.isActive
-      ? this.userRepo.deactivateUser(user.id)
-      : this.userRepo.activateUser(user.id);
+  onConfirmResetPassword(payload: AdminResetPasswordParams): void {
+    if (!this.selectedUser()) return;
 
-    action$.subscribe({
+    this.isSubmittingModal.set(true);
+    this.userRepo.adminResetPassword(payload).subscribe({
       next: () => {
-        const msg = user.isActive ? 'User account deactivated.' : 'User account reactivated.';
-        this.notificationService.showSuccess(msg);
-        this.loadUsers();
+        this.isSubmittingModal.set(false);
+        this.showResetPasswordModal.set(false);
+        this.notificationService.showSuccess(`Password updated for ${this.selectedUser()!.fullName}.`);
       },
       error: (err: any) => {
-        const msg = err?.error?.message || err?.message || 'Failed to update user status.';
+        this.isSubmittingModal.set(false);
+        const msg = err?.error?.message || err?.message || 'Failed to reset member password.';
         this.notificationService.showError(msg);
       }
     });
   }
 
-  onConfirmResetPassword(payload: AdminResetPasswordParams): void {
-    this.isSubmittingModal.set(true);
+  toggleStatus(user: UserSummary): void {
+    const nextStatus = !user.isActive;
+    const action$ = user.isActive 
+      ? this.userRepo.deactivateUser(user.id) 
+      : this.userRepo.activateUser(user.id);
 
-    this.userRepo.adminResetPassword(payload).subscribe({
+    action$.subscribe({
       next: () => {
-        this.notificationService.showSuccess('Password reset successfully.');
-        this.isSubmittingModal.set(false);
-        this.showResetPasswordModal.set(false);
+        this.notificationService.showSuccess(`Account ${nextStatus ? 'activated' : 'deactivated'} for ${user.fullName}.`);
+        this.loadUsers();
       },
       error: (err: any) => {
-        const msg = err?.error?.message || err?.message || 'Failed to reset password.';
+        const msg = err?.error?.message || err?.message || 'Failed to change account status.';
         this.notificationService.showError(msg);
-        this.isSubmittingModal.set(false);
       }
     });
   }
 
   promptDeleteUser(user: UserSummary): void {
     this.userToDelete = user;
-    this.deleteConfirmMessage = `Are you sure you want to permanently delete the user account for ${user.fullName} (${user.email})? This action cannot be undone.`;
+    this.deleteConfirmMessage = `Are you sure you want to remove ${user.fullName} (${user.email}) from the directory?`;
     this.showDeleteConfirm.set(true);
   }
 
@@ -555,23 +558,23 @@ export class UserListPageComponent implements OnInit, AfterViewInit, OnDestroy {
     this.isDeletingUser.set(true);
     this.userRepo.deleteUser(this.userToDelete.id).subscribe({
       next: () => {
-        this.notificationService.showSuccess('User account deleted.');
         this.isDeletingUser.set(false);
         this.showDeleteConfirm.set(false);
+        this.notificationService.showSuccess(`Removed ${this.userToDelete!.fullName} from directory.`);
         this.userToDelete = null;
         this.loadUsers();
       },
       error: (err: any) => {
-        const msg = err?.error?.message || err?.message || 'Failed to delete user.';
-        this.notificationService.showError(msg);
         this.isDeletingUser.set(false);
+        const msg = err?.error?.message || err?.message || 'Failed to remove team member.';
+        this.notificationService.showError(msg);
       }
     });
   }
 
-  getInitials(firstName: string, lastName: string): string {
+  getInitials(firstName?: string, lastName?: string): string {
     const f = firstName ? firstName.charAt(0).toUpperCase() : '';
     const l = lastName ? lastName.charAt(0).toUpperCase() : '';
-    return `${f}${l}` || 'U';
+    return f + l || 'U';
   }
 }

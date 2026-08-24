@@ -54,7 +54,7 @@ public class GlobalExceptionMiddleware
     {
         context.Response.ContentType = "application/json";
         
-        var response = ApiResponse<object>.Fail(ResponseMessage.UnexpectedError.GetDescription());
+        var response = ApiResponse<object>.Fail(exception.Message ?? ResponseMessage.UnexpectedError.GetDescription());
 
         switch (exception)
         {
@@ -66,9 +66,22 @@ public class GlobalExceptionMiddleware
                 context.Response.StatusCode = (int)HttpStatusCode.Unauthorized;
                 response = ApiResponse<object>.Fail(ex.Message);
                 break;
+            case NotFoundException ex:
+                context.Response.StatusCode = (int)HttpStatusCode.NotFound;
+                response = ApiResponse<object>.Fail(ex.Message);
+                break;
+            case ForbiddenException ex:
+                context.Response.StatusCode = (int)HttpStatusCode.Forbidden;
+                response = ApiResponse<object>.Fail(ex.Message);
+                break;
+            case ArgumentException ex:
+                context.Response.StatusCode = (int)HttpStatusCode.BadRequest;
+                response = ApiResponse<object>.Fail(ex.Message);
+                break;
             default:
-                _logger.LogError(exception, "Unhandled exception occurred.");
+                _logger.LogError(exception, "Unhandled exception occurred: {Message}", exception.Message);
                 context.Response.StatusCode = (int)HttpStatusCode.InternalServerError;
+                response = ApiResponse<object>.Fail(exception.Message ?? ResponseMessage.UnexpectedError.GetDescription());
                 break;
         }
 

@@ -65,10 +65,6 @@ export class AuthService {
         this.tokenService.setAccessToken(tokens.accessToken);
         this.tokenService.setRefreshToken(tokens.refreshToken);
         this.loadProfile().subscribe();
-      }),
-      catchError((err: Error) => {
-        this.notificationService.showError(err.message || 'Authentication failed.');
-        return throwError(() => err);
       })
     );
   }
@@ -130,7 +126,7 @@ export class AuthService {
         this.clearSessionAndRedirect();
         this.notificationService.showInfo('Logged out successfully.');
       }),
-      catchError((err: Error) => {
+      catchError(() => {
         this.clearSessionAndRedirect();
         return of({ message: 'Logged out.' });
       })
@@ -183,10 +179,6 @@ export class AuthService {
     return this.authRepository.forgotPassword(params).pipe(
       tap((res: OperationResult) => {
         this.notificationService.showSuccess(res.message || 'Recovery link dispatched to your corporate email.');
-      }),
-      catchError((err: Error) => {
-        this.notificationService.showError(err.message || 'Password recovery request failed.');
-        return throwError(() => err);
       })
     );
   }
@@ -201,10 +193,6 @@ export class AuthService {
     return this.authRepository.resetPassword(params).pipe(
       tap((res: OperationResult) => {
         this.notificationService.showSuccess(res.message || 'Password reset completed successfully.');
-      }),
-      catchError((err: Error) => {
-        this.notificationService.showError(err.message || 'Password reset failed.');
-        return throwError(() => err);
       })
     );
   }
@@ -219,10 +207,6 @@ export class AuthService {
     return this.authRepository.changePassword(params).pipe(
       tap((res: OperationResult) => {
         this.notificationService.showSuccess(res.message || 'Password changed successfully.');
-      }),
-      catchError((err: Error) => {
-        this.notificationService.showError(err.message || 'Failed to update password.');
-        return throwError(() => err);
       })
     );
   }
@@ -236,4 +220,3 @@ export class AuthService {
     this.router.navigate(['/login']);
   }
 }
-
