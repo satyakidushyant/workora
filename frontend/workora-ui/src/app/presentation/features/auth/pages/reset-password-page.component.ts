@@ -18,49 +18,56 @@ export type PasswordStrengthLevel = 'Minimal' | 'Warning' | 'Average' | 'Info' |
   standalone: true,
   imports: [CommonModule, FormsModule, RouterLink, AuthShaderComponent],
   template: `
-    <div class="bg-[#F4F8F7] text-[#163331] font-sans min-h-screen relative flex flex-col justify-between items-center antialiased selection:bg-[#DCEBE7] selection:text-[#063B39]">
+    <div class="bg-[#F4F8F7] text-[#163331] font-sans min-h-screen lg:h-screen lg:max-h-screen lg:overflow-hidden relative flex flex-col justify-between items-center antialiased selection:bg-[#DCEBE7] selection:text-[#063B39]">
       <app-auth-shader></app-auth-shader>
 
-      <!-- Header Navigation -->
-      <header class="relative z-10 w-full px-6 md:px-12 py-5 flex justify-between items-center max-w-7xl mx-auto">
-        <a routerLink="/" class="flex items-center gap-3 cursor-pointer group text-decoration-none">
-          <img alt="Workora Logo" class="h-9 w-auto object-contain transition-transform group-hover:scale-105 drop-shadow-xs" src="/workoraLogo.png"/>
-          <span class="text-2xl font-extrabold tracking-tight text-[#063B39] font-heading flex items-center">
-            Workora
-            <span class="w-1.5 h-1.5 rounded-full bg-[#0E6E68] ml-1"></span>
-          </span>
+      <!-- Header Navigation: Big 3D Logo Only -->
+      <header class="relative z-10 w-full px-4 xs:px-6 md:px-12 py-3 xs:py-4 md:py-5 flex justify-between items-center max-w-7xl 2xl:max-w-8xl mx-auto shrink-0">
+        <a routerLink="/" class="flex items-center cursor-pointer group focus:outline-none" aria-label="Workora Home">
+          <img 
+            alt="Workora 3D Logo" 
+            src="/workoraLogo.png" 
+            class="h-9 xs:h-11 sm:h-13 md:h-14 w-auto object-contain transition-transform duration-300 group-hover:scale-105 filter drop-shadow-[0_6px_14px_rgba(14,110,104,0.22)] group-hover:drop-shadow-[0_8px_20px_rgba(63,167,155,0.35)]"
+          />
         </a>
+
+        <div class="flex items-center gap-4">
+          <a routerLink="/login" class="text-xs font-bold text-[#0E6E68] hover:text-[#063B39] transition-colors uppercase tracking-wider flex items-center gap-1 cursor-pointer">
+            <span class="material-symbols-outlined text-base">arrow_back</span>
+            <span class="hidden xs:inline">Back to Sign In</span>
+          </a>
+        </div>
       </header>
 
-      <main class="relative z-10 flex flex-col items-center justify-center px-6 py-8 my-auto w-full max-w-md">
+      <main class="relative z-10 flex flex-col items-center justify-center px-3.5 xs:px-6 py-4 my-auto w-full max-w-md overflow-y-auto lg:overflow-visible">
         
         <!-- Reset Form Card -->
-        <div class="bg-white w-full rounded-3xl p-8 sm:p-10 border border-[#DCEBE7] shadow-lg auth-card">
+        <div class="bg-white w-full rounded-2xl sm:rounded-3xl p-5 xs:p-7 sm:p-8 border border-[#DCEBE7] shadow-lg auth-card">
           
-          <div class="text-center mb-6 space-y-1">
-            <div class="inline-flex p-3 rounded-2xl bg-[#DCEBE7] text-[#0E6E68] mb-1">
-              <span class="material-symbols-outlined text-3xl">key</span>
+          <div class="text-center mb-5 space-y-1">
+            <div class="inline-flex p-2.5 rounded-2xl bg-[#DCEBE7] text-[#0E6E68] mb-1">
+              <span class="material-symbols-outlined text-2xl">key</span>
             </div>
-            <h2 class="text-2xl font-extrabold text-[#063B39] tracking-tight font-heading">Set New Password</h2>
+            <h2 class="text-xl sm:text-2xl font-extrabold text-[#063B39] tracking-tight font-heading">Set New Password</h2>
             <p class="text-xs text-[#6B7F7C]">Choose a strong passphrase for your account.</p>
           </div>
 
           <!-- Error Alert Banner -->
           @if (errorMessage()) {
-            <div class="mb-4 p-3.5 rounded-xl bg-red-50 border border-red-200/80 flex items-start gap-2.5 text-red-700 text-xs animate-in fade-in duration-200">
-              <span class="material-symbols-outlined text-lg shrink-0 mt-0.5 text-red-600">error</span>
+            <div class="mb-4 p-3 rounded-xl bg-red-50 border border-red-200/80 flex items-start gap-2.5 text-red-700 text-xs animate-in fade-in duration-200">
+              <span class="material-symbols-outlined text-base shrink-0 mt-0.5 text-red-600">error</span>
               <div class="font-medium leading-relaxed">{{ errorMessage() }}</div>
             </div>
           }
 
-          <form class="space-y-4" (ngSubmit)="onSubmit()">
+          <form class="space-y-3.5" (ngSubmit)="onSubmit()">
             
             <!-- New Password Field -->
-            <div class="space-y-1.5">
-              <label class="block text-xs font-bold text-[#063B39] uppercase tracking-wider" for="new_password">New Password</label>
+            <div class="space-y-1 auth-field">
+              <label class="workora-label !mb-1" for="new_password">New Password</label>
               <div class="relative flex items-center">
                 <input 
-                  class="workora-input pr-10" 
+                  class="workora-input pl-4 pr-11 !py-2.5 text-xs" 
                   id="new_password" 
                   name="newPassword"
                   [(ngModel)]="newPassword"
@@ -70,7 +77,7 @@ export type PasswordStrengthLevel = 'Minimal' | 'Warning' | 'Average' | 'Info' |
                   required
                 />
                 <button 
-                  class="material-symbols-outlined text-slate-400 hover:text-[#063B39] transition-colors cursor-pointer text-lg absolute right-3.5 flex items-center justify-center border-none bg-transparent" 
+                  class="material-symbols-outlined text-slate-400 hover:text-[#063B39] transition-colors cursor-pointer text-base absolute right-3.5 flex items-center justify-center border-none bg-transparent" 
                   type="button"
                   (click)="togglePasswordVisibility()"
                   aria-label="Toggle password visibility"
@@ -81,9 +88,9 @@ export type PasswordStrengthLevel = 'Minimal' | 'Warning' | 'Average' | 'Info' |
             </div>
 
             <!-- Strength Meter -->
-            <div class="space-y-1.5 py-1">
+            <div class="space-y-1 py-0.5">
               <div class="flex justify-between items-center text-xs">
-                <span class="text-[#6B7F7C] font-medium">Security strength</span>
+                <span class="text-[#6B7F7C] font-medium text-[11px]">Security strength</span>
                 <span 
                   [ngClass]="{
                     'text-slate-400': strengthLevel() === 'Minimal',
@@ -92,7 +99,7 @@ export type PasswordStrengthLevel = 'Minimal' | 'Warning' | 'Average' | 'Info' |
                     'text-[#0E6E68]': strengthLevel() === 'Info',
                     'text-emerald-600': strengthLevel() === 'Success'
                   }"
-                  class="font-bold uppercase tracking-wider text-[11px]"
+                  class="font-bold uppercase tracking-wider text-[10px]"
                 >
                   {{ strengthLevel() }}
                 </span>
@@ -106,11 +113,11 @@ export type PasswordStrengthLevel = 'Minimal' | 'Warning' | 'Average' | 'Info' |
             </div>
 
             <!-- Validation Checklist -->
-            <div class="space-y-1.5 bg-[#FAFCFB] p-3 rounded-xl border border-[#DCEBE7] text-xs">
-              <div class="flex items-center gap-2">
+            <div class="space-y-1 bg-[#FAFCFB] p-2.5 rounded-xl border border-[#DCEBE7] text-[11px]">
+              <div class="flex items-center gap-1.5">
                 <span 
                   [ngClass]="hasMinLength() ? 'text-emerald-600' : 'text-slate-400'" 
-                  class="material-symbols-outlined text-base"
+                  class="material-symbols-outlined text-sm"
                 >
                   {{ hasMinLength() ? 'check_circle' : 'radio_button_unchecked' }}
                 </span>
@@ -118,10 +125,10 @@ export type PasswordStrengthLevel = 'Minimal' | 'Warning' | 'Average' | 'Info' |
                   At least 8 characters
                 </span>
               </div>
-              <div class="flex items-center gap-2">
+              <div class="flex items-center gap-1.5">
                 <span 
                   [ngClass]="hasComplexity() ? 'text-emerald-600' : 'text-slate-400'" 
-                  class="material-symbols-outlined text-base"
+                  class="material-symbols-outlined text-sm"
                 >
                   {{ hasComplexity() ? 'check_circle' : 'radio_button_unchecked' }}
                 </span>
@@ -132,11 +139,11 @@ export type PasswordStrengthLevel = 'Minimal' | 'Warning' | 'Average' | 'Info' |
             </div>
 
             <!-- Confirm Password Field -->
-            <div class="space-y-1.5">
-              <label class="block text-xs font-bold text-[#063B39] uppercase tracking-wider" for="confirm_password">Confirm New Password</label>
+            <div class="space-y-1 auth-field">
+              <label class="workora-label !mb-1" for="confirm_password">Confirm New Password</label>
               <div class="relative flex items-center">
                 <input 
-                  class="workora-input pr-10" 
+                  class="workora-input px-4 !py-2.5 text-xs" 
                   id="confirm_password" 
                   name="confirmPassword"
                   [(ngModel)]="confirmPassword"
@@ -150,24 +157,24 @@ export type PasswordStrengthLevel = 'Minimal' | 'Warning' | 'Average' | 'Info' |
             <!-- Action Button -->
             <button 
               [disabled]="isLoading() || isSuccess()"
-              class="w-full h-12 workora-btn-primary disabled:opacity-75" 
+              class="w-full h-11 workora-btn-primary text-xs disabled:opacity-75" 
               type="submit"
             >
               @if (isLoading()) {
-                <span class="material-symbols-outlined text-lg animate-spin">progress_activity</span>
+                <span class="material-symbols-outlined text-base animate-spin">progress_activity</span>
                 <span>Updating Password...</span>
               } @else if (isSuccess()) {
-                <span class="material-symbols-outlined text-lg">verified</span>
+                <span class="material-symbols-outlined text-base">verified</span>
                 <span>Updated Successfully</span>
               } @else {
                 <span>Update Password</span>
-                <span class="material-symbols-outlined text-lg">arrow_forward</span>
+                <span class="material-symbols-outlined text-base">arrow_forward</span>
               }
             </button>
           </form>
 
           <!-- Back to Login -->
-          <div class="mt-6 pt-4 border-t border-[#DCEBE7] text-center">
+          <div class="mt-5 pt-3.5 border-t border-[#DCEBE7] text-center">
             <a routerLink="/login" class="text-xs font-bold text-[#0E6E68] hover:text-[#063B39] transition-colors inline-flex items-center justify-center gap-1.5 cursor-pointer">
               <span class="material-symbols-outlined text-base">arrow_back</span>
               <span>Back to Sign In</span>
@@ -178,7 +185,7 @@ export type PasswordStrengthLevel = 'Minimal' | 'Warning' | 'Average' | 'Info' |
       </main>
 
       <!-- Footer -->
-      <footer class="relative z-10 w-full px-6 py-4 text-center text-xs text-[#6B7F7C]">
+      <footer class="relative z-10 w-full px-6 py-3 text-center text-[11px] text-[#6B7F7C] shrink-0">
         <p>© 2026 Workora HRMS. All rights reserved.</p>
       </footer>
     </div>
@@ -305,7 +312,7 @@ export class ResetPasswordPageComponent implements AfterViewInit, OnDestroy {
       },
       error: (err: any) => {
         this.isLoading.set(false);
-        this.errorMessage.set(err?.message || 'Password reset failed. The reset token may be expired or invalid.');
+        this.errorMessage.set(err?.error?.message || err?.message || 'Password reset failed. The reset token may be expired or invalid.');
       }
     });
   }
