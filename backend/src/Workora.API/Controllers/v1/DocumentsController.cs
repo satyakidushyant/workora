@@ -67,4 +67,24 @@ public class DocumentsController : ControllerBase
     [Authorize(Policy = "documents.manage")]
     public async Task<ApiResponse<bool>> DeleteDocument(int id)
         => await _mediator.Send(new DeleteDocumentCommand(id));
+
+    /// <summary>
+    /// Gets a secure download link for a document.
+    /// </summary>
+    /// <param name="id">The document ID.</param>
+    /// <returns>Secure download payload.</returns>
+    [HttpGet("{id:int}/download")]
+    [Authorize(Policy = "documents.view")]
+    public async Task<ApiResponse<Workora.Application.Features.Documents.Actions.DocumentDownloadDto>> DownloadDocument(int id)
+        => await _mediator.Send(new Workora.Application.Features.Documents.Actions.DownloadDocumentQuery(id));
+
+    /// <summary>
+    /// Retrieves documents expiring in the next 30 days.
+    /// </summary>
+    /// <param name="companyId">Company identifier.</param>
+    /// <returns>List of expiring documents.</returns>
+    [HttpGet("expiring")]
+    [Authorize(Policy = "documents.view")]
+    public async Task<ApiResponse<IReadOnlyList<DocumentDto>>> GetExpiringDocuments([FromQuery] int companyId)
+        => await _mediator.Send(new Workora.Application.Features.Documents.Actions.GetExpiringDocumentsQuery(companyId));
 }

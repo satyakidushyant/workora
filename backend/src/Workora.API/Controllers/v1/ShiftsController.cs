@@ -9,6 +9,7 @@ using Workora.Application.Features.Shifts.Commands.UpdateShift;
 using Workora.Application.Features.Shifts.DTOs;
 using Workora.Application.Features.Shifts.Queries.GetShiftById;
 using Workora.Application.Features.Shifts.Queries.GetShiftsList;
+using Workora.Application.Features.Shifts.Rosters;
 using Workora.Shared.Responses;
 
 namespace Workora.API.Controllers.v1;
@@ -100,5 +101,37 @@ public class ShiftsController : ControllerBase
     [HttpPost("unassign")]
     [Authorize(Policy = "shifts.manage")]
     public async Task<ApiResponse<bool>> UnassignShift([FromBody] UnassignShiftCommand command)
+        => await _mediator.Send(command);
+
+    /// <summary>
+    /// Retrieves monthly shift roster for company workforce.
+    /// </summary>
+    /// <param name="companyId">Company identifier.</param>
+    /// <param name="month">Target month.</param>
+    /// <param name="year">Target year.</param>
+    /// <returns>List of employee shift roster entries.</returns>
+    [HttpGet("roster")]
+    [Authorize(Policy = "shifts.view")]
+    public async Task<ApiResponse<IReadOnlyList<EmployeeRosterDto>>> GetRoster([FromQuery] int companyId, [FromQuery] int month, [FromQuery] int year)
+        => await _mediator.Send(new GetMonthlyShiftRosterQuery(companyId, month, year));
+
+    /// <summary>
+    /// Assigns rotational shift roster to multiple employees.
+    /// </summary>
+    /// <param name="command">Rotational roster command payload.</param>
+    /// <returns>Confirmation boolean.</returns>
+    [HttpPost("roster/assign")]
+    [Authorize(Policy = "shifts.manage")]
+    public async Task<ApiResponse<bool>> AssignRotationalRoster([FromBody] AssignRotationalRosterCommand command)
+        => await _mediator.Send(command);
+
+    /// <summary>
+    /// Swaps shift assignments between two employees.
+    /// </summary>
+    /// <param name="command">Shift swap payload.</param>
+    /// <returns>Confirmation boolean.</returns>
+    [HttpPost("roster/swap")]
+    [Authorize(Policy = "shifts.manage")]
+    public async Task<ApiResponse<bool>> SwapRoster([FromBody] SwapEmployeeShiftsCommand command)
         => await _mediator.Send(command);
 }

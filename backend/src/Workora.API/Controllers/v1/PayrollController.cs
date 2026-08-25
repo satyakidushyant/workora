@@ -15,6 +15,8 @@ using Workora.Application.Features.Payroll.Queries.GetPayrollRunsList;
 using Workora.Application.Features.Payroll.Queries.GetPayslipById;
 using Workora.Application.Features.Payroll.Queries.GetSalaryStructureById;
 using Workora.Application.Features.Payroll.Queries.GetSalaryStructuresList;
+using Workora.Application.Features.Payroll.Queries.GetSalaryStructureHistory;
+using Workora.Application.Features.Payroll.Processing;
 using Workora.Shared.Responses;
 
 namespace Workora.API.Controllers.v1;
@@ -167,4 +169,57 @@ public class PayrollController : ControllerBase
     [Authorize(Policy = "payroll.self")]
     public async Task<ApiResponse<IReadOnlyList<PayslipDto>>> GetMyPayslips([FromQuery] int? year = null)
         => await _mediator.Send(new GetMyPayslipsQuery(year));
+
+    /// <summary>
+    /// Computes earnings and statutory deductions for a draft payroll run.
+    /// </summary>
+    /// <param name="id">The payroll run ID.</param>
+    /// <returns>Processed payroll run status.</returns>
+    [HttpPost("runs/{id:int}/process")]
+    [Authorize(Policy = "payroll.process")]
+    public async Task<ApiResponse<PayrollRunDto>> ProcessRun(int id)
+        => await _mediator.Send(new ProcessPayrollRunCommand(id));
+
+    /// <summary>
+    /// Downloads an employee's itemized payslip for a specific payroll run.
+    /// </summary>
+    /// <param name="id">The payroll run ID.</param>
+    /// <param name="empId">The employee ID.</param>
+    /// <returns>Single employee payslip details.</returns>
+    [HttpGet("runs/{id:int}/payslips/{empId:int}")]
+    [Authorize(Policy = "payroll.view")]
+    public async Task<ApiResponse<PayslipDto>> GetEmployeeRunPayslip(int id, int empId)
+        => await _mediator.Send(new GetEmployeePayslipQuery(id, empId));
+
+    /// <summary>
+    /// Downloads all generated payslips for a payroll run in bulk.
+    /// </summary>
+    /// <param name="id">The payroll run ID.</param>
+    /// <returns>Bulk payslips archive package information.</returns>
+    [HttpGet("runs/{id:int}/payslips/bulk")]
+    [Authorize(Policy = "payroll.view")]
+    public async Task<ApiResponse<BulkPayslipsExportDto>> GetBulkPayslips(int id)
+        => await _mediator.Send(new GetBulkPayslipsExportQuery(id));
+
+    /// <summary>
+    /// Exports bank payment disbursement file for a finalized payroll run.
+    /// </summary>
+    /// <param name="id">The payroll run ID.</param>
+    /// <returns>Bank payment disbursement file information.</returns>
+    [HttpGet("runs/{id:int}/disbursement")]
+    [Authorize(Policy = "payroll.export")]
+    public async Task<ApiResponse<PayrollDisbursementFileDto>> GetDisbursementFile(int id)
+        => await _mediator.Send(new GetPayrollDisbursementFileQuery(id));
+
+    /// <summary>
+    /// Retrieves salary structure revision and assignment history for an employee.
+    /// </summary>
+    /// <param name="employeeId">The employee ID.</param>
+    /// <returns>A list of past and present salary assignments.</returns>
+    [HttpGet("structures/history/{employeeId:int}")]
+    [HttpGet("/api/v1/salary-structures/history/{employeeId:int}")]
+    [Authorize(Policy = "payroll.view")]
+    public async Task<ApiResponse<IReadOnlyList<EmployeeSalaryAssignmentDto>>> GetSalaryStructureHistory(int employeeId)
+        => await _mediator.Send(new GetSalaryStructureHistoryQuery(employeeId));
 }
+

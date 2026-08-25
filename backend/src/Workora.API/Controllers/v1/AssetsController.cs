@@ -67,4 +67,34 @@ public class AssetsController : ControllerBase
     [Authorize(Policy = "assets.manage")]
     public async Task<ApiResponse<bool>> ReturnAsset([FromBody] ReturnAssetCommand command)
         => await _mediator.Send(command);
+
+    /// <summary>
+    /// Gets asset details by ID.
+    /// </summary>
+    /// <param name="id">The asset ID.</param>
+    /// <returns>Asset detail object.</returns>
+    [HttpGet("{id:int}")]
+    [Authorize(Policy = "assets.view")]
+    public async Task<ApiResponse<AssetDto>> GetAssetById(int id)
+        => await _mediator.Send(new Workora.Application.Features.Assets.Details.GetAssetByIdQuery(id));
+
+    /// <summary>
+    /// Updates metadata for an existing asset.
+    /// </summary>
+    /// <param name="id">The asset ID.</param>
+    /// <param name="command">Update payload.</param>
+    /// <returns>Updated asset details.</returns>
+    [HttpPut("{id:int}")]
+    [Authorize(Policy = "assets.manage")]
+    public async Task<ApiResponse<AssetDto>> UpdateAsset(int id, [FromBody] Workora.Application.Features.Assets.Details.UpdateAssetCommand command)
+        => await _mediator.Send(command with { Id = id });
+
+    /// <summary>
+    /// Retrieves all assets currently checked out to the caller.
+    /// </summary>
+    /// <returns>List of assigned assets.</returns>
+    [HttpGet("me")]
+    [Authorize]
+    public async Task<ApiResponse<IReadOnlyList<AssetDto>>> GetMyAssets()
+        => await _mediator.Send(new Workora.Application.Features.Assets.Details.GetMyAssignedAssetsQuery());
 }

@@ -34,4 +34,25 @@ public class AuditLogsController : ControllerBase
     [Authorize(Policy = "audit.view")]
     public async Task<ApiResponse<PagedResponse<AuditLogDto>>> GetAuditLogs([FromQuery] GetAuditLogsListQuery query)
         => await _mediator.Send(query);
+
+    /// <summary>
+    /// Gets entity-specific change history logs.
+    /// </summary>
+    /// <param name="entity">Target entity name (e.g. Employee, PayrollRun).</param>
+    /// <param name="id">Target entity ID.</param>
+    /// <returns>List of audit log change entries.</returns>
+    [HttpGet("{entity}/{id:int}")]
+    [Authorize(Policy = "audit.view")]
+    public async Task<ApiResponse<IReadOnlyList<AuditLogDto>>> GetEntityAuditLogs(string entity, int id)
+        => await _mediator.Send(new Workora.Application.Features.AuditLogs.EntityLogs.GetEntityAuditLogsQuery(entity, id));
+
+    /// <summary>
+    /// Exports audit log records as a CSV file.
+    /// </summary>
+    /// <param name="companyId">Company identifier.</param>
+    /// <returns>CSV file download URL.</returns>
+    [HttpGet("export")]
+    [Authorize(Policy = "audit.view")]
+    public async Task<ApiResponse<string>> ExportAuditLogs([FromQuery] int companyId)
+        => await _mediator.Send(new Workora.Application.Features.AuditLogs.EntityLogs.ExportAuditLogsQuery(companyId));
 }

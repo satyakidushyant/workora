@@ -30,6 +30,7 @@ public static class DependencyInjection
         services.AddScoped<IUnitOfWork>(provider => provider.GetRequiredService<AppDbContext>());
 
         services.AddScoped(typeof(IRepository<>), typeof(GenericRepository<>));
+        services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
         services.AddScoped<IUserRepository, UserRepository>();
         services.AddScoped<IRefreshTokenRepository, RefreshTokenRepository>();
         services.AddScoped<IPasswordResetTokenRepository, PasswordResetTokenRepository>();
@@ -58,6 +59,11 @@ public static class DependencyInjection
         services.AddScoped<ISystemSettingRepository, SystemSettingRepository>();
         services.AddScoped<IAuditLogRepository, AuditLogRepository>();
         services.AddScoped<IAnalyticsRepository, AnalyticsRepository>();
+        services.AddScoped<ILoanRepository, LoanRepository>();
+        services.AddScoped<IExpenseClaimRepository, ExpenseClaimRepository>();
+        services.AddScoped<IFieldVisitRepository, FieldVisitRepository>();
+        services.AddScoped<ITaskItemRepository, TaskItemRepository>();
+        services.AddScoped<IHelpdeskTicketRepository, HelpdeskTicketRepository>();
 
         services.AddScoped<DatabaseSeeder>();
 

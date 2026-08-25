@@ -12,6 +12,7 @@ using Workora.Application.Features.Leave.Queries.GetLeaveBalances;
 using Workora.Application.Features.Leave.Queries.GetLeaveCalendar;
 using Workora.Application.Features.Leave.Queries.GetLeaveRequestsList;
 using Workora.Application.Features.Leave.Queries.GetLeaveTypesList;
+using Workora.Application.Features.Leave.Queries.GetMyLeaveBalances;
 using Workora.Shared.Responses;
 
 namespace Workora.API.Controllers.v1;
@@ -96,6 +97,16 @@ public class LeaveController : ControllerBase
     [Authorize(Policy = "leave.view")]
     public async Task<ApiResponse<IReadOnlyList<LeaveBalanceDto>>> GetLeaveBalances(int employeeId, [FromQuery] int year)
         => await _mediator.Send(new GetLeaveBalancesQuery(employeeId, year));
+
+    /// <summary>
+    /// Gets the current caller's personal leave balance quotas for a calendar year.
+    /// </summary>
+    /// <param name="year">The calendar year (defaults to current year).</param>
+    /// <returns>A list of caller's balances by leave type.</returns>
+    [HttpGet("balances/me")]
+    [Authorize]
+    public async Task<ApiResponse<IReadOnlyList<LeaveBalanceDto>>> GetMyLeaveBalances([FromQuery] int year = 0)
+        => await _mediator.Send(new GetMyLeaveBalancesQuery(year));
 
     /// <summary>
     /// Gets all configured leave types.

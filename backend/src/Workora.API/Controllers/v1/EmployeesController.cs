@@ -17,6 +17,7 @@ using Workora.Application.Features.Employees.Queries.GetEmployeeEmploymentHistor
 using Workora.Application.Features.Employees.Queries.GetEmployeeOrgChart;
 using Workora.Application.Features.Employees.Queries.GetEmployeesList;
 using Workora.Application.Features.Employees.Queries.GetMyEmployeeProfile;
+using Workora.Application.Features.Employees.Commands.BulkImportEmployees;
 using Workora.Shared.Responses;
 
 namespace Workora.API.Controllers.v1;
@@ -193,4 +194,14 @@ public class EmployeesController : ControllerBase
     [Authorize(Policy = "employees.update")]
     public async Task<ApiResponse<bool>> UpsertBankDetails(int id, [FromBody] UpsertBankDetailsCommand command)
         => await _mediator.Send(command with { EmployeeId = id });
+
+    /// <summary>
+    /// Bulk uploads new employee records into the system.
+    /// </summary>
+    /// <param name="command">The bulk employee payload.</param>
+    /// <returns>Number of created employee records.</returns>
+    [HttpPost("bulk-import")]
+    [Authorize(Policy = "employees.create")]
+    public async Task<ApiResponse<int>> BulkImport([FromBody] BulkImportEmployeesCommand command)
+        => await _mediator.Send(command);
 }

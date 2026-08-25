@@ -130,4 +130,24 @@ public class PerformanceController : ControllerBase
     [Authorize(Policy = "performance.self")]
     public async Task<ApiResponse<GoalDto>> UpdateGoalProgress(int id, [FromBody] UpdateGoalProgressCommand command)
         => await _mediator.Send(command with { Id = id });
+
+    /// <summary>
+    /// Retrieves performance appraisal cycles for a company.
+    /// </summary>
+    /// <param name="companyId">Company identifier.</param>
+    /// <returns>List of performance appraisal review cycles.</returns>
+    [HttpGet("cycles")]
+    [Authorize(Policy = "performance.view")]
+    public async Task<ApiResponse<IReadOnlyList<Workora.Application.Features.Performance.Cycles.PerformanceCycleDto>>> GetCycles([FromQuery] int companyId)
+        => await _mediator.Send(new Workora.Application.Features.Performance.Cycles.GetPerformanceCyclesQuery(companyId));
+
+    /// <summary>
+    /// Creates a new performance appraisal review cycle.
+    /// </summary>
+    /// <param name="command">Creation command payload.</param>
+    /// <returns>Created performance review cycle details.</returns>
+    [HttpPost("cycles")]
+    [Authorize(Policy = "performance.manage")]
+    public async Task<ApiResponse<Workora.Application.Features.Performance.Cycles.PerformanceCycleDto>> CreateCycle([FromBody] Workora.Application.Features.Performance.Cycles.CreatePerformanceCycleCommand command)
+        => await _mediator.Send(command);
 }

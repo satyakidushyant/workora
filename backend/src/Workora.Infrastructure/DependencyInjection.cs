@@ -4,6 +4,7 @@ using Workora.Application.Common.Interfaces;
 using Workora.Infrastructure.Authentication;
 using Workora.Infrastructure.Caching;
 using Workora.Infrastructure.Email;
+using Workora.Infrastructure.Storage;
 
 namespace Workora.Infrastructure;
 
@@ -13,15 +14,19 @@ namespace Workora.Infrastructure;
 public static class DependencyInjection
 {
     /// <summary>
-    /// Registers Infrastructure layer services such as JWT authentication, password hashing, and email.
+    /// Registers Infrastructure layer services such as JWT authentication, password hashing, Cloudinary storage, and email.
     /// </summary>
     /// <param name="services">The service collection.</param>
+    /// <param name="configuration">Application configuration configuration root.</param>
     /// <returns>The updated service collection.</returns>
     public static IServiceCollection AddInfrastructure(this IServiceCollection services, IConfiguration configuration)
     {
         services.AddSingleton<ITokenService, TokenService>();
         services.AddSingleton<IPasswordHasher, PasswordHasher>();
         services.AddScoped<IEmailService, SmtpEmailService>();
+
+        services.Configure<CloudinarySettings>(configuration.GetSection(CloudinarySettings.SectionName));
+        services.AddScoped<IFileStorageService, CloudinaryFileStorageService>();
 
         var useRedis = configuration.GetValue<bool>("CacheSettings:UseRedis");
         if (useRedis)

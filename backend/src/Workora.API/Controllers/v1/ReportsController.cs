@@ -70,4 +70,25 @@ public class ReportsController : ControllerBase
     [Authorize(Policy = "reports.view")]
     public async Task<ApiResponse<PayrollReportDto>> GetPayrollReport([FromQuery] int companyId)
         => await _mediator.Send(new GetPayrollReportQuery(companyId));
+
+    /// <summary>
+    /// Generates attrition & turnover rate metrics.
+    /// </summary>
+    /// <param name="companyId">Company ID.</param>
+    /// <param name="year">Calendar year filter (defaults to current year).</param>
+    /// <returns>Attrition report metrics.</returns>
+    [HttpGet("attrition")]
+    [Authorize(Policy = "reports.view")]
+    public async Task<ApiResponse<Workora.Application.Features.Reports.Attrition.AttritionReportDto>> GetAttritionReport([FromQuery] int companyId, [FromQuery] int year = 0)
+        => await _mediator.Send(new Workora.Application.Features.Reports.Attrition.GetAttritionReportQuery(companyId, year == 0 ? DateTime.UtcNow.Year : year));
+
+    /// <summary>
+    /// Generates a custom dynamic Excel report export.
+    /// </summary>
+    /// <param name="command">Custom export request payload.</param>
+    /// <returns>Export file metadata.</returns>
+    [HttpPost("custom/export")]
+    [Authorize(Policy = "reports.export")]
+    public async Task<ApiResponse<Workora.Application.Features.Reports.Attrition.CustomReportExportDto>> ExportCustomReport([FromBody] Workora.Application.Features.Reports.Attrition.ExportCustomReportCommand command)
+        => await _mediator.Send(command);
 }

@@ -245,6 +245,26 @@ public class RecruitmentController : ControllerBase
         => await _mediator.Send(new DeclineJobOfferCommand(id));
 
     /// <summary>
+    /// Downloads an offer letter PDF document.
+    /// </summary>
+    /// <param name="id">The offer ID.</param>
+    /// <returns>Offer letter PDF details.</returns>
+    [HttpGet("offers/{id:int}/pdf")]
+    [Authorize(Policy = "recruitment.view")]
+    public async Task<ApiResponse<Workora.Application.Features.Recruitment.Offers.OfferLetterPdfDto>> GetOfferPdf(int id)
+        => await _mediator.Send(new Workora.Application.Features.Recruitment.Offers.GetOfferLetterPdfQuery(id));
+
+    /// <summary>
+    /// Resends job offer notification email to a candidate.
+    /// </summary>
+    /// <param name="id">The offer ID.</param>
+    /// <returns>A confirmation boolean.</returns>
+    [HttpPost("offers/{id:int}/resend")]
+    [Authorize(Policy = "recruitment.manage")]
+    public async Task<ApiResponse<bool>> ResendOffer(int id)
+        => await _mediator.Send(new Workora.Application.Features.Recruitment.Offers.ResendOfferLetterCommand(id));
+
+    /// <summary>
     /// Gets recruitment pipeline funnel metrics by candidate stage.
     /// </summary>
     /// <param name="jobPostingId">Optional job filter.</param>

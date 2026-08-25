@@ -62,6 +62,11 @@ public class AppDbContext : DbContext, IUnitOfWork
     public DbSet<Company> Companies { get; set; } = null!;
 
     /// <summary>
+    /// Gets or sets the SubscriptionPlans table.
+    /// </summary>
+    public DbSet<SubscriptionPlan> SubscriptionPlans { get; set; } = null!;
+
+    /// <summary>
     /// Gets or sets the Branches table.
     /// </summary>
     public DbSet<Branch> Branches { get; set; } = null!;
@@ -250,6 +255,46 @@ public class AppDbContext : DbContext, IUnitOfWork
     /// Gets or sets the AuditLogs table.
     /// </summary>
     public DbSet<AuditLog> AuditLogs { get; set; } = null!;
+
+    /// <summary>
+    /// Gets or sets the LoanRecords table.
+    /// </summary>
+    public DbSet<LoanRecord> LoanRecords { get; set; } = null!;
+
+    /// <summary>
+    /// Gets or sets the LoanEmiSchedules table.
+    /// </summary>
+    public DbSet<LoanEmiSchedule> LoanEmiSchedules { get; set; } = null!;
+
+    /// <summary>
+    /// Gets or sets the ExpenseClaims table.
+    /// </summary>
+    public DbSet<ExpenseClaim> ExpenseClaims { get; set; } = null!;
+
+    /// <summary>
+    /// Gets or sets the FieldVisits table.
+    /// </summary>
+    public DbSet<FieldVisit> FieldVisits { get; set; } = null!;
+
+    /// <summary>
+    /// Gets or sets the FieldGpsPings table.
+    /// </summary>
+    public DbSet<FieldGpsPing> FieldGpsPings { get; set; } = null!;
+
+    /// <summary>
+    /// Gets or sets the TaskItems table.
+    /// </summary>
+    public DbSet<TaskItem> TaskItems { get; set; } = null!;
+
+    /// <summary>
+    /// Gets or sets the HelpdeskTickets table.
+    /// </summary>
+    public DbSet<HelpdeskTicket> HelpdeskTickets { get; set; } = null!;
+
+    /// <summary>
+    /// Gets or sets the HelpdeskTicketComments table.
+    /// </summary>
+    public DbSet<HelpdeskTicketComment> HelpdeskTicketComments { get; set; } = null!;
 
     /// <summary>
     /// Saves all changes made in this context to the database, populating CreatedAt/UpdatedAt timestamps.

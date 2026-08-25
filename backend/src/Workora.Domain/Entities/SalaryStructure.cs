@@ -152,4 +152,24 @@ public class SalaryComponent : BaseEntity
             IsActive = true
         };
     }
+
+    /// <summary>
+    /// Updates the salary component parameters.
+    /// </summary>
+    public void Update(
+        string name,
+        string code,
+        ComponentType type,
+        CalculationType calculationType,
+        decimal defaultValue,
+        bool isTaxable)
+    {
+        Name = name;
+        Code = code.ToUpperInvariant();
+        Type = type;
+        CalculationType = calculationType;
+        DefaultValue = defaultValue;
+        IsTaxable = isTaxable;
+    }
 }
+

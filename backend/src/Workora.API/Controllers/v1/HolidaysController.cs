@@ -7,6 +7,8 @@ using Workora.Application.Features.Holidays.Commands.UpdateHoliday;
 using Workora.Application.Features.Holidays.DTOs;
 using Workora.Application.Features.Holidays.Queries.GetHolidayById;
 using Workora.Application.Features.Holidays.Queries.GetHolidaysList;
+using Workora.Application.Features.Holidays.Commands.BulkImportHolidays;
+using Workora.Application.Features.Holidays.WeeklyOffs;
 using Workora.Shared.Responses;
 
 namespace Workora.API.Controllers.v1;
@@ -81,4 +83,34 @@ public class HolidaysController : ControllerBase
     [Authorize(Policy = "holidays.manage")]
     public async Task<ApiResponse<bool>> DeleteHoliday(int id)
         => await _mediator.Send(new DeleteHolidayCommand(id));
+
+    /// <summary>
+    /// Bulk imports annual holiday entries.
+    /// </summary>
+    /// <param name="command">The bulk import payload.</param>
+    /// <returns>Number of imported holidays.</returns>
+    [HttpPost("import")]
+    [Authorize(Policy = "holidays.manage")]
+    public async Task<ApiResponse<int>> BulkImport([FromBody] BulkImportHolidaysCommand command)
+        => await _mediator.Send(command);
+
+    /// <summary>
+    /// Gets the weekly-off policy for a company.
+    /// </summary>
+    /// <param name="companyId">The company ID.</param>
+    /// <returns>Weekly off policy details.</returns>
+    [HttpGet("/api/v1/weekly-offs")]
+    [Authorize(Policy = "settings.view")]
+    public async Task<ApiResponse<WeeklyOffPolicyDto>> GetWeeklyOffPolicy([FromQuery] int companyId)
+        => await _mediator.Send(new GetWeeklyOffPolicyQuery(companyId));
+
+    /// <summary>
+    /// Updates the weekly-off policy for a company.
+    /// </summary>
+    /// <param name="command">The update policy payload.</param>
+    /// <returns>Updated weekly off policy.</returns>
+    [HttpPut("/api/v1/weekly-offs")]
+    [Authorize(Policy = "settings.manage")]
+    public async Task<ApiResponse<WeeklyOffPolicyDto>> UpdateWeeklyOffPolicy([FromBody] UpdateWeeklyOffPolicyCommand command)
+        => await _mediator.Send(command);
 }

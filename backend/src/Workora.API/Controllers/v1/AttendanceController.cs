@@ -12,6 +12,8 @@ using Workora.Application.Features.Attendance.Queries.GetAttendanceCorrectionsLi
 using Workora.Application.Features.Attendance.Queries.GetAttendanceHistory;
 using Workora.Application.Features.Attendance.Queries.GetAttendanceSummary;
 using Workora.Application.Features.Attendance.Queries.GetTodayAttendanceStatus;
+using Workora.Application.Features.Attendance.Queries.GetLiveAttendanceStatus;
+using Workora.Application.Features.Attendance.Commands.PushBiometricDevicePunches;
 using Workora.Domain.Enums;
 using Workora.Shared.Responses;
 
@@ -145,5 +147,25 @@ public class AttendanceController : ControllerBase
     [HttpPost("bulk-import")]
     [Authorize(Policy = "attendance.manage")]
     public async Task<ApiResponse<int>> BulkImport([FromBody] BulkImportAttendanceCommand command)
+        => await _mediator.Send(command);
+
+    /// <summary>
+    /// Retrieves real-time presence dashboard for active company employees.
+    /// </summary>
+    /// <param name="companyId">The company ID.</param>
+    /// <returns>Real-time attendance metrics.</returns>
+    [HttpGet("live-status")]
+    [Authorize(Policy = "attendance.view")]
+    public async Task<ApiResponse<LiveAttendanceStatusDto>> GetLiveStatus([FromQuery] int companyId)
+        => await _mediator.Send(new GetLiveAttendanceStatusQuery(companyId));
+
+    /// <summary>
+    /// Pushes biometric device punch logs into the system.
+    /// </summary>
+    /// <param name="command">The biometric punches payload.</param>
+    /// <returns>Number of punches processed.</returns>
+    [HttpPost("device-punches")]
+    [Authorize(Policy = "attendance.manage")]
+    public async Task<ApiResponse<int>> PushDevicePunches([FromBody] PushBiometricDevicePunchesCommand command)
         => await _mediator.Send(command);
 }

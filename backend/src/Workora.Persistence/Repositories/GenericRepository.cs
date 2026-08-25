@@ -8,7 +8,7 @@ namespace Workora.Persistence.Repositories;
 /// Generic repository implementation for standard CRUD operations.
 /// </summary>
 /// <typeparam name="T">The type of the entity.</typeparam>
-public class GenericRepository<T> : IRepository<T> where T : BaseEntity
+public class GenericRepository<T> : IRepository<T>, IGenericRepository<T> where T : BaseEntity
 {
     protected readonly AppDbContext _dbContext;
 
@@ -19,6 +19,18 @@ public class GenericRepository<T> : IRepository<T> where T : BaseEntity
     public GenericRepository(AppDbContext dbContext)
     {
         _dbContext = dbContext;
+    }
+
+    /// <inheritdoc />
+    public virtual IQueryable<T> GetQueryable()
+    {
+        return _dbContext.Set<T>().AsQueryable();
+    }
+
+    /// <inheritdoc />
+    public virtual async Task<T?> GetFirstOrDefaultAsync(System.Linq.Expressions.Expression<Func<T, bool>> predicate, CancellationToken ct = default)
+    {
+        return await _dbContext.Set<T>().FirstOrDefaultAsync(predicate, ct);
     }
 
     /// <inheritdoc />

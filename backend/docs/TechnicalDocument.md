@@ -1,6 +1,6 @@
 # Workora
-## Backend Technical Documentation
-### Version 1.1
+## 360° Human Resource Management & Payroll Platform
+### Backend Technical Architecture & System Documentation — Version 2.0
 
 ---
 
@@ -8,83 +8,142 @@
 
 | Field | Value |
 |---|---|
-| **Project Name** | Workora (Human Resource Management System) |
-| **Document Title** | Backend Technical Documentation |
-| **Version** | 1.1 |
+| **Project Name** | Workora (Enterprise 360° HRMS & Payroll SaaS) |
+| **Document Title** | Backend Technical Architecture & System Specification |
+| **Version** | 2.0 (Full 360° HRMS & Multi-Tenant SaaS Architecture) |
 | **Author** | Principal Solution Architecture Team |
 | **Created Date** | July 2, 2026 |
-| **Classification** | Internal / Engineering |
-| **Status** | Approved for Development |
+| **Last Updated** | August 25, 2026 |
+| **Classification** | Enterprise / Engineering Specification |
+| **Status** | Approved for Implementation |
 
 ### Revision History
 
 | Version | Date | Author | Description |
 |---|---|---|---|
-| 0.1 | 2026-05-10 | Solution Architecture Team | Initial draft — architecture skeleton |
+| 0.1 | 2026-05-10 | Solution Architecture Team | Initial draft — Clean Architecture skeleton |
 | 0.5 | 2026-05-28 | Solution Architecture Team | Added module architecture and DB design |
 | 0.9 | 2026-06-18 | Solution Architecture Team | Added security, deployment, CI/CD |
 | 1.0 | 2026-07-02 | Solution Architecture Team | Baseline release for development kickoff |
-| 1.1 | 2026-07-15 | Solution Architecture Team | Full API audit across all 30 modules — added missing CRUD, self-service (`/me`), lifecycle (cancel/reject/reactivate), and history/log endpoints; endpoint index expanded from ~120 to ~202 |
+| 1.1 | 2026-07-15 | Solution Architecture Team | Full API audit across 30 modules — CRUD, `/me`, and lifecycle endpoints |
+| 2.0 | 2026-08-25 | Solution Architecture Team | Major release: Complete 360° HRMS transformation modeled after modern enterprise HR operating systems (Tankhwa Patra paradigm). Added 3-Tier Multi-Tenant SaaS Architecture (Super Admin, Company Admin/HR, Employee ESS), Dynamic Plan & Module Licensing, Core Interconnected HR Data Engine, India Statutory Compliance Engine (PF, ESIC, PT, TDS, Gratuity, Bonus), Multi-Device Biometric/GPS Attendance Engine, Rotating Rosters, Loans & Advances with EMI Recovery, Expense Reimbursements, Field GPS & Visit Tracking, Assets Lifecycle, Task Management, Helpdesk, Workora AI Conversational Assistant, and ~280+ fully mapped CQRS API endpoints. |
 
 ---
 
-## 1. Document Purpose
+## Table of Contents
 
-### 1.1 Objectives
-This document defines the complete backend technical architecture for **Workora**, an enterprise Human Resource Management and Payroll platform built on **ASP.NET Core 9** using **Clean Architecture**, **Domain-Driven Design (DDD)**, and **CQRS**. It serves as the authoritative technical reference for architects, backend engineers, QA engineers, DevOps engineers, and technical stakeholders throughout the system's lifecycle.
+1. [Document Purpose & System Vision](#1-document-purpose--system-vision)
+2. [Technology Stack](#2-technology-stack)
+3. [System Architecture & Clean Architecture Principles](#3-system-architecture--clean-architecture-principles)
+4. [Solution & Project Folder Structure](#4-solution--project-folder-structure)
+5. [The Three-Tier Operational Model](#5-the-three-tier-operational-model)
+    - 5.1 [Level 1 — Super Admin (Platform Owner)](#51-level-1--super-admin-platform-owner)
+    - 5.2 [Level 2 — Company Admin / HR / Finance / Managers](#52-level-2--company-admin--hr--finance--managers)
+    - 5.3 [Level 3 — Employee Self-Service (ESS)](#53-level-3--employee-self-service-ess)
+    - 5.4 [Complete Admin Navigation & Sidebar Blueprint](#54-complete-admin-navigation--sidebar-information-architecture)
+6. [Multi-Tenant SaaS Architecture & Plan Licensing](#6-multi-tenant-saas-architecture--plan-licensing)
+7. [The Interconnected Core HRMS Data Flow](#7-the-interconnected-core-hrms-data-flow)
+8. [Multi-Level Approval State Machine](#8-multi-level-approval-state-machine)
+9. [Identity, Authentication & Authorization (PBAC)](#9-identity-authentication--authorization-pbac)
+10. [Database Architecture & Data Governance](#10-database-architecture--data-governance)
+11. [Detailed Entity Relational Schemas (All Tables & Columns)](#11-detailed-entity-relational-schemas-all-tables--columns)
+12. [Comprehensive Module Architecture (36 Modules)](#12-comprehensive-module-architecture-36-modules)
+    - 12.1 Platform Subscriptions & Tiered Plans
+    - 12.2 Organizations & Multi-Tenant Management
+    - 12.3 Authentication & Session Management
+    - 12.4 Users & Identity
+    - 12.5 Roles & Permissions Catalog
+    - 12.6 Company Profile & Legal Entities
+    - 12.7 Branches & Regional Locations
+    - 12.8 Departments & Organizational Hierarchy
+    - 12.9 Designations, Grades & Job Levels
+    - 12.10 Financial Years & Fiscal Settings
+    - 12.11 Holiday Calendars (Company & Branch-wise)
+    - 12.12 Weekly-Off Configurations
+    - 12.13 Employee Master & 360° Profile
+    - 12.14 Pre-Boarding, Offer Management & E-Sign
+    - 12.15 Onboarding Checklists & Document Verification
+    - 12.16 Employee Lifecycle (Transfers, Promotions, Exit & Offboarding)
+    - 12.17 Attendance Core & Multi-Device Synchronization
+    - 12.18 Attendance Policies & Overtime Engine
+    - 12.19 Attendance Regularization & Corrections
+    - 12.20 Shifts & Rotating Rosters (Factory & Office)
+    - 12.21 Leave Types & Accrual Policy Engine
+    - 12.22 Leave Requests & Balance Management
+    - 12.23 Salary Structures, Payheads & Templates
+    - 12.24 Salary Revisions & Increment History
+    - 12.25 Loans, Advances & EMI Recovery Engine
+    - 12.26 Expense Claims & Reimbursements
+    - 12.27 Field Employee Live GPS Tracking & Visit Logs
+    - 12.28 Payroll Calculation Core & Disbursement
+    - 12.29 Statutory & Compliance Engine (PF, ESIC, PT, TDS, Gratuity, Bonus)
+    - 12.30 Asset Management & Allocation Lifecycle
+    - 12.31 Task Management & Operational SLAs
+    - 12.32 Performance Management (OKRs, KPIs & 360° Reviews)
+    - 12.33 Helpdesk & Employee Ticketing
+    - 12.34 Documents & Compliance Expiry Engine
+    - 12.35 Policies & Versioned Digital Acknowledgments
+    - 12.36 Workora AI Assistant & Dynamic Reports Engine
+13. [API Standards & Response Contracts](#13-api-standards--response-contracts)
+14. [Consolidated API Endpoint Catalog (~280+ Endpoints)](#14-consolidated-api-endpoint-catalog-280-endpoints)
+15. [Security Architecture & OWASP Top 10 Mitigation](#15-security-architecture--owasp-top-10-mitigation)
+16. [Caching, Logging, Exception Handling & Observability](#16-caching-logging-exception-handling--observability)
+17. [Cloud Infrastructure, Azure Deployment & Event Bus](#17-cloud-infrastructure-azure-deployment--event-bus)
+18. [Phased Implementation Roadmap](#18-phased-implementation-roadmap)
+19. [Appendix & Standards Compliance](#19-appendix--standards-compliance)
 
-The objectives of this document are to:
+---
 
-- Define the layered architecture and the rules that govern dependencies between layers.
-- Describe the technology stack and justify each technology choice.
-- Specify the database architecture, entity relationships, and data governance rules.
-- Document every functional module: its purpose, data model, business rules, and API surface.
-- Establish API design standards, security controls, and operational practices (logging, caching, monitoring).
-- Define the deployment topology and CI/CD pipeline.
-- Provide a single source of truth so that engineering decisions are consistent and traceable.
+## 1. Document Purpose & System Vision
 
-### 1.2 Scope
-This document covers the **backend system only** — the ASP.NET Core Web API, the domain and application layers, the persistence layer (PostgreSQL via EF Core), background services, and backend-adjacent infrastructure (caching, logging, file storage, email, PDF generation). It does **not** cover:
+### 1.1 Executive Summary
+**Workora** is an enterprise-grade, cloud-native 360° Human Resource Management System (HRMS) and Payroll automation platform. Engineered on **.NET 9**, **Clean Architecture**, **Domain-Driven Design (DDD)**, and **CQRS (MediatR)**, Workora delivers an interconnected operational ecosystem where workforce management, time & attendance, leave accruals, statutory compliance, loan recovery, expense claims, and payroll computation operate as a synchronized engine.
 
-- Frontend/UI implementation (SPA, mobile apps) — covered by a separate Frontend Technical Documentation.
-- Detailed infrastructure-as-code scripts (Terraform/Bicep) — covered by a separate DevOps Runbook.
-- Third-party payroll compliance/tax tables for specific jurisdictions — covered by a Payroll Compliance Addendum.
+Workora is structured around a three-tier operational hierarchy:
+1. **Platform / Super Admin**: Manages multi-tenant onboarding, subscriptions, tiered feature flags, module licenses, and global platform observability.
+2. **Company Admin / HR / Finance / Manager Dashboard**: Provides company setup, branch-level operations, employee master management, biometric/GPS attendance calculation, multi-shift rotating rosters, leave approvals, salary structure templates, loan/advance EMI scheduling, expense claim approvals, statutory compliance, and payroll finalization.
+3. **Employee Self-Service (ESS)**: A mobile-first and responsive web portal enabling employees to mark geo-fenced/selfie attendance, request regularizations, apply for leaves, access monthly payslips, submit reimbursement claims, request salary advances, track assigned assets, manage tasks, and interact with **Workora AI** (an intelligent conversational HR assistant).
 
-### 1.3 Audience
-| Audience | Use of this Document |
-|---|---|
-| Solution Architects | Validate architectural decisions and enforce the dependency rule |
-| Backend Developers | Implement modules according to defined structure, standards, and contracts |
-| QA / Test Engineers | Derive test plans from business rules, validation rules, and API contracts |
-| DevOps Engineers | Implement deployment topology, CI/CD, monitoring, and health checks |
-| Technical Leads / Project Managers | Track scope, estimate effort, and review module boundaries |
-| Security Auditors | Validate authentication, authorization, and OWASP-aligned controls |
+```mermaid
+flowchart TB
+    subgraph SaaS_Platform["Level 1: Workora Platform & Super Admin"]
+        Platform[Platform Owner Portal]
+        Tenants[Organizations / Tenants]
+        Subs[Subscriptions & Tiered Plans]
+        ModLic[Module & License Matrix]
+        PlatformConfig[Global Config & Platform Analytics]
+    end
 
-### 1.4 Definitions
-| Term | Definition |
-|---|---|
-| **Aggregate Root** | A DDD entity that acts as the entry point for a cluster of related domain objects, enforcing invariants |
-| **Bounded Context** | A logical boundary within which a domain model is defined and consistent |
-| **CQRS** | Command Query Responsibility Segregation — separates write (Command) and read (Query) operations |
-| **DTO** | Data Transfer Object — a shape used to move data across layer boundaries |
-| **Idempotency** | A property of an operation such that performing it multiple times has the same effect as performing it once |
-| **Soft Delete** | Marking a record as deleted (via a flag/timestamp) rather than physically removing it |
-| **Tenant** | A logically isolated customer/company instance within a multi-company deployment |
+    subgraph Tenant_Company["Level 2: Company Admin / HR / Finance / Managers"]
+        CompanySetup[Company Settings, Branches & Hierarchy]
+        EmpLifecycle[Employee Master & 360° Lifecycle]
+        AttShift[Biometric/GPS Attendance & Rotating Rosters]
+        LeaveMgmt[Leave Management & Policy Engine]
+        PayrollComp[Payroll, Payheads, Loans, Expenses & Compliance Engine]
+        AdvHR[Recruitment, Assets, Tasks, Performance, Helpdesk]
+        WorkoraAIAdmin[Workora AI Assistant Admin & Rules]
+    end
 
-### 1.5 Abbreviations
-| Abbreviation | Meaning |
-|---|---|
-| API | Application Programming Interface |
-| DDD | Domain-Driven Design |
-| DI | Dependency Injection |
-| DTO | Data Transfer Object |
-| EF Core | Entity Framework Core |
-| JWT | JSON Web Token |
-| ORM | Object-Relational Mapper |
-| RBAC | Role-Based Access Control |
-| PBAC | Permission-Based Access Control |
-| SLA | Service Level Agreement |
-| UoW | Unit of Work |
+    subgraph ESS_Layer["Level 3: Employee Self-Service (ESS Web & Mobile)"]
+        ESSPunch[Self GPS/Face/Web Punch & Regularization]
+        ESSLeave[Leave Balances, Applications & Approvals]
+        ESSSalary[Current Salary, Payslips & Tax Declarations]
+        ESSReimburse[Expense Claims & Receipts]
+        ESSDesk[Helpdesk, Assets & Task Tracking]
+        WorkoraAIESS[Workora AI Natural Language Assistant]
+    end
+
+    Platform --> Tenants
+    Tenants --> Tenant_Company
+    Tenant_Company --> ESS_Layer
+```
+
+### 1.2 Core Objectives
+- **Zero-Friction Tenancy**: Multi-tenant isolation using Row-Level Security (RLS) via EF Core Global Query Filters with zero cross-tenant data leakage.
+- **Deep Interconnectivity**: Immediate propagation of employee status changes, approved leaves, overtime hours, unpaid absences (LOP), loans, and expense claims into the payroll calculation pipeline.
+- **Statutory Rigor**: Full compliance with Indian statutory payroll mandates (EPF, ESIC, PT across state slabs, TDS with New/Old tax regimes, Gratuity, and Statutory Bonus).
+- **Clean Architecture & CQRS Integrity**: Strict separation between Domain, Application, Infrastructure, Persistence, and API layers with MediatR vertical slices.
+- **Enterprise Extensibility**: Event-driven architecture with Outbox pattern, distributed caching (Redis), Azure Service Bus pub/sub, and modular subscription licensing.
 
 ---
 
@@ -92,2418 +151,1656 @@ This document covers the **backend system only** — the ASP.NET Core Web API, t
 
 | Layer / Concern | Technology | Version | Purpose |
 |---|---|---|---|
-| Runtime | .NET | 9.0 (LTS-track) | Backend execution runtime |
-| Web Framework | ASP.NET Core Web API | 9.0 | REST API host |
-| Architecture Style | Clean Architecture + DDD | — | Separation of concerns, testability, domain isolation |
-| CQRS Mediator | MediatR | 12.x | Decouples controllers from handlers; pipeline behaviors |
-| Database | PostgreSQL | 16.x | Primary relational data store |
-| ORM | Entity Framework Core (Npgsql provider) | 9.0 | Data access, migrations, LINQ querying |
-| Authentication | JWT Bearer (Microsoft.AspNetCore.Authentication.JwtBearer) | 9.0 | Stateless token-based authentication |
-| Authorization | ASP.NET Core Policy-Based Authorization | 9.0 | Role + permission enforcement |
-| Validation | FluentValidation | 11.x | Declarative request validation |
-| Object Mapping | AutoMapper | 13.x | Entity ⇄ DTO projection |
-| Logging | Serilog (+ Sinks: Console, File, Seq) | 4.x | Structured logging |
-| Caching | IMemoryCache (built-in) | 9.0 | In-process caching of hot, read-heavy data |
-| Background Jobs | IHostedService / BackgroundService | 9.0 | Scheduled and queued background processing |
-| File Storage | Local Filesystem Provider (abstracted via `IFileStorageService`) | — | Document/asset storage |
-| PDF Generation | QuestPDF | 2024.x | Payslips, offer letters, reports |
-| Email | SMTP (MailKit) | 4.x | Transactional email delivery |
-| Dependency Injection | Built-in .NET DI Container | 9.0 | Service lifetime management |
-| API Documentation | Swashbuckle (Swagger/OpenAPI) | 6.x | Interactive API docs, contract generation |
-| Unit Testing | xUnit + FluentAssertions + Moq | latest stable | Unit and integration testing |
-| Containerization | Docker | latest stable | Reproducible build/deploy artifacts |
-| Reverse Proxy | Nginx | latest stable | TLS termination, load balancing |
-| Distributed Cache (future) | Redis | latest stable | Cross-instance caching, distributed locks |
-
-> **Note:** Version numbers are pinned at the *minor* level intentionally; exact patch versions are resolved via the `Directory.Packages.props` central package management file and reviewed quarterly for security patching.
+| **Runtime** | .NET | 9.0 (LTS-track) | High-performance backend execution framework |
+| **Web API** | ASP.NET Core Web API | 9.0 | RESTful API host with routing and DI |
+| **Architecture Style** | Clean Architecture + DDD + CQRS | — | Domain isolation, maintainability, and testability |
+| **CQRS Mediator** | MediatR | 12.x | Decouples HTTP controllers from domain handlers; executes pipeline behaviors |
+| **Database** | PostgreSQL | 16.x | Primary relational store supporting ACID transactions, JSONB, and RLS |
+| **ORM** | Entity Framework Core (Npgsql provider) | 9.0 | Data modeling, migrations, LINQ projections, and interceptors |
+| **Naming Conventions** | EFCore.NamingConventions | 9.0 | Enforces idiomatic PostgreSQL `snake_case` naming from C# `PascalCase` |
+| **Authentication** | JWT Bearer (`Microsoft.AspNetCore.Authentication.JwtBearer`) | 9.0 | Stateless cryptographically signed token auth with claims |
+| **Authorization** | ASP.NET Core Policy-Based Authorization | 9.0 | Fine-grained Permission-Based Access Control (PBAC) |
+| **Validation** | FluentValidation.AspNetCore | 11.x | Strongly typed request validation integrated into MediatR pipeline |
+| **Object Mapping** | AutoMapper | 13.x | Entity-to-DTO projection and shape mapping |
+| **Logging** | Serilog (+ Sinks: Console, File, Seq) | 8.x / 4.x | Structured JSON logging with Correlation ID and Tenant ID enrichment |
+| **In-Memory Cache** | `IMemoryCache` (built-in) | 9.0 | In-process caching for hot reference data (permissions, settings, holidays) |
+| **Distributed Cache** | Azure Cache for Redis | 7.x | Cross-instance caching, session state, and distributed locking |
+| **Message Broker** | Azure Service Bus / Outbox Pattern | 7.x | Reliable asynchronous event pub/sub across bounded contexts |
+| **Background Processing** | `BackgroundService` / Quartz.NET | 9.0 / 3.x | Cron-based jobs (leave accruals, biometric sync, document expiry, payroll batch) |
+| **PDF Generation** | QuestPDF | 2024.x | Pixel-perfect programmatic generation of payslips, offer letters, and compliance reports |
+| **Excel / CSV Engine** | ClosedXML / CsvHelper | 0.104.x / 33.x | High-throughput bulk import/export processing |
+| **Email Service** | MailKit / MimeKit | 4.x | Transactional email delivery with HTML templates |
+| **Cryptographic Security** | BCrypt.Net-Next / `System.Security.Cryptography` (AES-GCM) | 4.x | Password hashing (work factor 12) and encrypted columns (bank accounts, PAN, Aadhaar) |
+| **AI / NLP Engine** | Azure OpenAI / Semantic Kernel / Custom Intent Router | 1.x | Natural language HR assistant (*Workora AI*) for Q&A and automated actions |
+| **API Documentation** | Swashbuckle (Swagger/OpenAPI) | 6.x | Interactive API schema documentation and OpenAPI v3 contracts |
+| **Containerization** | Docker + Linux Alpine base | Latest | Container runtime for Azure App Service & AKS |
 
 ---
 
-## 3. System Architecture
+## 3. System Architecture & Clean Architecture Principles
 
-### 3.1 Architectural Style
-Workora follows **Clean Architecture** (Robert C. Martin) combined with **Domain-Driven Design** tactical patterns and **CQRS** for the application layer. The guiding principle is the **Dependency Rule**: source code dependencies must only point **inward**. Nothing in an inner circle can know anything about an outer circle.
+Workora strictly enforces **Clean Architecture** (Robert C. Martin) and **Domain-Driven Design (DDD)** tactical patterns.
 
 ```mermaid
 flowchart TB
-    subgraph Outer["Infrastructure & Persistence Layer"]
-        direction TB
-        DB[(PostgreSQL)]
-        FS[File Storage]
-        SMTP[SMTP Server]
-        Cache[Memory Cache]
-    end
-    subgraph API["API / Presentation Layer"]
-        direction TB
-        Controllers[Controllers]
-        Middleware[Middleware Pipeline]
-        Swagger[Swagger/OpenAPI]
-    end
-    subgraph Application["Application Layer"]
-        direction TB
-        Commands[Commands]
-        Queries[Queries]
-        Handlers[Handlers]
-        Validators[FluentValidation Validators]
-        Behaviors[Pipeline Behaviors]
-        Mappings[AutoMapper Profiles]
-    end
-    subgraph Domain["Domain Layer (Core)"]
-        direction TB
-        Entities[Entities / Aggregates]
-        ValueObjects[Value Objects]
-        DomainEvents[Domain Events]
-        Interfaces[Repository Interfaces]
+    subgraph External["External Systems & Clients"]
+        WebAdmin["Web Admin / HR Dashboard"]
+        MobileApp["Mobile / ESS App"]
+        Biometric["Biometric Devices / GPS"]
+        AzureSB["Azure Service Bus"]
     end
 
-    API --> Application
-    Application --> Domain
-    Outer -->|implements interfaces defined in| Domain
+    subgraph Presentation["API Layer (src/Workora.API)"]
+        Controllers["API Controllers"]
+        Middleware["Global Exception & Tenant Middleware"]
+        Swagger["OpenAPI Specs"]
+    end
 
-    style Domain fill:#2b2d42,color:#fff
-    style Application fill:#4361ee,color:#fff
-    style API fill:#4895ef,color:#fff
-    style Outer fill:#adb5bd,color:#000
+    subgraph ApplicationLayer["Application Layer (src/Workora.Application)"]
+        Commands["CQRS Commands & Handlers"]
+        Queries["CQRS Queries & Handlers"]
+        Validators["FluentValidation Validators"]
+        Behaviors["Pipeline Behaviors (Validation, Logging, Tx, Cache)"]
+        Interfaces["Service Interfaces (IEmail, IFile, IPayroll)"]
+    end
+
+    subgraph DomainLayer["Domain Layer - Core (src/Workora.Domain)"]
+        Entities["Aggregate Roots & Entities"]
+        ValueObjects["Value Objects (Money, DateRange, Slabs)"]
+        DomainEvents["Domain Events (EmployeeCreated, LeaveApproved)"]
+        RepoInterfaces["Repository Interfaces (IEmployeeRepository)"]
+        Enums["Domain Enums"]
+    end
+
+    subgraph InfrastructureLayer["Infrastructure Layer (src/Workora.Infrastructure)"]
+        EmailSvc["SmtpEmailService"]
+        PdfSvc["QuestPdfService"]
+        FileStore["Local / Azure Blob Storage"]
+        RedisSvc["RedisCacheService"]
+        EventBus["AzureServiceBusPublisher"]
+        AIService["WorkoraAiAssistantService"]
+    end
+
+    subgraph PersistenceLayer["Persistence Layer (src/Workora.Persistence)"]
+        AppDb["AppDbContext & Configurations"]
+        Repos["Repository Implementations"]
+        Interceptors["Tenant & Audit Interceptors"]
+        Migrations["EF Core Migrations"]
+    end
+
+    External --> Presentation
+    Presentation --> ApplicationLayer
+    ApplicationLayer --> DomainLayer
+    InfrastructureLayer --> ApplicationLayer
+    PersistenceLayer --> DomainLayer
+    PersistenceLayer --> ApplicationLayer
 ```
 
-### 3.2 The Dependency Rule in Practice
-- **Domain layer** has **zero** dependencies on any other project. It contains Entities, Value Objects, Domain Events, Domain Exceptions, and repository **interfaces** (not implementations).
-- **Application layer** depends only on **Domain**. It contains Commands, Queries, Handlers, DTOs, Validators, and orchestration logic. It defines interfaces for anything infrastructural it needs (e.g., `IEmailService`, `IFileStorageService`).
-- **Infrastructure/Persistence layer** depends on **Application** and **Domain** (to implement their interfaces) but nothing depends on Infrastructure directly except the composition root (API startup).
-- **API layer** depends on **Application** (to dispatch MediatR requests) and on **Infrastructure** only at startup/composition-root time (`Program.cs`) for DI registration — controllers themselves never reference Infrastructure types directly.
-
-> ⚠️ **Warning:** A controller that directly injects `AppDbContext` or any Infrastructure-layer class is a Clean Architecture violation and must be flagged in code review. Controllers must depend only on `IMediator`.
-
-### 3.3 High-Level Component Flow
-
-```mermaid
-flowchart LR
-    Client[Client Application] -->|HTTPS/JSON| Nginx[Nginx Reverse Proxy]
-    Nginx --> Kestrel[Kestrel / ASP.NET Core API]
-    Kestrel --> MW[Middleware Pipeline]
-    MW --> Ctrl[Controllers]
-    Ctrl --> Mediator[MediatR]
-    Mediator --> PB[Pipeline Behaviors\nValidation / Logging / Transaction]
-    PB --> Handler[Command/Query Handler]
-    Handler --> Repo[Repository / UoW]
-    Repo --> EF[EF Core DbContext]
-    EF --> PG[(PostgreSQL)]
-    Handler --> Cache[(Memory Cache)]
-    Handler --> FileSvc[File Storage Service]
-    Handler --> Mail[SMTP Email Service]
-    Handler --> PDF[QuestPDF Generator]
-```
-
-### 3.4 Best Practices
-- Keep the **Domain layer** persistence-ignorant: no EF Core attributes, no `DbContext` references, no infrastructure `using` statements.
-- Favor **rich domain models** (behavior-carrying entities) over anemic models for aggregates with real business invariants (e.g., `LeaveRequest`, `PayrollRun`).
-- Use **Domain Events** to decouple side effects (e.g., `EmployeeOnboardedEvent` triggers welcome email + asset allocation task) instead of chaining logic in a single handler.
-- Every cross-cutting concern (validation, logging, transactions, caching) should be implemented as a **MediatR Pipeline Behavior**, not duplicated in each handler.
+### 3.1 The Dependency Rule
+- **`Workora.Domain`**: Has **zero** external package or project dependencies. Owns entity models, business invariants, domain events, domain exceptions, enums, value objects, and repository interfaces.
+- **`Workora.Application`**: References only `Workora.Domain` and `Workora.Shared`. Contains MediatR Commands/Queries, handlers, validators, DTOs, AutoMapper profiles, and abstractions for external services.
+- **`Workora.Persistence`**: References `Workora.Domain` and `Workora.Application`. Implements repository interfaces, manages `AppDbContext`, applies entity type configurations (`IEntityTypeConfiguration<T>`), runs migrations, and configures global query filters.
+- **`Workora.Infrastructure`**: References `Workora.Application` and `Workora.Domain`. Implements non-database external services (SMTP email, QuestPDF rendering, Azure Blob storage, Redis caching, Azure Service Bus, AI connectors).
+- **`Workora.API`**: The composition root. References `Workora.Application`, `Workora.Infrastructure`, `Workora.Persistence`, and `Workora.Shared`. Controllers only inject `IMediator` and never directly access `DbContext` or repositories.
 
 ---
 
-## 4. Project Folder Structure
+## 4. Solution & Project Folder Structure
 
-```mermaid
-graph TD
-    Root[Workora.sln] --> API[src/Workora.API]
-    Root --> Application[src/Workora.Application]
-    Root --> Domain[src/Workora.Domain]
-    Root --> Infrastructure[src/Workora.Infrastructure]
-    Root --> Persistence[src/Workora.Persistence]
-    Root --> Shared[src/Workora.Shared]
-    Root --> Tests[tests/]
-
-    Tests --> UnitTests[Workora.UnitTests]
-    Tests --> IntegrationTests[Workora.IntegrationTests]
 ```
-
-| Folder / Project | Responsibility |
-|---|---|
-| `Workora.API` | ASP.NET Core Web API host: Controllers, Middleware, Swagger config, `Program.cs` composition root, appsettings |
-| `Workora.Application` | CQRS Commands/Queries/Handlers, DTOs, Validators, MediatR Pipeline Behaviors, AutoMapper Profiles, service interfaces |
-| `Workora.Domain` | Entities, Value Objects, Enums, Domain Events, Domain Exceptions, Repository interfaces, Specifications |
-| `Workora.Infrastructure` | Implementations of Application-defined interfaces: Email (SMTP), File Storage, PDF (QuestPDF), Token Service, Background Jobs |
-| `Workora.Persistence` | EF Core `DbContext`, Entity Configurations, Migrations, Repository implementations, Seeders |
-| `Workora.Shared` | Cross-cutting constants, common response wrappers (`ApiResponse<T>`), extension methods, guard clauses |
-| `tests/Workora.UnitTests` | xUnit unit tests for handlers, validators, domain logic (mocked dependencies) |
-| `tests/Workora.IntegrationTests` | End-to-end API tests against a Testcontainers-provisioned PostgreSQL instance |
-
-> **Note:** `Persistence` is deliberately separated from `Infrastructure` so that database concerns (migrations, EF configurations) can evolve independently from external-service integrations (SMTP, file storage). Both implement interfaces owned by `Domain`/`Application`.
+workora/
+├── backend/
+│   ├── Workora.sln
+│   ├── Directory.Build.props
+│   ├── Directory.Packages.props
+│   ├── src/
+│   │   ├── Workora.Domain/
+│   │   │   ├── Common/              (BaseEntity, AuditableEntity, DomainEvent, IMustHaveTenant)
+│   │   │   ├── Entities/            (Employee, AttendanceRecord, LeaveRequest, PayrollRun, etc.)
+│   │   │   ├── ValueObjects/        (Money, DateRange, Address, Coordinates, TaxSlab)
+│   │   │   ├── Enums/               (EmploymentStatus, AttendanceStatus, LeaveStatus, LoanStatus, etc.)
+│   │   │   ├── Events/              (EmployeeOnboardedEvent, PayrollApprovedEvent, etc.)
+│   │   │   ├── Exceptions/          (DomainException, InvalidStateTransitionException, etc.)
+│   │   │   └── Interfaces/          (IEmployeeRepository, IPayrollRunRepository, etc.)
+│   │   │
+│   │   ├── Workora.Application/
+│   │   │   ├── Common/
+│   │   │   │   ├── Behaviors/       (ValidationBehavior, LoggingBehavior, TransactionBehavior, CachingBehavior)
+│   │   │   │   ├── Interfaces/      (ICurrentTenantService, ICurrentUserService, IEmailService, IPdfGenerator)
+│   │   │   │   ├── Mappings/        (MappingProfile, Module-specific AutoMapper Profiles)
+│   │   │   │   └── Models/          (ApiResponse, PagedResponse, ErrorResponse)
+│   │   │   └── Features/            (Vertical Slices by Module)
+│   │   │       ├── Employees/
+│   │   │       │   ├── Commands/    (CreateEmployee/, UpdateEmployee/, TerminateEmployee/)
+│   │   │       │   ├── Queries/     (GetEmployeeById/, ListEmployees/, GetMyProfile/)
+│   │   │       │   └── DTOs/        (EmployeeDto, EmployeeListDto)
+│   │   │       ├── Attendance/
+│   │   │       ├── Leave/
+│   │   │       ├── Payroll/
+│   │   │       ├── Compliance/
+│   │   │       ├── Loans/
+│   │   │       ├── Expenses/
+│   │   │       ├── Shifts/
+│   │   │       ├── Assets/
+│   │   │       ├── Tasks/
+│   │   │       ├── Performance/
+│   │   │       ├── Helpdesk/
+│   │   │       ├── WorkoraAI/
+│   │   │       └── ... (all functional modules)
+│   │   │
+│   │   ├── Workora.Infrastructure/
+│   │   │   ├── Email/               (SmtpEmailService, EmailTemplates/)
+│   │   │   ├── FileStorage/         (LocalFileStorageService, AzureBlobStorageService)
+│   │   │   ├── Pdf/                 (QuestPdfPayslipGenerator, QuestPdfOfferGenerator)
+│   │   │   ├── Caching/             (MemoryCacheService, RedisCacheService)
+│   │   │   ├── Messaging/           (AzureServiceBusPublisher, OutboxProcessorJob)
+│   │   │   ├── AI/                  (WorkoraAiEngine, IntentClassifier, ContextRetriever)
+│   │   │   └── BackgroundJobs/      (BiometricSyncJob, LeaveAccrualJob, PayrollBatchJob)
+│   │   │
+│   │   ├── Workora.Persistence/
+│   │   │   ├── AppDbContext.cs
+│   │   │   ├── Configurations/      (EmployeeConfiguration, AttendanceConfiguration, etc.)
+│   │   │   ├── Repositories/        (GenericRepository, EmployeeRepository, PayrollRepository)
+│   │   │   ├── Interceptors/        (TenantSaveChangesInterceptor, AuditSaveChangesInterceptor)
+│   │   │   ├── Migrations/          (EF Core PostgreSQL migration snapshots)
+│   │   │   └── Seeders/             (PermissionSeeder, RoleSeeder, StatutorySlabSeeder)
+│   │   │
+│   │   ├── Workora.Shared/
+│   │   │   ├── Responses/           (ApiResponse<T>, PagedResponse<T>, ErrorResponse)
+│   │   │   ├── Constants/           (PermissionConstants, RoleConstants, CacheKeys)
+│   │   │   ├── Guards/              (Guard.AgainstNull, Guard.AgainstNegative)
+│   │   │   └── Extensions/          (DateTimeExtensions, QueryableExtensions)
+│   │   │
+│   │   └── Workora.API/
+│   │       ├── Controllers/v1/      (AuthController, EmployeesController, PayrollController, etc.)
+│   │       ├── Middleware/          (GlobalExceptionMiddleware, TenantResolverMiddleware, CorrelationIdMiddleware)
+│   │       ├── Program.cs           (Composition Root, DI Registrations, Pipeline Setup)
+│   │       └── appsettings.json
+│   │
+│   └── tests/
+│       ├── Workora.UnitTests/       (Handler, Validator, and Domain Logic Tests)
+│       └── Workora.IntegrationTests/(End-to-end API tests with Testcontainers PostgreSQL)
+```
 
 ---
 
-## 5. Request Lifecycle
+## 5. The Three-Tier Operational Model
+
+Workora decouples administrative authority, company operations, and workforce self-service into three clearly isolated tiers:
+
+```mermaid
+graph LR
+    subgraph Level1["Level 1: Platform / Super Admin"]
+        L1_1[Organization Onboarding]
+        L1_2[Subscription & Plans]
+        L1_3[Module Licensing]
+        L1_4[Platform Analytics]
+        L1_5[System Configuration]
+    end
+
+    subgraph Level2["Level 2: Company Admin / HR / Finance"]
+        L2_1[Company & Branch Setup]
+        L2_2[Employee Master & 360° Lifecycle]
+        L2_3[Shift & Biometric Attendance]
+        L2_4[Leave Policies & Approvals]
+        L2_5[Payroll, Loans, Expenses & Compliance]
+        L2_6[Assets, Tasks, Performance, Helpdesk]
+    end
+
+    subgraph Level3["Level 3: Employee Self-Service (ESS)"]
+        L3_1[GPS / Face Self-Attendance]
+        L3_2[Apply Leaves & Regularization]
+        L3_3[View / Download Payslips]
+        L3_4[Expense Claims & Receipts]
+        L3_5[Loan / Advance Requests]
+        L3_6[Workora AI Assistant]
+    end
+
+    Level1 --> Level2
+    Level2 --> Level3
+```
+
+### 5.1 Level 1 — Super Admin (Platform Owner)
+The Super Admin is the SaaS owner controlling the platform ecosystem:
+- **Tenant Management**: Registers organizations, issues company codes, provisions default databases/tenants.
+- **Subscription Engine**: Manages subscription tiers (`Starter`, `Professional`, `Enterprise`, `Custom`), billing cycles, seat limits (max allowed employees), and renewal statuses.
+- **Module Feature Flags**: Controls which modules are licensed per organization (e.g., Company A licenses Payroll + Attendance; Company B licenses full Suite + AI + Field Tracking).
+- **Global Metrics**: Platform-wide telemetry (active tenants, total seats under management, API throughput, background queue latencies).
+
+### 5.2 Level 2 — Company Admin / HR / Finance / Managers
+The tenant customer administrators who configure and run daily business operations:
+- **HR Administrators**: Master configuration (branches, departments, designations, shifts, attendance rules, holiday calendars, leave policies), candidate pre-boarding, onboarding checklist enforcement, employee profile management, policy publishing, asset assignment, and performance review cycles.
+- **Reporting Managers**: Review direct reports' attendance punches, approve/reject leave requests, approve attendance regularizations, review submitted expense claims, conduct quarterly OKR/KPI performance reviews, and assign team tasks.
+- **Finance & Payroll Officers**: Configure salary templates, manage salary revisions, approve loan/advance applications, review approved expenses for reimbursement, execute monthly payroll batch runs, verify statutory deductions (PF/ESIC/PT/TDS), approve disbursement files, and publish digital payslips.
+
+### 5.3 Level 3 — Employee Self-Service (ESS)
+The mobile and web portal used by the workforce:
+- **Time Tracking**: Mobile GPS-geofenced clock-in/clock-out, selfie punch verification, monthly punch logs, shift schedules, and regularization request filing.
+- **Leave & Absence**: Real-time balance ledger (CL, PL, SL, Comp-Off), leave applications with doctor certificate attachments, holiday calendar view, and approval status tracking.
+- **Financial Services**: Access to current compensation structure, one-click PDF payslip downloads, annual Form 16/tax computation statements, salary advance requests with auto-calculated EMI repayment schedules, and expense claims with instant bill/receipt camera uploads.
+- **Workplace Engagement**: Assigned company asset tracking, assigned operational tasks, goal setting and self-review submissions, HR helpdesk ticket raising, company policy acknowledgments, and conversational interaction with **Workora AI**.
+
+### 5.4 Complete Admin Navigation & Sidebar Information Architecture
+
+To deliver an enterprise-grade administration console matching modern HR operating systems (Tankhwa Patra paradigm), the Workora Web Dashboard is structured across the following functional hierarchy:
+
+```
+WORKORA ENTERPRISE ADMIN NAVIGATION
+│
+├── 📊 1. Dashboard
+│   ├── Real-time Workforce Presence (Present, Absent, On Leave, Late)
+│   ├── Monthly Payroll Cost & Disbursal Metrics
+│   ├── Actionable Pending Approvals (Leaves, Regularizations, Expenses, Loans)
+│   └── Visual Attendance Trends & Shift Coverage
+│
+├── 🏢 2. Organization Master
+│   ├── Company Profile & Statutory Identifiers (CIN, GSTIN, PAN, TAN)
+│   ├── Branches & Regional Work Locations
+│   ├── Departments & Sub-Departments
+│   ├── Designations, Job Bands & Salary Grades
+│   └── Organization Settings & Fiscal Year
+│
+├── 👥 3. Employee Directory
+│   ├── All Employees (Advanced Search, Filters, Org Chart)
+│   ├── Add Employee (Single & Bulk Excel/CSV Import)
+│   ├── Employee 360° Profile & Digital Files
+│   ├── Employment History, Promotions & Transfers
+│   └── Lifecycle Management (Probation, Confirmation, Notice, Exit)
+│
+├── 🎯 4. Recruitment & Pre-Boarding
+│   ├── Job Postings & Open Requisitions
+│   ├── Candidate Pipeline & Interview Schedules
+│   ├── Digital Offer Letters (QuestPDF Generation + Link Delivery)
+│   ├── Pre-boarding Portal (Document Upload: Aadhaar, PAN, Education)
+│   └── Joining Checklists & Automated Workflows
+│
+├── 🚀 5. Onboarding
+│   ├── Pending Verification (HR Document Review)
+│   ├── In-Progress Asset/Account Allocation (IT, Email, ID Card)
+│   └── Completed Joinings & Auto-Master Sync
+│
+├── ⏱️ 6. Attendance & Time Tracking
+│   ├── Real-time Live Attendance Dashboard
+│   ├── Daily Attendance Grid & Biometric Multi-Punch Logs
+│   ├── Monthly Muster Roll & Attendance Registers
+│   ├── Late Coming & Early Going Analytics
+│   ├── Absence & Loss of Pay (LOP) Tracking
+│   ├── Attendance Regularization Requests & Approvals
+│   ├── Geo-Tracking & Geofenced Punch Radius
+│   └── Biometric Hardware Devices & Integration Gateway
+│
+├── 🔄 7. Shifts & Rotating Rosters
+│   ├── Shift Masters (Shift A, Shift B, Night Shift C, Flexible)
+│   ├── Rotating Monthly Roster Planning (Factory & Office)
+│   ├── Weekly Off Rules & Rotational Offs
+│   └── Holiday Calendars (Company-wide & Branch-specific)
+│
+├── 🌴 8. Leave Management
+│   ├── Leave Types Master (CL, PL, SL, Comp-Off, Maternity, LWP)
+│   ├── Leave Accrual & Carryover Policy Engine
+│   ├── Employee Leave Balances & Annual Ledgers
+│   ├── Leave Applications & Multi-Tier Approvals
+│   └── Team Leave Calendar & Availability Matrix
+│
+├── 💰 9. Payroll Core & Compensation
+│   ├── Salary Structures & Customizable Payheads (Earnings & Deductions)
+│   ├── CTC Calculator & Compensation Templates
+│   ├── Salary Revisions, Increment History & Effective Dates
+│   ├── Monthly Payroll Run Processing (Select Branch / Employees)
+│   ├── Multi-Tier Payroll Approvals (HR -> Finance -> Leadership)
+│   ├── Itemized Payslips (QuestPDF Generation & Batch ZIP Export)
+│   ├── Bank Disbursement Files (NEFT / RTGS Formats)
+│   └── Payroll Audit Registers & Historical Runs
+│
+├── 💳 10. Loans & Salary Advances
+│   ├── Advance / Loan Applications
+│   ├── HR & Finance Approval Chain
+│   ├── Amortization Schedule & Monthly EMI Calculator
+│   └── Automatic Monthly Payroll Recovery Ledger
+│
+├── ⌛ 11. Overtime (OT) Engine
+│   ├── Overtime Calculation Rules (Single / Double Slabs)
+│   ├── Employee OT Requests & Biometric Trigger Logs
+│   ├── Manager OT Approval Chain
+│   └── Monthly OT Pay Registers
+│
+├── 🧾 12. Expenses & Reimbursements
+│   ├── Expense Categories (Travel, Lodging, Meals, Fuel, Stationery)
+│   ├── Claim Submissions with Bill & Invoice Uploads
+│   ├── Multi-Tier Approval (Manager -> Finance)
+│   ├── Automated Payroll Reimbursement Settlement
+│   └── Expense Utilization & Audit Reports
+│
+├── ⚖️ 13. Statutory Compliance (India Regulations)
+│   ├── Employee Provident Fund (EPF / EPS / EDLI ECR `.txt` Export)
+│   ├── Employee State Insurance (ESIC Monthly Return `.csv` Export)
+│   ├── Professional Tax (PT Slabs & State-wise Statements)
+│   ├── Income Tax TDS (Old vs New Regime u/s 115BAC)
+│   ├── Tax Declaration Proofs & HRA Verification
+│   ├── Gratuity Slabs & Provisions
+│   └── Statutory Bonus Calculations (8.33% to 20%)
+│
+├── 💻 14. Asset Management
+│   ├── Asset Master & Category Inventory (Hardware, Software, Vehicles)
+│   ├── Employee Asset Allocation & Acknowledgment
+│   ├── Return & Inspection during Offboarding
+│   └── Maintenance & Depreciation Logs
+│
+├── 📍 15. Field Tracking & Client Visits
+│   ├── Real-time Field Agent Live GPS Map
+│   ├── Client Site Visits (Check-In, Geotag, Address)
+│   ├── Check-Out with Travel Distance (KM), Notes & Signature
+│   └── Travel Allowance & Route Reports
+│
+├── 📈 16. Performance Management
+│   ├── Performance Cycles & Evaluation Periods
+│   ├── OKR & KPI Goal Setting
+│   ├── Self-Review & Manager Review Forms
+│   └── 360° Ratings, Bell Curve Calibration & History
+│
+├── 📋 17. Task Management
+│   ├── Operational Tasks Board (ToDo, InProgress, InReview, Done)
+│   ├── My Tasks (Assigned to Authenticated Employee)
+│   ├── Team Tasks & Delegated Assignments
+│   └── SLA & Deadline Tracking
+│
+├── 🎫 18. HR & IT Helpdesk
+│   ├── Support Ticket Creation (Payroll, Attendance, IT, HR Policy)
+│   ├── Support Agent Assignment & Priority Management
+│   ├── Discussion Threads & File Attachments
+│   └── Resolution Verification & SLA Closure
+│
+├── 📁 19. Documents Hub
+│   ├── Central HR Templates & Policy Documents
+│   ├── Digital Letters (Appointment, Confirmation, Relieving)
+│   ├── Employee Document Vault (KYC, Education, Experience)
+│   └── Expiry Tracking Engine (Visas, Passports, Driving Licenses)
+│
+├── 📜 20. Policies & Governance
+│   ├── Company Handbook & Code of Conduct
+│   ├── Versioned Policy Publishing
+│   ├── Employee Digital E-Sign Acknowledgments
+│   └── Compliance Audit Reports
+│
+├── 📊 21. Reports & Analytics Engine
+│   ├── Headcount, Gender Ratio & Attrition Reports
+│   ├── Attendance Muster & Late-coming Reports
+│   ├── Payroll Summary & Cost Trend Analysis
+│   ├── Leave Utilization & Balance Reports
+│   ├── Statutory Filing Reports
+│   └── Dynamic Custom Report Builder & Excel Export
+│
+├── 🔔 22. Notifications Hub
+│   ├── In-App Notification Center
+│   ├── Push Notifications (Mobile ESS)
+│   └── Email & SMS Notification Templates
+│
+├── 🤖 23. Workora AI Assistant
+│   ├── Conversational Natural Language Assistant
+│   ├── Attendance & Leave Balance Q&A
+│   ├── Policy Inquiries & Payslip Retrieval
+│   └── Intent-Based HR Action Triggering
+│
+└── ⚙️ 24. System Administration & Settings
+    ├── User Accounts & Multi-Tenant Access
+    ├── Roles & Permission Matrix (PBAC)
+    ├── Multi-Level Approval Workflow Configurations
+    ├── Third-Party Hardware & API Integrations
+    ├── Immutable System Audit Logs (Who, What, When, IP)
+    └── Global System Preferences
+```
+
+---
+
+## 6. Multi-Tenant SaaS Architecture & Plan Licensing
+
+### 6.1 Multi-Tenant Data Isolation Strategy
+Workora utilizes a **Shared Database, Shared Schema** multi-tenant model enforced through PostgreSQL **Row-Level Security (RLS)** and Entity Framework Core **Global Query Filters**.
 
 ```mermaid
 sequenceDiagram
     autonumber
-    participant C as Client
-    participant N as Nginx
-    participant K as Kestrel
-    participant MW as Middleware Pipeline
-    participant Auth as JWT Auth
-    participant Authz as Authorization
-    participant Ctrl as Controller
-    participant Med as MediatR
-    participant PB as Pipeline Behaviors
-    participant Val as FluentValidation
-    participant H as Handler
-    participant Repo as Repository / UoW
-    participant EF as EF Core
-    participant DB as PostgreSQL
+    participant C as Client / Mobile
+    participant MW as TenantResolverMiddleware
+    participant Claims as ClaimsPrincipal (JWT)
+    participant Svc as ICurrentTenantService
+    participant EF as AppDbContext
+    participant PG as PostgreSQL (RLS Filter)
 
-    C->>N: HTTPS Request
-    N->>K: Forward Request
-    K->>MW: Enter Middleware Pipeline
-    MW->>MW: Exception Handling Middleware (wraps pipeline)
-    MW->>MW: Request Logging Middleware
-    MW->>Auth: Authenticate (validate JWT)
-    Auth-->>MW: ClaimsPrincipal
-    MW->>Authz: Authorize (Role/Permission Policy)
-    Authz-->>MW: Allowed / 403
-    MW->>Ctrl: Route to Controller Action
-    Ctrl->>Med: Send(Command/Query)
-    Med->>PB: Execute Pipeline Behaviors
-    PB->>Val: Validate Request (FluentValidation)
-    Val-->>PB: Valid / ValidationException
-    PB->>H: Invoke Handler
-    H->>Repo: Query/Persist via Repository
-    Repo->>EF: LINQ / SaveChangesAsync
-    EF->>DB: SQL
-    DB-->>EF: Result Set
-    EF-->>Repo: Entities
-    Repo-->>H: Domain Result
-    H-->>PB: ApiResponse<DTO>
-    PB-->>Med: ApiResponse<DTO>
-    Med-->>Ctrl: ApiResponse<DTO>
-    Ctrl-->>C: 200 OK (ApiResponse<DTO>)
+    C->>MW: HTTP Request (Bearer JWT)
+    MW->>Claims: Extract claim `tenant_id`
+    Claims-->>MW: Guid TenantId = 8a1b2c3d-...
+    MW->>Svc: Set TenantId in Scoped Lifetime
+    MW->>EF: Initialize DbContext with Tenant Context
+    EF->>PG: SELECT * FROM employees WHERE tenant_id = '8a1b2c3d-...' AND is_deleted = false
+    PG-->>EF: Filtered Multi-tenant Result Set
+    EF-->>C: Isolated Tenant Data
 ```
 
-### 5.1 Pipeline Stages Explained
-1. **Exception Handling Middleware** — outermost; catches unhandled exceptions and converts them into a standardized `ErrorResponse`.
-2. **Request Logging Middleware** — logs method, path, status code, and duration via Serilog with a correlation ID.
-3. **Authentication Middleware** — validates the JWT signature, expiry, and issuer/audience; populates `HttpContext.User`.
-4. **Authorization Middleware** — evaluates policy requirements (role and/or permission claims) against the route's `[Authorize]` metadata.
-5. **Controller Action** — a thin layer that maps the HTTP request to a MediatR `IRequest` and directly returns the resulting `ApiResponse<T>`.
-6. **MediatR Pipeline Behaviors** — execute in registered order: `ValidationBehavior` → `LoggingBehavior` → `TransactionBehavior` → `CachingBehavior` (for queries) → Handler.
-7. **Handler** — orchestrates domain logic, repository calls, and side effects (email, PDF, events).
+1. Every tenant-owned aggregate root implements `IMustHaveTenant`, which enforces a required `Guid TenantId` column.
+2. In `AppDbContext.OnModelCreating`, a universal expression is applied:
+   ```csharp
+   modelBuilder.Entity<TEntity>().HasQueryFilter(e => e.TenantId == _currentTenantService.TenantId && !e.IsDeleted);
+   ```
+3. An EF Core `SaveChangesInterceptor` automatically stamps the resolved `TenantId` on every newly added entity, preventing developer omission.
 
----
+### 6.2 Dynamic Tiered Plans & Module License Matrix
+Module visibility and API execution are gated by a 5-tier evaluation chain:
 
-## 6. Authentication
-
-### 6.1 JWT Authentication Flow
-
-```mermaid
-sequenceDiagram
-    autonumber
-    participant U as User
-    participant API as Auth API
-    participant Svc as AuthService
-    participant DB as PostgreSQL
-    participant Token as TokenService
-
-    U->>API: POST /api/v1/auth/login {email, password}
-    API->>Svc: Authenticate(email, password)
-    Svc->>DB: Fetch User by Email
-    DB-->>Svc: User + PasswordHash
-    Svc->>Svc: Verify Password (BCrypt)
-    Svc->>DB: Fetch Roles + Permissions
-    DB-->>Svc: Roles/Permissions
-    Svc->>Token: Generate Access Token (JWT) + Refresh Token
-    Token-->>Svc: AccessToken, RefreshToken
-    Svc->>DB: Persist Refresh Token (hashed, with expiry)
-    Svc-->>API: AuthResult
-    API-->>U: 200 OK {accessToken, refreshToken, expiresIn}
-```
-
-### 6.2 Token Claims Structure
-| Claim | Description |
-|---|---|
-| `sub` | User ID (GUID) |
-| `email` | User email address |
-| `name` | Full display name |
-| `role` | One or more role names (e.g., `Admin`, `HRManager`, `Employee`) |
-| `permission` | One claim per granted permission (e.g., `employees.create`, `payroll.approve`) |
-| `tenant_id` | Company/tenant identifier (multi-company support) |
-| `jti` | Unique token identifier (used for revocation tracking) |
-| `exp` | Expiration timestamp (default: 15 minutes for access tokens) |
-
-### 6.3 Refresh Token Strategy
-- Refresh tokens are opaque, cryptographically random strings (256-bit), **hashed** (SHA-256) before storage — never stored in plaintext.
-- Refresh tokens are long-lived (default: 7 days) and stored per-device, enabling multi-device session management and per-device revocation.
-- Refresh token rotation is enforced: each use invalidates the prior token and issues a new one, mitigating replay attacks.
-- On logout, the associated refresh token is revoked server-side immediately.
+$$\text{User} \longrightarrow \text{Role} \longrightarrow \text{Permission} \longrightarrow \text{Tenant Subscription Plan} \longrightarrow \text{Licensed Module Enabled}$$
 
 ```mermaid
 flowchart LR
-    A[Access Token Expired] --> B[POST /auth/refresh-token]
-    B --> C{Refresh Token Valid & Not Revoked?}
-    C -->|Yes| D[Issue New Access + Refresh Token]
-    D --> E[Revoke Old Refresh Token]
-    C -->|No| F[401 Unauthorized -> Force Re-login]
+    A[Incoming API Request] --> B{User Authenticated?}
+    B -->|No| C[401 Unauthorized]
+    B -->|Yes| D{Has Permission Claim?}
+    D -->|No| E[403 Forbidden - Insufficient Permissions]
+    D -->|Yes| F{Tenant Subscription Active?}
+    F -->|No| G[402 Payment Required / Subscription Expired]
+    F -->|Yes| H{Module Enabled in Tenant Plan?}
+    H -->|No| I[403 Forbidden - Module Not Licensed in Plan]
+    H -->|Yes| J[Allow MediatR Execution]
 ```
 
-> **Best Practice:** Access tokens are never persisted client-side in `localStorage` on web clients; use `httpOnly` secure cookies or in-memory storage to reduce XSS token-theft exposure.
+#### Plan Tiers & Module Availability Matrix
+
+| Module / Capability | Starter Plan | Professional Plan | Enterprise Plan | Custom / Factory Plan |
+|---|:---:|:---:|:---:|:---:|
+| **Core HR & Employee Master** | Yes | Yes | Yes | Yes |
+| **Basic Web Attendance** | Yes | Yes | Yes | Yes |
+| **Leave Management (CL/SL/PL)** | Yes | Yes | Yes | Yes |
+| **Standard Payroll & Payslips** | Yes | Yes | Yes | Yes |
+| **Employee Self-Service (Web)** | Yes | Yes | Yes | Yes |
+| **Employee ESS Mobile App** | Optional | Yes | Yes | Yes |
+| **Biometric Device Integration** | — | Yes | Yes | Yes |
+| **GPS Geofenced Punch & Selfie**| — | Yes | Yes | Yes |
+| **Rotating Shift & Factory Rosters**| — | — | Yes | Yes |
+| **Statutory Compliance (PF/ESIC/PT/TDS)**| Optional | Yes | Yes | Yes |
+| **Loans & Salary Advances** | — | Yes | Yes | Yes |
+| **Expense Claims & Reimbursement**| — | Yes | Yes | Yes |
+| **Field Live GPS Tracking & Visits**| — | — | Yes | Yes |
+| **Asset Management Lifecycle** | — | — | Yes | Yes |
+| **Task Management & Team SLAs**| — | — | Yes | Yes |
+| **Performance Management (OKR/KPI)**| — | — | Yes | Yes |
+| **HR Helpdesk & Ticketing** | — | — | Yes | Yes |
+| **Workora AI Assistant** | — | Optional | Yes | Yes |
+| **Custom Labour Law Registers**| — | — | Yes | Yes |
 
 ---
 
-## 7. Authorization
+## 7. The Interconnected Core HRMS Data Flow
 
-Workora combines three complementary authorization models:
-
-### 7.1 Role-Based Access Control (RBAC)
-Coarse-grained access based on named roles (`SuperAdmin`, `HRManager`, `PayrollOfficer`, `Employee`, `Manager`). Roles group permissions for ease of assignment.
-
-### 7.2 Permission-Based Access Control (PBAC)
-Fine-grained access based on discrete permission strings following the `{module}.{action}` convention, e.g., `employees.create`, `employees.delete`, `payroll.process`, `leave.approve`. Permissions are assigned to roles, and roles are assigned to users — but permission checks at the API layer are always against the **permission claim**, never the role name directly, so that role composition can change without touching controller code.
-
-### 7.3 Policy-Based Authorization
-ASP.NET Core policies compose role/permission checks into named policies evaluated by custom `IAuthorizationHandler` implementations.
+The central power of Workora lies in the automated data pipeline between modules. No module exists as an isolated silo.
 
 ```mermaid
 flowchart TD
-    User[User] -->|assigned| Role1[Role: HRManager]
-    Role1 -->|grants| P1[employees.create]
-    Role1 -->|grants| P2[employees.update]
-    Role1 -->|grants| P3[leave.approve]
-    User -->|assigned| Role2[Role: PayrollOfficer]
-    Role2 -->|grants| P4[payroll.process]
-    Role2 -->|grants| P5[payroll.approve]
-
-    P1 --> Policy1[Policy: CanManageEmployees]
-    P2 --> Policy1
-    P4 --> Policy2[Policy: CanProcessPayroll]
-    P5 --> Policy2
+    EM[Employee Master & Salary Template] --> Shift[Shift & Roster Configuration]
+    Shift --> Att[Daily Attendance Engine: Biometric / GPS / Web]
+    Leave[Approved Leaves & Comp-Off] --> Att
+    
+    Att --> Calc[Daily Work Hours, Late-in, Early-out, Overtime]
+    Calc --> AttSummary[Monthly Attendance Summary]
+    
+    AttSummary --> LOP[Loss of Pay - LOP Days]
+    AttSummary --> OT[Total Approved OT Hours]
+    
+    Loans[Loan & Advance EMI Schedules] --> Deductions[Payroll Deductions]
+    Expenses[Approved Expense Reimbursements] --> Earnings[Payroll Earnings]
+    
+    EM --> SalaryGross[Base Salary & Fixed Payheads]
+    SalaryGross --> PayrollEngine[Core Payroll Calculation Engine]
+    OT --> PayrollEngine
+    LOP --> PayrollEngine
+    Deductions --> PayrollEngine
+    Earnings --> PayrollEngine
+    
+    PayrollEngine --> Statutory[Statutory Compliance Engine: PF, ESIC, PT, TDS]
+    Statutory --> FinalCalc[Gross Pay - Total Deductions = Net Salary]
+    
+    FinalCalc --> ApprovalChain[Multi-Level Payroll Approval]
+    ApprovalChain --> PayslipGen[QuestPDF Payslip Generation]
+    ApprovalChain --> BankFile[Bank Disbursement Export File]
+    
+    PayslipGen --> ESS[Employee ESS Portal & Mobile Push Notification]
 ```
 
-```csharp
-// Example controller usage
-[Authorize(Policy = "employees.create")]
-[HttpPost]
-public async Task<ApiResponse<Guid>> CreateEmployee(CreateEmployeeCommand command)
-    => await _mediator.Send(command);
-```
-
-> ⚠️ **Warning:** Never rely solely on UI-level hiding of buttons/menus for authorization. Every state-changing endpoint must independently enforce a permission policy server-side.
+### 7.1 Cross-Module Synchronization Steps
+1. **Attendance $\rightarrow$ LOP & OT**:
+   - Each calendar day, if an employee has no punch and no approved leave record, the attendance engine flags the day as `Absent`.
+   - At month-end, total unexcused absent days are aggregated into `UnpaidLeaveDays (LOP)`.
+   - Overtime minutes accumulated beyond shift schedules (and manager-approved via `OTRequest`) are compiled into `PayableOTHours`.
+2. **Salary Advances $\rightarrow$ EMI Recovery**:
+   - Active loans in `Approved` status query their amortization schedule for the payroll processing month. The active `MonthlyEMI` is automatically pulled into the deduction line item `LOAN_RECOVERY`.
+3. **Expense Claims $\rightarrow$ Non-Taxable Reimbursements**:
+   - Expense claims marked `FinanceApproved` in the current billing cycle are aggregated and added as non-taxable earnings line items `EXPENSE_REIMBURSEMENT`.
+4. **Statutory Computations**:
+   - **EPF**: Computed as $12\%$ of $(\text{Basic} + \text{DA})$ subject to statutory ceiling ($\text{INR } 15,000$ wage limit or actual basic as per company policy). Employer $12\%$ split into EPS ($8.33\%$) and EPF ($3.67\%$) plus EDLI and admin charges.
+   - **ESIC**: Computed as $0.75\%$ (Employee) and $3.25\%$ (Employer) of Gross Wages for employees earning $\le \text{INR } 21,000/\text{month}$.
+   - **Professional Tax (PT)**: Computed based on state-specific salary slab schedules (e.g., Maharashtra, Karnataka, Gujarat, Tamil Nadu, West Bengal).
+   - **TDS**: Calculated monthly based on employee-declared tax regime (Old vs. New Regime u/s 115BAC), Chapter VI-A deductions, HRA exemptions, and annualized tax projections.
 
 ---
 
-## 8. Database Architecture
+## 8. Multi-Level Approval State Machine
 
-### 8.1 Entity Relationship Overview (Core Domain)
+Workora implements a flexible, configurable workflow approval engine supporting single-level, two-level, and custom hierarchical chains.
+
+```mermaid
+stateDiagram-v2
+    [*] --> Draft: Submitter creates request
+    Draft --> PendingManager: Submit Request
+    
+    state "Pending Manager Review" as PendingManager
+    state "Pending HR / Finance Review" as PendingHRFinance
+    state "Approved & Locked" as Approved
+    state "Rejected" as Rejected
+    state "Cancelled / Withdrawn" as Cancelled
+
+    PendingManager --> PendingHRFinance: Manager Approves (if multi-level configured)
+    PendingManager --> Approved: Manager Approves (if single-level)
+    PendingManager --> Rejected: Manager Rejects (with mandatory comment)
+    PendingManager --> Cancelled: Submitter Withdraws
+
+    PendingHRFinance --> Approved: HR / Finance Approves
+    PendingHRFinance --> Rejected: HR / Finance Rejects
+    PendingHRFinance --> Cancelled: Submitter Withdraws
+
+    Approved --> [*]: Triggers Domain Event & Downstream Module Sync
+    Rejected --> [*]: Notification sent to submitter
+    Cancelled --> [*]: Slot / Balance restored
+```
+
+#### Approval Matrix Configuration by Workflow Type
+
+| Workflow Type | Submitter | Level 1 Approver | Level 2 Approver | Final State Impact |
+|---|---|---|---|---|
+| **Leave Application** | Employee | Direct Reporting Manager | HR Manager (Optional if $>3$ days) | Decrements leave balance ledger; updates attendance sheet |
+| **Attendance Regularization** | Employee | Reporting Manager | HR Admin | Updates punch records from `Absent`/`Missed` to `Present` |
+| **Expense Reimbursement** | Employee | Project/Dept Manager | Finance Approver | Queues claim into next payroll reimbursement batch |
+| **Salary Advance / Loan** | Employee | HR Manager | Finance Director | Generates loan account & monthly EMI deduction schedule |
+| **Salary Revision / Increment**| Manager / HR | Department Head | Management / Finance | Updates `salary_structures` with `effective_from` date |
+| **Monthly Payroll Batch Run** | Payroll Officer | HR Director | Finance VP / CFO | Locks payroll records, generates immutable PDFs, publishes to ESS |
+
+---
+
+## 9. Identity, Authentication & Authorization (PBAC)
+
+### 9.1 JWT & Refresh Token Architecture
+Workora implements stateless token authentication with asymmetric cryptographic signing (RSA / HMAC-SHA256) and rolling refresh tokens.
+
+```mermaid
+sequenceDiagram
+    autonumber
+    participant Client
+    participant AuthAPI as /api/v1/auth/login
+    participant JWT as TokenService
+    participant DB as PostgreSQL
+    participant RLS as Tenant Context
+
+    Client->>AuthAPI: POST {email, password}
+    AuthAPI->>DB: Query User & Active Roles/Permissions
+    DB-->>AuthAPI: User, PasswordHash, TenantId, Permissions
+    AuthAPI->>AuthAPI: Verify BCrypt Hash (Work Factor 12)
+    AuthAPI->>JWT: Generate Access Token (15 min) + Refresh Token (7 days)
+    JWT-->>AuthAPI: Tokens
+    AuthAPI->>DB: Store Refresh Token SHA-256 Hash with Device Fingerprint
+    AuthAPI-->>Client: 200 OK {accessToken, refreshToken, expiresIn: 900, userProfile}
+    
+    Note over Client,AuthAPI: Subsequent API Requests
+    Client->>AuthAPI: GET /api/v1/employees (Header: Bearer AccessToken)
+    AuthAPI->>RLS: Authenticate Claims & Set Scoped Tenant Context
+    AuthAPI-->>Client: 200 OK (Scoped Tenant Data)
+```
+
+### 9.2 Token Claims Payload Schema
+```json
+{
+  "sub": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+  "email": "priya.sharma@jadequest.com",
+  "name": "Priya Sharma",
+  "tenant_id": "8a1b2c3d-4e5f-6a7b-8c9d-0e1f2a3b4c5d",
+  "company_id": "1",
+  "employee_id": "142",
+  "roles": ["HRManager"],
+  "permissions": [
+    "employees.view",
+    "employees.create",
+    "employees.update",
+    "attendance.view",
+    "attendance.approve",
+    "leave.approve",
+    "payroll.process",
+    "payroll.approve"
+  ],
+  "jti": "d7b4c3a2-1e0f-4b8a-9c7d-6e5f4a3b2c1d",
+  "iat": 1787654400,
+  "exp": 1787655300,
+  "iss": "Workora.IdentityServer",
+  "aud": "Workora.ClientApps"
+}
+```
+
+### 9.3 Permission-Based Access Control (PBAC) Policy System
+Rather than checking coarse roles in code, Workora checks discrete permissions formatted as `{module}.{action}`:
+```csharp
+[Authorize(Policy = "payroll.process")]
+[HttpPost("{id:int}/process")]
+public async Task<ApiResponse<PayrollRunSummaryDto>> ProcessPayroll(int id)
+    => await _mediator.Send(new ProcessPayrollRunCommand(id));
+```
+
+---
+
+## 10. Database Architecture & Data Governance
+
+### 10.1 Schema Principles & Governance
+- **Primary Keys**: Auto-incrementing 64-bit integers (`int` / `bigint`) for performant clustered index lookups + secondary immutable `UUID` (`uuid`) exposed externally across REST endpoints to prevent enumeration attacks.
+- **Tenant Scoping**: All tenant-owned tables contain `tenant_id uuid NOT NULL`.
+- **Soft Deletion**: All operational records inherit from `AuditableEntity`, including `is_deleted boolean DEFAULT false`, `deleted_at timestamptz`, and `deleted_by uuid`.
+- **Audit Interception**: `created_at`, `created_by`, `updated_at`, and `updated_by` are populated automatically by EF Core `SaveChangesInterceptor`.
+- **Concurrency Token**: PostgreSQL `xmin` system column mapped as row version for optimistic concurrency detection (`409 Conflict`).
+- **Data Protection**: PII and sensitive financial data (Bank Account Numbers, IFSC, Aadhaar Numbers, PAN) are encrypted at rest using `AesGcm` value converters before persistence.
 
 ```mermaid
 erDiagram
-    COMPANY {
-        int id PK
-        uuid uuid
-        string name
-        string code
-    }
-    BRANCH {
-        int id PK
-        uuid uuid
-        int company_id FK
-        string name
-        string location
-    }
-    DEPARTMENT {
-        int id PK
-        uuid uuid
-        int company_id FK
-        string code
-        string name
-        int head_employee_id FK
-    }
-    DESIGNATION {
-        int id PK
-        uuid uuid
-        int department_id FK
-        string title
-        int level
-        string grade
-    }
-    EMPLOYEE {
-        int id PK
-        uuid uuid
-        string first_name
-        string last_name
-        string email
-        string national_id
-        date date_of_birth
-        int department_id FK
-        int designation_id FK
-        int branch_id FK
-        int manager_id FK
-        int user_id FK
-        string employment_status
-        date termination_date
-    }
-    ATTENDANCE {
-        int id PK
-        uuid uuid
-        int employee_id FK
-        date attendance_date
-        timestamptz check_in_time
-        timestamptz check_out_time
-        string status
-    }
-    LEAVE_REQUEST {
-        int id PK
-        uuid uuid
-        int employee_id FK
-        int leave_type_id FK
-        date start_date
-        date end_date
-        string status
-        string reason
-    }
-    SALARY_STRUCTURE {
-        int id PK
-        uuid uuid
-        int employee_id FK
-        decimal base_salary
-        date effective_date
-    }
-    PAYROLL_RUN_DETAIL {
-        int id PK
-        uuid uuid
-        int payroll_run_id FK
-        int employee_id FK
-        decimal gross_pay
-        decimal net_pay
-        jsonb breakdown_json
-    }
-    PAYROLL_RUN {
-        int id PK
-        uuid uuid
-        date period_start
-        date period_end
-        string status
-        date processing_date
-    }
-    DOCUMENT {
-        int id PK
-        uuid uuid
-        int employee_id FK
-        string document_type
-        string file_path
-    }
-    ASSET_ASSIGNMENT {
-        int id PK
-        uuid uuid
-        int employee_id FK
-        string asset_type
-        string serial_number
-        date assigned_date
-    }
-    USER {
-        int id PK
-        uuid uuid
-        string email UK
-        string first_name
-        string last_name
-        string password_hash
-        int employee_id FK
-        int failed_login_attempts
-        timestamptz lockout_end
-    }
-    ROLE {
-        int id PK
-        uuid uuid
-        string name
-        string description
-    }
-    PERMISSION {
-        int id PK
-        uuid uuid
-        string name
-        string module
-    }
-    USER_ROLE {
-        int user_id FK
-        int role_id FK
-    }
-    ROLE_PERMISSION {
-        int role_id FK
-        int permission_id FK
-    }
-    JOB_POSTING {
-        int id PK
-        uuid uuid
-        string title
-        string description
-        string status
-    }
-    CANDIDATE {
-        int id PK
-        uuid uuid
-        int job_posting_id FK
-        string first_name
-        string last_name
-        string email
-        string resume_path
-    }
-    INTERVIEW {
-        int id PK
-        uuid uuid
-        int candidate_id FK
-        timestamptz scheduled_at
-        string interviewer_name
-        string status
-    }
-    OFFER_LETTER {
-        int id PK
-        uuid uuid
-        int candidate_id FK
-        decimal offered_salary
-        date joining_date
-        string status
-    }
+    TENANT ||--o{ COMPANY : owns
+    COMPANY ||--o{ BRANCH : operates
+    COMPANY ||--o{ DEPARTMENT : structures
+    DEPARTMENT ||--o{ DESIGNATION : defines
+    COMPANY ||--o{ EMPLOYEE : employs
+    BRANCH ||--o{ EMPLOYEE : locates
+    DEPARTMENT ||--o{ EMPLOYEE : assigns
+    DESIGNATION ||--o{ EMPLOYEE : ranks
 
-    COMPANY ||--o{ BRANCH : has
-    COMPANY ||--o{ DEPARTMENT : has
-    DEPARTMENT ||--o{ DESIGNATION : has
-    DEPARTMENT ||--o{ EMPLOYEE : contains
-    DESIGNATION ||--o{ EMPLOYEE : assigned_to
-    BRANCH ||--o{ EMPLOYEE : located_at
-    EMPLOYEE ||--o{ ATTENDANCE : logs
-    EMPLOYEE ||--o{ LEAVE_REQUEST : submits
-    EMPLOYEE ||--o{ SALARY_STRUCTURE : has
-    EMPLOYEE ||--o{ PAYROLL_RUN_DETAIL : included_in
-    EMPLOYEE ||--o{ DOCUMENT : owns
+    EMPLOYEE ||--o{ ATTENDANCE_RECORD : logs
+    EMPLOYEE ||--o{ LEAVE_REQUEST : applies
+    EMPLOYEE ||--o{ SALARY_STRUCTURE : assigned
+    EMPLOYEE ||--o{ LOAN_RECORD : borrows
+    EMPLOYEE ||--o{ EXPENSE_CLAIM : submits
     EMPLOYEE ||--o{ ASSET_ASSIGNMENT : holds
-    USER ||--|| EMPLOYEE : linked_to
-    USER ||--o{ USER_ROLE : has
-    ROLE ||--o{ USER_ROLE : assigned
-    ROLE ||--o{ ROLE_PERMISSION : has
-    PERMISSION ||--o{ ROLE_PERMISSION : granted_via
-    PAYROLL_RUN ||--o{ PAYROLL_RUN_DETAIL : contains
-    JOB_POSTING ||--o{ CANDIDATE : receives
-    CANDIDATE ||--o{ INTERVIEW : scheduled
-    CANDIDATE ||--o{ OFFER_LETTER : issued
+    EMPLOYEE ||--o{ TASK_ITEM : assigned
+
+    COMPANY ||--o{ PAYROLL_RUN : executes
+    PAYROLL_RUN ||--o{ PAYROLL_RUN_DETAIL : calculates
+    EMPLOYEE ||--o{ PAYROLL_RUN_DETAIL : receives
 ```
 
-### 8.2 Naming Conventions
-| Object | Convention | Example |
-|---|---|---|
-| Table | `snake_case`, plural | `employees`, `leave_requests` |
-| Column | `snake_case` | `first_name`, `created_at` |
-| Primary Key | `id` (UUID) | `id` |
-| Foreign Key | `{singular_table}_id` | `department_id` |
-| Index | `ix_{table}_{column(s)}` | `ix_employees_department_id` |
-| Unique Constraint | `uq_{table}_{column(s)}` | `uq_users_email` |
-| Check Constraint | `ck_{table}_{rule}` | `ck_leave_requests_dates` |
+---
 
-> **Note:** EF Core's `UseSnakeCaseNamingConvention` (EFCore.NamingConventions package) is used so that C# entities remain `PascalCase` while PostgreSQL objects remain idiomatic `snake_case`.
+## 11. Detailed Entity Relational Schemas (All Tables & Columns)
 
-### 8.3 Migration Strategy
-- Migrations are generated via `dotnet ef migrations add {Name}` per feature branch and reviewed in pull requests as first-class code artifacts.
-- **No destructive migrations** (column drops, type narrowing) are applied directly in production; a two-phase **expand/contract** pattern is used: (1) expand — add new column/table, dual-write; (2) contract — remove old column in a subsequent release after backfill verification.
-- Migrations run automatically on deployment via a dedicated `migrate` job in the CI/CD pipeline (`dotnet ef database update`), never from developer machines against production.
-- Each migration is idempotent and reversible (`Down()` methods are implemented, not left empty).
+The following tables define the PostgreSQL relational schema. Every table inherits standard identity and audit columns (`id` int PK, `uuid` uuid UNIQUE, `tenant_id` uuid, `is_active` bool, `created_at` timestamptz, `created_by` uuid, `updated_at` timestamptz, `updated_by` uuid, `is_deleted` bool, `deleted_at` timestamptz, `deleted_by` uuid). The domain-specific columns are detailed below:
 
-### 8.4 Indexes
-- Every foreign key column has a supporting non-clustered index.
-- Composite indexes are added for common filter/sort combinations (e.g., `(employee_id, attendance_date)` on `attendance`).
-- Partial indexes are used for soft-delete filtering: `CREATE INDEX ix_employees_active ON employees (id) WHERE is_deleted = false;`
-- `GIN` indexes are used on JSONB columns (e.g., `payroll_run_detail.breakdown_json`) where ad-hoc querying is required.
+### 11.1 Platform & Tenancy Tables
+#### `tenants`
+- `name` (varchar(200), NOT NULL)
+- `code` (varchar(50), UNIQUE, NOT NULL)
+- `domain` (varchar(100), UNIQUE, NULL)
+- `subscription_plan_id` (int, FK to `subscription_plans`, NOT NULL)
+- `max_employees` (int, NOT NULL DEFAULT 50)
+- `status` (varchar(30), NOT NULL DEFAULT 'Active')  -- Active, Suspended, Expired
+- `subscription_start_date` (date, NOT NULL)
+- `subscription_expiry_date` (date, NOT NULL)
 
-### 8.5 Constraints
-- `NOT NULL` is the default for all business-required columns; nullability is an explicit domain decision, not an oversight.
-- Foreign keys use `ON DELETE RESTRICT` by default; cascading deletes are used only for true ownership relationships (e.g., `PayrollRun` → `PayrollRunDetail`).
-- `CHECK` constraints enforce domain invariants at the database level as a defense-in-depth measure (e.g., `end_date >= start_date`).
+#### `subscription_plans`
+- `name` (varchar(100), NOT NULL)
+- `code` (varchar(50), UNIQUE, NOT NULL) -- STARTER, PRO, ENTERPRISE, FACTORY
+- `description` (varchar(500), NULL)
+- `base_price_monthly` (numeric(12,2), NOT NULL)
+- `price_per_employee_monthly` (numeric(12,2), NOT NULL)
+- `modules_json` (jsonb, NOT NULL) -- Array of enabled module string codes
+- `max_seats` (int, NOT NULL)
 
-### 8.6 Soft Delete
-All aggregate roots inherit from `AuditableEntity`, which includes:
+### 11.2 Core Organization Hierarchy
+#### `companies`
+- `name` (varchar(250), NOT NULL)
+- `legal_name` (varchar(250), NOT NULL)
+- `cin_number` (varchar(50), NULL)
+- `pan_number` (varchar(20), NULL)
+- `tan_number` (varchar(20), NULL)
+- `gstin` (varchar(20), NULL)
+- `logo_url` (varchar(500), NULL)
+- `website` (varchar(200), NULL)
+- `financial_year_start_month` (int, NOT NULL DEFAULT 4) -- 4 for April
 
-| Column | Type | Purpose |
-|---|---|---|
-| `is_deleted` | boolean | Soft-delete flag |
-| `deleted_at` | timestamptz, nullable | Deletion timestamp |
-| `deleted_by` | uuid, nullable | User who performed the deletion |
+#### `branches`
+- `company_id` (int, FK to `companies`, NOT NULL)
+- `code` (varchar(50), NOT NULL)
+- `name` (varchar(150), NOT NULL)
+- `address_line1` (varchar(250), NOT NULL)
+- `address_line2` (varchar(250), NULL)
+- `city` (varchar(100), NOT NULL)
+- `state` (varchar(100), NOT NULL)
+- `country` (varchar(100), NOT NULL DEFAULT 'India')
+- `pincode` (varchar(20), NOT NULL)
+- `latitude` (numeric(10,8), NULL)
+- `longitude` (numeric(11,8), NULL)
+- `geofence_radius_meters` (int, NOT NULL DEFAULT 100)
+- `timezone` (varchar(50), NOT NULL DEFAULT 'Asia/Kolkata')
+- `is_head_office` (bool, NOT NULL DEFAULT false)
 
-A global EF Core query filter (`HasQueryFilter(e => !e.IsDeleted)`) is applied per entity so soft-deleted rows are excluded from all default queries automatically.
+#### `departments`
+- `company_id` (int, FK to `companies`, NOT NULL)
+- `parent_department_id` (int, FK to `departments`, NULL)
+- `code` (varchar(50), NOT NULL)
+- `name` (varchar(150), NOT NULL)
+- `head_employee_id` (int, FK to `employees`, NULL)
 
-### 8.7 Audit Columns
-| Column | Type | Purpose |
-|---|---|---|
-| `created_at` | timestamptz | Set automatically via `SaveChangesAsync` interceptor |
-| `created_by` | uuid | Populated from the current `ICurrentUserService` |
-| `updated_at` | timestamptz, nullable | Updated automatically on modification |
-| `updated_by` | uuid, nullable | Populated automatically |
+#### `designations`
+- `department_id` (int, FK to `departments`, NOT NULL)
+- `code` (varchar(50), NOT NULL)
+- `title` (varchar(150), NOT NULL)
+- `level` (int, NOT NULL DEFAULT 1)
+- `grade` (varchar(20), NOT NULL DEFAULT 'L1')
+- `min_salary` (numeric(12,2), NULL)
+- `max_salary` (numeric(12,2), NULL)
 
-### 8.8 Concurrency Control
-- Optimistic concurrency is implemented via a `xmin` PostgreSQL system column mapped as a concurrency token (`IsRowVersion()`), avoiding a dedicated version column.
-- Concurrency conflicts raise `DbUpdateConcurrencyException`, translated by the Global Exception Middleware into a `409 Conflict` response with a machine-readable `ConcurrencyConflict` error code.
+### 11.3 Employee Master & Lifecycle
+#### `employees`
+- `company_id` (int, FK to `companies`, NOT NULL)
+- `branch_id` (int, FK to `branches`, NOT NULL)
+- `department_id` (int, FK to `departments`, NOT NULL)
+- `designation_id` (int, FK to `designations`, NOT NULL)
+- `manager_id` (int, FK to `employees`, NULL)
+- `user_id` (int, FK to `users`, NULL)
+- `employee_code` (varchar(50), UNIQUE, NOT NULL)
+- `first_name` (varchar(100), NOT NULL)
+- `middle_name` (varchar(100), NULL)
+- `last_name` (varchar(100), NOT NULL)
+- `gender` (varchar(20), NOT NULL)
+- `date_of_birth` (date, NOT NULL)
+- `date_of_joining` (date, NOT NULL)
+- `confirmation_date` (date, NULL)
+- `employment_type` (varchar(30), NOT NULL DEFAULT 'FullTime') -- FullTime, PartTime, Contractor, Intern, Trainee
+- `employment_status` (varchar(30), NOT NULL DEFAULT 'Active') -- Active, Probation, NoticePeriod, Terminated, Resigned
+- `official_email` (varchar(150), UNIQUE, NOT NULL)
+- `personal_email` (varchar(150), NULL)
+- `phone_number` (varchar(20), NOT NULL)
+- `emergency_contact_name` (varchar(150), NULL)
+- `emergency_contact_phone` (varchar(20), NULL)
+- `emergency_contact_relation` (varchar(50), NULL)
+- `pan_encrypted` (varchar(255), NULL)
+- `aadhaar_encrypted` (varchar(255), NULL)
+- `uan_number` (varchar(50), NULL)
+- `esic_number` (varchar(50), NULL)
+- `bank_name` (varchar(150), NULL)
+- `bank_account_encrypted` (varchar(255), NULL)
+- `bank_ifsc_code` (varchar(20), NULL)
+- `avatar_url` (varchar(500), NULL)
+- `probation_period_months` (int, NOT NULL DEFAULT 6)
+- `notice_period_days` (int, NOT NULL DEFAULT 30)
+- `termination_date` (date, NULL)
+- `termination_reason` (varchar(500), NULL)
 
-> **Best Practice:** Long-running payroll processing runs use a **pessimistic** application-level lock (a `processing` status flag with a unique partial index) in addition to optimistic concurrency, since payroll runs must not be processed concurrently by two operators.
+### 11.4 Attendance & Shifts
+#### `shifts`
+- `company_id` (int, FK to `companies`, NOT NULL)
+- `branch_id` (int, FK to `branches`, NULL)
+- `code` (varchar(50), NOT NULL)
+- `name` (varchar(100), NOT NULL)
+- `start_time` (time, NOT NULL)
+- `end_time` (time, NOT NULL)
+- `grace_period_minutes` (int, NOT NULL DEFAULT 15)
+- `half_day_hours` (numeric(4,2), NOT NULL DEFAULT 4.5)
+- `full_day_hours` (numeric(4,2), NOT NULL DEFAULT 8.0)
+- `spans_midnight` (bool, NOT NULL DEFAULT false)
+- `is_rotational` (bool, NOT NULL DEFAULT false)
 
-### 8.9 Detailed Entity Schema (All Columns)
+#### `attendance_records`
+- `employee_id` (int, FK to `employees`, NOT NULL)
+- `shift_id` (int, FK to `shifts`, NOT NULL)
+- `attendance_date` (date, NOT NULL)
+- `first_punch_in` (timestamptz, NULL)
+- `last_punch_out` (timestamptz, NULL)
+- `punch_source` (varchar(30), NOT NULL DEFAULT 'Web') -- Web, MobileGPS, FaceDevice, BiometricFinger, QR
+- `punch_in_latitude` (numeric(10,8), NULL)
+- `punch_in_longitude` (numeric(11,8), NULL)
+- `punch_in_address` (varchar(300), NULL)
+- `punch_in_selfie_url` (varchar(500), NULL)
+- `total_working_hours` (numeric(5,2), NOT NULL DEFAULT 0.0)
+- `late_minutes` (int, NOT NULL DEFAULT 0)
+- `early_exit_minutes` (int, NOT NULL DEFAULT 0)
+- `overtime_minutes` (int, NOT NULL DEFAULT 0)
+- `status` (varchar(30), NOT NULL) -- Present, Absent, HalfDay, Late, OnLeave, Holiday, WeeklyOff
+- `is_regularized` (bool, NOT NULL DEFAULT false)
 
-**Note**: Most entities (all aggregate roots) derive from `AuditableEntity` (which inherits `BaseEntity`). Therefore, they implicitly contain the following standard audit columns:
-- `id` (int, Primary Key)
-- `uuid` (uuid, Unique)
-- `is_active` (boolean)
-- `created_at` (timestamptz)
-- `created_by` (uuid)
-- `updated_at` (timestamptz, nullable)
-- `updated_by` (uuid, nullable)
-- `is_deleted` (boolean, for soft-delete)
-- `deleted_at` (timestamptz, nullable)
-- `deleted_by` (uuid, nullable)
+#### `attendance_punches` (Raw Multi-punch Logs)
+- `attendance_record_id` (int, FK to `attendance_records`, NOT NULL)
+- `employee_id` (int, FK to `employees`, NOT NULL)
+- `punch_time` (timestamptz, NOT NULL)
+- `punch_type` (varchar(10), NOT NULL) -- IN, OUT
+- `device_id` (varchar(100), NULL)
+- `latitude` (numeric(10,8), NULL)
+- `longitude` (numeric(11,8), NULL)
 
-The below schemas focus on the domain-specific columns.
+#### `attendance_regularizations`
+- `attendance_record_id` (int, FK to `attendance_records`, NOT NULL)
+- `employee_id` (int, FK to `employees`, NOT NULL)
+- `requested_punch_in` (timestamptz, NOT NULL)
+- `requested_punch_out` (timestamptz, NOT NULL)
+- `reason` (varchar(500), NOT NULL)
+- `status` (varchar(30), NOT NULL DEFAULT 'Pending') -- Pending, Approved, Rejected
+- `reviewed_by_employee_id` (int, FK to `employees`, NULL)
+- `reviewed_at` (timestamptz, NULL)
+- `review_comments` (varchar(500), NULL)
 
-#### 1. users
-- `email` (varchar, unique)
-- `first_name` (varchar)
-- `last_name` (varchar)
-- `password_hash` (varchar)
-- `employee_id` (int, nullable FK to employees)
-- `failed_login_attempts` (int)
-- `lockout_end` (timestamptz, nullable)
+### 11.5 Leave Management
+#### `leave_types`
+- `company_id` (int, FK to `companies`, NOT NULL)
+- `name` (varchar(100), NOT NULL)
+- `code` (varchar(20), NOT NULL) -- CL, PL, SL, COMP_OFF, LWP, MATERNITY, PATERNITY
+- `annual_quota` (numeric(5,2), NOT NULL)
+- `is_carry_forward_allowed` (bool, NOT NULL DEFAULT false)
+- `max_carry_forward_days` (numeric(5,2), NOT NULL DEFAULT 0.0)
+- `is_encashable` (bool, NOT NULL DEFAULT false)
+- `requires_document_proof` (bool, NOT NULL DEFAULT false)
+- `proof_required_after_days` (int, NOT NULL DEFAULT 2)
+- `is_paid` (bool, NOT NULL DEFAULT true)
 
-#### 2. login_audit_logs (Inherits BaseEntity only)
-- `email` (varchar)
-- `is_success` (boolean)
-- `ip_address` (varchar)
-- `user_agent` (varchar)
-- `details` (varchar, nullable)
+#### `leave_balances`
+- `employee_id` (int, FK to `employees`, NOT NULL)
+- `leave_type_id` (int, FK to `leave_types`, NOT NULL)
+- `year` (int, NOT NULL)
+- `opening_balance` (numeric(5,2), NOT NULL DEFAULT 0.0)
+- `accrued` (numeric(5,2), NOT NULL DEFAULT 0.0)
+- `taken` (numeric(5,2), NOT NULL DEFAULT 0.0)
+- `pending_approval` (numeric(5,2), NOT NULL DEFAULT 0.0)
+- `closing_balance` (numeric(5,2), NOT NULL DEFAULT 0.0)
 
-#### 3. password_reset_tokens
-- `user_id` (int, FK to users)
-- `token_hash` (varchar)
-- `expires_at` (timestamptz)
-- `is_used` (boolean)
+#### `leave_requests`
+- `employee_id` (int, FK to `employees`, NOT NULL)
+- `leave_type_id` (int, FK to `leave_types`, NOT NULL)
+- `start_date` (date, NOT NULL)
+- `end_date` (date, NOT NULL)
+- `is_half_day` (bool, NOT NULL DEFAULT false)
+- `half_day_session` (varchar(20), NULL) -- FirstHalf, SecondHalf
+- `total_days` (numeric(4,2), NOT NULL)
+- `reason` (varchar(500), NOT NULL)
+- `attachment_url` (varchar(500), NULL)
+- `status` (varchar(30), NOT NULL DEFAULT 'PendingManager') -- PendingManager, PendingHR, Approved, Rejected, Cancelled
+- `manager_id` (int, FK to `employees`, NULL)
+- `manager_action_at` (timestamptz, NULL)
+- `manager_comments` (varchar(500), NULL)
 
-#### 4. refresh_tokens
-- `token_hash` (varchar)
-- `user_id` (int, FK to users)
-- `expires_at` (timestamptz)
-- `created_by_ip` (varchar)
-- `created_by_user_agent` (varchar)
-- `is_revoked` (boolean)
-- `revoked_at` (timestamptz, nullable)
+### 11.6 Payroll & Compensation
+#### `payheads` (Salary Components)
+- `company_id` (int, FK to `companies`, NOT NULL)
+- `code` (varchar(50), NOT NULL) -- BASIC, HRA, DA, SPECIAL_ALLOW, CONVEYANCE, MEDICAL, BONUS, PF_EMPLOYEE, ESIC_EMPLOYEE, PT, TDS
+- `name` (varchar(100), NOT NULL)
+- `type` (varchar(20), NOT NULL) -- Earning, Deduction
+- `category` (varchar(30), NOT NULL) -- Fixed, Variable, Statutory, Reimbursement
+- `calculation_type` (varchar(30), NOT NULL) -- FlatAmount, PercentageOfBasic, PercentageOfGross, Formula
+- `calculation_formula` (varchar(200), NULL)
+- `is_taxable` (bool, NOT NULL DEFAULT true)
+- `is_part_of_epf` (bool, NOT NULL DEFAULT true)
+- `is_part_of_esic` (bool, NOT NULL DEFAULT true)
 
-#### 5. employees
-- `first_name` (varchar)
-- `last_name` (varchar)
-- `email` (varchar)
-- `national_id` (varchar, unique)
-- `date_of_birth` (date)
-- `department_id` (int, FK to departments)
-- `designation_id` (int, FK to designations)
-- `branch_id` (int, FK to branches)
-- `manager_id` (int, nullable FK to employees - self)
-- `user_id` (int, nullable FK to users)
-- `employment_status` (varchar / enum)
-- `termination_date` (date, nullable)
+#### `salary_structures`
+- `employee_id` (int, FK to `employees`, NOT NULL)
+- `effective_from` (date, NOT NULL)
+- `annual_ctc` (numeric(14,2), NOT NULL)
+- `monthly_gross` (numeric(14,2), NOT NULL)
+- `status` (varchar(20), NOT NULL DEFAULT 'Active') -- Draft, Active, Superseded
 
-#### 6. departments
-- `company_id` (int, FK to companies)
-- `code` (varchar, unique)
-- `name` (varchar)
-- `head_employee_id` (int, nullable FK to employees)
+#### `salary_structure_items`
+- `salary_structure_id` (int, FK to `salary_structures`, NOT NULL)
+- `payhead_id` (int, FK to `payheads`, NOT NULL)
+- `monthly_amount` (numeric(12,2), NOT NULL)
+- `annual_amount` (numeric(14,2), NOT NULL)
 
-#### 7. designations
-- `department_id` (int, FK to departments)
-- `title` (varchar)
-- `level` (int)
-- `grade` (varchar)
+#### `payroll_runs`
+- `company_id` (int, FK to `companies`, NOT NULL)
+- `month` (int, NOT NULL) -- 1 to 12
+- `year` (int, NOT NULL)
+- `processing_date` (date, NOT NULL)
+- `total_employees_count` (int, NOT NULL DEFAULT 0)
+- `total_gross_wages` (numeric(16,2), NOT NULL DEFAULT 0.0)
+- `total_deductions` (numeric(16,2), NOT NULL DEFAULT 0.0)
+- `total_net_payable` (numeric(16,2), NOT NULL DEFAULT 0.0)
+- `status` (varchar(30), NOT NULL DEFAULT 'Draft') -- Draft, Processing, Processed, Approved, Locked, Paid
+- `approved_by_user_id` (int, FK to `users`, NULL)
+- `approved_at` (timestamptz, NULL)
 
-#### 8. branches
-- `company_id` (int, FK to companies)
-- `name` (varchar)
-- `location` (varchar)
+#### `payroll_run_details` (Employee Payslip Line)
+- `payroll_run_id` (int, FK to `payroll_runs`, NOT NULL)
+- `employee_id` (int, FK to `employees`, NOT NULL)
+- `total_calendar_days` (int, NOT NULL)
+- `payable_days` (numeric(4,2), NOT NULL)
+- `lop_days` (numeric(4,2), NOT NULL DEFAULT 0.0)
+- `ot_hours` (numeric(5,2), NOT NULL DEFAULT 0.0)
+- `basic_pay` (numeric(12,2), NOT NULL)
+- `gross_earnings` (numeric(12,2), NOT NULL)
+- `epf_employee` (numeric(10,2), NOT NULL DEFAULT 0.0)
+- `epf_employer` (numeric(10,2), NOT NULL DEFAULT 0.0)
+- `esic_employee` (numeric(10,2), NOT NULL DEFAULT 0.0)
+- `esic_employer` (numeric(10,2), NOT NULL DEFAULT 0.0)
+- `professional_tax` (numeric(10,2), NOT NULL DEFAULT 0.0)
+- `tds_amount` (numeric(10,2), NOT NULL DEFAULT 0.0)
+- `loan_recovery` (numeric(10,2), NOT NULL DEFAULT 0.0)
+- `other_deductions` (numeric(10,2), NOT NULL DEFAULT 0.0)
+- `total_deductions` (numeric(12,2), NOT NULL)
+- `net_salary` (numeric(12,2), NOT NULL)
+- `earnings_json` (jsonb, NOT NULL) -- Breakdown of every earning payhead
+- `deductions_json` (jsonb, NOT NULL) -- Breakdown of every deduction payhead
+- `payslip_pdf_url` (varchar(500), NULL)
+- `disbursement_status` (varchar(30), NOT NULL DEFAULT 'Pending') -- Pending, Transferred, Failed
 
-#### 9. companies
-- `name` (varchar)
-- `code` (varchar)
+### 11.7 Loans, Advances & Expenses
+#### `loan_records`
+- `employee_id` (int, FK to `employees`, NOT NULL)
+- `loan_type` (varchar(50), NOT NULL) -- SalaryAdvance, PersonalLoan, EmergencyLoan
+- `principal_amount` (numeric(12,2), NOT NULL)
+- `tenure_months` (int, NOT NULL)
+- `monthly_emi` (numeric(10,2), NOT NULL)
+- `total_repaid` (numeric(12,2), NOT NULL DEFAULT 0.0)
+- `remaining_balance` (numeric(12,2), NOT NULL)
+- `disbursement_date` (date, NOT NULL)
+- `status` (varchar(30), NOT NULL DEFAULT 'PendingApproval') -- PendingApproval, Active, Closed, Rejected
 
-#### 10. roles
-- `name` (varchar)
-- `description` (varchar)
+#### `expense_claims`
+- `employee_id` (int, FK to `employees`, NOT NULL)
+- `category` (varchar(50), NOT NULL) -- Travel, Lodging, Meals, ClientMeeting, Fuel, Stationery
+- `expense_date` (date, NOT NULL)
+- `amount` (numeric(10,2), NOT NULL)
+- `merchant_name` (varchar(150), NULL)
+- `description` (varchar(500), NOT NULL)
+- `receipt_url` (varchar(500), NOT NULL)
+- `status` (varchar(30), NOT NULL DEFAULT 'Submitted') -- Submitted, ManagerApproved, FinanceApproved, Reimbursed, Rejected
+- `payroll_run_detail_id` (int, FK to `payroll_run_details`, NULL)
 
-#### 11. permissions
-- `name` (varchar)
-- `module` (varchar)
+### 11.8 Field GPS & Visit Tracking
+#### `field_visits`
+- `employee_id` (int, FK to `employees`, NOT NULL)
+- `client_name` (varchar(150), NOT NULL)
+- `visit_purpose` (varchar(250), NOT NULL)
+- `check_in_time` (timestamptz, NOT NULL)
+- `check_in_latitude` (numeric(10,8), NOT NULL)
+- `check_in_longitude` (numeric(11,8), NOT NULL)
+- `check_in_address` (varchar(300), NOT NULL)
+- `check_out_time` (timestamptz, NULL)
+- `check_out_latitude` (numeric(10,8), NULL)
+- `check_out_longitude` (numeric(11,8), NULL)
+- `distance_traveled_km` (numeric(6,2), NOT NULL DEFAULT 0.0)
+- `meeting_notes` (varchar(1000), NULL)
+- `signature_url` (varchar(500), NULL)
 
-#### 12. user_roles (Junction Table)
-- `user_id` (int, FK to users)
-- `role_id` (int, FK to roles)
+### 11.9 Assets, Tasks, Performance & Helpdesk
+#### `assets`
+- `company_id` (int, FK to `companies`, NOT NULL)
+- `asset_code` (varchar(50), UNIQUE, NOT NULL)
+- `category` (varchar(50), NOT NULL) -- Laptop, Monitor, MobilePhone, Vehicle, IDCard
+- `name` (varchar(150), NOT NULL)
+- `serial_number` (varchar(100), UNIQUE, NOT NULL)
+- `purchase_date` (date, NOT NULL)
+- `purchase_cost` (numeric(12,2), NOT NULL)
+- `current_employee_id` (int, FK to `employees`, NULL)
+- `status` (varchar(30), NOT NULL DEFAULT 'Available') -- Available, Assigned, Maintenance, Retired
 
-#### 13. role_permissions (Junction Table)
-- `role_id` (int, FK to roles)
-- `permission_id` (int, FK to permissions)
+#### `task_items`
+- `company_id` (int, FK to `companies`, NOT NULL)
+- `title` (varchar(200), NOT NULL)
+- `description` (varchar(1000), NULL)
+- `assigned_to_employee_id` (int, FK to `employees`, NOT NULL)
+- `created_by_employee_id` (int, FK to `employees`, NOT NULL)
+- `priority` (varchar(20), NOT NULL DEFAULT 'Medium') -- Low, Medium, High, Urgent
+- `due_date` (date, NOT NULL)
+- `status` (varchar(30), NOT NULL DEFAULT 'ToDo') -- ToDo, InProgress, InReview, Completed, Cancelled
 
-#### 14. attendance_records
-- `employee_id` (int, FK to employees)
-- `attendance_date` (date)
-- `check_in_time` (timestamptz, nullable)
-- `check_out_time` (timestamptz, nullable)
-- `status` (varchar)
+#### `helpdesk_tickets`
+- `company_id` (int, FK to `companies`, NOT NULL)
+- `ticket_number` (varchar(50), UNIQUE, NOT NULL) -- TKT-2026-0001
+- `raised_by_employee_id` (int, FK to `employees`, NOT NULL)
+- `assigned_to_employee_id` (int, FK to `employees`, NULL)
+- `category` (varchar(50), NOT NULL) -- Payroll, Attendance, ITSupport, Admin, HRPolicy
+- `subject` (varchar(200), NOT NULL)
+- `description` (varchar(2000), NOT NULL)
+- `priority` (varchar(20), NOT NULL DEFAULT 'Medium')
+- `status` (varchar(30), NOT NULL DEFAULT 'Open') -- Open, Assigned, InProgress, Resolved, Closed
+- `resolution_notes` (varchar(2000), NULL)
 
-#### 15. leave_requests
-- `employee_id` (int, FK to employees)
-- `leave_type_id` (int, FK to leave_types)
-- `start_date` (date)
-- `end_date` (date)
-- `status` (varchar)
-- `reason` (varchar)
-
-#### 16. salary_structures
-- `employee_id` (int, FK to employees)
-- `base_salary` (decimal)
-- `effective_date` (date)
-
-#### 17. payroll_runs
-- `period_start` (date)
-- `period_end` (date)
-- `status` (varchar)
-- `processing_date` (date)
-
-#### 18. payroll_run_details
-- `payroll_run_id` (int, FK to payroll_runs)
-- `employee_id` (int, FK to employees)
-- `gross_pay` (decimal)
-- `net_pay` (decimal)
-- `breakdown_json` (jsonb)
+#### `audit_logs`
+- `user_id` (int, FK to `users`, NOT NULL)
+- `user_email` (varchar(150), NOT NULL)
+- `entity_name` (varchar(100), NOT NULL)
+- `entity_id` (varchar(100), NOT NULL)
+- `action` (varchar(50), NOT NULL) -- Create, Update, Delete, Approve, Finalize, Login
+- `old_values_json` (jsonb, NULL)
+- `new_values_json` (jsonb, NULL)
+- `ip_address` (varchar(50), NOT NULL)
+- `user_agent` (varchar(300), NOT NULL)
+- `reason` (varchar(500), NULL)
 
 ---
 
-## 9. Module Architecture
+## 12. Comprehensive Module Architecture (36 Modules)
 
-This section documents every functional module of Workora. Each module follows the same architectural template: **Purpose**, **Features**, **Database Tables**, **Relationships**, **Business Rules**, **API Endpoints**, **Flow Diagram**, **Validation**, **Permissions**, **Repository**, and **Services**.
+Every module follows the vertical-slice CQRS architecture: Commands, Queries, Handlers, Validators, DTOs, Repository interfaces, and Controllers.
 
----
-
-### 9.1 Authentication Module
-
-**Purpose:** Handles user login, logout, token issuance/refresh, and password recovery.
-
-**Features:** Login, Logout, Refresh Token, Forgot Password, Reset Password, Change Password, Session/Device tracking.
-
-**Database Tables:** `users` (shared with Users module), `refresh_tokens`, `password_reset_tokens`, `login_audit_logs`.
-
-**Relationships:** `refresh_tokens.user_id → users.id`; `password_reset_tokens.user_id → users.id`.
-
-**Business Rules:**
-- Accounts lock for 15 minutes after 5 consecutive failed login attempts.
-- Password reset tokens are single-use and expire after 30 minutes.
-- Refresh tokens rotate on every use (see Section 6.3).
-
-**API Endpoints:**
-
-| Method | URL | Description | Auth |
-|---|---|---|---|
-| POST | `/api/v1/auth/login` | Authenticate and issue tokens | Anonymous |
-| POST | `/api/v1/auth/refresh-token` | Exchange refresh token for new pair | Anonymous (token in body) |
-| POST | `/api/v1/auth/logout` | Revoke current refresh token | Authenticated |
-| POST | `/api/v1/auth/forgot-password` | Request password reset email | Anonymous |
-| POST | `/api/v1/auth/reset-password` | Reset password with token | Anonymous |
-| POST | `/api/v1/auth/change-password` | Change password (logged in) | Authenticated |
-| GET | `/api/v1/auth/me` | Get current authenticated user profile + roles/permissions | Authenticated |
-| GET | `/api/v1/auth/sessions` | List active sessions/devices (by refresh token) | Authenticated |
-| POST | `/api/v1/auth/logout-all` | Revoke all refresh tokens/sessions for the current user | Authenticated |
-
-**Flow Diagram:** See Section 6.1 (JWT Authentication Flow).
-
-**Validation:** Email format, password complexity (min 8 chars, upper/lower/digit/symbol), token presence.
-
-**Permissions:** None required (public/self-service endpoints); `change-password`, `me`, `sessions`, and `logout-all` require an authenticated identity only.
-
-**Repository:** `IUserRepository`, `IRefreshTokenRepository`.
-
-**Services:** `IAuthService`, `ITokenService`, `IPasswordHasher`, `IEmailService` (reset link delivery).
-
----
-
-### 9.2 Users Module
-
-**Purpose:** Manages system user accounts (distinct from Employee HR records, though typically 1:1 linked).
-
-**Features:** Create/Update/Deactivate user, assign roles, view user list, link user to employee record.
-
-**Database Tables:** `users`, `user_roles`.
-
-**Relationships:** `users.employee_id → employees.id` (nullable, 1:1); `user_roles.user_id → users.id`; `user_roles.role_id → roles.id`.
-
-**Business Rules:**
-- A user's email must be unique across the tenant.
-- Deactivating a user immediately revokes all active refresh tokens.
-- A user cannot be deleted if they are the sole `SuperAdmin`.
-
-**API Endpoints:**
-
-| Method | URL | Description | Auth | Permission |
-|---|---|---|---|---|
-| GET | `/api/v1/users` | List users (paged/filtered) | Yes | `users.view` |
-| GET | `/api/v1/users/{id}` | Get user detail | Yes | `users.view` |
-| POST | `/api/v1/users` | Create user | Yes | `users.create` |
-| PUT | `/api/v1/users/{id}` | Update user | Yes | `users.update` |
-| PATCH | `/api/v1/users/{id}/deactivate` | Deactivate user | Yes | `users.deactivate` |
-| PATCH | `/api/v1/users/{id}/activate` | Reactivate a previously deactivated user | Yes | `users.deactivate` |
-| POST | `/api/v1/users/{id}/roles` | Assign roles | Yes | `users.assign-roles` |
-| DELETE | `/api/v1/users/{id}` | Hard-delete a user (only if never linked to audit-relevant activity) | Yes | `users.delete` |
-| POST | `/api/v1/users/{id}/reset-password` | Admin-triggered password reset (issues reset email) | Yes | `users.manage` |
-| GET | `/api/v1/users/me` | Get current user's own account record | Yes | Authenticated |
-
-```mermaid
-flowchart LR
-    A[POST /users] --> B[CreateUserCommand]
-    B --> C[CreateUserCommandValidator]
-    C --> D[CreateUserHandler]
-    D --> E{Email Unique?}
-    E -->|No| F[409 Conflict]
-    E -->|Yes| G[Hash Password]
-    G --> H[Persist User]
-    H --> I[Assign Default Role]
-    I --> J[Send Welcome Email]
-    J --> K[201 Created]
+```
+Workora.Application/Features/{Module}/
+├── Commands/{Action}/
+│   ├── {Action}Command.cs
+│   ├── {Action}CommandHandler.cs
+│   └── {Action}CommandValidator.cs
+├── Queries/{Action}/
+│   ├── {Action}Query.cs
+│   ├── {Action}QueryHandler.cs
+│   └── {Action}QueryValidator.cs
+└── DTOs/
+    └── {Entity}Dto.cs
 ```
 
-**Validation:** Unique email, valid role IDs, required first/last name.
+---
 
-**Permissions:** `users.view`, `users.create`, `users.update`, `users.deactivate`, `users.assign-roles`, `users.delete`, `users.manage`.
+### 12.1 Platform Subscriptions & Tiered Plans
+- **Purpose**: Level 1 Super Admin engine to create SaaS plans, set employee thresholds, price tiers, and enable/disable licensed feature flags.
+- **CQRS Slices**:
+  - `CreateSubscriptionPlanCommand` / `UpdateSubscriptionPlanCommand` / `DeleteSubscriptionPlanCommand`
+  - `GetSubscriptionPlanByIdQuery` / `ListSubscriptionPlansQuery`
+- **Key Business Rules**: Plan cannot be deleted if active tenants are currently subscribed.
 
-**Repository:** `IUserRepository`.
+### 12.2 Organizations & Multi-Tenant Management
+- **Purpose**: Super Admin onboarding of customer organizations, provisioning tenant databases, and configuring plan expiration.
+- **CQRS Slices**:
+  - `RegisterOrganizationCommand` / `UpdateOrganizationCommand` / `SuspendOrganizationCommand` / `ReactivateOrganizationCommand`
+  - `GetOrganizationByIdQuery` / `ListOrganizationsQuery` / `GetTenantUsageMetricsQuery`
+- **Key Business Rules**: Employee provisioning blocks automatically when active headcount reaches `max_employees` limit of tenant subscription.
 
-**Services:** `IUserService`, `IPasswordHasher`, `IEmailService`.
+### 12.3 Authentication & Session Management
+- **Purpose**: Issues JWT access tokens, rotates refresh tokens, validates MFA/Device fingerprints, and tracks active sessions.
+- **CQRS Slices**:
+  - `LoginCommand` / `RefreshTokenCommand` / `LogoutCommand` / `LogoutAllDevicesCommand` / `ForgotPasswordCommand` / `ResetPasswordCommand` / `ChangePasswordCommand`
+  - `GetMyProfileQuery` / `ListMyActiveSessionsQuery`
+
+### 12.4 Users & Identity
+- **Purpose**: Manages authenticated logins mapped to employee records.
+- **CQRS Slices**:
+  - `CreateUserCommand` / `UpdateUserCommand` / `DeactivateUserCommand` / `ActivateUserCommand` / `AssignRolesCommand` / `AdminResetPasswordCommand`
+  - `GetUserByIdQuery` / `ListUsersQuery` / `GetMyUserQuery`
+
+### 12.5 Roles & Permissions Catalog
+- **Purpose**: Seedable permission strings and role definitions assigned across HR, Finance, Managers, and Employees.
+- **CQRS Slices**:
+  - `CreateRoleCommand` / `UpdateRoleCommand` / `DeleteRoleCommand` / `SetRolePermissionsCommand` / `CloneRoleCommand`
+  - `ListRolesQuery` / `GetRoleByIdQuery` / `ListPermissionsQuery`
+
+### 12.6 Company Profile & Legal Entities
+- **Purpose**: Manages company legal details (CIN, PAN, TAN, GSTIN, Logo, Fiscal year start).
+- **CQRS Slices**:
+  - `UpdateCompanyProfileCommand` / `UploadCompanyLogoCommand`
+  - `GetCompanyProfileQuery` / `ListCompaniesQuery`
+
+### 12.7 Branches & Regional Locations
+- **Purpose**: Multi-location office management with latitude/longitude geofencing radius and localized timezones.
+- **CQRS Slices**:
+  - `CreateBranchCommand` / `UpdateBranchCommand` / `DeleteBranchCommand`
+  - `GetBranchByIdQuery` / `ListBranchesQuery`
+
+### 12.8 Departments & Organizational Hierarchy
+- **Purpose**: Department tree structure with parent-child relationships and assigned department heads.
+- **CQRS Slices**:
+  - `CreateDepartmentCommand` / `UpdateDepartmentCommand` / `DeleteDepartmentCommand` / `AssignDepartmentHeadCommand`
+  - `GetDepartmentByIdQuery` / `ListDepartmentsQuery` / `GetDepartmentOrgTreeQuery`
+
+### 12.9 Designations, Grades & Job Levels
+- **Purpose**: Defines job titles, organizational levels (L1–L8), and salary compensation bands.
+- **CQRS Slices**:
+  - `CreateDesignationCommand` / `UpdateDesignationCommand` / `DeleteDesignationCommand`
+  - `GetDesignationByIdQuery` / `ListDesignationsQuery`
+
+### 12.10 Financial Years & Fiscal Settings
+- **Purpose**: Defines financial year boundaries (e.g., April 1 to March 31) for tax projections and leave cycles.
+- **CQRS Slices**:
+  - `ConfigureFinancialYearCommand` / `CloseFinancialYearCommand`
+  - `GetCurrentFinancialYearQuery` / `ListFinancialYearsQuery`
+
+### 12.11 Holiday Calendars (Company & Branch-wise)
+- **Purpose**: Configures mandatory, floating, and regional branch-specific holiday lists.
+- **CQRS Slices**:
+  - `CreateHolidayCommand` / `UpdateHolidayCommand` / `DeleteHolidayCommand` / `ImportHolidayCalendarCommand`
+  - `GetHolidayByIdQuery` / `ListHolidaysQuery`
+
+### 12.12 Weekly-Off Configurations
+- **Purpose**: Defines standard weekly off rules (e.g., 5-day week, 6-day week, alternate 2nd/4th Saturdays).
+- **CQRS Slices**:
+  - `ConfigureWeeklyOffPolicyCommand` / `AssignWeeklyOffToBranchCommand`
+  - `GetWeeklyOffPolicyQuery`
+
+### 12.13 Employee Master & 360° Profile
+- **Purpose**: The central HR repository containing personal, employment, statutory (PAN/Aadhaar/UAN/ESIC), encrypted banking, and reporting hierarchy details.
+- **CQRS Slices**:
+  - `CreateEmployeeCommand` / `UpdateEmployeeCommand` / `UpdateMyProfileCommand` / `UpsertBankDetailsCommand` / `UpsertEmergencyContactsCommand`
+  - `GetEmployeeByIdQuery` / `ListEmployeesQuery` / `GetMyEmployeeProfileQuery` / `GetOrgChartQuery` / `GetEmploymentHistoryQuery` / `GetDirectReportsQuery` / `ExportEmployeesQuery`
+
+### 12.14 Pre-Boarding, Offer Management & E-Sign
+- **Purpose**: Issue digital offer letters, track acceptance, collect candidate document uploads prior to day-one joining.
+- **CQRS Slices**:
+  - `GenerateOfferLetterCommand` / `AcceptOfferLetterCommand` / `DeclineOfferLetterCommand` / `ResendOfferLetterCommand`
+  - `GetOfferLetterByIdQuery` / `ListOfferLettersQuery` / `DownloadOfferLetterPdfQuery`
+
+### 12.15 Onboarding Checklists & Document Verification
+- **Purpose**: Configurable joining checklist (ID card, email account, laptop, bank doc verification, policy signoff).
+- **CQRS Slices**:
+  - `CreateOnboardingChecklistCommand` / `VerifyOnboardingItemCommand` / `CompleteOnboardingCommand`
+  - `GetEmployeeOnboardingStatusQuery` / `ListPendingOnboardingsQuery`
+
+### 12.16 Employee Lifecycle (Transfers, Promotions, Exit & Offboarding)
+- **Purpose**: Manages department/branch transfers, promotions, resignation submissions, clearance checklists, and full & final settlement triggers.
+- **CQRS Slices**:
+  - `TransferEmployeeCommand` / `PromoteEmployeeCommand` / `SubmitResignationCommand` / `ProcessExitClearanceCommand` / `TerminateEmployeeCommand` / `ReactivateEmployeeCommand`
+  - `GetExitClearanceStatusQuery` / `ListResignationsQuery`
+
+### 12.17 Attendance Core & Multi-Device Synchronization
+- **Purpose**: Processes attendance punches from Biometric Fingerprint/Face terminals, GPS Geofenced mobile punches, QR codes, and Web portals.
+- **CQRS Slices**:
+  - `CheckInCommand` / `CheckOutCommand` / `RecordDevicePunchLogCommand` / `BulkImportAttendanceCommand`
+  - `GetAttendanceHistoryQuery` / `GetTodayMyAttendanceQuery` / `GetAttendanceSummaryQuery` / `GetLiveAttendanceStatusQuery`
+
+### 12.18 Attendance Policies & Overtime Engine
+- **Purpose**: Computes late-coming minutes, early departures, half-day eligibility, and overtime accruals based on shift grace periods.
+- **CQRS Slices**:
+  - `ConfigureAttendancePolicyCommand` / `SubmitOTRequestCommand` / `ApproveOTRequestCommand`
+  - `GetAttendancePolicyQuery` / `ListOTRequestsQuery` / `GetOTReportQuery`
+
+### 12.19 Attendance Regularization & Corrections
+- **Purpose**: Workflow for employees to regularize missed punches with manager approval chains.
+- **CQRS Slices**:
+  - `RequestAttendanceCorrectionCommand` / `ApproveAttendanceCorrectionCommand` / `RejectAttendanceCorrectionCommand`
+  - `ListPendingRegularizationsQuery` / `GetRegularizationByIdQuery`
+
+### 12.20 Shifts & Rotating Rosters (Factory & Office)
+- **Purpose**: Defines standard (09:00–18:00), afternoon (14:00–23:00), night (23:00–08:00) shifts, and rotational monthly roster schedules for shift-based factories.
+- **CQRS Slices**:
+  - `CreateShiftCommand` / `UpdateShiftCommand` / `DeleteShiftCommand` / `AssignShiftRosterCommand` / `SwapEmployeeShiftCommand`
+  - `ListShiftsQuery` / `GetShiftByIdQuery` / `GetMonthlyRosterQuery`
+
+### 12.21 Leave Types & Accrual Policy Engine
+- **Purpose**: Configures annual leave allowances (CL, PL, SL, Comp-Off, Maternity), monthly accrual rules, carry-forward caps, and encashment settings.
+- **CQRS Slices**:
+  - `CreateLeaveTypeCommand` / `UpdateLeaveTypeCommand` / `DeleteLeaveTypeCommand` / `RunMonthlyLeaveAccrualJobCommand`
+  - `ListLeaveTypesQuery` / `GetLeaveTypeByIdQuery`
+
+### 12.22 Leave Requests & Balance Management
+- **Purpose**: Leave application submission, manager/HR multi-level approvals, team calendar views, and real-time balance ledger updates.
+- **CQRS Slices**:
+  - `SubmitLeaveRequestCommand` / `ApproveLeaveRequestCommand` / `RejectLeaveRequestCommand` / `CancelLeaveRequestCommand`
+  - `GetLeaveBalancesQuery` / `ListLeaveRequestsQuery` / `GetLeaveCalendarQuery`
+
+### 12.23 Salary Structures, Payheads & Templates
+- **Purpose**: Master payhead definitions (Earnings, Deductions, Formulas) and assignment of salary structure templates to employees.
+- **CQRS Slices**:
+  - `CreatePayheadCommand` / `UpdatePayheadCommand` / `CreateSalaryStructureCommand` / `AssignSalaryTemplateCommand`
+  - `ListPayheadsQuery` / `GetSalaryStructureByEmployeeQuery`
+
+### 12.24 Salary Revisions & Increment History
+- **Purpose**: Manages percentage/flat CTC revisions with future/retrospective `effective_from` dates and full historical salary auditing.
+- **CQRS Slices**:
+  - `ReviseSalaryCommand` / `ApproveSalaryRevisionCommand`
+  - `GetSalaryRevisionHistoryQuery`
+
+### 12.25 Loans, Advances & EMI Recovery Engine
+- **Purpose**: Employee salary advance requests, loan sanctioning, amortization schedules, and automated monthly payroll deductions.
+- **CQRS Slices**:
+  - `ApplyForLoanCommand` / `ApproveLoanCommand` / `DisburseLoanCommand` / `ForecloseLoanCommand`
+  - `GetLoanDetailsQuery` / `ListMyLoansQuery` / `ListCompanyLoansQuery`
+
+### 12.26 Expense Claims & Reimbursements
+- **Purpose**: Field/travel expense claim filing with camera receipt attachments, multi-tier approval, and payroll reimbursement synchronization.
+- **CQRS Slices**:
+  - `SubmitExpenseClaimCommand` / `ApproveExpenseClaimCommand` / `RejectExpenseClaimCommand` / `ProcessReimbursementBatchCommand`
+  - `ListExpenseClaimsQuery` / `GetExpenseClaimByIdQuery` / `ListMyExpensesQuery`
+
+### 12.27 Field Employee Live GPS Tracking & Visit Logs
+- **Purpose**: Real-time GPS location tracking, client visit check-in/check-out, travel distance (km) calculation, and route history for sales/field agents.
+- **CQRS Slices**:
+  - `RecordLiveGpsLocationCommand` / `CheckInClientVisitCommand` / `CheckOutClientVisitCommand`
+  - `GetFieldEmployeeLiveLocationsQuery` / `GetEmployeeVisitHistoryQuery` / `GetTravelDistanceReportQuery`
+
+### 12.28 Payroll Calculation Core & Disbursement
+- **Purpose**: Executes monthly batch payroll calculation (Gross, LOP, OT, Loans, Expenses, Net), locks runs, creates bank transfer files, and renders PDF payslips.
+- **CQRS Slices**:
+  - `CreatePayrollRunCommand` / `ProcessPayrollRunCommand` / `ApprovePayrollRunCommand` / `LockPayrollRunCommand` / `CreateAdjustmentRunCommand`
+  - `ListPayrollRunsQuery` / `GetPayrollRunByIdQuery` / `DownloadPayslipPdfQuery` / `DownloadBulkPayslipsZipQuery` / `ExportBankDisbursementFileQuery`
+
+### 12.29 Statutory & Compliance Engine (PF, ESIC, PT, TDS, Gratuity, Bonus)
+- **Purpose**: Automated statutory calculation and export of compliance registers (EPF ECR Challan, ESIC Monthly Return, Form 16/24Q TDS summaries, PT Form 5).
+- **CQRS Slices**:
+  - `ConfigureStatutorySettingsCommand` / `DeclareTaxInvestmentCommand` / `VerifyTaxDeclarationsCommand`
+  - `GetStatutorySummaryQuery` / `ExportEpfEcrQuery` / `ExportEsicMonthlyReturnQuery` / `GetTdsComputationSheetQuery`
+
+### 12.30 Asset Management & Allocation Lifecycle
+- **Purpose**: Tracks inventory of IT assets (laptops, monitors), serial numbers, employee custody, return checklists during offboarding, and maintenance logs.
+- **CQRS Slices**:
+  - `RegisterAssetCommand` / `UpdateAssetCommand` / `AssignAssetCommand` / `ReturnAssetCommand` / `LogAssetMaintenanceCommand` / `RetireAssetCommand`
+  - `ListAssetsQuery` / `GetAssetByIdQuery` / `GetMyAssignedAssetsQuery`
+
+### 12.31 Task Management & Operational SLAs
+- **Purpose**: HR and team task delegation with priorities, due dates, SLA escalations, and status boards.
+- **CQRS Slices**:
+  - `CreateTaskCommand` / `UpdateTaskStatusCommand` / `AssignTaskCommand` / `DeleteTaskCommand`
+  - `ListMyTasksQuery` / `ListTeamTasksQuery` / `GetTaskByIdQuery`
+
+### 12.32 Performance Management (OKRs, KPIs & 360° Reviews)
+- **Purpose**: Quarterly/annual review cycles, goal setting (OKRs/KPIs with weightages), self-assessments, manager evaluations, and final appraisal ratings.
+- **CQRS Slices**:
+  - `CreateReviewCycleCommand` / `SetEmployeeGoalsCommand` / `SubmitSelfReviewCommand` / `SubmitManagerReviewCommand` / `FinalizeAppraisalCommand`
+  - `ListReviewCyclesQuery` / `GetMyPerformanceReviewsQuery` / `GetTeamReviewListQuery`
+
+### 12.33 Helpdesk & Employee Ticketing
+- **Purpose**: Internal ticketing system for payroll disputes, attendance corrections, IT support, and HR inquiries with SLA tracking.
+- **CQRS Slices**:
+  - `CreateTicketCommand` / `AssignTicketCommand` / `ResolveTicketCommand` / `CloseTicketCommand` / `AddTicketCommentCommand`
+  - `ListMyTicketsQuery` / `ListHelpdeskTicketsQuery` / `GetTicketByIdQuery`
+
+### 12.34 Documents & Compliance Expiry Engine
+- **Purpose**: Centralized storage of company and employee documents (Passports, Visas, Driving Licenses) with automated 30-day expiry notifications.
+- **CQRS Slices**:
+  - `UploadDocumentCommand` / `UpdateDocumentMetadataCommand` / `DeleteDocumentCommand`
+  - `ListEmployeeDocumentsQuery` / `DownloadDocumentQuery` / `ListExpiringDocumentsQuery`
+
+### 12.35 Policies & Versioned Digital Acknowledgments
+- **Purpose**: Publishing of company HR policies (Code of Conduct, Leave Policy) with version tracking and mandatory employee digital signoff.
+- **CQRS Slices**:
+  - `CreatePolicyCommand` / `PublishPolicyVersionCommand` / `AcknowledgePolicyCommand`
+  - `ListPublishedPoliciesQuery` / `GetPolicyByIdQuery` / `GetPolicyComplianceReportQuery`
+
+### 12.36 Workora AI Assistant & Dynamic Reports Engine
+- **Purpose**: Conversational AI HR Assistant (*Workora AI*) for natural language inquiries (leave balance, policy explanations, attendance summaries) + dynamic cross-module SQL reporting engine.
+- **CQRS Slices**:
+  - `AskWorkoraAiAssistantCommand` / `ExecuteDynamicReportQuery` / `ExportReportToExcelQuery`
+  - `GetHeadcountReportQuery` / `GetAttritionReportQuery` / `GetPayrollCostSummaryQuery`
 
 ---
 
-### 9.3 Roles Module
+## 13. API Standards & Response Contracts
 
-**Purpose:** Defines named roles that group permissions for assignment to users.
+### 13.1 Envelope Standards
+All MediatR handlers return data wrapped inside `ApiResponse<T>` or `PagedResponse<T>`.
 
-**Features:** CRUD roles, view role's permissions, clone role.
-
-**Database Tables:** `roles`, `role_permissions`.
-
-**Relationships:** `role_permissions.role_id → roles.id`; `role_permissions.permission_id → permissions.id`.
-
-**Business Rules:**
-- System-seeded roles (`SuperAdmin`, `Employee`) cannot be deleted, only extended.
-- A role in use by at least one user cannot be deleted (must be reassigned first).
-
-**API Endpoints:**
-
-| Method | URL | Description | Permission |
-|---|---|---|---|
-| GET | `/api/v1/roles` | List roles | `roles.view` |
-| GET | `/api/v1/roles/{id}` | Get role detail (with assigned permissions) | `roles.view` |
-| POST | `/api/v1/roles` | Create role | `roles.create` |
-| PUT | `/api/v1/roles/{id}` | Update role | `roles.update` |
-| DELETE | `/api/v1/roles/{id}` | Delete role | `roles.delete` |
-| PUT | `/api/v1/roles/{id}/permissions` | Set role permissions | `roles.manage-permissions` |
-| POST | `/api/v1/roles/{id}/clone` | Clone an existing role (with its permission set) as a new role | `roles.create` |
-
-**Validation:** Unique role name per tenant; permission IDs must exist.
-
-**Permissions:** `roles.view`, `roles.create`, `roles.update`, `roles.delete`, `roles.manage-permissions`.
-
-**Repository:** `IRoleRepository`.
-
-**Services:** `IRoleService`.
-
----
-
-### 9.4 Permissions Module
-
-**Purpose:** Catalog of discrete, seedable permission strings that map to protected operations.
-
-**Features:** List available permissions grouped by module (read-only reference data — permissions are seeded from code via `PermissionCatalog`, not created ad hoc by users).
-
-**Database Tables:** `permissions`.
-
-**Relationships:** `role_permissions.permission_id → permissions.id`.
-
-**Business Rules:** Permissions are compile-time constants mirrored into the database by a startup seeder; the API does not expose create/update/delete for permissions themselves — only viewing.
-
-**API Endpoints:**
-
-| Method | URL | Description | Permission |
-|---|---|---|---|
-| GET | `/api/v1/permissions` | List all permissions grouped by module | `permissions.view` |
-
-**Validation:** N/A (read-only).
-
-**Permissions:** `permissions.view`.
-
-**Repository:** `IPermissionRepository`.
-
-**Services:** `IPermissionService`.
-
----
-
-### 9.5 Departments Module
-
-**Purpose:** Organizational departments within a company/branch.
-
-**Features:** CRUD department, assign department head, view department employee count.
-
-**Database Tables:** `departments`.
-
-**Relationships:** `departments.company_id → companies.id`; `departments.head_employee_id → employees.id` (nullable); `employees.department_id → departments.id`.
-
-**Business Rules:**
-- A department cannot be deleted while it has active employees or designations.
-- Department code must be unique per company.
-
-**API Endpoints:**
-
-| Method | URL | Description | Permission |
-|---|---|---|---|
-| GET | `/api/v1/departments` | List departments | `departments.view` |
-| GET | `/api/v1/departments/{id}` | Get department detail | `departments.view` |
-| POST | `/api/v1/departments` | Create department | `departments.create` |
-| PUT | `/api/v1/departments/{id}` | Update department | `departments.update` |
-| DELETE | `/api/v1/departments/{id}` | Delete department | `departments.delete` |
-| PATCH | `/api/v1/departments/{id}/assign-head` | Assign/change department head | `departments.update` |
-
-**Validation:** Unique code per company, required name, valid head employee ID.
-
-**Permissions:** `departments.view`, `departments.create`, `departments.update`, `departments.delete`.
-
-**Repository:** `IDepartmentRepository`.
-
-**Services:** `IDepartmentService`.
-
----
-
-### 9.6 Designations Module
-
-**Purpose:** Job titles/grades within a department (e.g., "Software Engineer II").
-
-**Features:** CRUD designation, link to department, define grade/level for salary banding.
-
-**Database Tables:** `designations`.
-
-**Relationships:** `designations.department_id → departments.id`; `employees.designation_id → designations.id`.
-
-**Business Rules:** Designation cannot be deleted while referenced by active employees.
-
-**API Endpoints:**
-
-| Method | URL | Description | Permission |
-|---|---|---|---|
-| GET | `/api/v1/designations` | List designations | `designations.view` |
-| GET | `/api/v1/designations/{id}` | Get designation detail | `designations.view` |
-| POST | `/api/v1/designations` | Create designation | `designations.create` |
-| PUT | `/api/v1/designations/{id}` | Update designation | `designations.update` |
-| DELETE | `/api/v1/designations/{id}` | Delete designation | `designations.delete` |
-
-**Validation:** Required title, valid department ID, unique title per department.
-
-**Permissions:** `designations.view`, `designations.create`, `designations.update`, `designations.delete`.
-
-**Repository:** `IDesignationRepository`. **Services:** `IDesignationService`.
-
----
-
-### 9.7 Employees Module
-
-**Purpose:** Core HR record for every employee — the central aggregate most other modules reference.
-
-**Features:** Onboarding, profile management, employment history, department/designation assignment, termination/offboarding, employee document management, org chart.
-
-**Database Tables:** `employees`, `employee_employment_history`, `employee_emergency_contacts`, `employee_bank_details`.
-
-**Relationships:** `employees.department_id → departments.id`; `employees.designation_id → designations.id`; `employees.branch_id → branches.id`; `employees.manager_id → employees.id` (self-referencing); `employees.user_id → users.id` (nullable 1:1).
-
-**Business Rules:**
-- Employee code is auto-generated (`EMP-{YYYY}-{sequence}`) and immutable.
-- An employee cannot be their own manager (validated against the self-reference chain to also prevent cycles).
-- Termination sets `employment_status = Terminated` and `termination_date`; it does not hard-delete the record (retained for payroll/legal history).
-- Bank details are encrypted at rest (see Section 12.6).
-
-**API Endpoints:**
-
-| Method | URL | Description | Permission |
-|---|---|---|---|
-| GET | `/api/v1/employees` | List employees (paged/filtered) | `employees.view` |
-| GET | `/api/v1/employees/{id}` | Get employee detail | `employees.view` |
-| POST | `/api/v1/employees` | Onboard new employee | `employees.create` |
-| PUT | `/api/v1/employees/{id}` | Update employee profile | `employees.update` |
-| PATCH | `/api/v1/employees/{id}/transfer` | Transfer department/branch | `employees.transfer` |
-| PATCH | `/api/v1/employees/{id}/terminate` | Terminate employment | `employees.terminate` |
-| GET | `/api/v1/employees/{id}/org-chart` | Get reporting chain | `employees.view` |
-| GET | `/api/v1/employees/me` | Get the caller's own employee profile | Authenticated |
-| PUT | `/api/v1/employees/me` | Self-update limited profile fields (phone, address, emergency contact) | Authenticated |
-| GET | `/api/v1/employees/{id}/employment-history` | Get employment history (transfers, promotions, designation changes) | `employees.view` |
-| POST | `/api/v1/employees/{id}/emergency-contacts` | Add/update emergency contact | `employees.update` |
-| PUT | `/api/v1/employees/{id}/bank-details` | Create/update bank details (encrypted at rest) | `employees.update` |
-| PATCH | `/api/v1/employees/{id}/reactivate` | Reactivate a previously terminated employee (rehire) | `employees.update` |
-| GET | `/api/v1/employees/{id}/direct-reports` | List employees reporting directly to this employee | `employees.view` |
-| GET | `/api/v1/employees/export` | Export filtered employee list (CSV/Excel) | `employees.view` |
-
-```mermaid
-flowchart TD
-    A[POST /employees] --> B[CreateEmployeeCommand]
-    B --> C[Validate DTO]
-    C --> D[Generate Employee Code]
-    D --> E[Persist Employee]
-    E --> F[Create Default Salary Structure Draft]
-    F --> G[Raise EmployeeOnboardedEvent]
-    G --> H[Send Welcome Email]
-    G --> I[Provision User Account]
-    G --> J[Create Asset Allocation Task]
-    H --> K[201 Created]
-```
-
-**Validation:** Required legal name, valid date of birth (18+ years), unique national ID, valid department/designation/branch references.
-
-**Permissions:** `employees.view`, `employees.create`, `employees.update`, `employees.transfer`, `employees.terminate`.
-
-**Repository:** `IEmployeeRepository` (includes `Specification`-based filtering for search/pagination).
-
-**Services:** `IEmployeeService`, `IEmployeeCodeGenerator`, domain event handlers for onboarding side-effects.
-
----
-
-### 9.8 Attendance Module
-
-**Purpose:** Daily clock-in/clock-out tracking and attendance status computation.
-
-**Features:** Check-in/check-out, manual attendance correction (with approval), daily/monthly attendance summary, late/early-leave flags, integration with Shift module for expected hours.
-
-**Database Tables:** `attendance_records`, `attendance_corrections`.
-
-**Relationships:** `attendance_records.employee_id → employees.id`; `attendance_corrections.attendance_record_id → attendance_records.id`; joins `shifts` for expected time windows.
-
-**Business Rules:**
-- Only one attendance record per employee per calendar day.
-- Check-out time must be after check-in time.
-- A correction request requires manager approval before the attendance record is amended; the original values are retained in `attendance_corrections` for audit.
-- Attendance status (`Present`, `Late`, `HalfDay`, `Absent`) is computed server-side from shift timing rules, never client-submitted.
-
-**API Endpoints:**
-
-| Method | URL | Description | Permission |
-|---|---|---|---|
-| POST | `/api/v1/attendance/check-in` | Record check-in | `attendance.self` |
-| POST | `/api/v1/attendance/check-out` | Record check-out | `attendance.self` |
-| GET | `/api/v1/attendance/{employeeId}` | Get attendance history | `attendance.view` |
-| POST | `/api/v1/attendance/{id}/correction` | Request correction | `attendance.self` |
-| PATCH | `/api/v1/attendance/corrections/{id}/approve` | Approve correction | `attendance.approve` |
-| PATCH | `/api/v1/attendance/corrections/{id}/reject` | Reject correction | `attendance.approve` |
-| GET | `/api/v1/attendance/summary` | Monthly summary report | `attendance.view` |
-| GET | `/api/v1/attendance/today` | Get the caller's own check-in/check-out status for today | `attendance.self` |
-| GET | `/api/v1/attendance/corrections` | List pending/processed correction requests | `attendance.view` |
-| POST | `/api/v1/attendance/bulk-import` | Bulk-import attendance records (e.g., from biometric device export) | `attendance.manage` |
-
-**Validation:** Cannot check in twice without checking out; correction reason required (min 10 chars).
-
-**Permissions:** `attendance.self`, `attendance.view`, `attendance.approve`, `attendance.manage`.
-
-**Repository:** `IAttendanceRepository`.
-
-**Services:** `IAttendanceService`, `IShiftResolverService` (computes expected window per employee/day).
-
----
-
-### 9.9 Leave Module
-
-**Purpose:** Leave request submission, approval workflow, and balance tracking.
-
-**Features:** Apply for leave, multi-level approval, leave balance accrual, leave calendar, cancel/withdraw request.
-
-**Database Tables:** `leave_types`, `leave_requests`, `leave_balances`, `leave_approvals`.
-
-**Relationships:** `leave_requests.employee_id → employees.id`; `leave_requests.leave_type_id → leave_types.id`; `leave_approvals.leave_request_id → leave_requests.id`; `leave_balances.employee_id → employees.id`.
-
-**Business Rules:**
-- A leave request cannot exceed the employee's available balance for that leave type unless the leave type allows negative balance (e.g., unpaid leave).
-- Overlapping approved leave requests for the same employee are rejected.
-- Multi-level approval: direct manager, then HR, configurable per leave type via `requires_hr_approval`.
-- Balance is decremented only on final approval, not on submission (reserved/pending is tracked separately to prevent double-booking).
-- Cancellation is only allowed before the leave start date, or by HR override after.
-
-**API Endpoints:**
-
-| Method | URL | Description | Permission |
-|---|---|---|---|
-| POST | `/api/v1/leave/requests` | Submit leave request | `leave.apply` |
-| GET | `/api/v1/leave/requests` | List leave requests (self/team) | `leave.view` |
-| PATCH | `/api/v1/leave/requests/{id}/approve` | Approve leave | `leave.approve` |
-| PATCH | `/api/v1/leave/requests/{id}/reject` | Reject leave | `leave.approve` |
-| PATCH | `/api/v1/leave/requests/{id}/cancel` | Cancel leave | `leave.apply` |
-| GET | `/api/v1/leave/balances/{employeeId}` | Get leave balances | `leave.view` |
-| GET | `/api/v1/leave/types` | List configured leave types | `leave.view` |
-| POST | `/api/v1/leave/types` | Create leave type | `leave.manage` |
-| PUT | `/api/v1/leave/types/{id}` | Update leave type (accrual rate, negative-balance policy, HR-approval flag) | `leave.manage` |
-| GET | `/api/v1/leave/calendar` | Team/company leave calendar for a date range | `leave.view` |
-
-```mermaid
-flowchart TD
-    A[Submit Leave Request] --> B{Sufficient Balance?}
-    B -->|No| C[400 Insufficient Balance]
-    B -->|Yes| D{Overlaps Approved Leave?}
-    D -->|Yes| E[409 Conflict]
-    D -->|No| F[Status: PendingManagerApproval]
-    F --> G{Manager Approves?}
-    G -->|No| H[Status: Rejected]
-    G -->|Yes| I{Requires HR Approval?}
-    I -->|No| J[Status: Approved]
-    I -->|Yes| K[Status: PendingHRApproval]
-    K --> L{HR Approves?}
-    L -->|Yes| J
-    L -->|No| H
-    J --> M[Decrement Leave Balance]
-```
-
-**Validation:** Start date ≤ end date, leave type active, reason required for certain leave types.
-
-**Permissions:** `leave.apply`, `leave.view`, `leave.approve`, `leave.manage`.
-
-**Repository:** `ILeaveRequestRepository`, `ILeaveBalanceRepository`.
-
-**Services:** `ILeaveService`, `ILeaveBalanceAccrualService` (scheduled background job).
-
----
-
-### 9.10 Payroll Module
-
-**Purpose:** Orchestrates the monthly payroll run: computing gross/net pay, deductions, and generating payslips.
-
-**Features:** Create payroll run, compute earnings/deductions per employee, approve/lock payroll run, generate payslips (PDF), disbursement export.
-
-**Database Tables:** `payroll_runs`, `payroll_run_details`, `payroll_deductions`, `payroll_earnings`.
-
-**Relationships:** `payroll_runs.company_id → companies.id`; `payroll_run_details.payroll_run_id → payroll_runs.id`; `payroll_run_details.employee_id → employees.id`; joins `salary_structures` for computation inputs.
-
-**Business Rules:**
-- A payroll run is scoped to a single calendar month and company; only one run per month/company (`uq_payroll_runs_company_month`).
-- Once a payroll run is **Locked/Approved**, its detail rows become immutable; corrections require a new **adjustment run**, never editing history.
-- Net pay = Gross Earnings − Statutory Deductions − Other Deductions; computation is fully server-side and auditable via `payroll_earnings`/`payroll_deductions` line items.
-- Payroll processing uses an application-level lock (Section 8.8) to prevent concurrent processing of the same run.
-- Terminated employees are pro-rated automatically based on `termination_date`.
-
-**API Endpoints:**
-
-| Method | URL | Description | Permission |
-|---|---|---|---|
-| GET | `/api/v1/payroll/runs` | List payroll runs (by company/date range/status) | `payroll.view` |
-| POST | `/api/v1/payroll/runs` | Create payroll run for a month | `payroll.create` |
-| POST | `/api/v1/payroll/runs/{id}/process` | Compute earnings/deductions | `payroll.process` |
-| GET | `/api/v1/payroll/runs/{id}` | View payroll run detail | `payroll.view` |
-| PATCH | `/api/v1/payroll/runs/{id}/approve` | Approve/lock run | `payroll.approve` |
-| DELETE | `/api/v1/payroll/runs/{id}` | Cancel/delete a run still in `Draft` status | `payroll.create` |
-| POST | `/api/v1/payroll/runs/{id}/adjustment` | Create an adjustment run against a locked run | `payroll.process` |
-| GET | `/api/v1/payroll/runs/{id}/payslips/{employeeId}` | Download payslip PDF | `payroll.view` |
-| GET | `/api/v1/payroll/runs/{id}/payslips` | List/download all payslips for a run (bulk ZIP) | `payroll.view` |
-| GET | `/api/v1/payroll/runs/{id}/export` | Bank disbursement export | `payroll.export` |
-
-```mermaid
-sequenceDiagram
-    participant HR as Payroll Officer
-    participant API as Payroll API
-    participant H as ProcessPayrollHandler
-    participant Salary as Salary Structure
-    participant Attn as Attendance
-    participant Leave as Leave
-    participant PDF as QuestPDF
-
-    HR->>API: POST /payroll/runs/{id}/process
-    API->>H: ProcessPayrollRunCommand
-    H->>H: Acquire Processing Lock
-    loop For each active employee
-        H->>Salary: Get Salary Structure
-        H->>Attn: Get Attendance Summary
-        H->>Leave: Get Unpaid Leave Days
-        H->>H: Compute Gross/Deductions/Net
-        H->>H: Persist PayrollRunDetail
-    end
-    H->>H: Release Lock, Status = Processed
-    H-->>API: Summary
-    API-->>HR: 200 OK
-    HR->>API: PATCH /runs/{id}/approve
-    API->>PDF: Generate Payslips
-    PDF-->>API: PDF Files
-```
-
-**Validation:** Run must not already exist for company/month; run must be in `Draft` status to process; must be `Processed` to approve.
-
-**Permissions:** `payroll.create`, `payroll.process`, `payroll.approve`, `payroll.view`, `payroll.export`.
-
-**Repository:** `IPayrollRunRepository`.
-
-**Services:** `IPayrollCalculationService`, `IPayslipPdfGenerator`, `IPayrollExportService`.
-
----
-
-### 9.11 Salary Structure Module
-
-**Purpose:** Defines the compensation composition (basic, allowances, deductions) for each employee, used as the input to Payroll.
-
-**Features:** Define salary components, assign structure to employee, effective-dated revisions (raises/promotions).
-
-**Database Tables:** `salary_structures`, `salary_components`, `salary_structure_components`.
-
-**Relationships:** `salary_structures.employee_id → employees.id`; `salary_structure_components.salary_structure_id → salary_structures.id`; `salary_structure_components.salary_component_id → salary_components.id`.
-
-**Business Rules:**
-- Salary structures are **effective-dated**: a new structure row is created on revision, with `effective_from`, never overwriting history (payroll for prior months must use the structure active at that time).
-- Sum of percentage-based components must resolve to a valid gross; validated at save time.
-- Only one structure may be `Active` per employee at any given date (enforced via exclusion constraint on date range).
-
-**API Endpoints:**
-
-| Method | URL | Description | Permission |
-|---|---|---|---|
-| GET | `/api/v1/salary-structures/{employeeId}` | Get current/historical structures | `salary.view` |
-| POST | `/api/v1/salary-structures` | Create/revise structure | `salary.manage` |
-| DELETE | `/api/v1/salary-structures/{id}` | Retract a draft (not-yet-effective) structure revision | `salary.manage` |
-| GET | `/api/v1/salary-components` | List available components | `salary.view` |
-| POST | `/api/v1/salary-components` | Create a new salary component (allowance/deduction type) | `salary.manage` |
-| PUT | `/api/v1/salary-components/{id}` | Update a salary component definition | `salary.manage` |
-
-**Validation:** `effective_from` ≥ employee hire date; component amounts non-negative.
-
-**Permissions:** `salary.view`, `salary.manage`.
-
-**Repository:** `ISalaryStructureRepository`. **Services:** `ISalaryStructureService`.
-
----
-
-### 9.12 Recruitment Module
-
-**Purpose:** Umbrella module coordinating the hiring pipeline (Job Postings → Candidates → Interviews → Offer Letters).
-
-**Features:** Pipeline dashboard, stage transitions, hiring analytics.
-
-**Database Tables:** Aggregates data from `job_postings`, `candidates`, `interviews`, `offer_letters` (no dedicated table of its own beyond `recruitment_pipelines` for stage configuration).
-
-**Relationships:** See sub-modules below.
-
-**Business Rules:** Pipeline stage order is configurable per company (`recruitment_pipeline_stages`), but default flow is `Applied → Screening → Interview → Offer → Hired/Rejected`.
-
-**API Endpoints:**
-
-| Method | URL | Description | Permission |
-|---|---|---|---|
-| GET | `/api/v1/recruitment/pipeline` | Pipeline board view | `recruitment.view` |
-| GET | `/api/v1/recruitment/analytics` | Hiring funnel metrics | `recruitment.view` |
-| PUT | `/api/v1/recruitment/pipeline-stages` | Configure the company's pipeline stage order | `recruitment.manage` |
-
-**Permissions:** `recruitment.view`, `recruitment.manage`. **Repository:** composed from sub-module repositories. **Services:** `IRecruitmentPipelineService`.
-
----
-
-### 9.13 Job Posting Module
-
-**Purpose:** Manages open positions published internally/externally.
-
-**Features:** Create/publish/close job posting, define requirements, link to department/designation.
-
-**Database Tables:** `job_postings`.
-
-**Relationships:** `job_postings.department_id → departments.id`; `job_postings.designation_id → designations.id`; `candidates.job_posting_id → job_postings.id`.
-
-**Business Rules:** A closed job posting can no longer accept new candidates; `openings_count` decrements as candidates are marked `Hired` and auto-closes at zero.
-
-**API Endpoints:**
-
-| Method | URL | Description | Permission |
-|---|---|---|---|
-| GET | `/api/v1/job-postings` | List postings | `recruitment.view` |
-| GET | `/api/v1/job-postings/{id}` | Get posting detail | `recruitment.view` |
-| POST | `/api/v1/job-postings` | Create posting | `recruitment.manage` |
-| PUT | `/api/v1/job-postings/{id}` | Update posting | `recruitment.manage` |
-| DELETE | `/api/v1/job-postings/{id}` | Delete a posting with no candidates yet | `recruitment.manage` |
-| PATCH | `/api/v1/job-postings/{id}/publish` | Publish posting | `recruitment.manage` |
-| PATCH | `/api/v1/job-postings/{id}/close` | Close posting | `recruitment.manage` |
-
-**Validation:** Openings count > 0, valid department/designation.
-
-**Permissions:** `recruitment.view`, `recruitment.manage`.
-
-**Repository:** `IJobPostingRepository`. **Services:** `IJobPostingService`.
-
----
-
-### 9.14 Candidates Module
-
-**Purpose:** Tracks applicants against job postings through the hiring pipeline.
-
-**Features:** Register candidate, upload resume, update pipeline stage, add evaluation notes.
-
-**Database Tables:** `candidates`, `candidate_documents`, `candidate_notes`.
-
-**Relationships:** `candidates.job_posting_id → job_postings.id`; `candidate_documents.candidate_id → candidates.id`; `interviews.candidate_id → candidates.id`; `offer_letters.candidate_id → candidates.id`.
-
-**Business Rules:**
-- Candidate email is unique per job posting (a candidate may apply to multiple postings).
-- Stage transitions are validated against the configured pipeline order — a candidate cannot skip from `Applied` directly to `Offer` without passing through required stages, unless the actor holds `recruitment.override-stage`.
-
-**API Endpoints:**
-
-| Method | URL | Description | Permission |
-|---|---|---|---|
-| GET | `/api/v1/candidates` | List/search candidates | `recruitment.view` |
-| GET | `/api/v1/candidates/{id}` | Get candidate detail | `recruitment.view` |
-| POST | `/api/v1/candidates` | Register candidate | `recruitment.manage` |
-| PUT | `/api/v1/candidates/{id}` | Update candidate profile | `recruitment.manage` |
-| PATCH | `/api/v1/candidates/{id}/stage` | Move pipeline stage | `recruitment.manage` |
-| PATCH | `/api/v1/candidates/{id}/reject` | Reject candidate (with reason) | `recruitment.manage` |
-| POST | `/api/v1/candidates/{id}/documents` | Upload resume/documents | `recruitment.manage` |
-| POST | `/api/v1/candidates/{id}/notes` | Add an evaluation note | `recruitment.manage` |
-
-**Validation:** Resume file type restricted to PDF/DOCX, max 5MB.
-
-**Permissions:** `recruitment.view`, `recruitment.manage`, `recruitment.override-stage`.
-
-**Repository:** `ICandidateRepository`. **Services:** `ICandidateService`, `IFileStorageService`.
-
----
-
-### 9.15 Interview Module
-
-**Purpose:** Schedules and records interview rounds for candidates.
-
-**Features:** Schedule interview, assign panel members, record feedback/scorecards, reschedule/cancel.
-
-**Database Tables:** `interviews`, `interview_panelists`, `interview_feedback`.
-
-**Relationships:** `interviews.candidate_id → candidates.id`; `interview_panelists.interview_id → interviews.id`; `interview_panelists.employee_id → employees.id`; `interview_feedback.interview_id → interviews.id`.
-
-**Business Rules:**
-- An interview cannot be scheduled in the past.
-- All assigned panelists must submit feedback before the candidate can be moved past the `Interview` stage (unless overridden by HR).
-- Panelist double-booking (same employee, overlapping time) triggers a warning but is not hard-blocked.
-
-**API Endpoints:**
-
-| Method | URL | Description | Permission |
-|---|---|---|---|
-| GET | `/api/v1/interviews` | List interviews (by candidate/date/panelist) | `recruitment.view` |
-| POST | `/api/v1/interviews` | Schedule interview | `recruitment.manage` |
-| PATCH | `/api/v1/interviews/{id}/reschedule` | Reschedule | `recruitment.manage` |
-| PATCH | `/api/v1/interviews/{id}/cancel` | Cancel interview | `recruitment.manage` |
-| POST | `/api/v1/interviews/{id}/feedback` | Submit feedback | `recruitment.interview` |
-| GET | `/api/v1/interviews/{id}` | Interview detail | `recruitment.view` |
-
-**Validation:** Scheduled time in the future, at least one panelist assigned, feedback score within defined scale (1–5).
-
-**Permissions:** `recruitment.view`, `recruitment.manage`, `recruitment.interview`.
-
-**Repository:** `IInterviewRepository`. **Services:** `IInterviewService`, `INotificationService` (panelist invites).
-
----
-
-### 9.16 Offer Letter Module
-
-**Purpose:** Generates and tracks formal offer letters for successful candidates.
-
-**Features:** Generate offer (PDF via QuestPDF), send for e-acceptance, track accept/decline/expire, convert accepted offer into an Employee record.
-
-**Database Tables:** `offer_letters`.
-
-**Relationships:** `offer_letters.candidate_id → candidates.id`; `offer_letters.job_posting_id → job_postings.id`.
-
-**Business Rules:**
-- Offer letters expire automatically after a configurable window (default 7 days) via a background job; expired offers cannot be accepted.
-- Accepting an offer triggers `CandidateHiredEvent`, which pre-populates a draft Employee record for HR to finalize onboarding.
-- Only one active (non-expired, non-declined) offer per candidate per job posting.
-
-**API Endpoints:**
-
-| Method | URL | Description | Permission |
-|---|---|---|---|
-| GET | `/api/v1/offer-letters` | List offer letters (by candidate/status) | `recruitment.view` |
-| GET | `/api/v1/offer-letters/{id}` | Get offer letter detail | `recruitment.view` |
-| POST | `/api/v1/offer-letters` | Generate offer | `recruitment.offer` |
-| GET | `/api/v1/offer-letters/{id}/pdf` | Download offer PDF | `recruitment.view` |
-| PATCH | `/api/v1/offer-letters/{id}/accept` | Mark accepted | `recruitment.offer` |
-| PATCH | `/api/v1/offer-letters/{id}/decline` | Mark declined | `recruitment.offer` |
-| POST | `/api/v1/offer-letters/{id}/resend` | Resend the offer letter email/e-acceptance link | `recruitment.offer` |
-
-**Validation:** Offered salary within approved band, candidate not already hired.
-
-**Permissions:** `recruitment.offer`, `recruitment.view`.
-
-**Repository:** `IOfferLetterRepository`. **Services:** `IOfferLetterService`, `IPdfGenerationService`, `IEmailService`.
-
----
-
-### 9.17 Performance Module
-
-**Purpose:** Manages performance review cycles, goal setting, and evaluations.
-
-**Features:** Define review cycle, set employee goals (OKRs/KPIs), self-assessment, manager assessment, final rating, 360-degree feedback (optional).
-
-**Database Tables:** `performance_cycles`, `performance_goals`, `performance_reviews`, `performance_review_feedback`.
-
-**Relationships:** `performance_reviews.employee_id → employees.id`; `performance_reviews.cycle_id → performance_cycles.id`; `performance_goals.employee_id → employees.id`.
-
-**Business Rules:**
-- A review cannot be finalized until both self-assessment and manager-assessment sections are submitted.
-- Goal weightages within a cycle must sum to 100%.
-- Historical reviews are immutable once `Finalized`.
-
-**API Endpoints:**
-
-| Method | URL | Description | Permission |
-|---|---|---|---|
-| GET | `/api/v1/performance/cycles` | List review cycles | `performance.manage` |
-| POST | `/api/v1/performance/cycles` | Create review cycle | `performance.manage` |
-| POST | `/api/v1/performance/goals` | Set employee goals | `performance.self` |
-| DELETE | `/api/v1/performance/goals/{id}` | Remove a goal (before cycle finalization) | `performance.self` |
-| GET | `/api/v1/performance/reviews` | List reviews (self/team/cycle) | `performance.review` |
-| GET | `/api/v1/performance/reviews/{id}` | Get review detail | `performance.self` |
-| POST | `/api/v1/performance/reviews/{id}/self-assessment` | Submit self-review | `performance.self` |
-| POST | `/api/v1/performance/reviews/{id}/manager-assessment` | Submit manager review | `performance.review` |
-| PATCH | `/api/v1/performance/reviews/{id}/finalize` | Finalize review | `performance.finalize` |
-
-**Validation:** Goal weightage sum = 100%, rating within defined scale.
-
-**Permissions:** `performance.self`, `performance.review`, `performance.finalize`, `performance.manage`.
-
-**Repository:** `IPerformanceReviewRepository`. **Services:** `IPerformanceService`.
-
----
-
-### 9.18 Training Module
-
-**Purpose:** Tracks training programs and employee enrollment/completion.
-
-**Features:** Create training program, enroll employees, track completion/certification, feedback survey.
-
-**Database Tables:** `training_programs`, `training_enrollments`.
-
-**Relationships:** `training_enrollments.employee_id → employees.id`; `training_enrollments.training_program_id → training_programs.id`.
-
-**Business Rules:** Enrollment capacity is enforced (`max_participants`); completion requires `attendance_percentage ≥ program.min_attendance_required`.
-
-**API Endpoints:**
-
-| Method | URL | Description | Permission |
-|---|---|---|---|
-| GET | `/api/v1/training/programs` | List programs | `training.view` |
-| GET | `/api/v1/training/programs/{id}` | Get program detail | `training.view` |
-| POST | `/api/v1/training/programs` | Create program | `training.manage` |
-| PUT | `/api/v1/training/programs/{id}` | Update program | `training.manage` |
-| DELETE | `/api/v1/training/programs/{id}` | Delete/cancel a program with no active enrollments | `training.manage` |
-| GET | `/api/v1/training/enrollments` | List enrollments (by employee/program) | `training.view` |
-| POST | `/api/v1/training/enrollments` | Enroll employee | `training.enroll` |
-| PATCH | `/api/v1/training/enrollments/{id}/complete` | Mark completed | `training.manage` |
-| PATCH | `/api/v1/training/enrollments/{id}/cancel` | Cancel enrollment | `training.manage` |
-
-**Validation:** Enrollment capacity not exceeded, program not expired.
-
-**Permissions:** `training.view`, `training.manage`, `training.enroll`.
-
-**Repository:** `ITrainingRepository`. **Services:** `ITrainingService`.
-
----
-
-### 9.19 Assets Module
-
-**Purpose:** Tracks company assets (laptops, equipment) issued to employees.
-
-**Features:** Register asset, assign/return asset, condition tracking, maintenance log.
-
-**Database Tables:** `assets`, `asset_assignments`.
-
-**Relationships:** `asset_assignments.asset_id → assets.id`; `asset_assignments.employee_id → employees.id`.
-
-**Business Rules:** An asset can only be `Assigned` to one employee at a time; returning an asset closes the assignment (`returned_at` set) and reverts asset status to `Available`.
-
-**API Endpoints:**
-
-| Method | URL | Description | Permission |
-|---|---|---|---|
-| GET | `/api/v1/assets` | List assets | `assets.view` |
-| GET | `/api/v1/assets/{id}` | Get asset detail (with assignment history) | `assets.view` |
-| POST | `/api/v1/assets` | Register asset | `assets.manage` |
-| PUT | `/api/v1/assets/{id}` | Update asset details | `assets.manage` |
-| DELETE | `/api/v1/assets/{id}` | Retire/delete an asset (must be `Available`) | `assets.manage` |
-| POST | `/api/v1/assets/{id}/assign` | Assign to employee | `assets.manage` |
-| PATCH | `/api/v1/assets/assignments/{id}/return` | Process return | `assets.manage` |
-| GET | `/api/v1/assets/{id}/maintenance-log` | List maintenance/service entries | `assets.view` |
-| POST | `/api/v1/assets/{id}/maintenance-log` | Log a maintenance/service event | `assets.manage` |
-
-**Validation:** Asset must be `Available` to assign.
-
-**Permissions:** `assets.view`, `assets.manage`.
-
-**Repository:** `IAssetRepository`. **Services:** `IAssetService`.
-
----
-
-### 9.20 Documents Module
-
-**Purpose:** Central repository for employee and company documents (contracts, IDs, certificates).
-
-**Features:** Upload/download document, categorize by type, expiry tracking (e.g., visa, license), access control.
-
-**Database Tables:** `documents`.
-
-**Relationships:** `documents.employee_id → employees.id` (nullable, for company-level docs); `documents.uploaded_by → users.id`.
-
-**Business Rules:** Files are stored via `IFileStorageService` with only a reference path persisted in the database; sensitive document categories (e.g., `NationalID`) are restricted to `documents.view-sensitive` permission holders. Documents nearing `expiry_date` trigger a notification 30 days in advance via a background job.
-
-**API Endpoints:**
-
-| Method | URL | Description | Permission |
-|---|---|---|---|
-| POST | `/api/v1/documents` | Upload document | `documents.upload` |
-| GET | `/api/v1/documents/{employeeId}` | List employee documents | `documents.view` |
-| GET | `/api/v1/documents/{id}/download` | Download file | `documents.view` |
-| PUT | `/api/v1/documents/{id}` | Update document metadata (category, expiry date) | `documents.upload` |
-| DELETE | `/api/v1/documents/{id}` | Delete document | `documents.delete` |
-| GET | `/api/v1/documents/expiring` | List documents nearing expiry (within N days) | `documents.view` |
-
-**Validation:** File type whitelist (PDF, JPG, PNG, DOCX), max size 10MB, virus scan hook (extensibility point).
-
-**Permissions:** `documents.upload`, `documents.view`, `documents.view-sensitive`, `documents.delete`.
-
-**Repository:** `IDocumentRepository`. **Services:** `IFileStorageService`, `IDocumentExpiryNotifierJob`.
-
----
-
-### 9.21 Notifications Module
-
-**Purpose:** In-app and email notification delivery for system events across all modules.
-
-**Features:** In-app notification feed, mark read/unread, email digest preferences, event-driven triggers (leave approval, offer expiry, document expiry, payroll processed).
-
-**Database Tables:** `notifications`, `notification_preferences`.
-
-**Relationships:** `notifications.user_id → users.id`.
-
-**Business Rules:** Notifications are produced by Domain Event handlers (e.g., `LeaveApprovedEvent → NotificationHandler`), decoupling the triggering module from delivery. Users can opt out of email channel per notification category via `notification_preferences` but cannot disable critical/security notifications (e.g., password change).
-
-**API Endpoints:**
-
-| Method | URL | Description | Permission |
-|---|---|---|---|
-| GET | `/api/v1/notifications` | Get user's notifications | Authenticated |
-| GET | `/api/v1/notifications/unread-count` | Get count of unread notifications | Authenticated |
-| PATCH | `/api/v1/notifications/{id}/read` | Mark as read | Authenticated |
-| PATCH | `/api/v1/notifications/read-all` | Mark all notifications as read | Authenticated |
-| DELETE | `/api/v1/notifications/{id}` | Delete/dismiss a notification | Authenticated |
-| PUT | `/api/v1/notifications/preferences` | Update preferences | Authenticated |
-
-**Validation:** N/A beyond ownership check (users may only read/modify their own notifications).
-
-**Permissions:** Self-scoped; no elevated permission required.
-
-**Repository:** `INotificationRepository`. **Services:** `INotificationService`, `IEmailService`.
-
----
-
-### 9.22 Reports Module
-
-**Purpose:** Generates operational and compliance reports across HR data.
-
-**Features:** Headcount report, attrition report, payroll cost report, leave utilization report, custom date-range filters, export to PDF/Excel.
-
-**Database Tables:** No dedicated tables — reads via optimized read-model queries (CQRS Queries) against existing module tables, often through database views for performance.
-
-**Relationships:** N/A (cross-cutting read layer).
-
-**Business Rules:** Reports respect the requesting user's data scope (e.g., a department manager only sees their department's data) enforced via row-level filtering in the query handler, not just UI filtering.
-
-**API Endpoints:**
-
-| Method | URL | Description | Permission |
-|---|---|---|---|
-| GET | `/api/v1/reports/headcount` | Headcount by department/branch | `reports.view` |
-| GET | `/api/v1/reports/attrition` | Attrition rate over period | `reports.view` |
-| GET | `/api/v1/reports/payroll-cost` | Payroll cost trend | `reports.view-financial` |
-| GET | `/api/v1/reports/leave-utilization` | Leave usage summary | `reports.view` |
-| GET | `/api/v1/reports/employee-turnover` | Turnover/retention analysis over period | `reports.view` |
-| GET | `/api/v1/reports/export/{reportType}` | Export a given report to PDF/Excel | `reports.view` |
-
-**Validation:** Date range required and bounded (max 24 months) to protect query performance.
-
-**Permissions:** `reports.view`, `reports.view-financial`.
-
-**Repository:** Dedicated read-only query classes (Dapper or EF Core `AsNoTracking` projections). **Services:** `IReportService`, `IExcelExportService`.
-
----
-
-### 9.23 Dashboard Module
-
-**Purpose:** Aggregated at-a-glance metrics for the landing screen, role-aware (Admin vs Manager vs Employee views).
-
-**Features:** Headcount widget, pending approvals widget (leave/attendance corrections), upcoming holidays, birthday/anniversary widget, payroll status widget.
-
-**Database Tables:** No dedicated tables — composite read model aggregating from multiple modules, cached (Section 13) due to its read-heavy, low-volatility nature.
-
-**API Endpoints:**
-
-| Method | URL | Description | Permission |
-|---|---|---|---|
-| GET | `/api/v1/dashboard/summary` | Role-aware dashboard payload | Authenticated |
-| GET | `/api/v1/dashboard/widgets/{widgetKey}` | Refresh a single widget's data (e.g., for polling/lazy-load) | Authenticated |
-
-**Business Rules:** The response shape adapts based on the caller's role/permissions (e.g., `payroll.view` gates the payroll-status widget); this is a single endpoint with server-side composition rather than N client-side calls, to minimize round trips.
-
-**Permissions:** Authenticated; individual widgets gated by their source module's permission.
-
-**Repository:** Composed from multiple module repositories. **Services:** `IDashboardAggregationService` (with `IMemoryCache`).
-
----
-
-### 9.24 Settings Module
-
-**Purpose:** Tenant/company-level configuration (working days, currency, leave policy defaults, notification toggles).
-
-**Features:** View/update system settings, feature flags, localization defaults.
-
-**Database Tables:** `company_settings` (key-value with typed columns for common settings; JSONB `extra_settings` for extensibility).
-
-**Relationships:** `company_settings.company_id → companies.id`.
-
-**Business Rules:** Only `SuperAdmin`/`HRManager` roles may modify settings; changes are audit-logged (Section 9.25) given their system-wide blast radius.
-
-**API Endpoints:**
-
-| Method | URL | Description | Permission |
-|---|---|---|---|
-| GET | `/api/v1/settings` | Get company settings | `settings.view` |
-| PUT | `/api/v1/settings` | Update settings | `settings.manage` |
-| GET | `/api/v1/settings/feature-flags` | List feature flags and their current state | `settings.view` |
-| PUT | `/api/v1/settings/feature-flags` | Toggle feature flags | `settings.manage` |
-
-**Validation:** Setting-specific (e.g., currency must be a valid ISO 4217 code).
-
-**Permissions:** `settings.view`, `settings.manage`.
-
-**Repository:** `ICompanySettingsRepository`. **Services:** `ISettingsService` (cached).
-
----
-
-### 9.25 Audit Logs Module
-
-**Purpose:** Immutable trail of sensitive actions across the system for compliance and forensic review.
-
-**Features:** Automatic capture of create/update/delete on designated entities, settings changes, permission changes, login events; searchable audit viewer.
-
-**Database Tables:** `audit_logs` (append-only; no update/delete API exists for this table).
-
-**Relationships:** `audit_logs.user_id → users.id` (actor); polymorphic `entity_type` + `entity_id` reference to the affected record.
-
-**Business Rules:** Audit entries are written via a `SaveChangesAsync` interceptor that diffs tracked entity changes — application code never writes audit rows manually, preventing accidental omission. Audit logs are retained for a minimum of 7 years per typical HR compliance requirements and are excluded from any hard-delete operation.
-
-**API Endpoints:**
-
-| Method | URL | Description | Permission |
-|---|---|---|---|
-| GET | `/api/v1/audit-logs` | Search audit trail | `audit.view` |
-| GET | `/api/v1/audit-logs/{entityType}/{entityId}` | Entity-specific history | `audit.view` |
-| GET | `/api/v1/audit-logs/export` | Export filtered audit trail (CSV) for compliance review | `audit.view` |
-
-**Validation:** N/A (read-only, system-generated).
-
-**Permissions:** `audit.view` (typically restricted to `SuperAdmin`/Compliance role).
-
-**Repository:** `IAuditLogRepository`. **Services:** `IAuditInterceptor` (EF Core `SaveChangesInterceptor`).
-
----
-
-### 9.26 Company Module
-
-**Purpose:** Top-level tenant entity representing the organization using Workora (supports multi-company deployments under one instance).
-
-**Features:** Company profile, logo, legal/registration details, fiscal year configuration.
-
-**Database Tables:** `companies`.
-
-**Relationships:** Root of the tenancy hierarchy: `branches.company_id`, `departments.company_id`, `payroll_runs.company_id`, `company_settings.company_id`, etc. all reference `companies.id`.
-
-**Business Rules:** A user's `tenant_id` JWT claim scopes every query transparently via a global EF Core query filter on `company_id`, preventing cross-tenant data leakage even if application code omits an explicit filter.
-
-**API Endpoints:**
-
-| Method | URL | Description | Permission |
-|---|---|---|---|
-| GET | `/api/v1/company` | Get company profile | `company.view` |
-| PUT | `/api/v1/company` | Update company profile | `company.manage` |
-| POST | `/api/v1/company/logo` | Upload/replace company logo | `company.manage` |
-| GET | `/api/v1/companies` | List companies visible to the caller (multi-company `SuperAdmin` accounts only) | `company.view` |
-
-**Validation:** Required legal name, valid registration number format.
-
-**Permissions:** `company.view`, `company.manage`.
-
-**Repository:** `ICompanyRepository`. **Services:** `ICompanyService`.
-
----
-
-### 9.27 Branches Module
-
-**Purpose:** Physical/regional offices under a company.
-
-**Features:** CRUD branch, assign address/timezone, link employees.
-
-**Database Tables:** `branches`.
-
-**Relationships:** `branches.company_id → companies.id`; `employees.branch_id → branches.id`; `shifts.branch_id → branches.id` (optional branch-specific shift).
-
-**Business Rules:** A branch's timezone affects attendance/shift computation for employees assigned to it; cannot delete a branch with active employees.
-
-**API Endpoints:**
-
-| Method | URL | Description | Permission |
-|---|---|---|---|
-| GET | `/api/v1/branches` | List branches | `branches.view` |
-| GET | `/api/v1/branches/{id}` | Get branch detail | `branches.view` |
-| POST | `/api/v1/branches` | Create branch | `branches.manage` |
-| PUT | `/api/v1/branches/{id}` | Update branch | `branches.manage` |
-| DELETE | `/api/v1/branches/{id}` | Delete branch | `branches.manage` |
-
-**Validation:** Valid IANA timezone string, required address.
-
-**Permissions:** `branches.view`, `branches.manage`.
-
-**Repository:** `IBranchRepository`. **Services:** `IBranchService`.
-
----
-
-### 9.28 Holiday Module
-
-**Purpose:** Defines the annual holiday calendar used by Attendance and Leave computations.
-
-**Features:** CRUD holidays, optional/floating holidays, branch/region-specific calendars.
-
-**Database Tables:** `holidays`.
-
-**Relationships:** `holidays.branch_id → branches.id` (nullable — null means company-wide).
-
-**Business Rules:** Holidays are excluded automatically from leave day-count calculations and attendance expected-working-day calculations; duplicate dates per branch are rejected.
-
-**API Endpoints:**
-
-| Method | URL | Description | Permission |
-|---|---|---|---|
-| GET | `/api/v1/holidays` | List holidays (by year) | `holidays.view` |
-| GET | `/api/v1/holidays/{id}` | Get holiday detail | `holidays.view` |
-| POST | `/api/v1/holidays` | Create holiday | `holidays.manage` |
-| PUT | `/api/v1/holidays/{id}` | Update holiday | `holidays.manage` |
-| DELETE | `/api/v1/holidays/{id}` | Remove holiday | `holidays.manage` |
-
-**Validation:** Date not already defined for the same scope.
-
-**Permissions:** `holidays.view`, `holidays.manage`.
-
-**Repository:** `IHolidayRepository`. **Services:** `IHolidayService`.
-
----
-
-### 9.29 Shift Module
-
-**Purpose:** Defines work-time windows used to compute expected attendance and overtime.
-
-**Features:** CRUD shift definitions, assign shift to employee/department, rotating shift schedules (extensibility point).
-
-**Database Tables:** `shifts`, `employee_shift_assignments`.
-
-**Relationships:** `employee_shift_assignments.employee_id → employees.id`; `employee_shift_assignments.shift_id → shifts.id`.
-
-**Business Rules:** An employee has exactly one **active** shift assignment at any given date (effective-dated, similar pattern to Salary Structure); shift start/end times respect the branch timezone.
-
-**API Endpoints:**
-
-| Method | URL | Description | Permission |
-|---|---|---|---|
-| GET | `/api/v1/shifts` | List shift definitions | `shifts.view` |
-| GET | `/api/v1/shifts/{id}` | Get shift detail | `shifts.view` |
-| POST | `/api/v1/shifts` | Create shift | `shifts.manage` |
-| PUT | `/api/v1/shifts/{id}` | Update shift | `shifts.manage` |
-| DELETE | `/api/v1/shifts/{id}` | Delete an unused shift definition | `shifts.manage` |
-| POST | `/api/v1/shifts/assign` | Assign shift to employee | `shifts.manage` |
-| POST | `/api/v1/shifts/unassign` | Remove an employee's active shift assignment | `shifts.manage` |
-
-**Validation:** End time after start time (accounting for overnight shifts via a `spans_midnight` flag).
-
-**Permissions:** `shifts.view`, `shifts.manage`.
-
-**Repository:** `IShiftRepository`. **Services:** `IShiftService`, `IShiftResolverService` (shared with Attendance).
-
----
-
-### 9.30 Policy Module
-
-**Purpose:** Publishes company HR policies (leave policy, code of conduct, IT policy) with version tracking and acknowledgment.
-
-**Features:** CRUD policy document, publish new version, require employee acknowledgment, acknowledgment compliance report.
-
-**Database Tables:** `policies`, `policy_versions`, `policy_acknowledgments`.
-
-**Relationships:** `policy_versions.policy_id → policies.id`; `policy_acknowledgments.policy_version_id → policy_versions.id`; `policy_acknowledgments.employee_id → employees.id`.
-
-**Business Rules:** Publishing a new policy version does not retroactively alter prior acknowledgments (each acknowledgment is tied to a specific version); policies flagged `acknowledgment_required` surface as a blocking task on the employee dashboard until acknowledged.
-
-**API Endpoints:**
-
-| Method | URL | Description | Permission |
-|---|---|---|---|
-| GET | `/api/v1/policies` | List published policies | `policies.view` |
-| GET | `/api/v1/policies/{id}` | Get policy detail (with version history) | `policies.view` |
-| POST | `/api/v1/policies` | Create policy | `policies.manage` |
-| DELETE | `/api/v1/policies/{id}` | Archive/delete a policy with no acknowledgment history | `policies.manage` |
-| POST | `/api/v1/policies/{id}/versions` | Publish new version | `policies.manage` |
-| POST | `/api/v1/policies/versions/{id}/acknowledge` | Acknowledge policy | Authenticated |
-| GET | `/api/v1/policies/{id}/compliance` | Acknowledgment compliance report | `policies.manage` |
-
-**Validation:** Version content required; acknowledgment is idempotent (re-acknowledging is a no-op, not an error).
-
-**Permissions:** `policies.view`, `policies.manage`.
-
-**Repository:** `IPolicyRepository`. **Services:** `IPolicyService`.
-
----
-
-## 10. API Standards
-
-### 10.1 Naming Conventions
-- Routes use **kebab-case**, plural nouns: `/api/v1/leave-requests`, `/api/v1/salary-structures`.
-- Actions that don't map to a pure REST verb use a sub-resource/verb suffix: `PATCH /employees/{id}/terminate`.
-- Query parameters use `camelCase`: `?pageNumber=1&pageSize=25&sortBy=createdAt`.
-
-### 10.2 HTTP Status Codes
-
-| Code | Meaning | Usage |
-|---|---|---|
-| 200 OK | Success | Successful GET/PUT/PATCH |
-| 201 Created | Resource created | Successful POST creating a resource (includes `Location` header) |
-| 204 No Content | Success, no body | Successful DELETE |
-| 400 Bad Request | Validation failure | FluentValidation failures, malformed input |
-| 401 Unauthorized | Missing/invalid token | Authentication failure |
-| 403 Forbidden | Insufficient permission | Authorization failure |
-| 404 Not Found | Resource doesn't exist | Invalid ID lookups |
-| 409 Conflict | Business rule / concurrency conflict | Duplicate email, concurrency token mismatch |
-| 422 Unprocessable Entity | Semantically invalid request | Business-rule violations distinct from field validation |
-| 429 Too Many Requests | Rate limit exceeded | Rate-limiting middleware |
-| 500 Internal Server Error | Unhandled exception | Caught by global exception middleware |
-
-### 10.3 Standard Response Envelope
-
-```json
-{
-  "success": true,
-  "data": { "...": "..." },
-  "message": null,
-  "errors": null,
-  "correlationId": "b3f1c2a4-..."
-}
-```
-
-```json
-{
-  "success": false,
-  "data": null,
-  "message": "Validation failed",
-  "errors": [
-    { "field": "email", "message": "Email is required" }
-  ],
-  "correlationId": "b3f1c2a4-..."
-}
-```
-
-### 10.4 Pagination
-All list endpoints accept `pageNumber` (default 1) and `pageSize` (default 25, max 100), and return:
-
-```json
-{
-  "items": [ "..." ],
-  "pageNumber": 1,
-  "pageSize": 25,
-  "totalCount": 342,
-  "totalPages": 14
-}
-```
-
-### 10.5 Sorting & Filtering
-- Sorting: `?sortBy=lastName&sortDirection=asc`
-- Filtering: dedicated query parameters per endpoint (e.g., `?departmentId=...&status=Active`), not a generic OData-style filter string, to keep query handlers explicit and indexable.
-
-### 10.6 Errors & Validation
-- All validation errors are aggregated (not fail-fast) and returned together so clients can display all field errors at once.
-- Business-rule errors (e.g., "cannot delete department with active employees") use `422` with a machine-readable `errorCode` in addition to the human message, so clients can localize/branch on it.
-
----
-
-## 11. Security
-
-| Control | Implementation |
-|---|---|
-| Transport Security | HTTPS enforced end-to-end; HSTS enabled; TLS termination at Nginx |
-| Authentication | JWT Bearer, short-lived access tokens, rotated refresh tokens |
-| SQL Injection | Mitigated structurally via EF Core parameterized queries; raw SQL (if any) uses parameters exclusively, never string concatenation |
-| XSS | API returns JSON only (no HTML rendering); output encoding is the frontend's responsibility, but the API rejects/strips script-like payloads in free-text fields as defense-in-depth |
-| CSRF | Not applicable to token-based (non-cookie) API auth; if cookie-based auth is added for a web client, anti-forgery tokens will be required |
-| Password Hashing | BCrypt (work factor 12), never MD5/SHA1/plain |
-| Data Encryption | Sensitive columns (bank account numbers, national IDs) encrypted at rest via `AesGcm`-based value converters in EF Core |
-| Secrets Management | No secrets in `appsettings.json`; sourced from environment variables / a secrets manager (Azure Key Vault or equivalent) at runtime |
-| Rate Limiting | ASP.NET Core built-in Rate Limiting middleware, per-IP and per-user policies, stricter limits on `/auth/login` |
-| OWASP Alignment | Controls mapped against OWASP API Security Top 10 (see table below) |
-
-### 11.1 OWASP API Security Top 10 Mapping
-
-| Risk | Mitigation |
-|---|---|
-| Broken Object Level Authorization | Every query handler filters by tenant + ownership/scope, not just by ID |
-| Broken Authentication | JWT + refresh rotation + account lockout |
-| Broken Object Property Level Authorization | DTOs are explicit allow-lists (AutoMapper profiles), never `SELECT *`-style entity exposure |
-| Unrestricted Resource Consumption | Pagination caps, rate limiting, request size limits |
-| Broken Function Level Authorization | Policy-based authorization on every mutating endpoint |
-| Unrestricted Access to Sensitive Business Flows | Payroll processing lock, offer-letter expiry, stage-transition validation |
-| Server-Side Request Forgery | No user-supplied URLs are fetched server-side |
-| Security Misconfiguration | Swagger disabled in Production; verbose errors disabled outside Development |
-| Improper Inventory Management | API versioning (Section 20) and deprecation policy |
-| Unsafe Consumption of APIs | Outbound SMTP/webhook calls use timeouts and circuit breakers |
-
-> ⚠️ **Warning:** Swagger UI must be disabled (or protected behind authentication) in Production environments to avoid exposing the full API surface to unauthenticated actors.
-
----
-
-## 12. Caching Strategy
-
-- **`IMemoryCache`** is used for read-heavy, low-volatility data: permission catalogs, company settings, holiday calendars, dashboard aggregates.
-- Cache keys are namespaced per tenant: `settings:{companyId}`, `dashboard:{userId}:{date}`.
-- Cache invalidation is explicit: mutation handlers for cached entities call `IMemoryCache.Remove(key)` on write (write-through invalidation), rather than relying purely on TTL expiry.
-- Default TTL is 5–15 minutes for aggregate/report-style data; reference data (permissions, holidays) uses longer TTLs (1 hour) with explicit invalidation on change.
-- `IMemoryCache` is process-local; the architecture isolates cache access behind an `ICacheService` abstraction so a future move to a distributed cache (Redis) requires no handler-level changes — see Section 17 (Deployment) for the Redis-ready topology.
-
-> **Best Practice:** Never cache data scoped to a specific user's authorization state (e.g., "can this user see payroll") without including the user/role in the cache key — a shared cache entry across users with different permissions is a data-leak risk.
-
----
-
-## 13. Logging
-
-### 13.1 Serilog Configuration
-Sinks: Console (structured JSON in Production, human-readable in Development), rolling File sink, and Seq (centralized log aggregation) in staging/production.
-
-### 13.2 Log Levels
-
-| Level | Usage |
-|---|---|
-| Verbose/Debug | Detailed diagnostic info (Development only) |
-| Information | Request start/end, business milestones (e.g., "Payroll run processed") |
-| Warning | Recoverable anomalies (e.g., retry attempted, correction pending approval backlog) |
-| Error | Handled exceptions, failed external calls (SMTP, file storage) |
-| Fatal | Unrecoverable startup failures |
-
-### 13.3 Structured Logging & Correlation
-Every request is enriched with a `CorrelationId` (from `X-Correlation-Id` header or generated), `UserId`, and `TenantId`, propagated through Serilog's `LogContext` so all log lines for a single request can be correlated in Seq.
-
-### 13.4 Exception Logging
-All exceptions caught by the Global Exception Middleware are logged with full stack trace at `Error` level (or `Warning` for expected domain exceptions like `ValidationException`/`NotFoundException`, to avoid alert fatigue on expected 4xx conditions).
-
-> **Note:** PII (national IDs, bank details, passwords) is never written to logs. A Serilog destructuring policy explicitly masks these properties even if a developer accidentally logs a full entity object.
-
----
-
-## 14. Exception Handling
-
-### 14.1 Global Exception Middleware
-A single middleware, registered first in the pipeline, catches all unhandled exceptions and maps them to the standard error envelope (Section 10.3).
-
-| Exception Type | HTTP Status | Notes |
-|---|---|---|
-| `ValidationException` (FluentValidation) | 400 | Field-level errors array populated |
-| `NotFoundException` | 404 | Thrown by handlers when an entity lookup fails |
-| `ForbiddenException` | 403 | Business-level authorization failure beyond policy checks |
-| `BusinessRuleException` | 422 | Includes `errorCode` for client branching |
-| `DbUpdateConcurrencyException` | 409 | Translated to `ConcurrencyConflict` |
-| `Exception` (unhandled) | 500 | Generic message returned to client; full detail logged server-side only |
-
-```mermaid
-flowchart TD
-    A[Request] --> B[Try: Next Middleware/Handler]
-    B -->|Success| C[Return Response]
-    B -->|ValidationException| D[400 + field errors]
-    B -->|NotFoundException| E[404]
-    B -->|ForbiddenException| F[403]
-    B -->|BusinessRuleException| G[422 + errorCode]
-    B -->|DbUpdateConcurrencyException| H[409]
-    B -->|Unhandled Exception| I[Log Fatal Detail, Return Generic 500]
-```
-
-> ⚠️ **Warning:** The 500 response body must never include stack traces or internal exception messages in Production — only a generic message and `correlationId` for support lookup.
-
----
-
-## 15. Performance Optimization
-
-- **Database:** connection pooling via Npgsql; `AsNoTracking()` on all read-only queries; covering indexes for hot query paths (Section 8.4).
-- **EF Core:** avoid N+1 via `.Include()`/projection to DTOs directly in the query (`Select` before materialization) rather than loading full entity graphs.
-- **Caching:** Section 12 — reduces repeated DB round-trips for reference/aggregate data.
-- **Pagination:** enforced server-side maximum page size (100) to prevent unbounded result sets.
-- **Async:** all I/O (DB, SMTP, file, HTTP) is `async`/`await` end-to-end; no blocking `.Result`/`.Wait()` calls, which would starve the thread pool under load.
-- **Response Compression:** Gzip/Brotli response compression enabled at the Kestrel/Nginx layer.
-- **Bulk Operations:** payroll processing uses batched `SaveChangesAsync` (e.g., per 100 employees) rather than one round-trip per employee, balancing memory and transaction size.
-
----
-
-## 16. Deployment Architecture
-
-```mermaid
-flowchart TB
-    subgraph Client_Tier
-        Browser[Web/Mobile Clients]
-    end
-    subgraph Edge
-        LB[Load Balancer / Nginx]
-    end
-    subgraph App_Tier["Application Tier (Docker)"]
-        API1[Workora API Container 1]
-        API2[Workora API Container 2]
-        API3[Workora API Container N]
-    end
-    subgraph Data_Tier
-        PG[(PostgreSQL Primary)]
-        PGR[(PostgreSQL Read Replica)]
-        Redis[(Redis Cache - future)]
-    end
-    subgraph Support
-        Seq[Seq Log Server]
-        FileStore[(File Storage Volume)]
-    end
-
-    Browser -->|HTTPS| LB
-    LB --> API1
-    LB --> API2
-    LB --> API3
-    API1 --> PG
-    API2 --> PG
-    API3 --> PG
-    API1 -.->|reporting queries| PGR
-    API1 --> FileStore
-    API1 --> Seq
-    API1 -.-> Redis
-```
-
-### 16.1 Notes
-- Each API container is stateless; horizontal scaling is achieved by adding container replicas behind the load balancer.
-- `IMemoryCache` being process-local means cache is **not** shared across replicas today — acceptable given short TTLs, but the `ICacheService` abstraction (Section 12) allows swapping to Redis without handler changes as replica count grows.
-- File storage currently uses a shared volume/local disk mounted to all containers; migrating to object storage (S3-compatible) is a documented future enhancement (Section 26).
-
----
-
-## 17. CI/CD
-
-```mermaid
-flowchart LR
-    A[Git Push / PR] --> B[GitHub Actions: Build]
-    B --> C[Restore & Compile]
-    C --> D[Run Unit Tests]
-    D --> E[Run Integration Tests\nTestcontainers PostgreSQL]
-    E --> F{All Pass?}
-    F -->|No| G[Fail Build, Block Merge]
-    F -->|Yes| H[Build Docker Image]
-    H --> I[Push to Container Registry]
-    I --> J[Deploy to Staging]
-    J --> K[Run Migration Job]
-    K --> L[Smoke Tests]
-    L --> M{Manual Approval}
-    M -->|Approved| N[Deploy to Production]
-    N --> O[Run Migration Job]
-    O --> P[Health Check Verification]
-```
-
-- Build, test, and publish stages run on every pull request; deployment stages run on merge to `develop` (Staging) and `main` (Production, gated by manual approval).
-- Database migrations run as a distinct pipeline job before the new application version receives traffic, ensuring schema/code compatibility.
-
----
-
-## 18. Monitoring
-
-- **Health Checks:** `/health/live` (process liveness) and `/health/ready` (readiness, verifies DB connectivity) via `Microsoft.Extensions.Diagnostics.HealthChecks`, polled by the load balancer and container orchestrator.
-- **Logging:** centralized in Seq (Section 13), with saved queries/alerts for `Error`/`Fatal` spikes.
-- **Metrics:** request rate, latency percentiles (p50/p95/p99), and error rate exposed via `/metrics` (Prometheus-compatible) for scraping by the monitoring stack; payroll-run duration and background-job success/failure counts are tracked as custom business metrics.
-
----
-
-## 19. API Documentation
-
-- **Swagger/OpenAPI** (Swashbuckle) generates the interactive API explorer at `/swagger` in Development/Staging (disabled or auth-protected in Production per Section 11).
-- **Versioning:** URL-segment versioning (`/api/v1/...`); a new major version is introduced only for breaking changes, with the prior version supported for a minimum deprecation window of 6 months and a `Deprecation`/`Sunset` HTTP header on legacy responses.
-
----
-
-## 20. Complete API Documentation
-
-Per-module endpoint tables are provided in Section 9 (Module Architecture). This section consolidates the full endpoint index and provides worked request/response examples for representative endpoints from each functional area. The canonical, always-current contract (full JSON Schemas for every request/response) is generated automatically from code via Swashbuckle and published at `/swagger/v1/swagger.json`; this document intentionally shows representative depth rather than duplicating the generated OpenAPI spec, which would immediately drift from the generated source of truth.
-
-### 20.1 Consolidated Endpoint Index
-
-> **Update note (v1.1):** This index and every per-module table in Section 9 were audited against standard HRMS functional coverage and expanded with the missing CRUD, self-service, and lifecycle endpoints each module needed (e.g., `GET/{id}` and `PUT` on modules that only had list/create, self-service `/me` endpoints, bulk import/export, cancel/reject counterparts to approve, and history/log sub-resources). New endpoints are marked inline in Section 9; the counts below reflect the expanded surface.
-
-| Module | Endpoint Count | Base Route |
-|---|---|---|
-| Authentication | 9 | `/api/v1/auth` |
-| Users | 10 | `/api/v1/users` |
-| Roles | 7 | `/api/v1/roles` |
-| Permissions | 1 | `/api/v1/permissions` |
-| Departments | 6 | `/api/v1/departments` |
-| Designations | 5 | `/api/v1/designations` |
-| Employees | 15 | `/api/v1/employees` |
-| Attendance | 10 | `/api/v1/attendance` |
-| Leave | 10 | `/api/v1/leave` |
-| Payroll | 10 | `/api/v1/payroll` |
-| Salary Structure | 6 | `/api/v1/salary-structures` |
-| Recruitment | 3 | `/api/v1/recruitment` |
-| Job Posting | 7 | `/api/v1/job-postings` |
-| Candidates | 8 | `/api/v1/candidates` |
-| Interview | 6 | `/api/v1/interviews` |
-| Offer Letter | 7 | `/api/v1/offer-letters` |
-| Performance | 9 | `/api/v1/performance` |
-| Training | 9 | `/api/v1/training` |
-| Assets | 9 | `/api/v1/assets` |
-| Documents | 6 | `/api/v1/documents` |
-| Notifications | 6 | `/api/v1/notifications` |
-| Reports | 6 | `/api/v1/reports` |
-| Dashboard | 2 | `/api/v1/dashboard` |
-| Settings | 4 | `/api/v1/settings` |
-| Audit Logs | 3 | `/api/v1/audit-logs` |
-| Company | 4 | `/api/v1/company` |
-| Branches | 5 | `/api/v1/branches` |
-| Holiday | 5 | `/api/v1/holidays` |
-| Shift | 7 | `/api/v1/shifts` |
-| Policy | 7 | `/api/v1/policies` |
-| **Total** | **~202** | |
-
-### 20.2 Worked Example — Authentication: Login
-
-**`POST /api/v1/auth/login`**
-
-Request:
-```json
-{
-  "email": "priya.sharma@workora.com",
-  "password": "Str0ngP@ssw0rd!"
-}
-```
-
-Response `200 OK`:
+#### Standard Success Response
 ```json
 {
   "success": true,
   "data": {
-    "accessToken": "eyJhbGciOiJIUzI1NiIs...",
-    "refreshToken": "8f14e45fceea167a5a36...",
-    "expiresIn": 900,
-    "user": { "id": "3a1e...", "email": "priya.sharma@workora.com", "roles": ["HRManager"] }
-  },
-  "message": null,
-  "errors": null
-}
-```
-
-| Status | Condition |
-|---|---|
-| 200 | Valid credentials |
-| 400 | Missing email/password |
-| 401 | Invalid credentials |
-| 423 | Account locked (too many failed attempts) |
-
-**Validation Rules:** `email` required, valid format; `password` required, min length 8.
-
-### 20.3 Worked Example — Employees: Onboard
-
-**`POST /api/v1/employees`** — Permission: `employees.create`
-
-Request:
-```json
-{
-  "firstName": "Arjun",
-  "lastName": "Mehta",
-  "email": "arjun.mehta@workora.com",
-  "dateOfBirth": "1998-04-12",
-  "dateOfJoining": "2026-07-15",
-  "departmentId": "d3f1...",
-  "designationId": "de21...",
-  "branchId": "b901...",
-  "managerId": "e551..."
-}
-```
-
-Response `201 Created`:
-```json
-{
-  "success": true,
-  "data": {
-    "id": "e900...",
+    "id": "e900a1b2-...",
     "employeeCode": "EMP-2026-00142",
     "fullName": "Arjun Mehta",
     "status": "Active"
   },
-  "message": null,
-  "errors": null
+  "message": "Employee record created successfully.",
+  "errors": null,
+  "correlationId": "b3f1c2a4-7e8d-4f9a-8c1b-2d3e4f5a6b7c"
 }
 ```
 
-| Status | Condition |
-|---|---|
-| 201 | Employee created |
-| 400 | Validation failure (missing/invalid fields) |
-| 409 | National ID or email already exists |
-| 403 | Caller lacks `employees.create` |
-
-**Validation Rules:** Age ≥ 18 at `dateOfJoining`; `departmentId`, `designationId`, `branchId` must reference existing active records; `managerId` optional, must not create a cycle.
-
-### 20.4 Worked Example — Leave: Submit Request
-
-**`POST /api/v1/leave/requests`** — Permission: `leave.apply`
-
-Request:
-```json
-{
-  "leaveTypeId": "lt01...",
-  "startDate": "2026-08-10",
-  "endDate": "2026-08-12",
-  "reason": "Family function"
-}
-```
-
-Response `201 Created`:
-```json
-{
-  "success": true,
-  "data": { "id": "lr77...", "status": "PendingManagerApproval", "daysRequested": 3 },
-  "message": null,
-  "errors": null
-}
-```
-
-| Status | Condition |
-|---|---|
-| 201 | Request submitted |
-| 400 | `endDate` before `startDate` |
-| 422 | Insufficient balance (`errorCode: INSUFFICIENT_LEAVE_BALANCE`) |
-| 409 | Overlaps an already-approved leave request |
-
-### 20.5 Worked Example — Payroll: Process Run
-
-**`POST /api/v1/payroll/runs/{id}/process`** — Permission: `payroll.process`
-
-Response `200 OK`:
+#### Standard Paginated Response
 ```json
 {
   "success": true,
   "data": {
-    "payrollRunId": "pr55...",
-    "employeesProcessed": 248,
-    "totalGross": 18542000.00,
-    "totalDeductions": 3120450.00,
-    "totalNet": 15421550.00,
-    "status": "Processed"
+    "items": [ /* array of DTOs */ ],
+    "pageNumber": 1,
+    "pageSize": 25,
+    "totalCount": 248,
+    "totalPages": 10
   },
   "message": null,
-  "errors": null
+  "errors": null,
+  "correlationId": "b3f1c2a4-7e8d-4f9a-8c1b-2d3e4f5a6b7c"
 }
 ```
 
-| Status | Condition |
-|---|---|
-| 200 | Processing completed |
-| 409 | Run already processing/locked (concurrent processing attempt) |
-| 422 | Run not in `Draft` status |
-
-> For the complete, field-by-field request/response JSON Schema of every one of the ~120 endpoints listed in Section 20.1, refer to the live Swagger document at `/swagger/v1/swagger.json` in any deployed environment — it is generated directly from the Command/Query/DTO types and is therefore guaranteed to match the running code, unlike a hand-maintained static copy.
-
----
-
-## 21. NuGet Packages
-
-| Package | Purpose | Recommended Version |
-|---|---|---|
-| `Microsoft.AspNetCore.Authentication.JwtBearer` | JWT authentication middleware | 9.0.x |
-| `Microsoft.EntityFrameworkCore` | ORM core | 9.0.x |
-| `Npgsql.EntityFrameworkCore.PostgreSQL` | PostgreSQL EF Core provider | 9.0.x |
-| `EFCore.NamingConventions` | snake_case DB naming | 9.0.x |
-| `MediatR` | CQRS mediator | 12.x |
-| `FluentValidation.AspNetCore` | Request validation | 11.x |
-| `AutoMapper` | Object-object mapping | 13.x |
-| `Serilog.AspNetCore` | Structured logging host integration | 8.x |
-| `Serilog.Sinks.Seq` | Centralized log sink | 8.x |
-| `Serilog.Sinks.File` | Rolling file sink | 6.x |
-| `Swashbuckle.AspNetCore` | Swagger/OpenAPI generation | 6.x |
-| `QuestPDF` | PDF generation (payslips, offers) | 2024.x |
-| `MailKit` | SMTP email delivery | 4.x |
-| `BCrypt.Net-Next` | Password hashing | 4.x |
-| `xunit` | Unit testing framework | 2.x |
-| `FluentAssertions` | Test assertions | 6.x |
-| `Moq` | Mocking framework | 4.x |
-| `Testcontainers.PostgreSql` | Integration test DB provisioning | 3.x |
-| `Microsoft.AspNetCore.RateLimiting` (built-in) | API rate limiting | 9.0.x |
-| `AspNetCore.HealthChecks.NpgSql` | DB readiness health check | 8.x |
-
----
-
-## 22. Configuration
-
-### 22.1 `appsettings.json` Structure (Illustrative)
-
+#### Standard Error Response (Validation / Business Rule)
 ```json
 {
-  "ConnectionStrings": {
-    "DefaultConnection": "Host=localhost;Database=workora;Username=app;Password=__set_via_env__"
-  },
-  "Jwt": {
-    "Issuer": "Workora",
-    "Audience": "Workora.Clients",
-    "AccessTokenExpiryMinutes": 15,
-    "RefreshTokenExpiryDays": 7,
-    "SigningKey": "__set_via_env__"
-  },
-  "Smtp": {
-    "Host": "smtp.workora.com",
-    "Port": 587,
-    "UseSsl": true,
-    "Username": "__set_via_env__",
-    "Password": "__set_via_env__",
-    "FromAddress": "no-reply@workora.com"
-  },
-  "Serilog": {
-    "MinimumLevel": "Information",
-    "WriteTo": [ "Console", "File", "Seq" ],
-    "SeqServerUrl": "http://seq:5341"
-  },
-  "FileStorage": {
-    "Provider": "Local",
-    "RootPath": "/data/workora-files"
-  },
-  "RateLimiting": {
-    "LoginPolicy": { "PermitLimit": 5, "WindowSeconds": 60 }
-  }
+  "success": false,
+  "data": null,
+  "message": "One or more validation failures occurred.",
+  "errors": [
+    {
+      "field": "dateOfBirth",
+      "message": "Employee must be at least 18 years of age."
+    },
+    {
+      "field": "panNumber",
+      "message": "Invalid PAN card format. Expected pattern: [A-Z]{5}[0-9]{4}[A-Z]{1}"
+    }
+  ],
+  "correlationId": "b3f1c2a4-7e8d-4f9a-8c1b-2d3e4f5a6b7c"
 }
 ```
 
-### 22.2 Environment Variable Overrides
-All secret-bearing values (`ConnectionStrings__DefaultConnection`, `Jwt__SigningKey`, `Smtp__Password`) are supplied exclusively via environment variables / the secrets manager at deploy time, following the standard ASP.NET Core configuration precedence (env vars override `appsettings.{Environment}.json`, which overrides `appsettings.json`).
+---
 
-> ⚠️ **Warning:** `appsettings.json` committed to source control must never contain real secrets — only placeholder/empty values, enforced via a pre-commit secret-scanning hook.
+## 14. Consolidated API Endpoint Catalog (~280+ Endpoints)
+
+| Module | Route | Verb | Policy / Auth | Description |
+|---|---|:---:|---|---|
+| **Platform / Plans** | `/api/v1/superadmin/plans` | GET | `superadmin.access` | List subscription plans |
+| | `/api/v1/superadmin/plans` | POST | `superadmin.access` | Create subscription plan |
+| | `/api/v1/superadmin/plans/{id}` | PUT | `superadmin.access` | Update subscription plan |
+| | `/api/v1/superadmin/plans/{id}` | DELETE | `superadmin.access` | Delete subscription plan |
+| **Organizations** | `/api/v1/superadmin/organizations` | GET | `superadmin.access` | List tenant organizations |
+| | `/api/v1/superadmin/organizations` | POST | `superadmin.access` | Register new organization |
+| | `/api/v1/superadmin/organizations/{id}` | GET | `superadmin.access` | Get organization details |
+| | `/api/v1/superadmin/organizations/{id}` | PUT | `superadmin.access` | Update organization details |
+| | `/api/v1/superadmin/organizations/{id}/suspend` | PATCH | `superadmin.access` | Suspend tenant organization |
+| | `/api/v1/superadmin/organizations/{id}/reactivate` | PATCH | `superadmin.access` | Reactivate tenant |
+| | `/api/v1/superadmin/metrics` | GET | `superadmin.access` | Platform global metrics |
+| **Auth** | `/api/v1/auth/login` | POST | Anonymous | Authenticate & issue tokens |
+| | `/api/v1/auth/refresh-token` | POST | Anonymous | Rotate refresh token |
+| | `/api/v1/auth/logout` | POST | Authenticated | Revoke refresh token |
+| | `/api/v1/auth/logout-all` | POST | Authenticated | Revoke all user sessions |
+| | `/api/v1/auth/forgot-password` | POST | Anonymous | Issue password reset link |
+| | `/api/v1/auth/reset-password` | POST | Anonymous | Reset password with token |
+| | `/api/v1/auth/change-password` | POST | Authenticated | Change active password |
+| | `/api/v1/auth/me` | GET | Authenticated | Get current user context & claims |
+| | `/api/v1/auth/sessions` | GET | Authenticated | List active login devices |
+| **Users** | `/api/v1/users` | GET | `users.view` | List tenant users (paged) |
+| | `/api/v1/users/{id}` | GET | `users.view` | Get user details |
+| | `/api/v1/users` | POST | `users.create` | Provision new user account |
+| | `/api/v1/users/{id}` | PUT | `users.update` | Update user profile |
+| | `/api/v1/users/{id}/deactivate` | PATCH | `users.deactivate` | Deactivate user account |
+| | `/api/v1/users/{id}/activate` | PATCH | `users.deactivate` | Reactivate user account |
+| | `/api/v1/users/{id}/roles` | POST | `users.assign-roles` | Assign security roles |
+| | `/api/v1/users/{id}/reset-password` | POST | `users.manage` | Admin password reset |
+| **Roles & Permissions** | `/api/v1/roles` | GET | `roles.view` | List defined roles |
+| | `/api/v1/roles/{id}` | GET | `roles.view` | Get role & permissions |
+| | `/api/v1/roles` | POST | `roles.create` | Create custom role |
+| | `/api/v1/roles/{id}` | PUT | `roles.update` | Update role metadata |
+| | `/api/v1/roles/{id}` | DELETE | `roles.delete` | Delete role |
+| | `/api/v1/roles/{id}/permissions` | PUT | `roles.manage-permissions` | Set permission matrix |
+| | `/api/v1/roles/{id}/clone` | POST | `roles.create` | Clone existing role |
+| | `/api/v1/permissions` | GET | `permissions.view` | List all catalog permissions |
+| **Company & Branches** | `/api/v1/company` | GET | `company.view` | Get company profile |
+| | `/api/v1/company` | PUT | `company.manage` | Update company profile |
+| | `/api/v1/company/logo` | POST | `company.manage` | Upload company logo |
+| | `/api/v1/branches` | GET | `branches.view` | List branch offices |
+| | `/api/v1/branches/{id}` | GET | `branches.view` | Get branch office detail |
+| | `/api/v1/branches` | POST | `branches.manage` | Create branch office |
+| | `/api/v1/branches/{id}` | PUT | `branches.manage` | Update branch office |
+| | `/api/v1/branches/{id}` | DELETE | `branches.manage` | Delete branch office |
+| **Departments & Designations** | `/api/v1/departments` | GET | `departments.view` | List departments |
+| | `/api/v1/departments/{id}` | GET | `departments.view` | Get department details |
+| | `/api/v1/departments` | POST | `departments.create` | Create department |
+| | `/api/v1/departments/{id}` | PUT | `departments.update` | Update department |
+| | `/api/v1/departments/{id}` | DELETE | `departments.delete` | Delete department |
+| | `/api/v1/departments/{id}/assign-head`| PATCH | `departments.update` | Assign department head |
+| | `/api/v1/designations` | GET | `designations.view` | List designations |
+| | `/api/v1/designations/{id}` | GET | `designations.view` | Get designation detail |
+| | `/api/v1/designations` | POST | `designations.create` | Create designation |
+| | `/api/v1/designations/{id}` | PUT | `designations.update` | Update designation |
+| | `/api/v1/designations/{id}` | DELETE | `designations.delete` | Delete designation |
+| **Holidays & Weekly Offs** | `/api/v1/holidays` | GET | `holidays.view` | List annual holidays |
+| | `/api/v1/holidays/{id}` | GET | `holidays.view` | Get holiday details |
+| | `/api/v1/holidays` | POST | `holidays.manage` | Create holiday |
+| | `/api/v1/holidays/{id}` | PUT | `holidays.manage` | Update holiday |
+| | `/api/v1/holidays/{id}` | DELETE | `holidays.manage` | Delete holiday |
+| | `/api/v1/holidays/import` | POST | `holidays.manage` | Bulk import holidays |
+| | `/api/v1/weekly-offs` | GET | `settings.view` | Get weekly-off policy |
+| | `/api/v1/weekly-offs` | PUT | `settings.manage` | Update weekly-off policy |
+| **Employees Master** | `/api/v1/employees` | GET | `employees.view` | List employees (paged/filtered) |
+| | `/api/v1/employees/{id}` | GET | `employees.view` | Get employee full 360° detail |
+| | `/api/v1/employees` | POST | `employees.create` | Onboard new employee |
+| | `/api/v1/employees/{id}` | PUT | `employees.update` | Update employee profile |
+| | `/api/v1/employees/me` | GET | Authenticated | Get caller's own ESS profile |
+| | `/api/v1/employees/me` | PUT | Authenticated | Self-update phone/address |
+| | `/api/v1/employees/{id}/transfer` | PATCH | `employees.transfer` | Transfer branch/dept |
+| | `/api/v1/employees/{id}/terminate` | PATCH | `employees.terminate` | Terminate employment |
+| | `/api/v1/employees/{id}/reactivate` | PATCH | `employees.update` | Rehire terminated employee |
+| | `/api/v1/employees/{id}/org-chart` | GET | `employees.view` | Reporting hierarchy tree |
+| | `/api/v1/employees/{id}/history` | GET | `employees.view` | Promotion/transfer history |
+| | `/api/v1/employees/{id}/direct-reports`| GET | `employees.view` | Direct reporting subordinates |
+| | `/api/v1/employees/{id}/bank-details` | PUT | `employees.update` | Update encrypted bank info |
+| | `/api/v1/employees/{id}/emergency` | POST | `employees.update` | Upsert emergency contact |
+| | `/api/v1/employees/export` | GET | `employees.view` | Export employee master (Excel) |
+| | `/api/v1/employees/bulk-import` | POST | `employees.create` | Bulk upload employee records |
+| **Pre-Boarding & Offers** | `/api/v1/offer-letters` | GET | `recruitment.view` | List issued offer letters |
+| | `/api/v1/offer-letters/{id}` | GET | `recruitment.view` | Get offer letter details |
+| | `/api/v1/offer-letters` | POST | `recruitment.offer` | Generate candidate offer |
+| | `/api/v1/offer-letters/{id}/pdf` | GET | `recruitment.view` | Download offer PDF |
+| | `/api/v1/offer-letters/{id}/accept` | PATCH | Anonymous (Token) | Digital offer acceptance |
+| | `/api/v1/offer-letters/{id}/decline` | PATCH | Anonymous (Token) | Candidate declines offer |
+| | `/api/v1/offer-letters/{id}/resend` | POST | `recruitment.offer` | Resend offer letter email |
+| **Attendance Engine** | `/api/v1/attendance/check-in` | POST | `attendance.self` | Self clock-in (GPS/Selfie/Web)|
+| | `/api/v1/attendance/check-out` | POST | `attendance.self` | Self clock-out (GPS/Web) |
+| | `/api/v1/attendance/today` | GET | `attendance.self` | Get today's punch status |
+| | `/api/v1/attendance/history/{id}` | GET | `attendance.view` | Get employee punch history |
+| | `/api/v1/attendance/summary` | GET | `attendance.view` | Monthly attendance report |
+| | `/api/v1/attendance/live-status` | GET | `attendance.view` | Real-time presence dashboard |
+| | `/api/v1/attendance/device-punches` | POST | `attendance.manage` | Push biometric device logs |
+| | `/api/v1/attendance/bulk-import` | POST | `attendance.manage` | Bulk upload punch sheets |
+| | `/api/v1/attendance/regularize` | POST | `attendance.self` | Submit regularization |
+| | `/api/v1/attendance/regularizations`| GET | `attendance.view` | List pending regularizations |
+| | `/api/v1/attendance/regularizations/{id}/approve` | PATCH | `attendance.approve` | Approve regularization |
+| | `/api/v1/attendance/regularizations/{id}/reject` | PATCH | `attendance.approve` | Reject regularization |
+| **Shifts & Rosters** | `/api/v1/shifts` | GET | `shifts.view` | List shift definitions |
+| | `/api/v1/shifts/{id}` | GET | `shifts.view` | Get shift details |
+| | `/api/v1/shifts` | POST | `shifts.manage` | Create shift definition |
+| | `/api/v1/shifts/{id}` | PUT | `shifts.manage` | Update shift |
+| | `/api/v1/shifts/{id}` | DELETE | `shifts.manage` | Delete shift |
+| | `/api/v1/shifts/roster` | GET | `shifts.view` | Get monthly shift roster |
+| | `/api/v1/shifts/roster/assign` | POST | `shifts.manage` | Assign rotational roster |
+| | `/api/v1/shifts/roster/swap` | POST | `shifts.manage` | Swap employee shifts |
+| **Leave Management** | `/api/v1/leave/types` | GET | `leave.view` | List configured leave types |
+| | `/api/v1/leave/types` | POST | `leave.manage` | Create leave type policy |
+| | `/api/v1/leave/types/{id}` | PUT | `leave.manage` | Update leave type policy |
+| | `/api/v1/leave/balances/{id}` | GET | `leave.view` | Get employee leave balances |
+| | `/api/v1/leave/balances/me` | GET | Authenticated | Get caller's leave balance |
+| | `/api/v1/leave/requests` | GET | `leave.view` | List leave applications |
+| | `/api/v1/leave/requests` | POST | `leave.apply` | Submit leave application |
+| | `/api/v1/leave/requests/{id}/approve`| PATCH | `leave.approve` | Approve leave application |
+| | `/api/v1/leave/requests/{id}/reject` | PATCH | `leave.approve` | Reject leave application |
+| | `/api/v1/leave/requests/{id}/cancel` | PATCH | `leave.apply` | Cancel leave application |
+| | `/api/v1/leave/calendar` | GET | `leave.view` | Team leave calendar |
+| **Salary Structure** | `/api/v1/payheads` | GET | `salary.view` | List salary payheads |
+| | `/api/v1/payheads` | POST | `salary.manage` | Create salary payhead |
+| | `/api/v1/payheads/{id}` | PUT | `salary.manage` | Update salary payhead |
+| | `/api/v1/salary-structures/{id}` | GET | `salary.view` | Get employee structure |
+| | `/api/v1/salary-structures` | POST | `salary.manage` | Create/revise salary structure|
+| | `/api/v1/salary-structures/history/{id}`| GET | `salary.view` | View salary revision history |
+| **Loans & Advances** | `/api/v1/loans` | GET | `loans.view` | List employee loan accounts |
+| | `/api/v1/loans/me` | GET | Authenticated | List caller's active loans |
+| | `/api/v1/loans/apply` | POST | `loans.apply` | Apply for loan / advance |
+| | `/api/v1/loans/{id}/approve` | PATCH | `loans.approve` | Approve loan application |
+| | `/api/v1/loans/{id}/reject` | PATCH | `loans.approve` | Reject loan application |
+| | `/api/v1/loans/{id}/schedule`| GET | `loans.view` | Get EMI repayment schedule |
+| **Expenses** | `/api/v1/expenses` | GET | `expenses.view` | List submitted claims |
+| | `/api/v1/expenses/me` | GET | Authenticated | List caller's expense claims |
+| | `/api/v1/expenses` | POST | `expenses.submit` | Submit expense with receipt |
+| | `/api/v1/expenses/{id}/approve-manager`| PATCH | `expenses.approve` | Manager approval |
+| | `/api/v1/expenses/{id}/approve-finance`| PATCH | `expenses.finance` | Finance reimbursement approval |
+| | `/api/v1/expenses/{id}/reject` | PATCH | `expenses.approve` | Reject claim |
+| **Field GPS & Visits** | `/api/v1/field/locations` | GET | `field.view` | Real-time map locations |
+| | `/api/v1/field/ping-location` | POST | `field.track` | Send GPS coordinates ping |
+| | `/api/v1/field/visits/check-in` | POST | `field.track` | Check-in at client site |
+| | `/api/v1/field/visits/check-out`| POST | `field.track` | Check-out at client site |
+| | `/api/v1/field/visits/history/{id}`| GET | `field.view` | List employee visit logs |
+| | `/api/v1/field/reports/travel-km` | GET | `field.view` | Distance traveled report |
+| **Payroll Processing**| `/api/v1/payroll/runs` | GET | `payroll.view` | List monthly payroll runs |
+| | `/api/v1/payroll/runs` | POST | `payroll.create` | Initialize draft payroll run |
+| | `/api/v1/payroll/runs/{id}/process` | POST | `payroll.process` | Compute earnings/deductions |
+| | `/api/v1/payroll/runs/{id}` | GET | `payroll.view` | Get payroll run breakdown |
+| | `/api/v1/payroll/runs/{id}/approve` | PATCH | `payroll.approve` | Lock & finalize payroll |
+| | `/api/v1/payroll/runs/{id}/payslips/{empId}`| GET | `payroll.view` | Download employee payslip |
+| | `/api/v1/payroll/runs/{id}/payslips/bulk`| GET | `payroll.view` | Download all payslips ZIP |
+| | `/api/v1/payroll/runs/{id}/disbursement`| GET | `payroll.export` | Export bank payment file |
+| | `/api/v1/payroll/payslips/me` | GET | Authenticated | ESS list/download my payslips|
+| **Statutory Compliance**| `/api/v1/compliance/summary` | GET | `compliance.view` | Monthly statutory summary |
+| | `/api/v1/compliance/epf/ecr` | GET | `compliance.export` | Export EPF ECR text file |
+| | `/api/v1/compliance/esic/monthly` | GET | `compliance.export` | Export ESIC monthly return |
+| | `/api/v1/compliance/pt/return` | GET | `compliance.export` | Export PT state statement |
+| | `/api/v1/compliance/tds/form16/{id}` | GET | `compliance.view` | Generate Form 16 Part A/B |
+| | `/api/v1/compliance/tax-declaration` | POST | Authenticated | Submit tax exemption proofs |
+| **Assets Management** | `/api/v1/assets` | GET | `assets.view` | List hardware/office assets |
+| | `/api/v1/assets/{id}` | GET | `assets.view` | Get asset & assignment log |
+| | `/api/v1/assets` | POST | `assets.manage` | Register asset |
+| | `/api/v1/assets/{id}` | PUT | `assets.manage` | Update asset metadata |
+| | `/api/v1/assets/{id}/assign` | POST | `assets.manage` | Assign asset to employee |
+| | `/api/v1/assets/assignments/{id}/return` | PATCH | `assets.manage` | Process asset return |
+| | `/api/v1/assets/me` | GET | Authenticated | List caller's assigned assets|
+| **Task Management** | `/api/v1/tasks` | GET | `tasks.view` | List team tasks |
+| | `/api/v1/tasks/me` | GET | Authenticated | List caller's assigned tasks |
+| | `/api/v1/tasks` | POST | `tasks.create` | Create task assignment |
+| | `/api/v1/tasks/{id}/status` | PATCH | Authenticated | Update task status |
+| | `/api/v1/tasks/{id}` | DELETE | `tasks.create` | Delete task |
+| **Performance (OKR/KPI)**| `/api/v1/performance/cycles` | GET | `performance.view` | List review cycles |
+| | `/api/v1/performance/cycles` | POST | `performance.manage` | Create appraisal cycle |
+| | `/api/v1/performance/goals` | POST | Authenticated | Set OKR/KPI goals |
+| | `/api/v1/performance/reviews/self` | POST | Authenticated | Submit self assessment |
+| | `/api/v1/performance/reviews/manager`| POST | `performance.review` | Submit manager rating |
+| | `/api/v1/performance/reviews/{id}/finalize`| PATCH | `performance.finalize`| Finalize appraisal score |
+| **Helpdesk & Tickets** | `/api/v1/helpdesk/tickets` | GET | `helpdesk.view` | List company support tickets |
+| | `/api/v1/helpdesk/tickets/me` | GET | Authenticated | List caller's tickets |
+| | `/api/v1/helpdesk/tickets` | POST | Authenticated | Raise helpdesk ticket |
+| | `/api/v1/helpdesk/tickets/{id}/assign` | PATCH | `helpdesk.manage` | Assign agent to ticket |
+| | `/api/v1/helpdesk/tickets/{id}/resolve`| PATCH | `helpdesk.manage` | Mark ticket resolved |
+| | `/api/v1/helpdesk/tickets/{id}/comments`| POST | Authenticated | Add comment to ticket |
+| **Documents Hub** | `/api/v1/documents` | POST | `documents.upload` | Upload employee/company doc |
+| | `/api/v1/documents/{empId}` | GET | `documents.view` | List employee documents |
+| | `/api/v1/documents/{id}/download` | GET | `documents.view` | Download secure file |
+| | `/api/v1/documents/expiring` | GET | `documents.view` | List docs expiring in 30 days|
+| **Policies & Compliance**| `/api/v1/policies` | GET | Authenticated | List published policies |
+| | `/api/v1/policies` | POST | `policies.manage` | Create company policy |
+| | `/api/v1/policies/{id}/versions` | POST | `policies.manage` | Publish new version |
+| | `/api/v1/policies/versions/{id}/acknowledge`| POST | Authenticated | Digital acknowledgment |
+| | `/api/v1/policies/{id}/compliance`| GET | `policies.manage` | Acknowledgment audit report |
+| **Workora AI & Reports** | `/api/v1/ai/ask` | POST | Authenticated | Natural Language Assistant Q&A |
+| | `/api/v1/reports/headcount` | GET | `reports.view` | Headcount breakdown report |
+| | `/api/v1/reports/attrition` | GET | `reports.view` | Attrition & turnover metrics |
+| | `/api/v1/reports/payroll-cost` | GET | `reports.financial`| Payroll cost trends |
+| | `/api/v1/reports/leave-utilization`| GET | `reports.view` | Leave utilization metrics |
+| | `/api/v1/reports/custom/export` | POST | `reports.export` | Dynamic SQL/Excel export |
+| **Audit Logs** | `/api/v1/audit-logs` | GET | `audit.view` | Search system audit trail |
+| | `/api/v1/audit-logs/{entity}/{id}` | GET | `audit.view` | Entity-specific change logs |
+| | `/api/v1/audit-logs/export` | GET | `audit.view` | Export audit logs (CSV) |
 
 ---
 
-## 23. Best Practices
+## 15. Security Architecture & OWASP Top 10 Mitigation
 
-- Keep controllers thin: one `_mediator.Send()` call per action, no business logic in the API layer.
-- Never expose Domain entities directly from an API response — always map to DTOs via AutoMapper profiles.
-- Prefer explicit, small DTOs per Command/Query over one shared "God DTO" reused across create/update/read.
-- Every mutating Command handler runs inside a single database transaction, committed only after all side-effect writes succeed (via `TransactionBehavior` pipeline behavior).
-- Domain invariants belong in the Domain layer (entity methods), not scattered across handlers — a handler orchestrates, an entity enforces its own rules.
-- Write integration tests against real (Testcontainers) PostgreSQL for anything involving raw SQL, concurrency tokens, or query filters — mocked repositories hide real database behavior differences.
-- Treat migrations as immutable once merged to `main`; fix forward with a new migration, never edit a shipped one.
-
----
-
-## 24. Coding Standards
-
-- Follow Microsoft's C# coding conventions; enforce via `.editorconfig` and `dotnet format` in CI.
-- One class per file; file name matches class name.
-- Async methods are suffixed `Async` and awaited all the way up the call stack — no `async void` except top-level event handlers.
-- Guard clauses at the top of methods (`Guard.Against.Null(...)`) rather than deeply nested `if` blocks.
-- Nullable reference types are enabled project-wide (`<Nullable>enable</Nullable>`); nullability annotations are treated as compiler warnings-as-errors in CI.
+| OWASP API Security Risk | Architectural Mitigation Strategy in Workora |
+|---|---|
+| **API1: Broken Object Level Auth (BOLA)** | EF Core Global Query Filter automatically injects `tenant_id` on every query; handlers independently verify `employee.id == currentUserId` or require elevated manager/HR permissions. |
+| **API2: Broken Authentication** | Short-lived JWTs (15 min), cryptographically hashed refresh tokens (SHA-256) rotated on every use, account lockout after 5 consecutive failures, and BCrypt password hashing. |
+| **API3: Broken Object Property Level Auth** | Strict DTO projections via AutoMapper; endpoints never expose raw domain entities or accept mass-assignment fields (e.g., `is_admin`, `salary`). |
+| **API4: Unrestricted Resource Consumption** | Global ASP.NET Core Rate Limiting per IP/User, mandatory pagination (`pageSize` max capped at 100), and max file upload limits (10MB). |
+| **API5: Broken Function Level Auth (BFLA)** | Declarative `[Authorize(Policy = "{module}.{action}")]` on all mutating endpoints; role composition is evaluated server-side. |
+| **API6: Unrestricted Access to Sensitive Flows** | Application-level locking on payroll execution (`processing` flag), offer letter 7-day TTL expiry, and OTP/re-auth on bank detail updates. |
+| **API7: Server-Side Request Forgery (SSRF)** | API does not fetch external client-supplied URLs; all webhook integrations use strictly whitelisted endpoints. |
+| **API8: Security Misconfiguration** | Swagger UI disabled in Production; CORS locked down to configured client origins; security headers (`HSTS`, `X-Content-Type-Options: nosniff`, `X-Frame-Options: DENY`) enforced. |
+| **API9: Improper Inventory Management** | Clean URL versioning (`/api/v1/`); legacy APIs deprecated with formal `Sunset` headers. |
+| **API10: Unsafe Consumption of APIs** | Outbound SMTP, SMS, and Azure Service Bus calls utilize Polly retry policies with exponential backoff and circuit breakers. |
 
 ---
 
-## 25. Future Enhancements
+## 16. Caching, Logging, Exception Handling & Observability
 
-- Migrate `IMemoryCache` to Redis for multi-instance cache coherence as horizontal scale increases.
-- Migrate local file storage to S3-compatible object storage with pre-signed URL downloads.
-- Introduce multi-factor authentication (TOTP) for privileged roles.
-- GraphQL read gateway for complex reporting/dashboard queries alongside the existing REST surface.
-- Event-driven integration (message broker) for payroll-to-finance system synchronization.
-- Localization/multi-currency support for global multi-company tenants.
+### 16.1 Caching Strategy
+- **Layer 1 (Process-Local)**: `IMemoryCache` for high-frequency, near-static data (Permission catalogs, System Settings, Holiday calendars) with write-through invalidation.
+- **Layer 2 (Distributed)**: Azure Cache for Redis for distributed lock management during monthly payroll calculation and cached organization trees.
 
----
+### 16.2 Structured Logging & Serilog
+Every log entry is enriched with `CorrelationId`, `TenantId`, `UserId`, `ClientIp`, and `MachineName`. PII (passwords, PAN, Aadhaar, bank numbers) is stripped using a Serilog destructuring policy.
 
-## 27. Multi-Tenant SaaS Implementation
+### 16.3 Global Exception Middleware Mapping
 
-For a multi-tenant system, tenant isolation is critical. Workora uses **Row-Level Security (RLS)** via a shared database, shared schema approach.
-
-- **Tenant Identification:** The `TenantId` is resolved from the JWT claim (`tenant_id`) or a custom header (`X-Tenant-Id`) by a `TenantResolverMiddleware`.
-- **Tenant Context:** `ICurrentTenantService` provides the scoped `TenantId` across the application.
-- **Data Isolation:** All aggregate roots implement `IMustHaveTenant`. The `AppDbContext` automatically applies a global query filter: `modelBuilder.Entity<IMustHaveTenant>().HasQueryFilter(e => e.TenantId == _currentTenantService.TenantId)`.
-- **Enforcement:** `AuditSaveChangesInterceptor` ensures every inserted record automatically receives the correct `TenantId`.
-
----
-
-## 28. Event-Driven Architecture (Azure Service Bus)
-
-To decouple bounded contexts (e.g., HR and Payroll) and handle asynchronous background processing reliably, Workora employs an Event-Driven Architecture.
-
-- **Integration Events:** Unlike Domain Events (which are handled in-process via MediatR), Integration Events (e.g., `EmployeeTerminatedIntegrationEvent`) are published to **Azure Service Bus**.
-- **Publishing:** `IEventBus` (implemented in Infrastructure) publishes messages to a Service Bus Topic.
-- **Subscribing:** Azure Functions or Background Services (e.g., AKS Worker Service) subscribe to specific Subscriptions on the Topic to process events like Payroll proration, Email Notifications, and external integrations independently.
-- **Outbox Pattern:** To ensure atomic consistency between database commits and event publishing, Domain Events are saved to an `OutboxMessages` table in the same transaction as the business entity. A background worker polls this table and publishes to Azure Service Bus.
+| Exception Type | HTTP Status | Client Response | Server Action |
+|---|:---:|---|---|
+| `FluentValidation.ValidationException` | `400 Bad Request` | List of field-level validation errors | Logged at `Debug` level |
+| `NotFoundException` | `404 Not Found` | Entity not found message | Logged at `Information` level |
+| `ForbiddenException` | `403 Forbidden` | Access denied for requested operation | Logged at `Warning` level |
+| `BusinessRuleException` | `422 Unprocessable`| Machine-readable `errorCode` and message | Logged at `Warning` level |
+| `DbUpdateConcurrencyException` | `409 Conflict` | Concurrency conflict detected | Logged at `Warning` level |
+| `Exception` (Unhandled) | `500 Server Error` | Generic error message + `correlationId` | Full stack trace logged at `Fatal` level |
 
 ---
 
-## 29. Azure Cloud Infrastructure Deployment Architecture
+## 17. Cloud Infrastructure, Azure Deployment & Event Bus
 
-Workora is deployed on a production-grade, highly available Azure ecosystem.
+Workora is deployed on Microsoft Azure using managed container services, high-availability PostgreSQL, and enterprise messaging.
 
 ```mermaid
 graph TD
-    Client[Web/Mobile Client] --> AFD[Azure Front Door / WAF]
-    AFD --> AppService[Azure App Service - API]
+    Client[Web & Mobile Clients] --> AFD[Azure Front Door / WAF]
+    AFD --> AppService[Azure App Service - Workora.API Containers]
     
-    subgraph Compute
-        AppService --> AKS[AKS - Background Workers]
+    subgraph Compute_Tier
+        AppService --> AKS[AKS Background Worker Nodes]
     end
-    
-    subgraph Data & Cache
+
+    subgraph Data_Tier
         AppService --> Redis[Azure Cache for Redis]
         AKS --> Redis
-        AppService --> Db[(Azure Database for PostgreSQL)]
-        AKS --> Db
+        AppService --> PgDb[(Azure Database for PostgreSQL Flexible Server)]
+        AKS --> PgDb
     end
-    
-    subgraph Storage
-        AppService --> Blob[Azure Blob Storage - Documents]
-    end
-    
-    subgraph Messaging
-        AppService --> ASB[Azure Service Bus]
+
+    subgraph Messaging_Tier
+        AppService --> ASB[Azure Service Bus - Topics & Subscriptions]
         ASB --> AKS
     end
-    
+
+    subgraph Storage_Tier
+        AppService --> Blob[Azure Blob Storage - Encrypted Documents]
+    end
+
     subgraph Observability
-        AppService --> AppInsights[Azure Application Insights]
+        AppService --> AppInsights[Azure Application Insights & Seq]
         AKS --> AppInsights
-        Db --> AppInsights
     end
 ```
 
-- **Azure App Service (Web App for Containers):** Hosts the `Workora.API`. It autoscales based on CPU/Memory usage.
-- **Azure Kubernetes Service (AKS):** Hosts decoupled background workers (Outbox processors, Report generators, Payroll batch processors) subscribing to Service Bus.
-- **Azure Database for PostgreSQL (Flexible Server):** The primary relational datastore. Provides High Availability (HA) across availability zones and automated backups.
-- **Azure Cache for Redis:** Caches read-heavy queries (e.g., Organization Hierarchy, Dropdown lists, User Permissions) and manages distributed locking.
-- **Azure Service Bus:** The enterprise message broker facilitating pub/sub communication for integration events.
-- **Azure Blob Storage:** Secure, scalable storage for employee documents, payslips, and compliance files, accessed via SAS tokens.
-- **Azure Application Insights (Log Analytics):** Centralized distributed tracing, metrics, exception tracking, and structured logging.
+- **Azure App Service (Web App for Containers)**: Hosts stateless `Workora.API` instances with autoscaling.
+- **Azure Kubernetes Service (AKS)**: Hosts background workers running the Outbox Processor, Biometric device sync listeners, scheduled leave accruals, and bulk payslip PDF renderers.
+- **Azure Database for PostgreSQL (Flexible Server)**: Zone-redundant high availability, automatic point-in-time backups, and SSD storage.
+- **Azure Service Bus**: Handles asynchronous Integration Events (e.g., `EmployeeTerminatedIntegrationEvent`, `PayrollApprovedIntegrationEvent`) decoupled via the transactional Outbox pattern.
 
 ---
 
-## 30. Appendix
+## 18. Phased Implementation Roadmap
 
-### 26.1 Useful Links
-- ASP.NET Core Documentation — https://learn.microsoft.com/aspnet/core
-- EF Core Documentation — https://learn.microsoft.com/ef/core
-- MediatR — https://github.com/jbogard/MediatR
-- FluentValidation — https://docs.fluentvalidation.net
-- QuestPDF — https://www.questpdf.com
-- OWASP API Security Top 10 — https://owasp.org/API-Security
-
-### 26.2 References
-- Martin, R. C., *Clean Architecture: A Craftsman's Guide to Software Structure and Design*.
-- Evans, E., *Domain-Driven Design: Tackling Complexity in the Heart of Software*.
-- Microsoft Docs — ASP.NET Core Architecture Guidance.
-
-### 26.3 Glossary
-See Section 1.4 (Definitions) and Section 1.5 (Abbreviations).
+```mermaid
+gantt
+    title Workora 360° HRMS Implementation Roadmap
+    dateFormat  YYYY-MM-DD
+    section Phase 1: Core HRMS
+    Organization & Branch Setup       :done, p1_1, 2026-09-01, 30d
+    Employee Master & User Roles      :done, p1_2, 2026-09-15, 30d
+    Attendance (Web/GPS) & Shifts     :active, p1_3, 2026-10-01, 30d
+    Leave Management & Balances       :active, p1_4, 2026-10-15, 30d
+    section Phase 2: Payroll Engine
+    Salary Templates & Payheads       :p2_1, 2026-11-01, 30d
+    Statutory Engine (PF/ESIC/PT/TDS) :p2_2, 2026-11-15, 30d
+    Loans, Advances & Reimbursements  :p2_3, 2026-12-01, 30d
+    Payroll Run & Payslip Generation  :p2_4, 2026-12-15, 30d
+    section Phase 3: Employee ESS
+    ESS Web & Mobile API Slices       :p3_1, 2027-01-01, 30d
+    Self Punch, Leave & Claims        :p3_2, 2027-01-15, 30d
+    Push Notifications & Documents    :p3_3, 2027-02-01, 30d
+    section Phase 4: Workforce & Field
+    Biometric Hardware Sync Gateway   :p4_1, 2027-02-15, 30d
+    Live GPS Field & Client Visits    :p4_2, 2027-03-01, 30d
+    Asset Management Lifecycle        :p4_3, 2027-03-15, 30d
+    section Phase 5: Advanced HR
+    Recruitment & Pre-boarding Portal :p5_1, 2027-04-01, 30d
+    Performance OKR/KPI & Helpdesk    :p5_2, 2027-04-15, 30d
+    section Phase 6: Intelligence
+    Workora AI Conversational Engine  :p6_1, 2027-05-01, 30d
+    Dynamic Reporting & Forecasting   :p6_2, 2027-05-15, 30d
+```
 
 ---
 
-*End of Workora — Backend Technical Documentation v1.1*
+## 19. Appendix & Standards Compliance
+
+### 19.1 Coding & Architecture Invariants
+1. **Controllers**: Must never contain business logic, direct DB access, or repository injections. Must only call `_mediator.Send(command)`.
+2. **DTO Isolation**: Entities are never exposed directly to presentation or clients. All mappings must pass through AutoMapper profiles.
+3. **Domain Events**: Inter-module side effects (e.g., sending welcome emails, allocating onboarding assets, queuing statutory reports) must be raised via `AddDomainEvent(new Event(...))` and handled asynchronously.
+4. **Mandatory Documentation**: All public classes, interfaces, records, methods, and configurations must contain XML doc comments.
+5. **Strong Typing with Enums**: All categorical, lifecycle, and status fields must be strongly typed C# enums placed in `Workora.Domain.Enums`.
+
+---
+
+*End of Workora — 360° Human Resource Management & Payroll Platform Technical Architecture Document v2.0*
