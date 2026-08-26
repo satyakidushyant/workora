@@ -12,11 +12,12 @@ using Workora.Shared.Responses;
 namespace Workora.Application.Features.Authentication.Commands.Login;
 
 /// <summary>
-/// Handler for the <see cref="LoginCommand"/>. Authenticates the user and generates tokens.
+/// Handler for the <see cref="LoginCommand"/>. Authenticates user credentials and generates JWT access and refresh tokens.
 /// </summary>
 public class LoginCommandHandler : IRequestHandler<LoginCommand, ApiResponse<AuthResultDto>>
 {
     private readonly IUserRepository _userRepository;
+    private readonly IPermissionRepository _permissionRepository;
     private readonly IPasswordHasher _passwordHasher;
     private readonly ITokenService _tokenService;
     private readonly IRefreshTokenRepository _refreshTokenRepository;
@@ -27,12 +28,14 @@ public class LoginCommandHandler : IRequestHandler<LoginCommand, ApiResponse<Aut
     /// </summary>
     public LoginCommandHandler(
         IUserRepository userRepository,
+        IPermissionRepository permissionRepository,
         IPasswordHasher passwordHasher,
         ITokenService tokenService,
         IRefreshTokenRepository refreshTokenRepository,
         IUnitOfWork unitOfWork)
     {
         _userRepository = userRepository;
+        _permissionRepository = permissionRepository;
         _passwordHasher = passwordHasher;
         _tokenService = tokenService;
         _refreshTokenRepository = refreshTokenRepository;
@@ -80,14 +83,35 @@ public class LoginCommandHandler : IRequestHandler<LoginCommand, ApiResponse<Aut
         user.ResetFailedLogin();
         _userRepository.Update(user);
 
-        // Default permissions for SuperAdmin / Development users
-        var roles = new[] { "SuperAdmin" };
-        var permissions = new[]
+        // Dynamically resolve roles from database
+        var roles = user.UserRoles
+            .Where(ur => ur.Role != null)
+            .Select(ur => ur.Role.Name)
+            .Distinct()
+            .ToList();
+
+        if (!roles.Any())
         {
-            "users.view", "users.create", "users.update", "users.deactivate",
-            "users.assign-roles", "users.delete", "users.manage",
-            "auth.me", "auth.logout", "auth.change-password", "auth.sessions", "auth.logout-all"
-        };
+            roles.Add("Employee");
+        }
+
+        // Dynamically resolve permissions from database
+        List<string> permissions;
+        if (roles.Contains("SuperAdmin"))
+        {
+            var allPermissions = await _permissionRepository.GetAllAsync(cancellationToken);
+            permissions = allPermissions.Select(p => p.Code).Distinct().ToList();
+        }
+        else
+        {
+            permissions = user.UserRoles
+                .Where(ur => ur.Role != null)
+                .SelectMany(ur => ur.Role.RolePermissions)
+                .Where(rp => rp.Permission != null)
+                .Select(rp => rp.Permission.Code)
+                .Distinct()
+                .ToList();
+        }
 
         var accessToken = _tokenService.GenerateAccessToken(user, roles, permissions);
         var refreshTokenStr = _tokenService.GenerateRefreshToken();

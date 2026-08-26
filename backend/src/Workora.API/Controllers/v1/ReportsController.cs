@@ -72,7 +72,7 @@ public class ReportsController : ControllerBase
         => await _mediator.Send(new GetPayrollReportQuery(companyId));
 
     /// <summary>
-    /// Generates attrition & turnover rate metrics.
+    /// Generates attrition and turnover rate metrics.
     /// </summary>
     /// <param name="companyId">Company ID.</param>
     /// <param name="year">Calendar year filter (defaults to current year).</param>

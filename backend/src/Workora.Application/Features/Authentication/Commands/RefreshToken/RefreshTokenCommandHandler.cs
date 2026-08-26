@@ -11,11 +11,12 @@ using Workora.Shared.Responses;
 namespace Workora.Application.Features.Authentication.Commands.RefreshToken;
 
 /// <summary>
-/// Handler for the <see cref="RefreshTokenCommand"/>. Generates new tokens based on a valid refresh token.
+/// Handler for the <see cref="RefreshTokenCommand"/>. Generates new access and refresh tokens preserving roles and permissions.
 /// </summary>
 public class RefreshTokenCommandHandler : IRequestHandler<RefreshTokenCommand, ApiResponse<AuthResultDto>>
 {
     private readonly IUserRepository _userRepository;
+    private readonly IPermissionRepository _permissionRepository;
     private readonly ITokenService _tokenService;
     private readonly IRefreshTokenRepository _refreshTokenRepository;
     private readonly IUnitOfWork _unitOfWork;
@@ -25,11 +26,13 @@ public class RefreshTokenCommandHandler : IRequestHandler<RefreshTokenCommand, A
     /// </summary>
     public RefreshTokenCommandHandler(
         IUserRepository userRepository,
+        IPermissionRepository permissionRepository,
         ITokenService tokenService,
         IRefreshTokenRepository refreshTokenRepository,
         IUnitOfWork unitOfWork)
     {
         _userRepository = userRepository;
+        _permissionRepository = permissionRepository;
         _tokenService = tokenService;
         _refreshTokenRepository = refreshTokenRepository;
         _unitOfWork = unitOfWork;
@@ -61,9 +64,34 @@ public class RefreshTokenCommandHandler : IRequestHandler<RefreshTokenCommand, A
         existingToken.Revoke();
         _refreshTokenRepository.Update(existingToken);
 
-        // Generate new tokens
-        var roles = Array.Empty<string>();
-        var permissions = Array.Empty<string>();
+        // Dynamically resolve roles and permissions
+        var roles = user.UserRoles
+            .Where(ur => ur.Role != null)
+            .Select(ur => ur.Role.Name)
+            .Distinct()
+            .ToList();
+
+        if (!roles.Any())
+        {
+            roles.Add("Employee");
+        }
+
+        List<string> permissions;
+        if (roles.Contains("SuperAdmin"))
+        {
+            var allPermissions = await _permissionRepository.GetAllAsync(cancellationToken);
+            permissions = allPermissions.Select(p => p.Code).Distinct().ToList();
+        }
+        else
+        {
+            permissions = user.UserRoles
+                .Where(ur => ur.Role != null)
+                .SelectMany(ur => ur.Role.RolePermissions)
+                .Where(rp => rp.Permission != null)
+                .Select(rp => rp.Permission.Code)
+                .Distinct()
+                .ToList();
+        }
 
         var accessToken = _tokenService.GenerateAccessToken(user, roles, permissions);
         var newRefreshTokenStr = _tokenService.GenerateRefreshToken();

@@ -21,15 +21,32 @@ public class UserRepository : GenericRepository<User>, IUserRepository
     {
         return await _dbContext.Users
             .Include(u => u.UserRoles)
-            .ThenInclude(ur => ur.Role)
+                .ThenInclude(ur => ur.Role)
+                    .ThenInclude(r => r.RolePermissions)
+                        .ThenInclude(rp => rp.Permission)
             .FirstOrDefaultAsync(u => u.Id == id, ct);
     }
 
     /// <inheritdoc />
-    public async Task<User?> GetByEmailAsync(EmailAddress email, CancellationToken ct = default)
-
+    public override async Task<User?> GetByUuidAsync(Guid uuid, CancellationToken ct = default)
     {
-        return await _dbContext.Users.FirstOrDefaultAsync(u => u.Email == email, ct);
+        return await _dbContext.Users
+            .Include(u => u.UserRoles)
+                .ThenInclude(ur => ur.Role)
+                    .ThenInclude(r => r.RolePermissions)
+                        .ThenInclude(rp => rp.Permission)
+            .FirstOrDefaultAsync(u => u.Uuid == uuid, ct);
+    }
+
+    /// <inheritdoc />
+    public async Task<User?> GetByEmailAsync(EmailAddress email, CancellationToken ct = default)
+    {
+        return await _dbContext.Users
+            .Include(u => u.UserRoles)
+                .ThenInclude(ur => ur.Role)
+                    .ThenInclude(r => r.RolePermissions)
+                        .ThenInclude(rp => rp.Permission)
+            .FirstOrDefaultAsync(u => u.Email == email, ct);
     }
 
     /// <inheritdoc />
@@ -41,7 +58,11 @@ public class UserRepository : GenericRepository<User>, IUserRepository
     /// <inheritdoc />
     public async Task<IReadOnlyList<User>> GetPagedListAsync(int pageNumber, int pageSize, string? searchTerm = null, bool? isActive = null, CancellationToken ct = default)
     {
-        var query = _dbContext.Users.AsNoTracking().AsQueryable();
+        var query = _dbContext.Users
+            .Include(u => u.UserRoles)
+                .ThenInclude(ur => ur.Role)
+            .AsNoTracking()
+            .AsQueryable();
 
         if (!string.IsNullOrWhiteSpace(searchTerm))
         {
@@ -84,11 +105,9 @@ public class UserRepository : GenericRepository<User>, IUserRepository
         return await query.CountAsync(ct);
     }
 
-
     /// <inheritdoc />
     public async Task<bool> HasOtherSuperAdminAsync(int excludeUserId, CancellationToken ct = default)
     {
-        // Checks if there are other users besides excludeUserId with active status
         return await _dbContext.Users.AnyAsync(u => u.Id != excludeUserId && u.IsActive, ct);
     }
 
@@ -113,5 +132,3 @@ public class UserRepository : GenericRepository<User>, IUserRepository
         await _dbContext.UserRoles.AddRangeAsync(newUserRoles, ct);
     }
 }
-
-
