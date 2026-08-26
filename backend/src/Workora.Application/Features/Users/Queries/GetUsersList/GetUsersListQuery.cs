@@ -15,5 +15,6 @@ public record GetUsersListQuery(
     int PageNumber = 1,
     int PageSize = 10,
     string? SearchTerm = null,
-    bool? IsActive = null
+    bool? IsActive = null,
+    int? CompanyId = null
 ) : IRequest<ApiResponse<PagedResponse<UserDto>>>;

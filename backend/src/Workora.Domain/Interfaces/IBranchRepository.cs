@@ -26,12 +26,12 @@ public interface IBranchRepository : IRepository<Branch>
     Task<bool> IsCodeUniqueAsync(int companyId, string code, int? excludeId = null, CancellationToken ct = default);
 
     /// <summary>
-    /// Gets a paginated list of branches with optional search term and status.
+    /// Gets a paginated list of branches with optional search term, status, and companyId.
     /// </summary>
-    Task<IReadOnlyList<Branch>> GetPagedListAsync(int pageNumber, int pageSize, string? searchTerm = null, bool? isActive = null, CancellationToken ct = default);
+    Task<IReadOnlyList<Branch>> GetPagedListAsync(int pageNumber, int pageSize, string? searchTerm = null, bool? isActive = null, int? companyId = null, CancellationToken ct = default);
 
     /// <summary>
     /// Gets total count of branches matching filters.
     /// </summary>
-    Task<int> GetCountAsync(string? searchTerm = null, bool? isActive = null, CancellationToken ct = default);
+    Task<int> GetCountAsync(string? searchTerm = null, bool? isActive = null, int? companyId = null, CancellationToken ct = default);
 }

@@ -100,9 +100,10 @@ public class EmployeeRepository : GenericRepository<Employee>, IEmployeeReposito
         int? designationId = null,
         int? branchId = null,
         EmploymentStatus? status = null,
+        int? companyId = null,
         CancellationToken ct = default)
     {
-        var query = BuildFilteredQuery(searchTerm, departmentId, designationId, branchId, status);
+        var query = BuildFilteredQuery(searchTerm, departmentId, designationId, branchId, status, companyId);
 
         return await query
             .OrderBy(e => e.FirstName)
@@ -119,9 +120,10 @@ public class EmployeeRepository : GenericRepository<Employee>, IEmployeeReposito
         int? designationId = null,
         int? branchId = null,
         EmploymentStatus? status = null,
+        int? companyId = null,
         CancellationToken ct = default)
     {
-        var query = BuildFilteredQuery(searchTerm, departmentId, designationId, branchId, status);
+        var query = BuildFilteredQuery(searchTerm, departmentId, designationId, branchId, status, companyId);
         return await query.CountAsync(ct);
     }
 
@@ -132,9 +134,10 @@ public class EmployeeRepository : GenericRepository<Employee>, IEmployeeReposito
         int? designationId = null,
         int? branchId = null,
         EmploymentStatus? status = null,
+        int? companyId = null,
         CancellationToken ct = default)
     {
-        var query = BuildFilteredQuery(searchTerm, departmentId, designationId, branchId, status);
+        var query = BuildFilteredQuery(searchTerm, departmentId, designationId, branchId, status, companyId);
         return await query
             .OrderBy(e => e.FirstName)
             .ThenBy(e => e.LastName)
@@ -165,7 +168,8 @@ public class EmployeeRepository : GenericRepository<Employee>, IEmployeeReposito
         int? departmentId,
         int? designationId,
         int? branchId,
-        EmploymentStatus? status)
+        EmploymentStatus? status,
+        int? companyId)
     {
         var query = _dbContext.Employees
             .AsNoTracking()
@@ -175,6 +179,12 @@ public class EmployeeRepository : GenericRepository<Employee>, IEmployeeReposito
             .Include(e => e.Manager)
             .AsQueryable();
 
+        if (companyId.HasValue)
+        {
+            query = query.Where(e => (e.Department != null && e.Department.CompanyId == companyId.Value) ||
+                                     (e.Branch != null && e.Branch.CompanyId == companyId.Value));
+        }
+
         if (!string.IsNullOrWhiteSpace(searchTerm))
         {
             var term = searchTerm.Trim().ToLower();
@@ -182,7 +192,7 @@ public class EmployeeRepository : GenericRepository<Employee>, IEmployeeReposito
                 e.FirstName.ToLower().Contains(term) ||
                 e.LastName.ToLower().Contains(term) ||
                 e.EmployeeCode.ToLower().Contains(term) ||
-                EF.Property<string>(e, "Email").ToLower().Contains(term) ||
+                ((string)(object)e.Email).ToLower().Contains(term) ||
                 e.NationalId.ToLower().Contains(term));
         }
 

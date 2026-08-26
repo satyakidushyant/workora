@@ -55,6 +55,7 @@ public interface IEmployeeRepository : IRepository<Employee>
         int? designationId = null,
         int? branchId = null,
         EmploymentStatus? status = null,
+        int? companyId = null,
         CancellationToken ct = default);
 
     /// <summary>
@@ -66,6 +67,7 @@ public interface IEmployeeRepository : IRepository<Employee>
         int? designationId = null,
         int? branchId = null,
         EmploymentStatus? status = null,
+        int? companyId = null,
         CancellationToken ct = default);
 
     /// <summary>
@@ -77,6 +79,7 @@ public interface IEmployeeRepository : IRepository<Employee>
         int? designationId = null,
         int? branchId = null,
         EmploymentStatus? status = null,
+        int? companyId = null,
         CancellationToken ct = default);
 
     /// <summary>

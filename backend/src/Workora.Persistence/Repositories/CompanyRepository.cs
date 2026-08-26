@@ -21,6 +21,7 @@ public class CompanyRepository : GenericRepository<Company>, ICompanyRepository
         return await _dbContext.Companies
             .Include(c => c.Branches)
             .Include(c => c.Departments)
+            .OrderBy(c => c.Id)
             .FirstOrDefaultAsync(ct);
     }
 

@@ -79,9 +79,10 @@ public class GlobalExceptionMiddleware
                 response = ApiResponse<object>.Fail(ex.Message);
                 break;
             default:
-                _logger.LogError(exception, "Unhandled exception occurred: {Message}", exception.Message);
+                var fullMessage = exception.InnerException != null ? $"{exception.Message} ---> {exception.InnerException.Message}" : exception.Message;
+                _logger.LogError(exception, "Unhandled exception occurred: {Message}", fullMessage);
                 context.Response.StatusCode = (int)HttpStatusCode.InternalServerError;
-                response = ApiResponse<object>.Fail(exception.Message ?? ResponseMessage.UnexpectedError.GetDescription());
+                response = ApiResponse<object>.Fail(fullMessage ?? ResponseMessage.UnexpectedError.GetDescription());
                 break;
         }
 

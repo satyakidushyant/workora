@@ -149,13 +149,28 @@ export class AuthService {
 
   /**
    * Checks if current authenticated user has a specific permission key.
+   * SuperAdmin role automatically has all permissions.
    *
    * @param permission Required permission identifier (e.g., 'employees.create').
-   * @returns True if user possesses permission, false otherwise.
+   * @returns True if user possesses permission or is SuperAdmin, false otherwise.
    */
   hasPermission(permission: string): boolean {
     if (!permission) return true;
+    if (this.hasRole('SuperAdmin')) return true;
     return this.userPermissions().includes(permission);
+  }
+
+  /**
+   * Checks if current authenticated user has ANY of the specified permission keys.
+   *
+   * @param permissions Array of permission identifiers.
+   * @returns True if user has at least one permission or is SuperAdmin.
+   */
+  hasAnyPermission(permissions: string[]): boolean {
+    if (!permissions || permissions.length === 0) return true;
+    if (this.hasRole('SuperAdmin')) return true;
+    const userPerms = this.userPermissions();
+    return permissions.some(p => userPerms.includes(p));
   }
 
   /**
@@ -167,6 +182,18 @@ export class AuthService {
   hasRole(role: string): boolean {
     if (!role) return true;
     return this.userRoles().includes(role);
+  }
+
+  /**
+   * Checks if current user has ANY of the assigned roles.
+   *
+   * @param roles Array of role name strings.
+   * @returns True if assigned to at least one role.
+   */
+  hasAnyRole(roles: string[]): boolean {
+    if (!roles || roles.length === 0) return true;
+    const userR = this.userRoles();
+    return roles.some(r => userR.includes(r));
   }
 
   /**

@@ -71,10 +71,21 @@ export class NotificationService {
   }
 
   private addToast(type: 'success' | 'error' | 'warning' | 'info', message: string, details?: string[], duration = 4000): void {
+    if (!message || message.trim() === '') {
+      return;
+    }
+
+    // Deduplicate: If an identical active toast already exists, ignore or refresh
+    const existing = this.toasts().find(t => t.message === message && t.type === type);
+    if (existing) {
+      return;
+    }
+
     const id = `toast-${Date.now()}-${Math.random().toString(36).substr(2, 5)}`;
     const toast: ToastItem = { id, type, message, details, duration };
 
-    this.toasts.update(current => [toast, ...current]);
+    // Limit maximum active toasts to 3 so screen is never overwhelmed
+    this.toasts.update(current => [toast, ...current].slice(0, 3));
 
     if (duration > 0) {
       setTimeout(() => {

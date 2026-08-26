@@ -56,13 +56,21 @@ public class UserRepository : GenericRepository<User>, IUserRepository
     }
 
     /// <inheritdoc />
-    public async Task<IReadOnlyList<User>> GetPagedListAsync(int pageNumber, int pageSize, string? searchTerm = null, bool? isActive = null, CancellationToken ct = default)
+    public async Task<IReadOnlyList<User>> GetPagedListAsync(int pageNumber, int pageSize, string? searchTerm = null, bool? isActive = null, int? companyId = null, CancellationToken ct = default)
     {
         var query = _dbContext.Users
             .Include(u => u.UserRoles)
                 .ThenInclude(ur => ur.Role)
             .AsNoTracking()
             .AsQueryable();
+
+        if (companyId.HasValue)
+        {
+            query = query.Where(u => u.EmployeeId.HasValue &&
+                _dbContext.Employees.Any(e => e.Id == u.EmployeeId.Value &&
+                    ((e.Department != null && e.Department.CompanyId == companyId.Value) ||
+                     (e.Branch != null && e.Branch.CompanyId == companyId.Value))));
+        }
 
         if (!string.IsNullOrWhiteSpace(searchTerm))
         {
@@ -85,9 +93,17 @@ public class UserRepository : GenericRepository<User>, IUserRepository
     }
 
     /// <inheritdoc />
-    public async Task<int> GetCountAsync(string? searchTerm = null, bool? isActive = null, CancellationToken ct = default)
+    public async Task<int> GetCountAsync(string? searchTerm = null, bool? isActive = null, int? companyId = null, CancellationToken ct = default)
     {
         var query = _dbContext.Users.AsNoTracking().AsQueryable();
+
+        if (companyId.HasValue)
+        {
+            query = query.Where(u => u.EmployeeId.HasValue &&
+                _dbContext.Employees.Any(e => e.Id == u.EmployeeId.Value &&
+                    ((e.Department != null && e.Department.CompanyId == companyId.Value) ||
+                     (e.Branch != null && e.Branch.CompanyId == companyId.Value))));
+        }
 
         if (!string.IsNullOrWhiteSpace(searchTerm))
         {

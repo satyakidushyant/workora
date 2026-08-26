@@ -31,18 +31,20 @@ public interface IUserRepository : IRepository<User>
     /// <param name="pageSize">The number of items per page.</param>
     /// <param name="searchTerm">Optional search term for filtering by name or email.</param>
     /// <param name="isActive">Optional active status filter.</param>
+    /// <param name="companyId">Optional tenant company filter.</param>
     /// <param name="ct">The cancellation token.</param>
     /// <returns>A list of users matching the criteria.</returns>
-    Task<IReadOnlyList<User>> GetPagedListAsync(int pageNumber, int pageSize, string? searchTerm = null, bool? isActive = null, CancellationToken ct = default);
+    Task<IReadOnlyList<User>> GetPagedListAsync(int pageNumber, int pageSize, string? searchTerm = null, bool? isActive = null, int? companyId = null, CancellationToken ct = default);
 
     /// <summary>
     /// Gets the total count of users matching optional filters.
     /// </summary>
     /// <param name="searchTerm">Optional search term for filtering by name or email.</param>
     /// <param name="isActive">Optional active status filter.</param>
+    /// <param name="companyId">Optional tenant company filter.</param>
     /// <param name="ct">The cancellation token.</param>
     /// <returns>The total matching user count.</returns>
-    Task<int> GetCountAsync(string? searchTerm = null, bool? isActive = null, CancellationToken ct = default);
+    Task<int> GetCountAsync(string? searchTerm = null, bool? isActive = null, int? companyId = null, CancellationToken ct = default);
 
     /// <summary>
     /// Checks if there is another SuperAdmin user besides the specified user ID.

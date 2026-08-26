@@ -43,7 +43,8 @@ public class ExportEmployeesQueryHandler : IRequestHandler<ExportEmployeesQuery,
             request.DesignationId,
             request.BranchId,
             request.Status,
-            ct);
+            companyId: null,
+            ct: ct);
 
         var dtos = _mapper.Map<IReadOnlyList<EmployeeDto>>(employees);
         return ApiResponse<IReadOnlyList<EmployeeDto>>.Success(dtos);

@@ -1,6 +1,7 @@
 using AutoMapper;
 using Workora.Application.Features.Employees.DTOs;
 using Workora.Domain.Entities;
+using Workora.Domain.ValueObjects;
 
 namespace Workora.Application.Features.Employees.Mappings;
 
@@ -14,13 +15,15 @@ public class EmployeeMappingProfile : Profile
     /// </summary>
     public EmployeeMappingProfile()
     {
+        CreateMap<EmailAddress, string>().ConvertUsing(e => e != null ? e.Value : string.Empty);
+
         CreateMap<EmployeeEmergencyContact, EmergencyContactDto>();
         CreateMap<EmployeeBankDetail, BankDetailDto>();
         CreateMap<EmployeeEmploymentHistory, EmploymentHistoryDto>();
 
         CreateMap<Employee, EmployeeDto>()
             .ForMember(d => d.FullName, opt => opt.MapFrom(s => $"{s.FirstName} {s.LastName}".Trim()))
-            .ForMember(d => d.Email, opt => opt.MapFrom(s => s.Email.Value))
+            .ForMember(d => d.Email, opt => opt.MapFrom(s => s.Email != null ? s.Email.Value : string.Empty))
             .ForMember(d => d.DepartmentName, opt => opt.MapFrom(s => s.Department != null ? s.Department.Name : null))
             .ForMember(d => d.DesignationTitle, opt => opt.MapFrom(s => s.Designation != null ? s.Designation.Title : null))
             .ForMember(d => d.BranchName, opt => opt.MapFrom(s => s.Branch != null ? s.Branch.Name : null))
@@ -28,7 +31,7 @@ public class EmployeeMappingProfile : Profile
 
         CreateMap<Employee, EmployeeDetailDto>()
             .ForMember(d => d.FullName, opt => opt.MapFrom(s => $"{s.FirstName} {s.LastName}".Trim()))
-            .ForMember(d => d.Email, opt => opt.MapFrom(s => s.Email.Value))
+            .ForMember(d => d.Email, opt => opt.MapFrom(s => s.Email != null ? s.Email.Value : string.Empty))
             .ForMember(d => d.DepartmentName, opt => opt.MapFrom(s => s.Department != null ? s.Department.Name : null))
             .ForMember(d => d.DesignationTitle, opt => opt.MapFrom(s => s.Designation != null ? s.Designation.Title : null))
             .ForMember(d => d.BranchName, opt => opt.MapFrom(s => s.Branch != null ? s.Branch.Name : null))

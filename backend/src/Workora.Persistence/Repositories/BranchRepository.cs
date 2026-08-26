@@ -34,9 +34,14 @@ public class BranchRepository : GenericRepository<Branch>, IBranchRepository
     }
 
     /// <inheritdoc />
-    public async Task<IReadOnlyList<Branch>> GetPagedListAsync(int pageNumber, int pageSize, string? searchTerm = null, bool? isActive = null, CancellationToken ct = default)
+    public async Task<IReadOnlyList<Branch>> GetPagedListAsync(int pageNumber, int pageSize, string? searchTerm = null, bool? isActive = null, int? companyId = null, CancellationToken ct = default)
     {
         var query = _dbContext.Branches.AsNoTracking().Include(b => b.Company).AsQueryable();
+
+        if (companyId.HasValue)
+        {
+            query = query.Where(b => b.CompanyId == companyId.Value);
+        }
 
         if (!string.IsNullOrWhiteSpace(searchTerm))
         {
@@ -59,9 +64,14 @@ public class BranchRepository : GenericRepository<Branch>, IBranchRepository
     }
 
     /// <inheritdoc />
-    public async Task<int> GetCountAsync(string? searchTerm = null, bool? isActive = null, CancellationToken ct = default)
+    public async Task<int> GetCountAsync(string? searchTerm = null, bool? isActive = null, int? companyId = null, CancellationToken ct = default)
     {
         var query = _dbContext.Branches.AsNoTracking().AsQueryable();
+
+        if (companyId.HasValue)
+        {
+            query = query.Where(b => b.CompanyId == companyId.Value);
+        }
 
         if (!string.IsNullOrWhiteSpace(searchTerm))
         {
