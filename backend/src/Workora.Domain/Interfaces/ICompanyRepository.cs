@@ -29,4 +29,12 @@ public interface ICompanyRepository : IRepository<Company>
     /// <param name="ct">The cancellation token.</param>
     /// <returns>A list of company entities.</returns>
     Task<IReadOnlyList<Company>> GetAllCompaniesAsync(CancellationToken ct = default);
+
+    /// <summary>
+    /// Gets a company by its registered corporate email address or website domain.
+    /// </summary>
+    /// <param name="email">The user email to match against company email or domain.</param>
+    /// <param name="ct">The cancellation token.</param>
+    /// <returns>The matched company if found; otherwise, null.</returns>
+    Task<Company?> GetByEmailOrDomainAsync(string email, CancellationToken ct = default);
 }

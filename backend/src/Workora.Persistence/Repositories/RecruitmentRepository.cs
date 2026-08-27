@@ -56,12 +56,18 @@ public class RecruitmentRepository : GenericRepository<JobPosting>, IRecruitment
     }
 
     /// <inheritdoc />
-    public async Task<IReadOnlyList<Candidate>> GetCandidatesPagedAsync(int pageNumber, int pageSize, int? jobPostingId = null, CandidateStage? stage = null, string? searchTerm = null, CancellationToken ct = default)
+    public async Task<IReadOnlyList<Candidate>> GetCandidatesPagedAsync(int pageNumber, int pageSize, int? jobPostingId = null, CandidateStage? stage = null, string? searchTerm = null, int? companyId = null, CancellationToken ct = default)
     {
         var query = _dbContext.Set<Candidate>()
             .AsNoTracking()
             .Include(c => c.JobPosting)
             .AsQueryable();
+
+        if (companyId.HasValue)
+        {
+            var cid = companyId.Value;
+            query = query.Where(c => c.JobPosting != null && c.JobPosting.CompanyId == cid);
+        }
 
         if (jobPostingId.HasValue)
         {
@@ -87,9 +93,18 @@ public class RecruitmentRepository : GenericRepository<JobPosting>, IRecruitment
     }
 
     /// <inheritdoc />
-    public async Task<int> GetCandidatesCountAsync(int? jobPostingId = null, CandidateStage? stage = null, string? searchTerm = null, CancellationToken ct = default)
+    public async Task<int> GetCandidatesCountAsync(int? jobPostingId = null, CandidateStage? stage = null, string? searchTerm = null, int? companyId = null, CancellationToken ct = default)
     {
-        var query = _dbContext.Set<Candidate>().AsNoTracking().AsQueryable();
+        var query = _dbContext.Set<Candidate>()
+            .AsNoTracking()
+            .Include(c => c.JobPosting)
+            .AsQueryable();
+
+        if (companyId.HasValue)
+        {
+            var cid = companyId.Value;
+            query = query.Where(c => c.JobPosting != null && c.JobPosting.CompanyId == cid);
+        }
 
         if (jobPostingId.HasValue)
         {

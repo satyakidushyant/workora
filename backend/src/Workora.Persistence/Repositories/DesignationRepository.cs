@@ -37,12 +37,17 @@ public class DesignationRepository : GenericRepository<Designation>, IDesignatio
     }
 
     /// <inheritdoc />
-    public async Task<IReadOnlyList<Designation>> GetPagedListAsync(int pageNumber, int pageSize, string? searchTerm = null, int? departmentId = null, CancellationToken ct = default)
+    public async Task<IReadOnlyList<Designation>> GetPagedListAsync(int pageNumber, int pageSize, string? searchTerm = null, int? departmentId = null, int? companyId = null, CancellationToken ct = default)
     {
         var query = _dbContext.Designations
             .AsNoTracking()
             .Include(d => d.Department)
             .AsQueryable();
+
+        if (companyId.HasValue)
+        {
+            query = query.Where(d => d.Department != null && d.Department.CompanyId == companyId.Value);
+        }
 
         if (departmentId.HasValue)
         {
@@ -64,9 +69,17 @@ public class DesignationRepository : GenericRepository<Designation>, IDesignatio
     }
 
     /// <inheritdoc />
-    public async Task<int> GetCountAsync(string? searchTerm = null, int? departmentId = null, CancellationToken ct = default)
+    public async Task<int> GetCountAsync(string? searchTerm = null, int? departmentId = null, int? companyId = null, CancellationToken ct = default)
     {
-        var query = _dbContext.Designations.AsNoTracking().AsQueryable();
+        var query = _dbContext.Designations
+            .AsNoTracking()
+            .Include(d => d.Department)
+            .AsQueryable();
+
+        if (companyId.HasValue)
+        {
+            query = query.Where(d => d.Department != null && d.Department.CompanyId == companyId.Value);
+        }
 
         if (departmentId.HasValue)
         {

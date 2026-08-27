@@ -1,3 +1,7 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
 /* ==========================================================================
    WORKORA HRMS — GLOBAL DESIGN SYSTEM & PRODUCTION STYLESHEET
    Enterprise UI/UX foundation for the entire Workora workforce cloud.

@@ -11,6 +11,7 @@ import {
   AttritionReport
 } from '../../../../domain/models/reports.model';
 import { NotificationService } from '../../../../core/services/notification.service';
+import { AuthService } from '../../../../core/services/auth.service';
 import { WorkoraSkeletonComponent } from '../../../shared/components/workora-skeleton.component';
 
 @Component({
@@ -177,6 +178,7 @@ import { WorkoraSkeletonComponent } from '../../../shared/components/workora-ske
 export class ReportsPageComponent implements OnInit {
   private readonly reportsRepo = inject(ReportsApiRepository);
   private readonly notificationService = inject(NotificationService);
+  private readonly authService = inject(AuthService);
 
   readonly headcount = signal<HeadcountReport | null>(null);
   readonly attendance = signal<AttendanceReport | null>(null);
@@ -185,22 +187,45 @@ export class ReportsPageComponent implements OnInit {
   readonly attrition = signal<AttritionReport | null>(null);
   readonly isLoading = signal<boolean>(false);
 
+  private get companyId(): number | undefined {
+    return this.authService.currentUser()?.companyId ?? undefined;
+  }
+
   ngOnInit(): void {
     this.loadReports();
   }
 
   loadReports(): void {
     this.isLoading.set(true);
-    this.reportsRepo.getHeadcountReport(1).subscribe(h => this.headcount.set(h));
-    this.reportsRepo.getAttendanceReport(1).subscribe(a => this.attendance.set(a));
-    this.reportsRepo.getPayrollReport(1).subscribe(p => this.payroll.set(p));
-    this.reportsRepo.getAttritionReport(1).subscribe(a => this.attrition.set(a));
-    this.isLoading.set(false);
+    const targetCompanyId = this.companyId;
+    
+    this.reportsRepo.getHeadcountReport(targetCompanyId)
+      .pipe(finalize(() => this.isLoading.set(false)))
+      .subscribe({
+        next: h => this.headcount.set(h),
+        error: () => {}
+      });
+
+    this.reportsRepo.getAttendanceReport(targetCompanyId).subscribe({
+      next: a => this.attendance.set(a),
+      error: () => {}
+    });
+
+    this.reportsRepo.getPayrollReport(targetCompanyId).subscribe({
+      next: p => this.payroll.set(p),
+      error: () => {}
+    });
+
+    this.reportsRepo.getAttritionReport(targetCompanyId).subscribe({
+      next: a => this.attrition.set(a),
+      error: () => {}
+    });
   }
 
   onExportCustomReport(): void {
-    this.reportsRepo.exportCustomReport(1, 'MasterWorkforce', 'csv').subscribe({
-      next: r => {
+    const targetCompanyId = this.companyId ?? 1;
+    this.reportsRepo.exportCustomReport(targetCompanyId, 'MasterWorkforce', 'csv').subscribe({
+      next: () => {
         this.notificationService.showSuccess('Master report export downloaded.');
       },
       error: () => this.notificationService.showSuccess('Master report export initiated.')

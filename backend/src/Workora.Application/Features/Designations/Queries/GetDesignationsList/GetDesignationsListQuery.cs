@@ -1,4 +1,4 @@
-﻿using AutoMapper;
+using AutoMapper;
 using MediatR;
 using Workora.Application.Features.Designations.DTOs;
 using Workora.Domain.Interfaces;
@@ -13,4 +13,5 @@ public record GetDesignationsListQuery(
     int PageNumber = 1,
     int PageSize = 25,
     string? SearchTerm = null,
-    int? DepartmentId = null) : IRequest<ApiResponse<PagedResponse<DesignationDto>>>;
+    int? DepartmentId = null,
+    int? CompanyId = null) : IRequest<ApiResponse<PagedResponse<DesignationDto>>>;

@@ -1,4 +1,4 @@
-﻿using MediatR;
+using MediatR;
 using Workora.Application.Common.Models;
 using Workora.Shared.Responses;
 using Workora.Domain.Entities;
@@ -11,4 +11,4 @@ namespace Workora.Application.Features.Attendance.Queries.GetLiveAttendanceStatu
 /// <summary>
 /// Query to retrieve live real-time attendance dashboard metrics.
 /// </summary>
-public record GetLiveAttendanceStatusQuery(int CompanyId) : IRequest<ApiResponse<LiveAttendanceStatusDto>>;
+public record GetLiveAttendanceStatusQuery(int? CompanyId = null) : IRequest<ApiResponse<LiveAttendanceStatusDto>>;

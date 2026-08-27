@@ -23,11 +23,17 @@ public class ExpenseClaimRepository : GenericRepository<ExpenseClaim>, IExpenseC
     }
 
     /// <inheritdoc />
-    public async Task<List<ExpenseClaim>> GetClaimsAsync(ExpenseStatus? status, ExpenseCategory? category, CancellationToken ct = default)
+    public async Task<List<ExpenseClaim>> GetClaimsAsync(ExpenseStatus? status, ExpenseCategory? category, int? companyId = null, CancellationToken ct = default)
     {
         var query = _dbContext.Set<ExpenseClaim>()
             .Include(x => x.Employee)
             .AsQueryable();
+
+        if (companyId.HasValue)
+        {
+            var cid = companyId.Value;
+            query = query.Where(x => x.Employee != null && ((x.Employee.Department != null && x.Employee.Department.CompanyId == cid) || (x.Employee.Branch != null && x.Employee.Branch.CompanyId == cid)));
+        }
 
         if (status.HasValue)
         {

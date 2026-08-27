@@ -1,13 +1,15 @@
 export interface OrganizationDto {
   id: number;
-  uuid: string;
   name: string;
-  slug: string;
-  subdomain: string;
-  adminEmail: string;
-  subscriptionPlanId: number;
-  subscriptionPlanName?: string | null;
-  status: string;
+  code: string;
+  registrationNumber?: string | null;
+  taxId?: string | null;
+  email?: string | null;
+  phone?: string | null;
+  website?: string | null;
+  logoUrl?: string | null;
+  currency: string;
+  isActive: boolean;
   createdAt: string;
 }
 
@@ -15,24 +17,30 @@ export interface SubscriptionPlanDto {
   id: number;
   name: string;
   description: string;
-  monthlyPrice: number;
-  annualPrice: number;
+  price: number;
   maxEmployees: number;
-  features: string[];
+  billingCycle: number;
   isActive: boolean;
 }
 
 export interface SuperAdminMetricsDto {
   totalOrganizations: number;
   activeOrganizations: number;
-  totalSubscribedUsers: number;
-  monthlyRecurringRevenue: number;
+  suspendedOrganizations: number;
+  totalSystemUsers: number;
+  totalEmployees: number;
+  activeSubscriptionPlans: number;
 }
 
 export interface RegisterOrganizationRequestDto {
   name: string;
-  slug: string;
-  subdomain: string;
-  adminEmail: string;
-  subscriptionPlanId: number;
+  code: string;
+  registrationNumber?: string | null;
+  taxId?: string | null;
+  email?: string | null;
+  phone?: string | null;
+  website?: string | null;
+  fiscalYearStartMonth?: number;
+  currency?: string;
+  address?: string | null;
 }

@@ -1,6 +1,7 @@
 import { Component, ElementRef, AfterViewInit, OnDestroy, inject, signal, computed, HostListener, PLATFORM_ID, OnInit } from '@angular/core';
 import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { RouterOutlet, RouterLink, RouterLinkActive } from '@angular/router';
+import { FormsModule } from '@angular/forms';
 import { gsap } from 'gsap';
 import { AuthService } from '../../core/services/auth.service';
 import { NotificationService } from '../../core/services/notification.service';
@@ -8,15 +9,147 @@ import { NotificationApiRepository } from '../../data/repositories/notification-
 import { AiAssistantModalComponent } from '../features/ai-assistant/components/ai-assistant-modal.component';
 
 /**
- * Humanized Workora Dashboard Layout Shell.
- * Provides a calm, structured workspace navigation layout
- * with friendly micro-interactions, responsive mobile drawer, 3-tier RBAC sidebar,
- * and topbar organization context with color-coded role badges.
+ * Interface representing a distinct Navigation Item in the Workora navigation tree.
+ */
+export interface NavItem {
+  /**
+   * Primary human-readable label of the navigation link.
+   */
+  readonly label: string;
+
+  /**
+   * Router destination link path.
+   */
+  readonly route: string;
+
+  /**
+   * Google Material Symbols icon identifier.
+   */
+  readonly icon: string;
+
+  /**
+   * Optional alternative label displayed specifically when user only has self-service permissions.
+   */
+  readonly selfLabel?: string;
+
+  /**
+   * Whether exact route match is required for active state.
+   */
+  readonly exact?: boolean;
+
+  /**
+   * Required permission keys (user needs at least one to view).
+   */
+  readonly requiredPermissions?: string[];
+
+  /**
+   * Required role names (user needs at least one to view).
+   */
+  readonly requiredRoles?: string[];
+
+  /**
+   * Optional visual badge text (e.g., 'New', 'Pro', 'Live').
+   */
+  readonly badge?: string;
+
+  /**
+   * CSS classes applied to badge chip.
+   */
+  readonly badgeColor?: string;
+}
+
+/**
+ * Interface representing a collapsible Navigation Section / Category in the Sidebar.
+ */
+export interface NavSection {
+  /**
+   * Unique identifier key for state tracking and collapse toggle.
+   */
+  readonly id: string;
+
+  /**
+   * Category section title displayed in uppercase tracking text.
+   */
+  readonly title: string;
+
+  /**
+   * Category header icon.
+   */
+  readonly icon?: string;
+
+  /**
+   * Required permissions to view the entire section.
+   */
+  readonly requiredPermissions?: string[];
+
+  /**
+   * Required roles to view the entire section.
+   */
+  readonly requiredRoles?: string[];
+
+  /**
+   * List of navigation child links in this section.
+   */
+  readonly items: NavItem[];
+}
+
+/**
+ * Interface representing a quick tab link in the top menubar.
+ */
+export interface TopMenubarTab {
+  /**
+   * Display label for top tab.
+   */
+  readonly label: string;
+
+  /**
+   * Router path link.
+   */
+  readonly route: string;
+
+  /**
+   * Google Material icon.
+   */
+  readonly icon?: string;
+
+  /**
+   * Exact route match flag.
+   */
+  readonly exact?: boolean;
+
+  /**
+   * Required permissions to view tab.
+   */
+  readonly requiredPermissions?: string[];
+
+  /**
+   * Required roles to view tab.
+   */
+  readonly requiredRoles?: string[];
+}
+
+/**
+ * Production-ready Workora Dashboard Layout Shell.
+ * Provides a structured, responsive workspace navigation layout with:
+ * - Dynamic 3-tier Role-Based Access Control (RBAC) sidebar
+ * - Dynamic top menubar quick-tabs tailored to user roles & permissions
+ * - Collapsible navigation categories & real-time keyword search filter
+ * - Role badges with theme color coding (SuperAdmin, HR Admin, Finance, Manager, Employee)
+ * - Organization context header with company code & tenant branding
+ * - Mobile responsive drawer with backdrop blur
+ * - AI Copilot floating modal integration
  */
 @Component({
   selector: 'app-dashboard-layout',
   standalone: true,
-  imports: [CommonModule, RouterOutlet, RouterLink, RouterLinkActive, AiAssistantModalComponent],
+  imports: [
+    CommonModule,
+    FormsModule,
+    RouterOutlet,
+    RouterLink,
+    RouterLinkActive,
+    AiAssistantModalComponent
+  ],
   template: `
     <div class="font-sans text-[#163331] bg-[#F4F8F7] min-h-screen relative overflow-x-hidden antialiased selection:bg-[#DCEBE7] selection:text-[#063B39] flex">
       
@@ -35,16 +168,16 @@ import { AiAssistantModalComponent } from '../features/ai-assistant/components/a
           'translate-x-0 shadow-2xl': isMobileMenuOpen(),
           '-translate-x-full lg:translate-x-0': !isMobileMenuOpen()
         }"
-        class="h-screen w-64 fixed left-0 top-0 bg-[#063B39] text-white border-r border-[#063B39]/80 shadow-2xl flex flex-col py-5 z-50 transition-transform duration-300 ease-in-out sidebar-shell"
+        class="h-screen w-64 fixed left-0 top-0 bg-[#063B39] text-white border-r border-[#063B39]/80 shadow-2xl flex flex-col py-4 z-50 transition-transform duration-300 ease-in-out sidebar-shell"
       >
         
         <!-- Brand Header with Workora Logo -->
-        <div class="px-5 sm:px-6 mb-6 flex items-center justify-between sidebar-brand">
+        <div class="px-5 mb-4 flex items-center justify-between sidebar-brand">
           <div class="flex items-center gap-3 cursor-pointer group" routerLink="/dashboard" (click)="closeMobileMenu()">
             <img 
               alt="Workora Logo" 
               src="/workoraLogo.png" 
-              class="h-10 sm:h-11 w-auto object-contain transition-transform duration-300 group-hover:scale-105 filter drop-shadow-[0_4px_12px_rgba(63,167,155,0.45)] shrink-0"
+              class="h-10 w-auto object-contain transition-transform duration-300 group-hover:scale-105 filter drop-shadow-[0_4px_12px_rgba(63,167,155,0.45)] shrink-0"
             />
             <div>
               <h2 class="text-xl font-extrabold text-white tracking-tight font-heading leading-none">Workora</h2>
@@ -62,393 +195,115 @@ import { AiAssistantModalComponent } from '../features/ai-assistant/components/a
           </button>
         </div>
 
-        <!-- Navigation Links -->
-        <nav class="flex-1 space-y-1.5 px-3 overflow-y-auto sidebar-nav">
-          
-          <!-- ================================================================= -->
-          <!-- 1. LEVEL 1: SUPER ADMIN PLATFORM SECTION                         -->
-          <!-- ================================================================= -->
-          @if (authService.hasRole('SuperAdmin')) {
-            <div class="px-3 pb-2 text-[10px] font-bold uppercase tracking-wider text-amber-400/90 flex items-center gap-1.5">
-              <span class="material-symbols-outlined text-sm text-amber-400">admin_panel_settings</span>
-              <span>Platform Control</span>
+        <!-- Role Badge Display in Sidebar -->
+        <div class="px-3 mb-3">
+          <div class="px-3 py-1.5 rounded-xl bg-white/5 border border-white/10 flex items-center justify-between gap-2">
+            <div class="flex items-center gap-1.5 min-w-0">
+              <span class="w-2 h-2 rounded-full" [ngClass]="roleIndicatorDotClass()"></span>
+              <span class="text-[11px] font-extrabold text-white/90 truncate uppercase tracking-wider">{{ primaryRole() }}</span>
             </div>
-            <a
-              routerLink="/superadmin"
-              (click)="closeMobileMenu()"
-              routerLinkActive="bg-[#0E6E68] text-white font-bold shadow-md border-l-4 border-amber-400"
-              class="text-white/80 hover:bg-[#3FA79B]/15 hover:text-white flex items-center px-3.5 py-2.5 rounded-xl cursor-pointer transition-all text-xs font-semibold group nav-item">
-              <span class="material-symbols-outlined mr-3 text-lg text-amber-400 group-hover:text-white group-hover:scale-105 transition-all">hub</span>
-              <span>Platform Admin Console</span>
-            </a>
+            <span class="text-[9px] font-bold px-1.5 py-0.5 rounded bg-white/10 text-[#3FA79B] border border-[#3FA79B]/30 uppercase">
+              {{ currentUser()?.companyCode || 'CORP' }}
+            </span>
+          </div>
+        </div>
+
+        <!-- Sidebar Quick Search Filter -->
+        <div class="px-3 mb-2">
+          <div class="relative flex items-center">
+            <span class="material-symbols-outlined absolute left-2.5 text-white/40 text-base pointer-events-none">filter_list</span>
+            <input 
+              type="text"
+              [(ngModel)]="sidebarSearchQuery"
+              placeholder="Filter menu..."
+              class="w-full bg-white/5 hover:bg-white/10 focus:bg-white/15 text-xs text-white placeholder-white/40 pl-8 pr-7 py-1.5 rounded-xl border border-white/10 focus:border-[#3FA79B] focus:ring-1 focus:ring-[#3FA79B]/40 outline-none transition-all"
+            />
+            @if (sidebarSearchQuery()) {
+              <button 
+                (click)="sidebarSearchQuery.set('')"
+                class="absolute right-2 text-white/40 hover:text-white border-none bg-transparent cursor-pointer p-0 flex items-center"
+              >
+                <span class="material-symbols-outlined text-sm">close</span>
+              </button>
+            }
+          </div>
+        </div>
+
+        <!-- Navigation Links Container -->
+        <nav class="flex-1 space-y-3 px-3 overflow-y-auto sidebar-nav custom-scrollbar">
+          
+          @for (section of visibleSections(); track section.id) {
+            <div class="space-y-1">
+              
+              <!-- Collapsible Section Header -->
+              <button
+                type="button"
+                (click)="toggleSectionCollapse(section.id)"
+                class="w-full flex items-center justify-between px-2.5 py-1 text-[10px] font-extrabold uppercase tracking-wider text-[#3FA79B]/80 hover:text-white rounded-lg transition-colors border-none bg-transparent cursor-pointer group"
+              >
+                <div class="flex items-center gap-1.5">
+                  @if (section.icon) {
+                    <span class="material-symbols-outlined text-xs" [ngClass]="section.id === 'platform' ? 'text-amber-400' : 'text-[#3FA79B]'">
+                      {{ section.icon }}
+                    </span>
+                  }
+                  <span [ngClass]="section.id === 'platform' ? 'text-amber-400 font-bold' : ''">{{ section.title }}</span>
+                </div>
+                <span 
+                  class="material-symbols-outlined text-xs text-white/40 group-hover:text-white transition-transform duration-200"
+                  [ngClass]="{ '-rotate-90': isSectionCollapsed(section.id) }"
+                >
+                  expand_more
+                </span>
+              </button>
+
+              <!-- Section Navigation Items -->
+              @if (!isSectionCollapsed(section.id)) {
+                <div class="space-y-1 pl-1">
+                  @for (item of section.items; track item.route) {
+                    <a
+                      [routerLink]="item.route"
+                      (click)="closeMobileMenu()"
+                      [routerLinkActive]="section.id === 'platform' ? 'bg-[#0E6E68] text-white font-bold shadow-md border-l-4 border-amber-400' : 'bg-[#0E6E68] text-white font-bold shadow-md border-l-4 border-[#3FA79B]'"
+                      [routerLinkActiveOptions]="{ exact: item.exact || false }"
+                      class="text-white/80 hover:bg-[#3FA79B]/15 hover:text-white flex items-center justify-between px-3 py-2 rounded-xl cursor-pointer transition-all text-xs font-semibold group nav-item"
+                    >
+                      <div class="flex items-center min-w-0">
+                        <span 
+                          class="material-symbols-outlined mr-2.5 text-base transition-all group-hover:scale-105 shrink-0"
+                          [ngClass]="section.id === 'platform' ? 'text-amber-400 group-hover:text-white' : 'text-[#3FA79B] group-hover:text-white'"
+                        >
+                          {{ item.icon }}
+                        </span>
+                        <span class="truncate">{{ getItemLabel(item) }}</span>
+                      </div>
+
+                      @if (item.badge) {
+                        <span [ngClass]="item.badgeColor || 'bg-[#3FA79B]/20 text-[#3FA79B] border border-[#3FA79B]/30'" class="text-[9px] font-extrabold px-1.5 py-0.2 rounded shrink-0 uppercase tracking-wider ml-1">
+                          {{ item.badge }}
+                        </span>
+                      }
+                    </a>
+                  }
+                </div>
+              }
+
+            </div>
           }
 
-          <!-- ================================================================= -->
-          <!-- 2. CORE WORKFORCE & DIRECTORY                                    -->
-          <!-- ================================================================= -->
-          <div class="px-3 pt-2 pb-2 text-[10px] font-bold uppercase tracking-wider text-[#3FA79B]/80">Core Workforce</div>
-
-          <!-- Dashboard Tab (Always visible) -->
-          <a
-            routerLink="/dashboard"
-            (click)="closeMobileMenu()"
-            routerLinkActive="bg-[#0E6E68] text-white font-bold shadow-md border-l-4 border-[#3FA79B]"
-            [routerLinkActiveOptions]="{ exact: true }"
-            class="text-white/80 hover:bg-[#3FA79B]/15 hover:text-white flex items-center px-3.5 py-2.5 rounded-xl cursor-pointer transition-all text-xs font-semibold group nav-item">
-            <span class="material-symbols-outlined mr-3 text-lg text-[#3FA79B] group-hover:text-white group-hover:scale-105 transition-all">dashboard</span>
-            <span>Dashboard</span>
-          </a>
-
-          <!-- Employees Directory Tab -->
-          @if (authService.hasPermission('employees.view') || authService.hasPermission('employees.self')) {
-            <a
-              routerLink="/employees"
-              (click)="closeMobileMenu()"
-              routerLinkActive="bg-[#0E6E68] text-white font-bold shadow-md border-l-4 border-[#3FA79B]"
-              class="text-white/80 hover:bg-[#3FA79B]/15 hover:text-white flex items-center px-3.5 py-2.5 rounded-xl cursor-pointer transition-all text-xs font-semibold group nav-item">
-              <span class="material-symbols-outlined mr-3 text-lg text-[#3FA79B] group-hover:text-white group-hover:scale-105 transition-all">badge</span>
-              <span>{{ authService.hasPermission('employees.view') ? 'People & Employees' : 'Team Directory' }}</span>
-            </a>
+          @if (visibleSections().length === 0) {
+            <div class="p-4 text-center text-white/50 text-xs">
+              <span class="material-symbols-outlined text-2xl text-white/30 mb-1">search_off</span>
+              <p>No matching menus found for "{{ sidebarSearchQuery() }}"</p>
+            </div>
           }
 
-          <!-- Organization Master Tab -->
-          @if (authService.hasAnyPermission(['company.view', 'companies.view', 'branches.view', 'departments.view', 'designations.view'])) {
-            <a
-              routerLink="/organization"
-              (click)="closeMobileMenu()"
-              routerLinkActive="bg-[#0E6E68] text-white font-bold shadow-md border-l-4 border-[#3FA79B]"
-              class="text-white/80 hover:bg-[#3FA79B]/15 hover:text-white flex items-center px-3.5 py-2.5 rounded-xl cursor-pointer transition-all text-xs font-semibold group nav-item">
-              <span class="material-symbols-outlined mr-3 text-lg text-[#3FA79B] group-hover:text-white group-hover:scale-105 transition-all">account_tree</span>
-              <span>Organization Structure</span>
-            </a>
-          }
-
-          <!-- Roles & Permissions Tab (SuperAdmin & RBAC Admins) -->
-          @if (authService.hasRole('SuperAdmin') || authService.hasPermission('roles.view')) {
-            <a
-              routerLink="/roles"
-              (click)="closeMobileMenu()"
-              routerLinkActive="bg-[#0E6E68] text-white font-bold shadow-md border-l-4 border-[#3FA79B]"
-              class="text-white/80 hover:bg-[#3FA79B]/15 hover:text-white flex items-center px-3.5 py-2.5 rounded-xl cursor-pointer transition-all text-xs font-semibold group nav-item">
-              <span class="material-symbols-outlined mr-3 text-lg text-[#3FA79B] group-hover:text-white group-hover:scale-105 transition-all">security</span>
-              <span>Roles &amp; RBAC</span>
-            </a>
-          }
-
-          <!-- User Directory Tab -->
-          @if (authService.hasPermission('users.view')) {
-            <a
-              routerLink="/users"
-              (click)="closeMobileMenu()"
-              routerLinkActive="bg-[#0E6E68] text-white font-bold shadow-md border-l-4 border-[#3FA79B]"
-              class="text-white/80 hover:bg-[#3FA79B]/15 hover:text-white flex items-center px-3.5 py-2.5 rounded-xl cursor-pointer transition-all text-xs font-semibold group nav-item">
-              <span class="material-symbols-outlined mr-3 text-lg text-[#3FA79B] group-hover:text-white group-hover:scale-105 transition-all">manage_accounts</span>
-              <span>User Accounts</span>
-            </a>
-          }
-
-          <!-- ================================================================= -->
-          <!-- 3. TIME & ATTENDANCE SECTION                                     -->
-          <!-- ================================================================= -->
-          @if (authService.hasAnyPermission(['attendance.view', 'attendance.self', 'leave.view', 'leave.self', 'leave.apply', 'holidays.view', 'shifts.view'])) {
-            <div class="px-3 pt-3 pb-2 text-[10px] font-bold uppercase tracking-wider text-[#3FA79B]/80">Time &amp; Attendance</div>
-
-            <!-- Attendance Tab -->
-            @if (authService.hasPermission('attendance.self') || authService.hasPermission('attendance.view')) {
-              <a
-                routerLink="/attendance"
-                (click)="closeMobileMenu()"
-                routerLinkActive="bg-[#0E6E68] text-white font-bold shadow-md border-l-4 border-[#3FA79B]"
-                class="text-white/80 hover:bg-[#3FA79B]/15 hover:text-white flex items-center px-3.5 py-2.5 rounded-xl cursor-pointer transition-all text-xs font-semibold group nav-item">
-                <span class="material-symbols-outlined mr-3 text-lg text-[#3FA79B] group-hover:text-white group-hover:scale-105 transition-all">schedule</span>
-                <span>{{ authService.hasPermission('attendance.view') ? 'Attendance & Punches' : 'My Attendance Clock' }}</span>
-              </a>
-            }
-
-            <!-- Leave Tab -->
-            @if (authService.hasAnyPermission(['leave.view', 'leave.self', 'leave.apply'])) {
-              <a
-                routerLink="/leave"
-                (click)="closeMobileMenu()"
-                routerLinkActive="bg-[#0E6E68] text-white font-bold shadow-md border-l-4 border-[#3FA79B]"
-                class="text-white/80 hover:bg-[#3FA79B]/15 hover:text-white flex items-center px-3.5 py-2.5 rounded-xl cursor-pointer transition-all text-xs font-semibold group nav-item">
-                <span class="material-symbols-outlined mr-3 text-lg text-[#3FA79B] group-hover:text-white group-hover:scale-105 transition-all">beach_access</span>
-                <span>{{ authService.hasPermission('leave.view') ? 'Leave & Time Off' : 'My Leave Requests' }}</span>
-              </a>
-            }
-
-            <!-- Holidays Tab -->
-            @if (authService.hasPermission('holidays.view')) {
-              <a
-                routerLink="/holidays"
-                (click)="closeMobileMenu()"
-                routerLinkActive="bg-[#0E6E68] text-white font-bold shadow-md border-l-4 border-[#3FA79B]"
-                class="text-white/80 hover:bg-[#3FA79B]/15 hover:text-white flex items-center px-3.5 py-2.5 rounded-xl cursor-pointer transition-all text-xs font-semibold group nav-item">
-                <span class="material-symbols-outlined mr-3 text-lg text-[#3FA79B] group-hover:text-white group-hover:scale-105 transition-all">celebration</span>
-                <span>Holiday Calendar</span>
-              </a>
-            }
-
-            <!-- Shifts Tab -->
-            @if (authService.hasPermission('shifts.view')) {
-              <a
-                routerLink="/shifts"
-                (click)="closeMobileMenu()"
-                routerLinkActive="bg-[#0E6E68] text-white font-bold shadow-md border-l-4 border-[#3FA79B]"
-                class="text-white/80 hover:bg-[#3FA79B]/15 hover:text-white flex items-center px-3.5 py-2.5 rounded-xl cursor-pointer transition-all text-xs font-semibold group nav-item">
-                <span class="material-symbols-outlined mr-3 text-lg text-[#3FA79B] group-hover:text-white group-hover:scale-105 transition-all">more_time</span>
-                <span>{{ authService.hasPermission('shifts.manage') ? 'Shift Schedules & Rosters' : 'My Shift Timing' }}</span>
-              </a>
-            }
-          }
-
-          <!-- ================================================================= -->
-          <!-- 4. PAYROLL & FINANCIALS SECTION                                  -->
-          <!-- ================================================================= -->
-          @if (authService.hasAnyPermission(['payroll.manage', 'payroll.process', 'payroll.view', 'payroll.self', 'loans.view', 'loans.apply', 'expenses.view', 'expenses.submit'])) {
-            <div class="px-3 pt-3 pb-2 text-[10px] font-bold uppercase tracking-wider text-[#3FA79B]/80">Payroll &amp; Finance</div>
-
-            <!-- Payroll Runs Tab (Finance & Leadership) -->
-            @if (authService.hasAnyPermission(['payroll.manage', 'payroll.process', 'payroll.view']) || authService.hasRole('FinanceManager') || authService.hasRole('SuperAdmin')) {
-              <a
-                routerLink="/payroll"
-                (click)="closeMobileMenu()"
-                routerLinkActive="bg-[#0E6E68] text-white font-bold shadow-md border-l-4 border-[#3FA79B]"
-                class="text-white/80 hover:bg-[#3FA79B]/15 hover:text-white flex items-center px-3.5 py-2.5 rounded-xl cursor-pointer transition-all text-xs font-semibold group nav-item">
-                <span class="material-symbols-outlined mr-3 text-lg text-[#3FA79B] group-hover:text-white group-hover:scale-105 transition-all">payments</span>
-                <span>Payroll Cycles</span>
-              </a>
-            }
-
-            <!-- My Payslips Tab (Self-Service) -->
-            @if (authService.hasPermission('payroll.self')) {
-              <a
-                routerLink="/my-payslips"
-                (click)="closeMobileMenu()"
-                routerLinkActive="bg-[#0E6E68] text-white font-bold shadow-md border-l-4 border-[#3FA79B]"
-                class="text-white/80 hover:bg-[#3FA79B]/15 hover:text-white flex items-center px-3.5 py-2.5 rounded-xl cursor-pointer transition-all text-xs font-semibold group nav-item">
-                <span class="material-symbols-outlined mr-3 text-lg text-[#3FA79B] group-hover:text-white group-hover:scale-105 transition-all">request_quote</span>
-                <span>My Payslips</span>
-              </a>
-            }
-
-            <!-- Loans Tab -->
-            @if (authService.hasPermission('loans.view') || authService.hasPermission('loans.apply')) {
-              <a
-                routerLink="/loans"
-                (click)="closeMobileMenu()"
-                routerLinkActive="bg-[#0E6E68] text-white font-bold shadow-md border-l-4 border-[#3FA79B]"
-                class="text-white/80 hover:bg-[#3FA79B]/15 hover:text-white flex items-center px-3.5 py-2.5 rounded-xl cursor-pointer transition-all text-xs font-semibold group nav-item">
-                <span class="material-symbols-outlined mr-3 text-lg text-[#3FA79B] group-hover:text-white group-hover:scale-105 transition-all">account_balance</span>
-                <span>{{ authService.hasPermission('loans.approve') ? 'Loans & Advances' : 'My Loans & Advances' }}</span>
-              </a>
-            }
-
-            <!-- Expenses Tab -->
-            @if (authService.hasPermission('expenses.view') || authService.hasPermission('expenses.submit')) {
-              <a
-                routerLink="/expenses"
-                (click)="closeMobileMenu()"
-                routerLinkActive="bg-[#0E6E68] text-white font-bold shadow-md border-l-4 border-[#3FA79B]"
-                class="text-white/80 hover:bg-[#3FA79B]/15 hover:text-white flex items-center px-3.5 py-2.5 rounded-xl cursor-pointer transition-all text-xs font-semibold group nav-item">
-                <span class="material-symbols-outlined mr-3 text-lg text-[#3FA79B] group-hover:text-white group-hover:scale-105 transition-all">receipt</span>
-                <span>{{ authService.hasPermission('expenses.approve') ? 'Expense Claims' : 'My Expense Claims' }}</span>
-              </a>
-            }
-          }
-
-          <!-- ================================================================= -->
-          <!-- 5. TALENT & GROWTH SECTION                                       -->
-          <!-- ================================================================= -->
-          @if (authService.hasAnyPermission(['recruitment.view', 'performance.view', 'performance.self', 'training.view'])) {
-            <div class="px-3 pt-3 pb-2 text-[10px] font-bold uppercase tracking-wider text-[#3FA79B]/80">Talent &amp; Growth</div>
-
-            <!-- Jobs & Recruitment Tabs -->
-            @if (authService.hasPermission('recruitment.view')) {
-              <a
-                routerLink="/jobs"
-                (click)="closeMobileMenu()"
-                routerLinkActive="bg-[#0E6E68] text-white font-bold shadow-md border-l-4 border-[#3FA79B]"
-                class="text-white/80 hover:bg-[#3FA79B]/15 hover:text-white flex items-center px-3.5 py-2.5 rounded-xl cursor-pointer transition-all text-xs font-semibold group nav-item">
-                <span class="material-symbols-outlined mr-3 text-lg text-[#3FA79B] group-hover:text-white group-hover:scale-105 transition-all">work</span>
-                <span>Job Vacancies</span>
-              </a>
-
-              <a
-                routerLink="/candidates"
-                (click)="closeMobileMenu()"
-                routerLinkActive="bg-[#0E6E68] text-white font-bold shadow-md border-l-4 border-[#3FA79B]"
-                class="text-white/80 hover:bg-[#3FA79B]/15 hover:text-white flex items-center px-3.5 py-2.5 rounded-xl cursor-pointer transition-all text-xs font-semibold group nav-item">
-                <span class="material-symbols-outlined mr-3 text-lg text-[#3FA79B] group-hover:text-white group-hover:scale-105 transition-all">view_kanban</span>
-                <span>Candidate Funnel</span>
-              </a>
-            }
-
-            <!-- Performance Tab -->
-            @if (authService.hasPermission('performance.view') || authService.hasPermission('performance.self')) {
-              <a
-                routerLink="/performance"
-                (click)="closeMobileMenu()"
-                routerLinkActive="bg-[#0E6E68] text-white font-bold shadow-md border-l-4 border-[#3FA79B]"
-                class="text-white/80 hover:bg-[#3FA79B]/15 hover:text-white flex items-center px-3.5 py-2.5 rounded-xl cursor-pointer transition-all text-xs font-semibold group nav-item">
-                <span class="material-symbols-outlined mr-3 text-lg text-[#3FA79B] group-hover:text-white group-hover:scale-105 transition-all">stars</span>
-                <span>{{ authService.hasPermission('performance.view') ? 'Performance & OKRs' : 'My Performance & Goals' }}</span>
-              </a>
-            }
-
-            <!-- Training Tab -->
-            @if (authService.hasPermission('training.view')) {
-              <a
-                routerLink="/training"
-                (click)="closeMobileMenu()"
-                routerLinkActive="bg-[#0E6E68] text-white font-bold shadow-md border-l-4 border-[#3FA79B]"
-                class="text-white/80 hover:bg-[#3FA79B]/15 hover:text-white flex items-center px-3.5 py-2.5 rounded-xl cursor-pointer transition-all text-xs font-semibold group nav-item">
-                <span class="material-symbols-outlined mr-3 text-lg text-[#3FA79B] group-hover:text-white group-hover:scale-105 transition-all">school</span>
-                <span>Learning &amp; Training</span>
-              </a>
-            }
-          }
-
-          <!-- ================================================================= -->
-          <!-- 6. OPERATIONS & TASKS SECTION                                    -->
-          <!-- ================================================================= -->
-          @if (authService.hasAnyPermission(['tasks.view', 'helpdesk.view', 'helpdesk.create', 'field.view', 'documents.view', 'assets.view'])) {
-            <div class="px-3 pt-3 pb-2 text-[10px] font-bold uppercase tracking-wider text-[#3FA79B]/80">Operations &amp; Tasks</div>
-
-            <!-- Tasks Tab -->
-            @if (authService.hasPermission('tasks.view')) {
-              <a
-                routerLink="/tasks"
-                (click)="closeMobileMenu()"
-                routerLinkActive="bg-[#0E6E68] text-white font-bold shadow-md border-l-4 border-[#3FA79B]"
-                class="text-white/80 hover:bg-[#3FA79B]/15 hover:text-white flex items-center px-3.5 py-2.5 rounded-xl cursor-pointer transition-all text-xs font-semibold group nav-item">
-                <span class="material-symbols-outlined mr-3 text-lg text-[#3FA79B] group-hover:text-white group-hover:scale-105 transition-all">checklist</span>
-                <span>Task Management</span>
-              </a>
-            }
-
-            <!-- Helpdesk Tab -->
-            @if (authService.hasPermission('helpdesk.view') || authService.hasPermission('helpdesk.create')) {
-              <a
-                routerLink="/helpdesk"
-                (click)="closeMobileMenu()"
-                routerLinkActive="bg-[#0E6E68] text-white font-bold shadow-md border-l-4 border-[#3FA79B]"
-                class="text-white/80 hover:bg-[#3FA79B]/15 hover:text-white flex items-center px-3.5 py-2.5 rounded-xl cursor-pointer transition-all text-xs font-semibold group nav-item">
-                <span class="material-symbols-outlined mr-3 text-lg text-[#3FA79B] group-hover:text-white group-hover:scale-105 transition-all">support_agent</span>
-                <span>Support Helpdesk</span>
-              </a>
-            }
-
-            <!-- Field Tracking Tab -->
-            @if (authService.hasPermission('field.view')) {
-              <a
-                routerLink="/field-tracking"
-                (click)="closeMobileMenu()"
-                routerLinkActive="bg-[#0E6E68] text-white font-bold shadow-md border-l-4 border-[#3FA79B]"
-                class="text-white/80 hover:bg-[#3FA79B]/15 hover:text-white flex items-center px-3.5 py-2.5 rounded-xl cursor-pointer transition-all text-xs font-semibold group nav-item">
-                <span class="material-symbols-outlined mr-3 text-lg text-[#3FA79B] group-hover:text-white group-hover:scale-105 transition-all">location_on</span>
-                <span>Field GPS Tracking</span>
-              </a>
-            }
-
-            <!-- Documents Tab -->
-            @if (authService.hasPermission('documents.view')) {
-              <a
-                routerLink="/documents"
-                (click)="closeMobileMenu()"
-                routerLinkActive="bg-[#0E6E68] text-white font-bold shadow-md border-l-4 border-[#3FA79B]"
-                class="text-white/80 hover:bg-[#3FA79B]/15 hover:text-white flex items-center px-3.5 py-2.5 rounded-xl cursor-pointer transition-all text-xs font-semibold group nav-item">
-                <span class="material-symbols-outlined mr-3 text-lg text-[#3FA79B] group-hover:text-white group-hover:scale-105 transition-all">folder_shared</span>
-                <span>Documents &amp; Policies</span>
-              </a>
-            }
-
-            <!-- Assets Tab -->
-            @if (authService.hasPermission('assets.view')) {
-              <a
-                routerLink="/assets"
-                (click)="closeMobileMenu()"
-                routerLinkActive="bg-[#0E6E68] text-white font-bold shadow-md border-l-4 border-[#3FA79B]"
-                class="text-white/80 hover:bg-[#3FA79B]/15 hover:text-white flex items-center px-3.5 py-2.5 rounded-xl cursor-pointer transition-all text-xs font-semibold group nav-item">
-                <span class="material-symbols-outlined mr-3 text-lg text-[#3FA79B] group-hover:text-white group-hover:scale-105 transition-all">devices</span>
-                <span>Assets &amp; Hardware</span>
-              </a>
-            }
-          }
-
-          <!-- ================================================================= -->
-          <!-- 7. GOVERNANCE, COMPLIANCE & REPORTS                              -->
-          <!-- ================================================================= -->
-          @if (authService.hasAnyPermission(['compliance.view', 'reports.view', 'settings.view', 'audit.view'])) {
-            <div class="px-3 pt-3 pb-2 text-[10px] font-bold uppercase tracking-wider text-[#3FA79B]/80">Governance &amp; Reports</div>
-
-            <!-- Compliance Tab -->
-            @if (authService.hasPermission('compliance.view')) {
-              <a
-                routerLink="/compliance"
-                (click)="closeMobileMenu()"
-                routerLinkActive="bg-[#0E6E68] text-white font-bold shadow-md border-l-4 border-[#3FA79B]"
-                class="text-white/80 hover:bg-[#3FA79B]/15 hover:text-white flex items-center px-3.5 py-2.5 rounded-xl cursor-pointer transition-all text-xs font-semibold group nav-item">
-                <span class="material-symbols-outlined mr-3 text-lg text-[#3FA79B] group-hover:text-white group-hover:scale-105 transition-all">account_balance</span>
-                <span>Statutory Compliance</span>
-              </a>
-            }
-
-            <!-- Analytics & Reports Tab -->
-            @if (authService.hasPermission('reports.view')) {
-              <a
-                routerLink="/reports"
-                (click)="closeMobileMenu()"
-                routerLinkActive="bg-[#0E6E68] text-white font-bold shadow-md border-l-4 border-[#3FA79B]"
-                class="text-white/80 hover:bg-[#3FA79B]/15 hover:text-white flex items-center px-3.5 py-2.5 rounded-xl cursor-pointer transition-all text-xs font-semibold group nav-item">
-                <span class="material-symbols-outlined mr-3 text-lg text-[#3FA79B] group-hover:text-white group-hover:scale-105 transition-all">analytics</span>
-                <span>Executive Analytics</span>
-              </a>
-            }
-
-            <!-- System Settings Tab -->
-            @if (authService.hasPermission('settings.view')) {
-              <a
-                routerLink="/settings"
-                (click)="closeMobileMenu()"
-                routerLinkActive="bg-[#0E6E68] text-white font-bold shadow-md border-l-4 border-[#3FA79B]"
-                class="text-white/80 hover:bg-[#3FA79B]/15 hover:text-white flex items-center px-3.5 py-2.5 rounded-xl cursor-pointer transition-all text-xs font-semibold group nav-item">
-                <span class="material-symbols-outlined mr-3 text-lg text-[#3FA79B] group-hover:text-white group-hover:scale-105 transition-all">tune</span>
-                <span>System Settings</span>
-              </a>
-            }
-
-            <!-- Security Audit Logs Tab -->
-            @if (authService.hasPermission('audit.view')) {
-              <a
-                routerLink="/audit-logs"
-                (click)="closeMobileMenu()"
-                routerLinkActive="bg-[#0E6E68] text-white font-bold shadow-md border-l-4 border-[#3FA79B]"
-                class="text-white/80 hover:bg-[#3FA79B]/15 hover:text-white flex items-center px-3.5 py-2.5 rounded-xl cursor-pointer transition-all text-xs font-semibold group nav-item">
-                <span class="material-symbols-outlined mr-3 text-lg text-[#3FA79B] group-hover:text-white group-hover:scale-105 transition-all">policy</span>
-                <span>Audit Trail Logs</span>
-              </a>
-            }
-          }
-
-          <!-- ================================================================= -->
-          <!-- 8. MY ACCOUNT & SECURITY (ALWAYS ACCESSIBLE)                     -->
-          <!-- ================================================================= -->
-          <div class="px-3 pt-3 pb-2 text-[10px] font-bold uppercase tracking-wider text-[#3FA79B]/80">My Account</div>
-          <a
-            routerLink="/change-password"
-            (click)="closeMobileMenu()"
-            routerLinkActive="bg-[#0E6E68] text-white font-bold shadow-md border-l-4 border-[#3FA79B]"
-            class="text-white/80 hover:bg-[#3FA79B]/15 hover:text-white flex items-center px-3.5 py-2.5 rounded-xl cursor-pointer transition-all text-xs font-semibold group nav-item">
-            <span class="material-symbols-outlined mr-3 text-lg text-[#3FA79B] group-hover:text-white group-hover:scale-105 transition-all">shield</span>
-            <span>Account Security</span>
-          </a>
         </nav>
 
         <!-- User Profile & Action Footer -->
-        <div class="px-3 mt-auto space-y-2 pt-4 border-t border-white/10 sidebar-footer">
+        <div class="px-3 mt-auto space-y-2 pt-3 border-t border-white/10 sidebar-footer">
           
-          <div class="flex items-center gap-3 px-3 py-2.5 rounded-2xl bg-white/5 border border-white/10 hover:border-[#3FA79B]/40 transition-colors">
+          <div class="flex items-center gap-3 px-3 py-2 rounded-2xl bg-white/5 border border-white/10 hover:border-[#3FA79B]/40 transition-colors">
             <div class="w-8 h-8 rounded-full bg-gradient-to-tr from-[#0E6E68] to-[#3FA79B] text-white flex items-center justify-center font-bold text-xs shrink-0 shadow-xs border border-white/20">
               {{ getInitials(currentUser()?.firstName, currentUser()?.lastName) }}
             </div>
@@ -458,31 +313,35 @@ import { AiAssistantModalComponent } from '../features/ai-assistant/components/a
             </div>
           </div>
 
-          <a 
-            routerLink="/" 
-            (click)="closeMobileMenu()"
-            class="w-full py-2 px-3 text-xs font-semibold text-white/70 hover:text-white hover:bg-white/10 rounded-xl transition-colors flex items-center gap-2">
-            <span class="material-symbols-outlined text-base text-[#3FA79B]">home</span>
-            <span>Public Home</span>
-          </a>
+          <div class="grid grid-cols-2 gap-1.5">
+            <a 
+              routerLink="/" 
+              (click)="closeMobileMenu()"
+              class="py-1.5 px-2 text-[11px] font-semibold text-white/70 hover:text-white hover:bg-white/10 rounded-xl transition-colors flex items-center justify-center gap-1.5">
+              <span class="material-symbols-outlined text-sm text-[#3FA79B]">home</span>
+              <span>Home</span>
+            </a>
 
-          <button 
-            (click)="onLogout()" 
-            class="w-full text-rose-300 hover:bg-rose-900/40 hover:text-rose-200 flex items-center px-3 py-2 rounded-xl cursor-pointer transition-all text-xs font-bold border-none bg-transparent">
-            <span class="material-symbols-outlined mr-2 text-base">logout</span>
-            <span>Sign Out</span>
-          </button>
+            <button 
+              (click)="onLogout()" 
+              class="py-1.5 px-2 text-[11px] font-bold text-rose-300 hover:bg-rose-900/40 hover:text-rose-200 rounded-xl transition-all flex items-center justify-center gap-1.5 border-none bg-transparent cursor-pointer">
+              <span class="material-symbols-outlined text-sm">logout</span>
+              <span>Sign Out</span>
+            </button>
+          </div>
+
         </div>
       </aside>
 
       <!-- Main Content Canvas Wrapper -->
       <div class="flex-1 lg:ml-64 min-h-screen flex flex-col relative z-10 w-full min-w-0">
         
-        <!-- TopNavBar Header -->
+        <!-- Top Menubar Header (Role Context, Quick Tabs, Search & User Menu) -->
         <header class="sticky top-0 z-30 bg-white/95 backdrop-blur-md border-b border-[#DCEBE7] h-14 sm:h-16 flex items-center px-3 xs:px-4 sm:px-6 lg:px-8 shadow-xs dashboard-topbar">
-          <div class="flex justify-between items-center w-full max-w-7xl 2xl:max-w-8xl 3xl:max-w-9xl mx-auto gap-2">
+          <div class="flex justify-between items-center w-full max-w-7xl 2xl:max-w-8xl mx-auto gap-2">
             
             <div class="flex items-center gap-2 sm:gap-4 md:gap-6 min-w-0">
+              
               <!-- Mobile Hamburger Toggle -->
               <button 
                 (click)="toggleMobileMenu()" 
@@ -498,7 +357,7 @@ import { AiAssistantModalComponent } from '../features/ai-assistant/components/a
                 <span class="font-extrabold text-[#063B39] text-base font-heading">Workora</span>
               </div>
 
-              <!-- Topbar Tenant Context Badge (FR-AC.10) -->
+              <!-- Topbar Tenant Context Badge -->
               @if (currentUser()?.companyName) {
                 <div class="hidden sm:flex items-center gap-1.5 px-3 py-1 bg-[#DCEBE7]/50 border border-[#DCEBE7] rounded-xl text-xs shrink-0">
                   <span class="material-symbols-outlined text-[#0E6E68] text-base">domain</span>
@@ -513,52 +372,28 @@ import { AiAssistantModalComponent } from '../features/ai-assistant/components/a
                 </div>
               }
 
-              <!-- Top Navigation Breadcrumbs (Role & Permission Aware) -->
-              <nav class="hidden md:flex items-center gap-2.5 text-xs font-semibold text-slate-500 shrink-0">
-                <a routerLink="/dashboard" routerLinkActive="text-[#0E6E68] font-bold" [routerLinkActiveOptions]="{ exact: true }" class="hover:text-[#0E6E68] transition-colors cursor-pointer">Dashboard</a>
-                
-                @if (authService.hasRole('SuperAdmin')) {
-                  <span>•</span>
-                  <a routerLink="/superadmin" routerLinkActive="text-[#0E6E68] font-bold" class="hover:text-[#0E6E68] transition-colors cursor-pointer">Platform Console</a>
-                }
-
-                @if (authService.hasPermission('employees.view')) {
-                  <span>•</span>
-                  <a routerLink="/employees" routerLinkActive="text-[#0E6E68] font-bold" class="hover:text-[#0E6E68] transition-colors cursor-pointer">Employees</a>
-                }
-
-                @if (authService.hasPermission('company.view')) {
-                  <span>•</span>
-                  <a routerLink="/organization" routerLinkActive="text-[#0E6E68] font-bold" class="hover:text-[#0E6E68] transition-colors cursor-pointer">Organization</a>
-                }
-
-                @if (authService.hasRole('SuperAdmin') || authService.hasPermission('roles.view')) {
-                  <span>•</span>
-                  <a routerLink="/roles" routerLinkActive="text-[#0E6E68] font-bold" class="hover:text-[#0E6E68] transition-colors cursor-pointer">Roles &amp; RBAC</a>
-                }
-
-                @if (authService.hasPermission('payroll.manage') || authService.hasRole('FinanceManager')) {
-                  <span>•</span>
-                  <a routerLink="/payroll" routerLinkActive="text-[#0E6E68] font-bold" class="hover:text-[#0E6E68] transition-colors cursor-pointer">Payroll</a>
-                } @else if (authService.hasPermission('payroll.self')) {
-                  <span>•</span>
-                  <a routerLink="/my-payslips" routerLinkActive="text-[#0E6E68] font-bold" class="hover:text-[#0E6E68] transition-colors cursor-pointer">My Payslips</a>
-                }
-
-                @if (authService.hasPermission('attendance.self') || authService.hasPermission('attendance.view')) {
-                  <span>•</span>
-                  <a routerLink="/attendance" routerLinkActive="text-[#0E6E68] font-bold" class="hover:text-[#0E6E68] transition-colors cursor-pointer">Attendance</a>
-                }
-
-                @if (authService.hasPermission('leave.view') || authService.hasPermission('leave.self')) {
-                  <span>•</span>
-                  <a routerLink="/leave" routerLinkActive="text-[#0E6E68] font-bold" class="hover:text-[#0E6E68] transition-colors cursor-pointer">Leaves</a>
+              <!-- Dynamic Top Navigation Menubar (Role-Tailored Quick Tabs) -->
+              <nav class="hidden md:flex items-center gap-2 text-xs font-semibold text-slate-500 overflow-x-auto py-1">
+                @for (tab of topMenubarTabs(); track tab.route) {
+                  <a 
+                    [routerLink]="tab.route" 
+                    routerLinkActive="bg-[#0E6E68]/10 text-[#0E6E68] font-bold border-[#0E6E68]"
+                    [routerLinkActiveOptions]="{ exact: tab.exact || false }"
+                    class="px-2.5 py-1 rounded-lg hover:text-[#0E6E68] hover:bg-[#DCEBE7]/40 transition-all cursor-pointer flex items-center gap-1 shrink-0 border border-transparent"
+                  >
+                    @if (tab.icon) {
+                      <span class="material-symbols-outlined text-sm text-[#0E6E68]">{{ tab.icon }}</span>
+                    }
+                    <span>{{ tab.label }}</span>
+                  </a>
                 }
               </nav>
             </div>
 
+            <!-- Right Controls: Search, AI Copilot, Notifications & User Dropdown -->
             <div class="flex items-center gap-2 sm:gap-3.5 relative shrink-0">
-              <!-- Search Input -->
+              
+              <!-- Quick Search Input Trigger -->
               <div class="relative hidden lg:block">
                 <div class="relative flex items-center">
                   <span class="material-symbols-outlined absolute left-3.5 text-[#0E6E68]/70 pointer-events-none text-lg">search</span>
@@ -586,7 +421,7 @@ import { AiAssistantModalComponent } from '../features/ai-assistant/components/a
                 <span class="hidden sm:inline">AI Copilot</span>
               </button>
 
-              <!-- Notifications -->
+              <!-- Notifications Bell -->
               <button 
                 (click)="onNotificationClick()"
                 class="hover:bg-[#DCEBE7]/50 rounded-xl p-1.5 xs:p-2 transition-all text-[#063B39] relative cursor-pointer border-none bg-transparent" 
@@ -594,7 +429,7 @@ import { AiAssistantModalComponent } from '../features/ai-assistant/components/a
               >
                 <span class="material-symbols-outlined text-xl">notifications</span>
                 @if (unreadNotificationsCount() > 0) {
-                  <span class="absolute top-1.5 right-1.5 w-2 h-2 bg-rose-500 rounded-full"></span>
+                  <span class="absolute top-1.5 right-1.5 w-2.5 h-2.5 bg-rose-500 rounded-full ring-2 ring-white"></span>
                 }
               </button>
 
@@ -695,14 +530,290 @@ export class DashboardLayoutComponent implements OnInit, AfterViewInit, OnDestro
   private readonly notificationService = inject(NotificationService);
   private readonly notificationRepo = inject(NotificationApiRepository);
 
+  /**
+   * Currently authenticated user profile signal from AuthService.
+   */
   readonly currentUser = this.authService.currentUser;
+
+  /**
+   * Signal controlling the mobile sidebar drawer state.
+   */
   readonly isMobileMenuOpen = signal<boolean>(false);
+
+  /**
+   * Signal controlling user profile popup menu visibility.
+   */
   readonly isProfileMenuOpen = signal<boolean>(false);
+
+  /**
+   * Signal controlling AI Copilot assistant modal.
+   */
   readonly isAiModalOpen = signal<boolean>(false);
+
+  /**
+   * Real-time unread notification count badge.
+   */
   readonly unreadNotificationsCount = signal<number>(0);
 
   /**
-   * Primary active role label for display.
+   * Live text query to filter sidebar menu options.
+   */
+  readonly sidebarSearchQuery = signal<string>('');
+
+  /**
+   * Collapsed state dictionary map for navigation categories.
+   */
+  readonly collapsedSections = signal<Record<string, boolean>>({});
+
+  /**
+   * All navigation sections and child routes defined in the Workora navigation tree.
+   */
+  private readonly allNavigationSections: NavSection[] = [
+    {
+      id: 'platform',
+      title: 'Platform Control',
+      icon: 'admin_panel_settings',
+      requiredRoles: ['SuperAdmin'],
+      items: [
+        {
+          label: 'Platform Admin Console',
+          route: '/superadmin',
+          icon: 'hub',
+          requiredRoles: ['SuperAdmin']
+        }
+      ]
+    },
+    {
+      id: 'workforce',
+      title: 'Core Workforce',
+      icon: 'groups',
+      items: [
+        {
+          label: 'Dashboard',
+          route: '/dashboard',
+          icon: 'dashboard',
+          exact: true
+        },
+        {
+          label: 'People & Employees',
+          selfLabel: 'Team Directory',
+          route: '/employees',
+          icon: 'badge',
+          requiredPermissions: ['employees.view', 'employees.self']
+        },
+        {
+          label: 'Organization Structure',
+          route: '/organization',
+          icon: 'account_tree',
+          requiredPermissions: ['company.view', 'companies.view', 'branches.view', 'departments.view', 'designations.view']
+        },
+        {
+          label: 'Roles & RBAC',
+          route: '/roles',
+          icon: 'security',
+          requiredPermissions: ['roles.view'],
+          requiredRoles: ['SuperAdmin']
+        },
+        {
+          label: 'User Accounts',
+          route: '/users',
+          icon: 'manage_accounts',
+          requiredPermissions: ['users.view']
+        }
+      ]
+    },
+    {
+      id: 'time',
+      title: 'Time & Attendance',
+      icon: 'schedule',
+      requiredPermissions: ['attendance.view', 'attendance.self', 'leave.view', 'leave.self', 'leave.apply', 'holidays.view', 'shifts.view'],
+      items: [
+        {
+          label: 'Attendance & Punches',
+          selfLabel: 'My Attendance Clock',
+          route: '/attendance',
+          icon: 'schedule',
+          requiredPermissions: ['attendance.self', 'attendance.view', 'attendance.manage']
+        },
+        {
+          label: 'Leave & Time Off',
+          selfLabel: 'My Leave Requests',
+          route: '/leave',
+          icon: 'beach_access',
+          requiredPermissions: ['leave.view', 'leave.self', 'leave.apply']
+        },
+        {
+          label: 'Holiday Calendar',
+          route: '/holidays',
+          icon: 'celebration',
+          requiredPermissions: ['holidays.view']
+        },
+        {
+          label: 'Shift Schedules & Rosters',
+          selfLabel: 'My Shift Timing',
+          route: '/shifts',
+          icon: 'more_time',
+          requiredPermissions: ['shifts.view', 'shifts.manage']
+        }
+      ]
+    },
+    {
+      id: 'finance',
+      title: 'Payroll & Finance',
+      icon: 'payments',
+      requiredPermissions: ['payroll.manage', 'payroll.process', 'payroll.view', 'payroll.self', 'loans.view', 'loans.apply', 'expenses.view', 'expenses.submit'],
+      items: [
+        {
+          label: 'Payroll Cycles & Runs',
+          route: '/payroll',
+          icon: 'payments',
+          requiredPermissions: ['payroll.manage', 'payroll.process', 'payroll.view'],
+          requiredRoles: ['SuperAdmin', 'FinanceManager']
+        },
+        {
+          label: 'My Payslips',
+          route: '/my-payslips',
+          icon: 'request_quote',
+          requiredPermissions: ['payroll.self']
+        },
+        {
+          label: 'Loans & Advances',
+          selfLabel: 'My Loans & Advances',
+          route: '/loans',
+          icon: 'account_balance',
+          requiredPermissions: ['loans.view', 'loans.apply']
+        },
+        {
+          label: 'Expense Claims',
+          selfLabel: 'My Expense Claims',
+          route: '/expenses',
+          icon: 'receipt',
+          requiredPermissions: ['expenses.view', 'expenses.submit']
+        }
+      ]
+    },
+    {
+      id: 'talent',
+      title: 'Talent & Growth',
+      icon: 'psychology',
+      requiredPermissions: ['recruitment.view', 'performance.view', 'performance.self', 'training.view'],
+      items: [
+        {
+          label: 'Job Vacancies',
+          route: '/jobs',
+          icon: 'work',
+          requiredPermissions: ['recruitment.view', 'recruitment.manage']
+        },
+        {
+          label: 'Candidate Funnel',
+          route: '/candidates',
+          icon: 'view_kanban',
+          requiredPermissions: ['recruitment.view', 'recruitment.manage']
+        },
+        {
+          label: 'Performance & OKRs',
+          selfLabel: 'My Performance & Goals',
+          route: '/performance',
+          icon: 'stars',
+          requiredPermissions: ['performance.view', 'performance.self']
+        },
+        {
+          label: 'Learning & Training',
+          selfLabel: 'My Training Programs',
+          route: '/training',
+          icon: 'school',
+          requiredPermissions: ['training.view']
+        }
+      ]
+    },
+    {
+      id: 'operations',
+      title: 'Operations & Tasks',
+      icon: 'build',
+      requiredPermissions: ['tasks.view', 'helpdesk.view', 'helpdesk.create', 'field.view', 'documents.view', 'assets.view'],
+      items: [
+        {
+          label: 'Task Management',
+          selfLabel: 'My Assigned Tasks',
+          route: '/tasks',
+          icon: 'checklist',
+          requiredPermissions: ['tasks.view', 'tasks.create']
+        },
+        {
+          label: 'Support Helpdesk',
+          selfLabel: 'My Helpdesk Tickets',
+          route: '/helpdesk',
+          icon: 'support_agent',
+          requiredPermissions: ['helpdesk.view', 'helpdesk.create']
+        },
+        {
+          label: 'Field GPS Tracking',
+          route: '/field-tracking',
+          icon: 'location_on',
+          requiredPermissions: ['field.view']
+        },
+        {
+          label: 'Documents & Policies',
+          route: '/documents',
+          icon: 'folder_shared',
+          requiredPermissions: ['documents.view', 'policies.view']
+        },
+        {
+          label: 'Assets & Hardware',
+          route: '/assets',
+          icon: 'devices',
+          requiredPermissions: ['assets.view']
+        }
+      ]
+    },
+    {
+      id: 'governance',
+      title: 'Governance & Reports',
+      icon: 'policy',
+      requiredPermissions: ['compliance.view', 'reports.view', 'settings.view', 'audit.view'],
+      items: [
+        {
+          label: 'Statutory Compliance',
+          route: '/compliance',
+          icon: 'balance',
+          requiredPermissions: ['compliance.view', 'compliance.manage']
+        },
+        {
+          label: 'Executive Analytics',
+          route: '/reports',
+          icon: 'analytics',
+          requiredPermissions: ['reports.view', 'reports.financial']
+        },
+        {
+          label: 'System Settings',
+          route: '/settings',
+          icon: 'tune',
+          requiredPermissions: ['settings.view', 'settings.manage']
+        },
+        {
+          label: 'Audit Trail Logs',
+          route: '/audit-logs',
+          icon: 'shield_lock',
+          requiredPermissions: ['audit.view']
+        }
+      ]
+    },
+    {
+      id: 'account',
+      title: 'My Account',
+      icon: 'account_circle',
+      items: [
+        {
+          label: 'Account Security',
+          route: '/change-password',
+          icon: 'shield'
+        }
+      ]
+    }
+  ];
+
+  /**
+   * Primary active role label for display computed from user profile.
    */
   readonly primaryRole = computed<string>(() => {
     const roles = this.currentUser()?.roles;
@@ -715,7 +826,7 @@ export class DashboardLayoutComponent implements OnInit, AfterViewInit, OnDestro
   });
 
   /**
-   * Color-coded styling classes for user role badge in topbar header.
+   * Color-coded styling classes for user role badge in topbar header and sidebar.
    */
   readonly roleBadgeClasses = computed<string>(() => {
     const role = this.primaryRole();
@@ -733,12 +844,154 @@ export class DashboardLayoutComponent implements OnInit, AfterViewInit, OnDestro
     }
   });
 
+  /**
+   * Dot indicator color class for sidebar role pill.
+   */
+  readonly roleIndicatorDotClass = computed<string>(() => {
+    const role = this.primaryRole();
+    switch (role) {
+      case 'Super Admin':
+        return 'bg-amber-400 shadow-[0_0_8px_rgba(251,191,36,0.8)]';
+      case 'HR Admin':
+        return 'bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.8)]';
+      case 'Finance Manager':
+        return 'bg-teal-400 shadow-[0_0_8px_rgba(45,212,191,0.8)]';
+      case 'Manager':
+        return 'bg-blue-400 shadow-[0_0_8px_rgba(96,165,250,0.8)]';
+      default:
+        return 'bg-[#3FA79B] shadow-[0_0_8px_rgba(63,167,155,0.8)]';
+    }
+  });
+
+  /**
+   * Computes the list of dynamic quick navigation tabs shown in the top menubar.
+   */
+  readonly topMenubarTabs = computed<TopMenubarTab[]>(() => {
+    const role = this.primaryRole();
+    
+    if (role === 'Super Admin') {
+      return [
+        { label: 'Platform Console', route: '/superadmin', icon: 'hub' },
+        { label: 'Users', route: '/users', icon: 'manage_accounts' },
+        { label: 'Roles & RBAC', route: '/roles', icon: 'security' },
+        { label: 'Audit Logs', route: '/audit-logs', icon: 'shield_lock' },
+        { label: 'System Settings', route: '/settings', icon: 'tune' }
+      ];
+    }
+
+    if (role === 'HR Admin') {
+      return [
+        { label: 'Dashboard', route: '/dashboard', icon: 'dashboard', exact: true },
+        { label: 'Employees', route: '/employees', icon: 'badge' },
+        { label: 'Organization', route: '/organization', icon: 'account_tree' },
+        { label: 'Attendance', route: '/attendance', icon: 'schedule' },
+        { label: 'Leave', route: '/leave', icon: 'beach_access' },
+        { label: 'Payroll', route: '/payroll', icon: 'payments' },
+        { label: 'Recruitment', route: '/jobs', icon: 'work' },
+        { label: 'Reports', route: '/reports', icon: 'analytics' }
+      ];
+    }
+
+    if (role === 'Finance Manager') {
+      return [
+        { label: 'Dashboard', route: '/dashboard', icon: 'dashboard', exact: true },
+        { label: 'Payroll Cycles', route: '/payroll', icon: 'payments' },
+        { label: 'My Payslips', route: '/my-payslips', icon: 'request_quote' },
+        { label: 'Compliance (PF/ESIC)', route: '/compliance', icon: 'balance' },
+        { label: 'Expenses', route: '/expenses', icon: 'receipt' },
+        { label: 'Loans', route: '/loans', icon: 'account_balance' },
+        { label: 'Reports', route: '/reports', icon: 'analytics' }
+      ];
+    }
+
+    if (role === 'Manager') {
+      return [
+        { label: 'Dashboard', route: '/dashboard', icon: 'dashboard', exact: true },
+        { label: 'Team Directory', route: '/employees', icon: 'badge' },
+        { label: 'Attendance Approvals', route: '/attendance', icon: 'schedule' },
+        { label: 'Leave Approvals', route: '/leave', icon: 'beach_access' },
+        { label: 'Shift Roster', route: '/shifts', icon: 'more_time' },
+        { label: 'Performance', route: '/performance', icon: 'stars' },
+        { label: 'Team Tasks', route: '/tasks', icon: 'checklist' }
+      ];
+    }
+
+    // Default: Employee Self-Service
+    return [
+      { label: 'Dashboard', route: '/dashboard', icon: 'dashboard', exact: true },
+      { label: 'My Attendance', route: '/attendance', icon: 'schedule' },
+      { label: 'My Leaves', route: '/leave', icon: 'beach_access' },
+      { label: 'My Payslips', route: '/my-payslips', icon: 'request_quote' },
+      { label: 'My Expenses', route: '/expenses', icon: 'receipt' },
+      { label: 'My Loans', route: '/loans', icon: 'account_balance' },
+      { label: 'My Tasks', route: '/tasks', icon: 'checklist' },
+      { label: 'Helpdesk', route: '/helpdesk', icon: 'support_agent' }
+    ];
+  });
+
+  /**
+   * Filtered navigation sections computed dynamically based on role, permissions, and search query.
+   */
+  readonly visibleSections = computed<NavSection[]>(() => {
+    const query = this.sidebarSearchQuery().trim().toLowerCase();
+
+    return this.allNavigationSections
+      .map(section => {
+        // Check section-level access
+        if (section.requiredRoles && !this.authService.hasAnyRole(section.requiredRoles)) {
+          return null;
+        }
+        if (section.requiredPermissions && !this.authService.hasAnyPermission(section.requiredPermissions)) {
+          return null;
+        }
+
+        // Filter permitted items
+        const permittedItems = section.items.filter(item => {
+          if (item.requiredRoles && !this.authService.hasAnyRole(item.requiredRoles)) {
+            return false;
+          }
+          if (item.requiredPermissions && !this.authService.hasAnyPermission(item.requiredPermissions)) {
+            return false;
+          }
+          return true;
+        });
+
+        // If search query is entered, match item label or section title
+        const matchingItems = query
+          ? permittedItems.filter(item => {
+              const label = this.getItemLabel(item).toLowerCase();
+              return label.includes(query) || section.title.toLowerCase().includes(query);
+            })
+          : permittedItems;
+
+        if (matchingItems.length === 0) {
+          return null;
+        }
+
+        return {
+          ...section,
+          items: matchingItems
+        };
+      })
+      .filter((s): s is NavSection => s !== null);
+  });
+
   private ctx?: gsap.Context;
 
   @HostListener('document:click')
   onDocumentClick(): void {
     if (this.isProfileMenuOpen()) {
       this.isProfileMenuOpen.set(false);
+    }
+  }
+
+  @HostListener('document:keydown.control.k', ['$event'])
+  @HostListener('document:keydown.meta.k', ['$event'])
+  onSearchShortcut(event: KeyboardEvent): void {
+    event.preventDefault();
+    const searchInput = this.elementRef.nativeElement.querySelector('input[placeholder*="Search workforce"]');
+    if (searchInput) {
+      searchInput.focus();
     }
   }
 
@@ -788,6 +1041,25 @@ export class DashboardLayoutComponent implements OnInit, AfterViewInit, OnDestro
     this.isProfileMenuOpen.update(v => !v);
   }
 
+  toggleSectionCollapse(sectionId: string): void {
+    this.collapsedSections.update(current => ({
+      ...current,
+      [sectionId]: !current[sectionId]
+    }));
+  }
+
+  isSectionCollapsed(sectionId: string): boolean {
+    return !!this.collapsedSections()[sectionId];
+  }
+
+  getItemLabel(item: NavItem): string {
+    const isSuperOrAdmin = this.authService.hasRole('SuperAdmin') || this.authService.hasRole('HRAdmin');
+    if (!isSuperOrAdmin && item.selfLabel) {
+      return item.selfLabel;
+    }
+    return item.label;
+  }
+
   onNotificationClick(): void {
     this.notificationRepo.getNotifications(1, 5).subscribe({
       next: p => {
@@ -802,10 +1074,6 @@ export class DashboardLayoutComponent implements OnInit, AfterViewInit, OnDestro
         this.notificationService.showInfo('2 Pending Leave Approvals • August Payroll calculations ready.');
       }
     });
-  }
-
-  onModulePreview(moduleName: string): void {
-    this.notificationService.showInfo(`${moduleName} is active and synchronized for your team.`);
   }
 
   getInitials(firstName?: string, lastName?: string): string {

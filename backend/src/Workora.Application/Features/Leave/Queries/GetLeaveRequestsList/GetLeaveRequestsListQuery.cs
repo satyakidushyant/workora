@@ -1,4 +1,4 @@
-﻿using AutoMapper;
+using AutoMapper;
 using MediatR;
 using Workora.Application.Features.Leave.DTOs;
 using Workora.Domain.Enums;
@@ -17,4 +17,5 @@ public record GetLeaveRequestsListQuery(
     int? DepartmentId = null,
     LeaveRequestStatus? Status = null,
     DateOnly? FromDate = null,
-    DateOnly? ToDate = null) : IRequest<ApiResponse<PagedResponse<LeaveRequestDto>>>;
+    DateOnly? ToDate = null,
+    int? CompanyId = null) : IRequest<ApiResponse<PagedResponse<LeaveRequestDto>>>;

@@ -21,7 +21,8 @@ export class UserMapper {
       fullName: dto.fullName || `${dto.firstName} ${dto.lastName}`.trim(),
       employeeId: dto.employeeId ?? null,
       isActive: dto.isActive,
-      createdAt: dto.createdAt
+      createdAt: dto.createdAt,
+      roles: dto.roles || []
     };
   }
 

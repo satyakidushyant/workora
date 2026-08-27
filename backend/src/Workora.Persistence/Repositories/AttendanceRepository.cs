@@ -37,13 +37,21 @@ public class AttendanceRepository : GenericRepository<AttendanceRecord>, IAttend
     }
 
     /// <inheritdoc />
-    public async Task<IReadOnlyList<AttendanceCorrection>> GetCorrectionsPagedAsync(int pageNumber, int pageSize, CorrectionStatus? status = null, CancellationToken ct = default)
+    public async Task<IReadOnlyList<AttendanceCorrection>> GetCorrectionsPagedAsync(int pageNumber, int pageSize, CorrectionStatus? status = null, int? companyId = null, CancellationToken ct = default)
     {
         var query = _dbContext.Set<AttendanceCorrection>()
             .AsNoTracking()
             .Include(c => c.AttendanceRecord)
             .ThenInclude(a => a.Employee)
             .AsQueryable();
+
+        if (companyId.HasValue)
+        {
+            var cid = companyId.Value;
+            query = query.Where(c => c.AttendanceRecord.Employee != null &&
+                ((c.AttendanceRecord.Employee.Department != null && c.AttendanceRecord.Employee.Department.CompanyId == cid) ||
+                 (c.AttendanceRecord.Employee.Branch != null && c.AttendanceRecord.Employee.Branch.CompanyId == cid)));
+        }
 
         if (status.HasValue)
         {
@@ -58,9 +66,21 @@ public class AttendanceRepository : GenericRepository<AttendanceRecord>, IAttend
     }
 
     /// <inheritdoc />
-    public async Task<int> GetCorrectionsCountAsync(CorrectionStatus? status = null, CancellationToken ct = default)
+    public async Task<int> GetCorrectionsCountAsync(CorrectionStatus? status = null, int? companyId = null, CancellationToken ct = default)
     {
-        var query = _dbContext.Set<AttendanceCorrection>().AsNoTracking().AsQueryable();
+        var query = _dbContext.Set<AttendanceCorrection>()
+            .AsNoTracking()
+            .Include(c => c.AttendanceRecord)
+            .ThenInclude(a => a.Employee)
+            .AsQueryable();
+
+        if (companyId.HasValue)
+        {
+            var cid = companyId.Value;
+            query = query.Where(c => c.AttendanceRecord.Employee != null &&
+                ((c.AttendanceRecord.Employee.Department != null && c.AttendanceRecord.Employee.Department.CompanyId == cid) ||
+                 (c.AttendanceRecord.Employee.Branch != null && c.AttendanceRecord.Employee.Branch.CompanyId == cid)));
+        }
 
         if (status.HasValue)
         {

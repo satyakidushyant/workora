@@ -50,4 +50,8 @@ public class UserDto
     /// </summary>
     public DateTimeOffset CreatedAt { get; set; }
 
+    /// <summary>
+    /// The list of assigned role names.
+    /// </summary>
+    public List<string> Roles { get; set; } = new();
 }

@@ -131,6 +131,20 @@ import { UserDetail, UserSummary, CreateUserParams, UpdateUserParams } from '../
             </div>
           }
 
+          <!-- Role Selector -->
+          <div class="space-y-1">
+            <label class="workora-label">
+              Assigned Security Role
+            </label>
+            <select formControlName="roleId" class="workora-input text-xs px-3 !py-2.5 bg-white">
+              <option [ngValue]="2">HRAdmin (Company / HR Administrator)</option>
+              <option [ngValue]="4">Manager (Department / Team Manager)</option>
+              <option [ngValue]="3">FinanceManager (Payroll & Finance Officer)</option>
+              <option [ngValue]="5">Employee (Standard Self-Service)</option>
+              <option [ngValue]="1">SuperAdmin (Platform Root Super Administrator)</option>
+            </select>
+          </div>
+
           <!-- Optional Linked Employee ID -->
           <div class="space-y-1">
             <label class="workora-label">
@@ -200,11 +214,23 @@ export class UserFormModalComponent implements OnInit, AfterViewInit, OnDestroy 
   }
 
   ngOnInit(): void {
+    let defaultRoleId = 5; // Employee
+    if (this.userToEdit?.roles && this.userToEdit.roles.length > 0) {
+      const r = this.userToEdit.roles[0].toLowerCase();
+      if (r === 'superadmin') defaultRoleId = 1;
+      else if (r === 'hradmin') defaultRoleId = 2;
+      else if (r === 'financemanager') defaultRoleId = 3;
+      else if (r === 'manager') defaultRoleId = 4;
+    } else if (this.userToEdit?.email?.startsWith('admin') || this.userToEdit?.email?.startsWith('hr')) {
+      defaultRoleId = 2; // HRAdmin
+    }
+
     this.userForm = this.fb.group({
       email: [this.userToEdit?.email || '', [Validators.required, Validators.email]],
       firstName: [this.userToEdit?.firstName || '', [Validators.required, Validators.maxLength(100)]],
       lastName: [this.userToEdit?.lastName || '', [Validators.required, Validators.maxLength(100)]],
       password: ['', this.isEdit ? [] : [Validators.required, Validators.minLength(8)]],
+      roleId: [defaultRoleId, [Validators.required]],
       employeeId: [this.userToEdit?.employeeId || null]
     });
 
@@ -253,7 +279,8 @@ export class UserFormModalComponent implements OnInit, AfterViewInit, OnDestroy 
         id: this.userToEdit!.id,
         firstName: formValues.firstName,
         lastName: formValues.lastName,
-        employeeId: formValues.employeeId ? Number(formValues.employeeId) : null
+        employeeId: formValues.employeeId ? Number(formValues.employeeId) : null,
+        roleId: formValues.roleId ? Number(formValues.roleId) : null
       };
       this.save.emit(updatePayload);
     } else {
@@ -262,7 +289,8 @@ export class UserFormModalComponent implements OnInit, AfterViewInit, OnDestroy 
         firstName: formValues.firstName,
         lastName: formValues.lastName,
         password: formValues.password,
-        employeeId: formValues.employeeId ? Number(formValues.employeeId) : null
+        employeeId: formValues.employeeId ? Number(formValues.employeeId) : null,
+        roleId: formValues.roleId ? Number(formValues.roleId) : null
       };
       this.save.emit(createPayload);
     }

@@ -1,4 +1,4 @@
-﻿using MediatR;
+using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Workora.Application.Features.Dashboard.DTOs;
@@ -32,21 +32,21 @@ public class DashboardController : ControllerBase
     /// <summary>
     /// Gets top-level company HRMS summary statistics.
     /// </summary>
-    /// <param name="companyId">The company ID.</param>
+    /// <param name="companyId">The optional company ID.</param>
     /// <returns>Executive dashboard summary.</returns>
     [HttpGet("summary")]
     [Authorize(Policy = "dashboard.view")]
-    public async Task<ApiResponse<DashboardSummaryDto>> GetSummary([FromQuery] int companyId)
+    public async Task<ApiResponse<DashboardSummaryDto>> GetSummary([FromQuery] int? companyId = null)
         => await _mediator.Send(new GetDashboardSummaryQuery(companyId));
 
     /// <summary>
     /// Gets headcount distribution by department for visual donut / bar charts.
     /// </summary>
-    /// <param name="companyId">The company ID.</param>
+    /// <param name="companyId">The optional company ID.</param>
     /// <returns>Headcount counts by department.</returns>
     [HttpGet("headcount-by-department")]
     [Authorize(Policy = "dashboard.view")]
-    public async Task<ApiResponse<IReadOnlyList<DepartmentHeadcountDto>>> GetHeadcountByDepartment([FromQuery] int companyId)
+    public async Task<ApiResponse<IReadOnlyList<DepartmentHeadcountDto>>> GetHeadcountByDepartment([FromQuery] int? companyId = null)
         => await _mediator.Send(new GetHeadcountByDepartmentQuery(companyId));
 
     /// <summary>
@@ -62,23 +62,23 @@ public class DashboardController : ControllerBase
     /// <summary>
     /// Gets upcoming approved leaves for the next 7 days.
     /// </summary>
-    /// <param name="companyId">The company ID.</param>
+    /// <param name="companyId">The optional company ID.</param>
     /// <param name="daysAhead">Days ahead horizon (default: 7).</param>
     /// <returns>Upcoming leaves list.</returns>
     [HttpGet("upcoming-leaves")]
     [Authorize(Policy = "dashboard.view")]
     public async Task<ApiResponse<IReadOnlyList<UpcomingLeaveDto>>> GetUpcomingLeaves(
-        [FromQuery] int companyId,
+        [FromQuery] int? companyId = null,
         [FromQuery] int daysAhead = 7)
         => await _mediator.Send(new GetUpcomingLeavesQuery(companyId, daysAhead));
 
     /// <summary>
     /// Gets real-time attendance KPIs for today.
     /// </summary>
-    /// <param name="companyId">The company ID.</param>
+    /// <param name="companyId">The optional company ID.</param>
     /// <returns>Today's attendance metrics.</returns>
     [HttpGet("attendance-today")]
     [Authorize(Policy = "dashboard.view")]
-    public async Task<ApiResponse<TodayAttendanceDashboardDto>> GetTodayAttendance([FromQuery] int companyId)
+    public async Task<ApiResponse<TodayAttendanceDashboardDto>> GetTodayAttendance([FromQuery] int? companyId = null)
         => await _mediator.Send(new GetTodayAttendanceDashboardQuery(companyId));
 }

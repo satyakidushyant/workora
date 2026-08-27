@@ -31,12 +31,12 @@ public interface IRecruitmentRepository : IRepository<JobPosting>
     /// <summary>
     /// Gets a paginated list of candidates with filtering.
     /// </summary>
-    Task<IReadOnlyList<Candidate>> GetCandidatesPagedAsync(int pageNumber, int pageSize, int? jobPostingId = null, CandidateStage? stage = null, string? searchTerm = null, CancellationToken ct = default);
+    Task<IReadOnlyList<Candidate>> GetCandidatesPagedAsync(int pageNumber, int pageSize, int? jobPostingId = null, CandidateStage? stage = null, string? searchTerm = null, int? companyId = null, CancellationToken ct = default);
 
     /// <summary>
     /// Gets total count of candidates matching criteria.
     /// </summary>
-    Task<int> GetCandidatesCountAsync(int? jobPostingId = null, CandidateStage? stage = null, string? searchTerm = null, CancellationToken ct = default);
+    Task<int> GetCandidatesCountAsync(int? jobPostingId = null, CandidateStage? stage = null, string? searchTerm = null, int? companyId = null, CancellationToken ct = default);
 
     /// <summary>
     /// Adds a new candidate application.

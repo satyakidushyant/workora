@@ -3,5 +3,7 @@
         "**/bin": true,
         "**/obj": true,
         "**/.vs": true
-    }
+    },
+    "css.lint.unknownAtRules": "ignore",
+    "scss.lint.unknownAtRules": "ignore"
 }

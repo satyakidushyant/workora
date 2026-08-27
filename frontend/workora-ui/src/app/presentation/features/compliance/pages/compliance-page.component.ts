@@ -7,6 +7,7 @@ import { EmployeeApiRepository } from '../../../../data/repositories/employee-ap
 import { StatutorySummary, StatutoryExportFile } from '../../../../domain/models/compliance.model';
 import { Employee } from '../../../../domain/models/employee.model';
 import { NotificationService } from '../../../../core/services/notification.service';
+import { AuthService } from '../../../../core/services/auth.service';
 import { WorkoraSkeletonComponent } from '../../../shared/components/workora-skeleton.component';
 
 @Component({
@@ -175,11 +176,16 @@ import { WorkoraSkeletonComponent } from '../../../shared/components/workora-ske
 export class CompliancePageComponent implements OnInit {
   private readonly complianceRepo = inject(ComplianceApiRepository);
   private readonly notificationService = inject(NotificationService);
+  private readonly authService = inject(AuthService);
 
   readonly selectedMonth = signal<number>(new Date().getMonth() + 1);
   readonly selectedYear = signal<number>(new Date().getFullYear());
   readonly summary = signal<StatutorySummary | null>(null);
   readonly isLoading = signal<boolean>(false);
+
+  private get companyId(): number | undefined {
+    return this.authService.currentUser()?.companyId ?? undefined;
+  }
 
   ngOnInit(): void {
     this.loadSummary();
@@ -197,7 +203,8 @@ export class CompliancePageComponent implements OnInit {
 
   loadSummary(): void {
     this.isLoading.set(true);
-    this.complianceRepo.getStatutorySummary(this.selectedMonth(), this.selectedYear(), 1)
+    const targetCompanyId = this.companyId ?? 1;
+    this.complianceRepo.getStatutorySummary(this.selectedMonth(), this.selectedYear(), targetCompanyId)
       .pipe(finalize(() => this.isLoading.set(false)))
       .subscribe({
         next: s => this.summary.set(s),
@@ -206,7 +213,8 @@ export class CompliancePageComponent implements OnInit {
   }
 
   onExportEpf(): void {
-    this.complianceRepo.exportEpfEcr(this.selectedMonth(), this.selectedYear(), 1).subscribe({
+    const targetCompanyId = this.companyId ?? 1;
+    this.complianceRepo.exportEpfEcr(this.selectedMonth(), this.selectedYear(), targetCompanyId).subscribe({
       next: f => {
         this.downloadFile(f);
         this.notificationService.showSuccess('EPF ECR file generated.');
@@ -216,7 +224,8 @@ export class CompliancePageComponent implements OnInit {
   }
 
   onExportEsic(): void {
-    this.complianceRepo.exportEsicReturn(this.selectedMonth(), this.selectedYear(), 1).subscribe({
+    const targetCompanyId = this.companyId ?? 1;
+    this.complianceRepo.exportEsicReturn(this.selectedMonth(), this.selectedYear(), targetCompanyId).subscribe({
       next: f => {
         this.downloadFile(f);
         this.notificationService.showSuccess('ESIC monthly return generated.');
@@ -226,7 +235,8 @@ export class CompliancePageComponent implements OnInit {
   }
 
   onExportPt(): void {
-    this.complianceRepo.exportPtReturn(this.selectedMonth(), this.selectedYear(), 1).subscribe({
+    const targetCompanyId = this.companyId ?? 1;
+    this.complianceRepo.exportPtReturn(this.selectedMonth(), this.selectedYear(), targetCompanyId).subscribe({
       next: f => {
         this.downloadFile(f);
         this.notificationService.showSuccess('PT return generated.');

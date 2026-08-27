@@ -1,4 +1,5 @@
-﻿using MediatR;
+using MediatR;
+using Workora.Application.Common.Interfaces;
 using Workora.Application.Features.Dashboard.DTOs;
 using Workora.Domain.Interfaces;
 using Workora.Shared.Responses;
@@ -11,19 +12,26 @@ namespace Workora.Application.Features.Dashboard.Queries.GetDashboardSummary;
 public class GetDashboardSummaryQueryHandler : IRequestHandler<GetDashboardSummaryQuery, ApiResponse<DashboardSummaryDto>>
 {
     private readonly IAnalyticsRepository _analyticsRepository;
+    private readonly ITenantResolutionService _tenantResolutionService;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="GetDashboardSummaryQueryHandler"/> class.
     /// </summary>
-    public GetDashboardSummaryQueryHandler(IAnalyticsRepository analyticsRepository)
+    public GetDashboardSummaryQueryHandler(
+        IAnalyticsRepository analyticsRepository,
+        ITenantResolutionService tenantResolutionService)
     {
         _analyticsRepository = analyticsRepository;
+        _tenantResolutionService = tenantResolutionService;
     }
 
     /// <inheritdoc />
     public async Task<ApiResponse<DashboardSummaryDto>> Handle(GetDashboardSummaryQuery request, CancellationToken ct)
     {
-        var summary = await _analyticsRepository.GetDashboardSummaryAsync(request.CompanyId, ct);
+        var targetCompanyId = await _tenantResolutionService.GetCurrentCompanyIdAsync(request.CompanyId, ct);
+        var effectiveCompanyId = targetCompanyId ?? 1;
+
+        var summary = await _analyticsRepository.GetDashboardSummaryAsync(effectiveCompanyId, ct);
         var dto = new DashboardSummaryDto(
             summary.TotalEmployees,
             summary.ActiveEmployees,

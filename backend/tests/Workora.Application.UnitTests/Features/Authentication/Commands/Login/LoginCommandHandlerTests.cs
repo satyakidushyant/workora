@@ -15,6 +15,7 @@ namespace Workora.Application.UnitTests.Features.Authentication.Commands.Login;
 public class LoginCommandHandlerTests
 {
     private readonly Mock<IUserRepository> _userRepositoryMock;
+    private readonly Mock<IRoleRepository> _roleRepositoryMock;
     private readonly Mock<IPermissionRepository> _permissionRepositoryMock;
     private readonly Mock<IPasswordHasher> _passwordHasherMock;
     private readonly Mock<ITokenService> _tokenServiceMock;
@@ -25,6 +26,7 @@ public class LoginCommandHandlerTests
     public LoginCommandHandlerTests()
     {
         _userRepositoryMock = new Mock<IUserRepository>();
+        _roleRepositoryMock = new Mock<IRoleRepository>();
         _permissionRepositoryMock = new Mock<IPermissionRepository>();
         _passwordHasherMock = new Mock<IPasswordHasher>();
         _tokenServiceMock = new Mock<ITokenService>();
@@ -33,6 +35,7 @@ public class LoginCommandHandlerTests
 
         _handler = new LoginCommandHandler(
             _userRepositoryMock.Object,
+            _roleRepositoryMock.Object,
             _permissionRepositoryMock.Object,
             _passwordHasherMock.Object,
             _tokenServiceMock.Object,

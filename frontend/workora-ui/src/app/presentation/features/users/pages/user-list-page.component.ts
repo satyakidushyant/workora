@@ -8,6 +8,7 @@ import { UserSummary, UserQueryParams, CreateUserParams, UpdateUserParams, Admin
 import { PagedResponse } from '../../../../domain/models/api-response.model';
 import { UserFormModalComponent } from '../components/user-form-modal.component';
 import { AdminResetPasswordModalComponent } from '../components/admin-reset-password-modal.component';
+import { AssignRoleModalComponent } from '../components/assign-role-modal.component';
 import { WorkoraEmptyStateComponent } from '../../../shared/components/workora-empty-state.component';
 import { WorkoraSkeletonComponent } from '../../../shared/components/workora-skeleton.component';
 import { WorkoraPaginationComponent } from '../../../shared/components/workora-pagination.component';
@@ -28,6 +29,7 @@ import { NotificationService } from '../../../../core/services/notification.serv
     RouterLink, 
     UserFormModalComponent, 
     AdminResetPasswordModalComponent,
+    AssignRoleModalComponent,
     WorkoraEmptyStateComponent,
     WorkoraSkeletonComponent,
     WorkoraPaginationComponent,
@@ -100,52 +102,49 @@ import { NotificationService } from '../../../../core/services/notification.serv
         <div class="flex items-center gap-1 bg-[#FAFCFB] border border-[#DCEBE7] p-1 rounded-xl w-full sm:w-auto">
           <button
             type="button"
-            (click)="onFilterStatus(null)"
-            class="flex-1 sm:flex-none px-3.5 py-1.5 text-xs font-bold rounded-lg transition-all border-none cursor-pointer text-center"
-            [ngClass]="activeFilter() === null ? 'bg-[#0E6E68] text-white shadow-xs' : 'text-slate-600 hover:text-[#0E6E68] bg-transparent'">
+            (click)="setFilter(null)"
+            [ngClass]="activeFilter() === null ? 'bg-[#0E6E68] text-white shadow-xs' : 'text-[#6B7F7C] hover:text-[#063B39] bg-transparent'"
+            class="px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all border-none cursor-pointer flex-1 sm:flex-none text-center">
             All Members
           </button>
           <button
             type="button"
-            (click)="onFilterStatus(true)"
-            class="flex-1 sm:flex-none px-3.5 py-1.5 text-xs font-bold rounded-lg transition-all border-none cursor-pointer text-center"
-            [ngClass]="activeFilter() === true ? 'bg-[#0E6E68] text-white shadow-xs' : 'text-slate-600 hover:text-emerald-600 bg-transparent'">
+            (click)="setFilter(true)"
+            [ngClass]="activeFilter() === true ? 'bg-[#0E6E68] text-white shadow-xs' : 'text-[#6B7F7C] hover:text-[#063B39] bg-transparent'"
+            class="px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all border-none cursor-pointer flex-1 sm:flex-none text-center">
             Active
           </button>
           <button
             type="button"
-            (click)="onFilterStatus(false)"
-            class="flex-1 sm:flex-none px-3.5 py-1.5 text-xs font-bold rounded-lg transition-all border-none cursor-pointer text-center"
-            [ngClass]="activeFilter() === false ? 'bg-[#0E6E68] text-white shadow-xs' : 'text-slate-600 hover:text-slate-900 bg-transparent'">
+            (click)="setFilter(false)"
+            [ngClass]="activeFilter() === false ? 'bg-[#0E6E68] text-white shadow-xs' : 'text-[#6B7F7C] hover:text-[#063B39] bg-transparent'"
+            class="px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all border-none cursor-pointer flex-1 sm:flex-none text-center">
             Inactive
           </button>
         </div>
 
-        <!-- Search Input with Clear Action -->
-        <div class="relative w-full sm:w-80">
-          <span class="material-symbols-outlined text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2 text-base pointer-events-none">search</span>
+        <!-- Search Input -->
+        <div class="relative flex-1 sm:max-w-xs">
           <input
             type="text"
             [(ngModel)]="searchQuery"
-            (ngModelChange)="onSearchChange()"
-            placeholder="Search by name, email, or role..."
-            class="workora-input pl-10 pr-9 text-xs !py-2.5 w-full" 
+            (keyup.enter)="onSearch()"
+            placeholder="Search by name or email..."
+            class="workora-input pl-9 pr-4 text-xs !py-2 w-full"
           />
+          <span class="material-symbols-outlined text-slate-400 absolute left-2.5 top-2.5 text-base pointer-events-none">search</span>
           @if (searchQuery) {
-            <button 
-              type="button"
+            <button
               (click)="clearSearch()"
-              class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 text-xs border-none bg-transparent cursor-pointer flex items-center justify-center p-0.5 rounded-full hover:bg-slate-100"
-              aria-label="Clear search"
-            >
-              <span class="material-symbols-outlined text-sm">close</span>
+              class="material-symbols-outlined text-slate-400 hover:text-slate-600 absolute right-2.5 top-2.5 text-base border-none bg-transparent cursor-pointer">
+              close
             </button>
           }
         </div>
       </div>
 
-      <!-- Table Container -->
-      <div class="bg-white border border-[#DCEBE7] rounded-3xl shadow-xs overflow-hidden workora-card user-table-card">
+      <!-- Users Table Card -->
+      <div class="bg-white border border-[#DCEBE7] rounded-3xl shadow-xs overflow-hidden workora-card">
         
         <!-- Loading State -->
         @if (isLoading()) {
@@ -171,6 +170,7 @@ import { NotificationService } from '../../../../core/services/notification.serv
               <thead>
                 <tr>
                   <th>Team Member</th>
+                  <th>Assigned Role</th>
                   <th>Status</th>
                   <th>Employee ID</th>
                   <th>Member Since</th>
@@ -193,6 +193,29 @@ import { NotificationService } from '../../../../core/services/notification.serv
                           </div>
                         </div>
                       </div>
+                    </td>
+
+                    <!-- Assigned Role -->
+                    <td>
+                      @if (user.roles && user.roles.length > 0) {
+                        @for (r of user.roles; track r) {
+                          <span 
+                            [ngClass]="{
+                              'bg-purple-50 text-purple-700 border-purple-200': r === 'SuperAdmin',
+                              'bg-emerald-50 text-emerald-700 border-emerald-200': r === 'HRAdmin',
+                              'bg-blue-50 text-blue-700 border-blue-200': r === 'FinanceManager',
+                              'bg-amber-50 text-amber-700 border-amber-200': r === 'Manager',
+                              'bg-slate-50 text-slate-700 border-slate-200': r === 'Employee'
+                            }"
+                            class="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold border mr-1 inline-block">
+                            {{ r }}
+                          </span>
+                        }
+                      } @else {
+                        <span class="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold bg-slate-50 text-slate-600 border border-slate-200">
+                          Employee
+                        </span>
+                      }
                     </td>
 
                     <!-- Status Pill -->
@@ -230,6 +253,17 @@ import { NotificationService } from '../../../../core/services/notification.serv
                     <!-- Action Buttons -->
                     <td class="text-right">
                       <div class="inline-flex items-center gap-1.5 justify-end">
+                        <!-- Assign Role Button -->
+                        <button
+                          type="button"
+                          (click)="openAssignRoleModal(user)"
+                          class="workora-btn-icon !w-8 !h-8 text-[#0E6E68] hover:bg-[#DCEBE7]/50"
+                          title="Assign Security Role"
+                          aria-label="Assign security role"
+                        >
+                          <span class="material-symbols-outlined text-base">shield_person</span>
+                        </button>
+
                         <!-- Edit Button -->
                         <button
                           type="button"
@@ -307,67 +341,79 @@ import { NotificationService } from '../../../../core/services/notification.serv
       ></app-user-form-modal>
     }
 
+    <!-- Assign Security Role Modal -->
+    @if (showAssignRoleModal()) {
+      <app-assign-role-modal
+        [user]="selectedUser()"
+        [isSubmitting]="isSubmittingModal()"
+        (assign)="onConfirmAssignRole($event)"
+        (cancel)="showAssignRoleModal.set(false)">
+      </app-assign-role-modal>
+    }
+
     <!-- Admin Reset Password Modal -->
     @if (showResetPasswordModal()) {
       <app-admin-reset-password-modal
         [user]="selectedUser()"
-        [isLoading]="isSubmittingModal()"
+        [isSubmitting]="isSubmittingModal()"
         (confirm)="onConfirmResetPassword($event)"
         (cancel)="showResetPasswordModal.set(false)"
       ></app-admin-reset-password-modal>
     }
 
-    <!-- Destructive Delete Confirmation Dialog -->
-    <app-workora-confirm-dialog
-      [isOpen]="showDeleteConfirm()"
-      title="Remove Team Member Account?"
-      [message]="deleteConfirmMessage"
-      confirmText="Remove Account"
-      cancelText="Keep Account"
-      variant="danger"
-      [isLoading]="isDeletingUser()"
-      (confirm)="confirmDeleteUser()"
-      (cancel)="showDeleteConfirm.set(false)"
-    ></app-workora-confirm-dialog>
+    <!-- Confirm Delete Dialog -->
+    @if (showDeleteConfirm()) {
+      <app-workora-confirm-dialog
+        [isOpen]="showDeleteConfirm()"
+        title="Remove User Account"
+        [message]="deleteConfirmMessage"
+        confirmText="Remove Account"
+        cancelText="Keep Account"
+        variant="danger"
+        [isLoading]="isDeletingUser()"
+        (confirm)="confirmDeleteUser()"
+        (cancel)="showDeleteConfirm.set(false)"
+      ></app-workora-confirm-dialog>
+    }
   `
 })
 export class UserListPageComponent implements OnInit, AfterViewInit, OnDestroy {
   private readonly platformId = inject(PLATFORM_ID);
   private readonly elementRef = inject(ElementRef);
-  private readonly userRepo: IUserRepository = inject(USER_REPOSITORY);
+  private readonly userRepo = inject<IUserRepository>(USER_REPOSITORY);
   private readonly notificationService = inject(NotificationService);
 
   readonly users = signal<UserSummary[]>([]);
   readonly isLoading = signal<boolean>(false);
+  readonly isSubmittingModal = signal<boolean>(false);
+  readonly isDeletingUser = signal<boolean>(false);
+
   readonly pageNumber = signal<number>(1);
   readonly pageSize = signal<number>(10);
-  readonly totalPages = signal<number>(1);
   readonly totalCount = signal<number>(0);
-
-  searchQuery = '';
-  private searchTimeout?: ReturnType<typeof setTimeout>;
+  readonly totalPages = signal<number>(1);
 
   readonly activeFilter = signal<boolean | null>(null);
-
-  readonly showFormModal = signal<boolean>(false);
-  readonly showResetPasswordModal = signal<boolean>(false);
-  readonly isSubmittingModal = signal<boolean>(false);
-  readonly selectedUser = signal<UserSummary | null>(null);
-
-  // Delete confirmation dialog signals
-  readonly showDeleteConfirm = signal<boolean>(false);
-  readonly isDeletingUser = signal<boolean>(false);
-  userToDelete: UserSummary | null = null;
-  deleteConfirmMessage = '';
+  searchQuery = '';
 
   readonly totalUsersCount = signal<number>(0);
   readonly activeUsersCount = signal<number>(0);
   readonly inactiveUsersCount = signal<number>(0);
 
+  readonly showFormModal = signal<boolean>(false);
+  readonly showAssignRoleModal = signal<boolean>(false);
+  readonly showResetPasswordModal = signal<boolean>(false);
+  readonly showDeleteConfirm = signal<boolean>(false);
+
+  readonly selectedUser = signal<UserSummary | null>(null);
+  userToDelete: UserSummary | null = null;
+  deleteConfirmMessage = '';
+
   private ctx?: gsap.Context;
 
   ngOnInit(): void {
     this.loadUsers();
+    this.loadStats();
   }
 
   ngAfterViewInit(): void {
@@ -377,21 +423,15 @@ export class UserListPageComponent implements OnInit, AfterViewInit, OnDestroy {
     if (prefersReducedMotion) return;
 
     this.ctx = gsap.context(() => {
-      gsap.from('.user-header', {
-        y: -15,
-        opacity: 0,
-        duration: 0.5,
-        ease: 'power3.out'
-      });
+      const el = this.elementRef.nativeElement;
+      const tl = gsap.timeline({ defaults: { ease: 'power2.out', duration: 0.3 } });
 
-      gsap.from('.user-stats-grid > *', {
-        y: 20,
-        opacity: 0,
-        stagger: 0.08,
-        duration: 0.5,
-        ease: 'power3.out',
-        delay: 0.1
-      });
+      if (el.querySelector('.user-header')) {
+        tl.from('.user-header', { opacity: 0, y: -10 });
+      }
+      if (el.querySelector('.user-stats-grid')) {
+        tl.from('.user-stats-grid .workora-card', { opacity: 0, y: 12, stagger: 0.08 }, '-=0.15');
+      }
     }, this.elementRef.nativeElement);
   }
 
@@ -401,62 +441,65 @@ export class UserListPageComponent implements OnInit, AfterViewInit, OnDestroy {
 
   loadUsers(): void {
     this.isLoading.set(true);
-
-    const queryParams: UserQueryParams = {
+    const params: UserQueryParams = {
       pageNumber: this.pageNumber(),
       pageSize: this.pageSize(),
-      searchTerm: this.searchQuery.trim() || undefined,
+      searchTerm: this.searchQuery?.trim() || undefined,
       isActive: this.activeFilter()
     };
 
-    this.userRepo.getUsers(queryParams).subscribe({
-      next: (response: PagedResponse<UserSummary>) => {
-        this.users.set(response.items);
-        this.totalPages.set(response.totalPages);
-        this.totalCount.set(response.totalCount);
-        this.totalUsersCount.set(response.totalCount);
-
-        const activeCount = response.items.filter((u: UserSummary) => u.isActive).length;
-        this.activeUsersCount.set(activeCount);
-        this.inactiveUsersCount.set(response.items.length - activeCount);
-
+    this.userRepo.getUsers(params).subscribe({
+      next: (res: PagedResponse<UserSummary>) => {
         this.isLoading.set(false);
+        this.users.set(res.items || []);
+        this.totalCount.set(res.totalCount || 0);
+        this.totalPages.set(res.totalPages || 1);
       },
       error: (err: any) => {
-        const msg = err?.error?.message || err?.message || 'Failed to load team directory.';
-        this.notificationService.showError(msg);
         this.isLoading.set(false);
+        const msg = err?.error?.message || err?.message || 'Failed to load user directory.';
+        this.notificationService.showError(msg);
       }
     });
   }
 
-  onFilterStatus(status: boolean | null): void {
-    this.activeFilter.set(status);
+  loadStats(): void {
+    this.userRepo.getUsers({ pageNumber: 1, pageSize: 1 }).subscribe({
+      next: res => this.totalUsersCount.set(res.totalCount || 0),
+      error: () => {}
+    });
+
+    this.userRepo.getUsers({ pageNumber: 1, pageSize: 1, isActive: true }).subscribe({
+      next: res => this.activeUsersCount.set(res.totalCount || 0),
+      error: () => {}
+    });
+
+    this.userRepo.getUsers({ pageNumber: 1, pageSize: 1, isActive: false }).subscribe({
+      next: res => this.inactiveUsersCount.set(res.totalCount || 0),
+      error: () => {}
+    });
+  }
+
+  setFilter(filter: boolean | null): void {
+    if (this.activeFilter() === filter) return;
+    this.activeFilter.set(filter);
     this.pageNumber.set(1);
     this.loadUsers();
   }
 
-  onSearchChange(): void {
-    if (this.searchTimeout) {
-      clearTimeout(this.searchTimeout);
-    }
-    this.searchTimeout = setTimeout(() => {
-      this.pageNumber.set(1);
-      this.loadUsers();
-    }, 300);
+  onSearch(): void {
+    this.pageNumber.set(1);
+    this.loadUsers();
   }
 
   clearSearch(): void {
     this.searchQuery = '';
-    this.pageNumber.set(1);
-    this.loadUsers();
+    this.onSearch();
   }
 
-  changePage(newPage: number): void {
-    if (newPage >= 1 && newPage <= this.totalPages() && newPage !== this.pageNumber()) {
-      this.pageNumber.set(newPage);
-      this.loadUsers();
-    }
+  changePage(page: number): void {
+    this.pageNumber.set(page);
+    this.loadUsers();
   }
 
   openCreateModal(): void {
@@ -469,37 +512,93 @@ export class UserListPageComponent implements OnInit, AfterViewInit, OnDestroy {
     this.showFormModal.set(true);
   }
 
+  openAssignRoleModal(user: UserSummary): void {
+    this.selectedUser.set(user);
+    this.showAssignRoleModal.set(true);
+  }
+
   openResetPasswordModal(user: UserSummary): void {
     this.selectedUser.set(user);
     this.showResetPasswordModal.set(true);
   }
 
+  onConfirmAssignRole(event: { userId: number; roleId: number }): void {
+    this.isSubmittingModal.set(true);
+    this.userRepo.assignRoles({ userId: event.userId, roleIds: [event.roleId] }).subscribe({
+      next: () => {
+        this.isSubmittingModal.set(false);
+        this.showAssignRoleModal.set(false);
+        this.notificationService.showSuccess(`Role updated successfully for ${this.selectedUser()?.fullName || 'user'}.`);
+        this.loadUsers();
+      },
+      error: (err: any) => {
+        this.isSubmittingModal.set(false);
+        const msg = err?.error?.message || err?.message || 'Failed to assign role.';
+        this.notificationService.showError(msg);
+      }
+    });
+  }
+
   onSaveUser(payload: CreateUserParams | UpdateUserParams): void {
     this.isSubmittingModal.set(true);
 
-    if (this.selectedUser()) {
-      const updatePayload = payload as UpdateUserParams;
-      this.userRepo.updateUser(updatePayload).subscribe({
-        next: () => {
-          this.isSubmittingModal.set(false);
-          this.showFormModal.set(false);
-          this.notificationService.showSuccess('Team member profile updated successfully.');
-          this.loadUsers();
+    if ('id' in payload) {
+      this.userRepo.updateUser(payload).subscribe({
+        next: (updatedUser) => {
+          if (payload.roleId) {
+            this.userRepo.assignRoles({ userId: updatedUser.id, roleIds: [payload.roleId] }).subscribe({
+              next: () => {
+                this.isSubmittingModal.set(false);
+                this.showFormModal.set(false);
+                this.notificationService.showSuccess('User profile and assigned role updated.');
+                this.loadUsers();
+              },
+              error: () => {
+                this.isSubmittingModal.set(false);
+                this.showFormModal.set(false);
+                this.loadUsers();
+              }
+            });
+          } else {
+            this.isSubmittingModal.set(false);
+            this.showFormModal.set(false);
+            this.notificationService.showSuccess('User profile updated successfully.');
+            this.loadUsers();
+          }
         },
         error: (err: any) => {
           this.isSubmittingModal.set(false);
-          const msg = err?.error?.message || err?.message || 'Failed to update member profile.';
+          const msg = err?.error?.message || err?.message || 'Failed to update user profile.';
           this.notificationService.showError(msg);
         }
       });
     } else {
       const createPayload = payload as CreateUserParams;
       this.userRepo.createUser(createPayload).subscribe({
-        next: () => {
-          this.isSubmittingModal.set(false);
-          this.showFormModal.set(false);
-          this.notificationService.showSuccess('New team member added to directory!');
-          this.loadUsers();
+        next: (newUser: UserSummary) => {
+          if (createPayload.roleId) {
+            this.userRepo.assignRoles({ userId: newUser.id, roleIds: [createPayload.roleId] }).subscribe({
+              next: () => {
+                this.isSubmittingModal.set(false);
+                this.showFormModal.set(false);
+                this.notificationService.showSuccess('New team member added with assigned role!');
+                this.loadUsers();
+                this.loadStats();
+              },
+              error: () => {
+                this.isSubmittingModal.set(false);
+                this.showFormModal.set(false);
+                this.loadUsers();
+                this.loadStats();
+              }
+            });
+          } else {
+            this.isSubmittingModal.set(false);
+            this.showFormModal.set(false);
+            this.notificationService.showSuccess('New team member added to directory!');
+            this.loadUsers();
+            this.loadStats();
+          }
         },
         error: (err: any) => {
           this.isSubmittingModal.set(false);
@@ -563,6 +662,7 @@ export class UserListPageComponent implements OnInit, AfterViewInit, OnDestroy {
         this.notificationService.showSuccess(`Removed ${this.userToDelete!.fullName} from directory.`);
         this.userToDelete = null;
         this.loadUsers();
+        this.loadStats();
       },
       error: (err: any) => {
         this.isDeletingUser.set(false);

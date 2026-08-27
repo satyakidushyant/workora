@@ -19,14 +19,14 @@ public interface IAttendanceRepository : IRepository<AttendanceRecord>
     Task<IReadOnlyList<AttendanceRecord>> GetHistoryAsync(int employeeId, DateOnly startDate, DateOnly endDate, CancellationToken ct = default);
 
     /// <summary>
-    /// Gets a paginated list of attendance corrections with optional status filter.
+    /// Gets a paginated list of attendance corrections with optional status and company filters.
     /// </summary>
-    Task<IReadOnlyList<AttendanceCorrection>> GetCorrectionsPagedAsync(int pageNumber, int pageSize, CorrectionStatus? status = null, CancellationToken ct = default);
+    Task<IReadOnlyList<AttendanceCorrection>> GetCorrectionsPagedAsync(int pageNumber, int pageSize, CorrectionStatus? status = null, int? companyId = null, CancellationToken ct = default);
 
     /// <summary>
     /// Gets total count of corrections matching filters.
     /// </summary>
-    Task<int> GetCorrectionsCountAsync(CorrectionStatus? status = null, CancellationToken ct = default);
+    Task<int> GetCorrectionsCountAsync(CorrectionStatus? status = null, int? companyId = null, CancellationToken ct = default);
 
     /// <summary>
     /// Gets a specific attendance correction request by ID.

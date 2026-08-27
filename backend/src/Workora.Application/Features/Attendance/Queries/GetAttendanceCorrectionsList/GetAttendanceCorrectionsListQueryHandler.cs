@@ -1,7 +1,7 @@
-﻿using AutoMapper;
+using AutoMapper;
 using MediatR;
+using Workora.Application.Common.Interfaces;
 using Workora.Application.Features.Attendance.DTOs;
-using Workora.Domain.Enums;
 using Workora.Domain.Interfaces;
 using Workora.Shared.Responses;
 
@@ -13,22 +13,38 @@ namespace Workora.Application.Features.Attendance.Queries.GetAttendanceCorrectio
 public class GetAttendanceCorrectionsListQueryHandler : IRequestHandler<GetAttendanceCorrectionsListQuery, ApiResponse<PagedResponse<AttendanceCorrectionDto>>>
 {
     private readonly IAttendanceRepository _attendanceRepository;
+    private readonly ITenantResolutionService _tenantResolutionService;
     private readonly IMapper _mapper;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="GetAttendanceCorrectionsListQueryHandler"/> class.
     /// </summary>
-    public GetAttendanceCorrectionsListQueryHandler(IAttendanceRepository attendanceRepository, IMapper mapper)
+    public GetAttendanceCorrectionsListQueryHandler(
+        IAttendanceRepository attendanceRepository,
+        ITenantResolutionService tenantResolutionService,
+        IMapper mapper)
     {
         _attendanceRepository = attendanceRepository;
+        _tenantResolutionService = tenantResolutionService;
         _mapper = mapper;
     }
 
     /// <inheritdoc />
     public async Task<ApiResponse<PagedResponse<AttendanceCorrectionDto>>> Handle(GetAttendanceCorrectionsListQuery request, CancellationToken ct)
     {
-        var corrections = await _attendanceRepository.GetCorrectionsPagedAsync(request.PageNumber, request.PageSize, request.Status, ct);
-        var totalCount = await _attendanceRepository.GetCorrectionsCountAsync(request.Status, ct);
+        var targetCompanyId = await _tenantResolutionService.GetCurrentCompanyIdAsync(request.CompanyId, ct);
+
+        var corrections = await _attendanceRepository.GetCorrectionsPagedAsync(
+            request.PageNumber,
+            request.PageSize,
+            request.Status,
+            targetCompanyId,
+            ct);
+
+        var totalCount = await _attendanceRepository.GetCorrectionsCountAsync(
+            request.Status,
+            targetCompanyId,
+            ct);
 
         var dtos = _mapper.Map<IReadOnlyList<AttendanceCorrectionDto>>(corrections);
         var paged = new PagedResponse<AttendanceCorrectionDto>(dtos, totalCount, request.PageNumber, request.PageSize);

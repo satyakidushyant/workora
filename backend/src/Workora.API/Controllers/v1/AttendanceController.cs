@@ -1,4 +1,4 @@
-﻿using MediatR;
+using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Workora.Application.Features.Attendance.Commands.ApproveAttendanceCorrection;
@@ -156,7 +156,7 @@ public class AttendanceController : ControllerBase
     /// <returns>Real-time attendance metrics.</returns>
     [HttpGet("live-status")]
     [Authorize(Policy = "attendance.view")]
-    public async Task<ApiResponse<LiveAttendanceStatusDto>> GetLiveStatus([FromQuery] int companyId)
+    public async Task<ApiResponse<LiveAttendanceStatusDto>> GetLiveStatus([FromQuery] int? companyId = null)
         => await _mediator.Send(new GetLiveAttendanceStatusQuery(companyId));
 
     /// <summary>

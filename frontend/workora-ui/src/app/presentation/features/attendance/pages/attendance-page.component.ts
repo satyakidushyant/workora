@@ -399,6 +399,7 @@ export class AttendancePageComponent implements OnInit {
   }
 
   loadTodayStatus(): void {
+    if (this.authService.hasRole('SuperAdmin')) return;
     this.attendanceRepo.getTodayStatus().subscribe({
       next: rec => this.todayRecord.set(rec),
       error: () => {}
@@ -406,7 +407,12 @@ export class AttendancePageComponent implements OnInit {
   }
 
   loadHistory(): void {
-    const empId = this.authService.currentUser()?.employeeId ?? 1;
+    const empId = this.authService.currentUser()?.employeeId;
+    if (!empId) {
+      this.isLoadingHistory.set(false);
+      return;
+    }
+
     this.isLoadingHistory.set(true);
     const now = new Date();
     const startDate = new Date(now.getFullYear(), now.getMonth(), 1).toISOString().substring(0, 10);
@@ -421,7 +427,9 @@ export class AttendancePageComponent implements OnInit {
   }
 
   loadMonthlySummary(): void {
-    const empId = this.authService.currentUser()?.employeeId ?? 1;
+    const empId = this.authService.currentUser()?.employeeId;
+    if (!empId) return;
+
     const now = new Date();
     this.attendanceRepo.getSummary(empId, now.getMonth() + 1, now.getFullYear()).subscribe({
       next: s => this.monthlySummary.set(s),
@@ -444,7 +452,7 @@ export class AttendancePageComponent implements OnInit {
   loadLiveStatus(): void {
     if (!this.canManageAttendance()) return;
 
-    this.attendanceRepo.getLiveStatus(1).subscribe({
+    this.attendanceRepo.getLiveStatus().subscribe({
       next: s => this.liveStatus.set(s),
       error: () => {}
     });

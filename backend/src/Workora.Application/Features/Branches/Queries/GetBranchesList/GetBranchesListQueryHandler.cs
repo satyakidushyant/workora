@@ -1,4 +1,4 @@
-﻿using AutoMapper;
+using AutoMapper;
 using MediatR;
 using Workora.Application.Common.Interfaces;
 using Workora.Application.Features.Branches.DTOs;
@@ -13,9 +13,7 @@ namespace Workora.Application.Features.Branches.Queries.GetBranchesList;
 public class GetBranchesListQueryHandler : IRequestHandler<GetBranchesListQuery, ApiResponse<PagedResponse<BranchDto>>>
 {
     private readonly IBranchRepository _branchRepository;
-    private readonly IUserRepository _userRepository;
-    private readonly IEmployeeRepository _employeeRepository;
-    private readonly ICurrentUserService _currentUserService;
+    private readonly ITenantResolutionService _tenantResolutionService;
     private readonly IMapper _mapper;
 
     /// <summary>
@@ -23,36 +21,18 @@ public class GetBranchesListQueryHandler : IRequestHandler<GetBranchesListQuery,
     /// </summary>
     public GetBranchesListQueryHandler(
         IBranchRepository branchRepository,
-        IUserRepository userRepository,
-        IEmployeeRepository employeeRepository,
-        ICurrentUserService currentUserService,
+        ITenantResolutionService tenantResolutionService,
         IMapper mapper)
     {
         _branchRepository = branchRepository;
-        _userRepository = userRepository;
-        _employeeRepository = employeeRepository;
-        _currentUserService = currentUserService;
+        _tenantResolutionService = tenantResolutionService;
         _mapper = mapper;
     }
 
     /// <inheritdoc />
     public async Task<ApiResponse<PagedResponse<BranchDto>>> Handle(GetBranchesListQuery request, CancellationToken ct)
     {
-        int? targetCompanyId = request.CompanyId;
-
-        // If not specified and user is not SuperAdmin, automatically scope to the user's company
-        if (!targetCompanyId.HasValue && _currentUserService.UserId.HasValue && !_currentUserService.IsInRole("SuperAdmin"))
-        {
-            var user = await _userRepository.GetByUuidAsync(_currentUserService.UserId.Value, ct);
-            if (user != null && user.EmployeeId.HasValue)
-            {
-                var employee = await _employeeRepository.GetWithFullDetailsAsync(user.EmployeeId.Value, ct);
-                if (employee != null)
-                {
-                    targetCompanyId = employee.Department?.CompanyId ?? employee.Branch?.CompanyId;
-                }
-            }
-        }
+        var targetCompanyId = await _tenantResolutionService.GetCurrentCompanyIdAsync(request.CompanyId, ct);
 
         var branches = await _branchRepository.GetPagedListAsync(
             request.PageNumber,

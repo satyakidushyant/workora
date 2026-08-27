@@ -1,4 +1,4 @@
-﻿using AutoMapper;
+using AutoMapper;
 using Workora.Domain.Enums;
 using Workora.Domain.Extensions;
 using MediatR;
@@ -15,8 +15,7 @@ namespace Workora.Application.Features.Companies.Queries.GetCompanyProfile;
 public class GetCompanyProfileQueryHandler : IRequestHandler<GetCompanyProfileQuery, ApiResponse<CompanyDto>>
 {
     private readonly ICompanyRepository _companyRepository;
-    private readonly IUserRepository _userRepository;
-    private readonly IEmployeeRepository _employeeRepository;
+    private readonly ITenantResolutionService _tenantResolutionService;
     private readonly ICurrentUserService _currentUserService;
     private readonly IMapper _mapper;
 
@@ -25,14 +24,12 @@ public class GetCompanyProfileQueryHandler : IRequestHandler<GetCompanyProfileQu
     /// </summary>
     public GetCompanyProfileQueryHandler(
         ICompanyRepository companyRepository,
-        IUserRepository userRepository,
-        IEmployeeRepository employeeRepository,
+        ITenantResolutionService tenantResolutionService,
         ICurrentUserService currentUserService,
         IMapper mapper)
     {
         _companyRepository = companyRepository;
-        _userRepository = userRepository;
-        _employeeRepository = employeeRepository;
+        _tenantResolutionService = tenantResolutionService;
         _currentUserService = currentUserService;
         _mapper = mapper;
     }
@@ -40,27 +37,14 @@ public class GetCompanyProfileQueryHandler : IRequestHandler<GetCompanyProfileQu
     /// <inheritdoc />
     public async Task<ApiResponse<CompanyDto>> Handle(GetCompanyProfileQuery request, CancellationToken ct)
     {
-        int? targetCompanyId = request.CompanyId;
+        var targetCompanyId = await _tenantResolutionService.GetCurrentCompanyIdAsync(request.CompanyId, ct);
 
-        // If not specified by request, attempt to resolve user's tenant company from their linked employee profile
-        if (!targetCompanyId.HasValue && _currentUserService.UserId.HasValue)
+        Domain.Entities.Company? company = null;
+        if (targetCompanyId.HasValue && targetCompanyId.Value > 0)
         {
-            var user = await _userRepository.GetByUuidAsync(_currentUserService.UserId.Value, ct);
-            if (user != null && user.EmployeeId.HasValue)
-            {
-                var employee = await _employeeRepository.GetWithFullDetailsAsync(user.EmployeeId.Value, ct);
-                if (employee != null)
-                {
-                    targetCompanyId = employee.Department?.CompanyId ?? employee.Branch?.CompanyId;
-                }
-            }
+            company = await _companyRepository.GetByIdAsync(targetCompanyId.Value, ct);
         }
-
-        var company = targetCompanyId.HasValue
-            ? await _companyRepository.GetByIdAsync(targetCompanyId.Value, ct)
-            : await _companyRepository.GetDefaultCompanyAsync(ct);
-
-        if (company == null)
+        else if (_currentUserService.IsInRole("SuperAdmin"))
         {
             company = await _companyRepository.GetDefaultCompanyAsync(ct);
         }

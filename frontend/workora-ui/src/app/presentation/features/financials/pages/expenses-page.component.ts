@@ -7,6 +7,7 @@ import { EmployeeApiRepository } from '../../../../data/repositories/employee-ap
 import { ExpenseClaim, SubmitExpenseParams } from '../../../../domain/models/expense.model';
 import { Employee } from '../../../../domain/models/employee.model';
 import { NotificationService } from '../../../../core/services/notification.service';
+import { AuthService } from '../../../../core/services/auth.service';
 import { WorkoraSkeletonComponent } from '../../../shared/components/workora-skeleton.component';
 import { WorkoraEmptyStateComponent } from '../../../shared/components/workora-empty-state.component';
 import { SubmitExpenseModalComponent } from '../components/submit-expense-modal.component';
@@ -175,6 +176,7 @@ export class ExpensesPageComponent implements OnInit {
   private readonly expenseRepo = inject(ExpenseApiRepository);
   private readonly empRepo = inject(EmployeeApiRepository);
   private readonly notificationService = inject(NotificationService);
+  private readonly authService = inject(AuthService);
 
   readonly claims = signal<ExpenseClaim[]>([]);
   readonly employees = signal<Employee[]>([]);
@@ -182,6 +184,10 @@ export class ExpensesPageComponent implements OnInit {
   readonly isLoading = signal<boolean>(false);
   readonly isSubmitModalOpen = signal<boolean>(false);
   readonly isSubmitting = signal<boolean>(false);
+
+  private get currentEmpId(): number {
+    return this.authService.currentUser()?.employeeId ?? 1;
+  }
 
   ngOnInit(): void {
     this.loadClaims();
@@ -213,7 +219,7 @@ export class ExpensesPageComponent implements OnInit {
   }
 
   onApproveManager(id: number): void {
-    this.expenseRepo.approveByManager(id, 1).subscribe({
+    this.expenseRepo.approveByManager(id, this.currentEmpId).subscribe({
       next: () => {
         this.notificationService.showSuccess('Approved by reporting manager. Forwarded to Finance.');
         this.loadClaims();
@@ -223,7 +229,7 @@ export class ExpensesPageComponent implements OnInit {
   }
 
   onApproveFinance(id: number): void {
-    this.expenseRepo.approveByFinance(id, 1).subscribe({
+    this.expenseRepo.approveByFinance(id, this.currentEmpId).subscribe({
       next: () => {
         this.notificationService.showSuccess('Reimbursement approved by Finance team.');
         this.loadClaims();
@@ -233,7 +239,7 @@ export class ExpensesPageComponent implements OnInit {
   }
 
   onRejectExpense(id: number): void {
-    this.expenseRepo.rejectExpenseClaim(id, 1, 'Invalid receipt proof').subscribe({
+    this.expenseRepo.rejectExpenseClaim(id, this.currentEmpId, 'Invalid receipt proof').subscribe({
       next: () => {
         this.notificationService.showSuccess('Claim rejected.');
         this.loadClaims();

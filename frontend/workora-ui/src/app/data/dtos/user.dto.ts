@@ -11,6 +11,7 @@ export interface UserDto {
   employeeId?: number | null;
   isActive: boolean;
   createdAt: string;
+  roles?: string[];
 }
 
 /**

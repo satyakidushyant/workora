@@ -1,4 +1,4 @@
-﻿using AutoMapper;
+using AutoMapper;
 using MediatR;
 using Workora.Application.Features.Expenses.DTOs;
 using Workora.Domain.Enums;
@@ -10,4 +10,4 @@ namespace Workora.Application.Features.Expenses.Queries.ListExpenseClaims;
 /// <summary>
 /// Query to list company expense claims with optional status and category filters.
 /// </summary>
-public record ListExpenseClaimsQuery(ExpenseStatus? Status, ExpenseCategory? Category) : IRequest<ApiResponse<List<ExpenseClaimDto>>>;
+public record ListExpenseClaimsQuery(ExpenseStatus? Status = null, ExpenseCategory? Category = null, int? CompanyId = null) : IRequest<ApiResponse<List<ExpenseClaimDto>>>;

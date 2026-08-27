@@ -17,7 +17,7 @@ export interface IAttendanceRepository {
   getTodayStatus(): Observable<AttendanceRecord | null>;
   getAttendanceHistory(employeeId: number, startDate: string, endDate: string): Observable<AttendanceRecord[]>;
   getSummary(employeeId: number, month: number, year: number): Observable<AttendanceSummary>;
-  getLiveStatus(companyId: number): Observable<LiveAttendanceStatus>;
+  getLiveStatus(companyId?: number): Observable<LiveAttendanceStatus>;
   requestCorrection(params: RequestCorrectionParams): Observable<boolean>;
   getCorrections(pageNumber?: number, pageSize?: number, status?: string): Observable<PagedResponse<AttendanceCorrection>>;
   approveCorrection(id: number, remarks?: string): Observable<boolean>;

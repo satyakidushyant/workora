@@ -98,8 +98,11 @@ export class AttendanceApiRepository implements IAttendanceRepository {
     );
   }
 
-  getLiveStatus(companyId: number): Observable<LiveAttendanceStatus> {
-    const params = new HttpParams().set('companyId', companyId.toString());
+  getLiveStatus(companyId?: number): Observable<LiveAttendanceStatus> {
+    let params = new HttpParams();
+    if (companyId) {
+      params = params.set('companyId', companyId.toString());
+    }
     return this.http.get<ApiResponse<LiveAttendanceStatusDto>>(`${this.baseUrl}/live-status`, { params }).pipe(
       map(response => {
         if (!response.isSuccess || !response.data) {

@@ -1,7 +1,7 @@
-﻿using AutoMapper;
+using AutoMapper;
 using MediatR;
+using Workora.Application.Common.Interfaces;
 using Workora.Application.Features.Recruitment.DTOs;
-using Workora.Domain.Enums;
 using Workora.Domain.Interfaces;
 using Workora.Shared.Responses;
 
@@ -13,31 +13,38 @@ namespace Workora.Application.Features.Recruitment.Queries.GetJobPostingsList;
 public class GetJobPostingsListQueryHandler : IRequestHandler<GetJobPostingsListQuery, ApiResponse<PagedResponse<JobPostingDto>>>
 {
     private readonly IRecruitmentRepository _recruitmentRepository;
+    private readonly ITenantResolutionService _tenantResolutionService;
     private readonly IMapper _mapper;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="GetJobPostingsListQueryHandler"/> class.
     /// </summary>
-    public GetJobPostingsListQueryHandler(IRecruitmentRepository recruitmentRepository, IMapper mapper)
+    public GetJobPostingsListQueryHandler(
+        IRecruitmentRepository recruitmentRepository,
+        ITenantResolutionService tenantResolutionService,
+        IMapper mapper)
     {
         _recruitmentRepository = recruitmentRepository;
+        _tenantResolutionService = tenantResolutionService;
         _mapper = mapper;
     }
 
     /// <inheritdoc />
     public async Task<ApiResponse<PagedResponse<JobPostingDto>>> Handle(GetJobPostingsListQuery request, CancellationToken ct)
     {
+        var targetCompanyId = await _tenantResolutionService.GetCurrentCompanyIdAsync(request.CompanyId, ct);
+
         var jobs = await _recruitmentRepository.GetJobsPagedAsync(
             request.PageNumber,
             request.PageSize,
-            request.CompanyId,
+            targetCompanyId,
             request.DepartmentId,
             request.Status,
             request.SearchTerm,
             ct);
 
         var totalCount = await _recruitmentRepository.GetJobsCountAsync(
-            request.CompanyId,
+            targetCompanyId,
             request.DepartmentId,
             request.Status,
             request.SearchTerm,

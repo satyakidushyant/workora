@@ -1,4 +1,5 @@
-﻿using MediatR;
+using MediatR;
+using Workora.Application.Common.Interfaces;
 using Workora.Application.Features.Dashboard.DTOs;
 using Workora.Domain.Interfaces;
 using Workora.Shared.Responses;
@@ -11,19 +12,26 @@ namespace Workora.Application.Features.Dashboard.Queries.GetTodayAttendanceDashb
 public class GetTodayAttendanceDashboardQueryHandler : IRequestHandler<GetTodayAttendanceDashboardQuery, ApiResponse<TodayAttendanceDashboardDto>>
 {
     private readonly IAnalyticsRepository _analyticsRepository;
+    private readonly ITenantResolutionService _tenantResolutionService;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="GetTodayAttendanceDashboardQueryHandler"/> class.
     /// </summary>
-    public GetTodayAttendanceDashboardQueryHandler(IAnalyticsRepository analyticsRepository)
+    public GetTodayAttendanceDashboardQueryHandler(
+        IAnalyticsRepository analyticsRepository,
+        ITenantResolutionService tenantResolutionService)
     {
         _analyticsRepository = analyticsRepository;
+        _tenantResolutionService = tenantResolutionService;
     }
 
     /// <inheritdoc />
     public async Task<ApiResponse<TodayAttendanceDashboardDto>> Handle(GetTodayAttendanceDashboardQuery request, CancellationToken ct)
     {
-        var metrics = await _analyticsRepository.GetTodayAttendanceMetricsAsync(request.CompanyId, ct);
+        var targetCompanyId = await _tenantResolutionService.GetCurrentCompanyIdAsync(request.CompanyId, ct);
+        var effectiveCompanyId = targetCompanyId ?? 1;
+
+        var metrics = await _analyticsRepository.GetTodayAttendanceMetricsAsync(effectiveCompanyId, ct);
         var dto = new TodayAttendanceDashboardDto(
             metrics.TotalPresent,
             metrics.OnTime,

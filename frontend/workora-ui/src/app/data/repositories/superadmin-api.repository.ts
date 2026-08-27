@@ -64,10 +64,15 @@ export class SuperAdminApiRepository implements ISuperAdminRepository {
   registerOrganization(params: RegisterOrganizationParams): Observable<TenantOrganization> {
     const payload: RegisterOrganizationRequestDto = {
       name: params.name,
-      slug: params.slug,
-      subdomain: params.subdomain,
-      adminEmail: params.adminEmail,
-      subscriptionPlanId: params.subscriptionPlanId
+      code: params.code.trim().toUpperCase(),
+      registrationNumber: params.registrationNumber || null,
+      taxId: params.taxId || null,
+      email: params.email || null,
+      phone: params.phone || null,
+      website: params.website || null,
+      fiscalYearStartMonth: params.fiscalYearStartMonth || 1,
+      currency: params.currency || 'USD',
+      address: params.address || null
     };
 
     return this.http.post<ApiResponse<OrganizationDto>>(`${this.baseUrl}/organizations`, payload).pipe(

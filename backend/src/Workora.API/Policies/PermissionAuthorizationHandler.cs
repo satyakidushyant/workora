@@ -1,4 +1,4 @@
-﻿using System.Security.Claims;
+using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
 
 namespace Workora.API.Policies;
@@ -28,7 +28,26 @@ public class PermissionAuthorizationHandler : AuthorizationHandler<PermissionReq
             return Task.CompletedTask;
         }
 
-        // 2. Discrete Permission Check (PBAC)
+        // 2. Base Self-Service Authentication Policies (Any valid authenticated user)
+        if (requirement.Permission.StartsWith("auth.", StringComparison.OrdinalIgnoreCase) &&
+            context.User.Identity?.IsAuthenticated == true)
+        {
+            context.Succeed(requirement);
+            return Task.CompletedTask;
+        }
+
+        // 3. HRAdmin / CompanyAdmin Role Bypass for Tenant-Level Operations
+        var isTenantAdmin = context.User.IsInRole("HRAdmin") ||
+                            context.User.IsInRole("CompanyAdmin") ||
+                            context.User.HasClaim(c => (c.Type == ClaimTypes.Role || c.Type == "role") && (c.Value == "HRAdmin" || c.Value == "CompanyAdmin"));
+
+        if (isTenantAdmin && !requirement.Permission.StartsWith("superadmin.", StringComparison.OrdinalIgnoreCase))
+        {
+            context.Succeed(requirement);
+            return Task.CompletedTask;
+        }
+
+        // 4. Discrete Permission Check (PBAC)
         if (context.User.HasClaim(c => c.Type == "permission" && string.Equals(c.Value, requirement.Permission, StringComparison.OrdinalIgnoreCase)) ||
             context.User.HasClaim(c => c.Type == "permissions" && string.Equals(c.Value, requirement.Permission, StringComparison.OrdinalIgnoreCase)))
         {

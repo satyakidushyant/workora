@@ -5,14 +5,16 @@ export class SuperAdminMapper {
   static fromOrgDto(dto: OrganizationDto): TenantOrganization {
     return {
       id: dto.id,
-      uuid: dto.uuid,
       name: dto.name,
-      slug: dto.slug,
-      subdomain: dto.subdomain,
-      adminEmail: dto.adminEmail,
-      subscriptionPlanId: dto.subscriptionPlanId,
-      subscriptionPlanName: dto.subscriptionPlanName,
-      status: dto.status,
+      code: dto.code,
+      registrationNumber: dto.registrationNumber,
+      taxId: dto.taxId,
+      email: dto.email,
+      phone: dto.phone,
+      website: dto.website,
+      logoUrl: dto.logoUrl,
+      currency: dto.currency,
+      isActive: dto.isActive,
       createdAt: dto.createdAt
     };
   }
@@ -22,10 +24,9 @@ export class SuperAdminMapper {
       id: dto.id,
       name: dto.name,
       description: dto.description,
-      monthlyPrice: dto.monthlyPrice,
-      annualPrice: dto.annualPrice,
+      price: dto.price,
       maxEmployees: dto.maxEmployees,
-      features: dto.features || [],
+      billingCycle: dto.billingCycle,
       isActive: dto.isActive
     };
   }
@@ -34,8 +35,10 @@ export class SuperAdminMapper {
     return {
       totalOrganizations: dto.totalOrganizations,
       activeOrganizations: dto.activeOrganizations,
-      totalSubscribedUsers: dto.totalSubscribedUsers,
-      monthlyRecurringRevenue: dto.monthlyRecurringRevenue
+      suspendedOrganizations: dto.suspendedOrganizations,
+      totalSystemUsers: dto.totalSystemUsers,
+      totalEmployees: dto.totalEmployees,
+      activeSubscriptionPlans: dto.activeSubscriptionPlans
     };
   }
 }

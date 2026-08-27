@@ -66,10 +66,22 @@ public class UserRepository : GenericRepository<User>, IUserRepository
 
         if (companyId.HasValue)
         {
-            query = query.Where(u => u.EmployeeId.HasValue &&
-                _dbContext.Employees.Any(e => e.Id == u.EmployeeId.Value &&
-                    ((e.Department != null && e.Department.CompanyId == companyId.Value) ||
-                     (e.Branch != null && e.Branch.CompanyId == companyId.Value))));
+            var cid = companyId.Value;
+            query = query.Where(u =>
+                !u.UserRoles.Any(ur => ur.Role != null && ur.Role.Name == "SuperAdmin") &&
+                (
+                    (u.EmployeeId.HasValue &&
+                     _dbContext.Employees.Any(e => e.Id == u.EmployeeId.Value &&
+                        ((e.Department != null && e.Department.CompanyId == cid) ||
+                         (e.Branch != null && e.Branch.CompanyId == cid))))
+                    ||
+                    (_dbContext.Employees.Any(e => e.UserId == u.Id &&
+                        ((e.Department != null && e.Department.CompanyId == cid) ||
+                         (e.Branch != null && e.Branch.CompanyId == cid))))
+                    ||
+                    (_dbContext.Companies.Any(c => c.Id == cid && c.Email != null && c.Email.ToLower() == EF.Property<string>(u, "Email").ToLower()))
+                )
+            );
         }
 
         if (!string.IsNullOrWhiteSpace(searchTerm))
@@ -99,10 +111,22 @@ public class UserRepository : GenericRepository<User>, IUserRepository
 
         if (companyId.HasValue)
         {
-            query = query.Where(u => u.EmployeeId.HasValue &&
-                _dbContext.Employees.Any(e => e.Id == u.EmployeeId.Value &&
-                    ((e.Department != null && e.Department.CompanyId == companyId.Value) ||
-                     (e.Branch != null && e.Branch.CompanyId == companyId.Value))));
+            var cid = companyId.Value;
+            query = query.Where(u =>
+                !u.UserRoles.Any(ur => ur.Role != null && ur.Role.Name == "SuperAdmin") &&
+                (
+                    (u.EmployeeId.HasValue &&
+                     _dbContext.Employees.Any(e => e.Id == u.EmployeeId.Value &&
+                        ((e.Department != null && e.Department.CompanyId == cid) ||
+                         (e.Branch != null && e.Branch.CompanyId == cid))))
+                    ||
+                    (_dbContext.Employees.Any(e => e.UserId == u.Id &&
+                        ((e.Department != null && e.Department.CompanyId == cid) ||
+                         (e.Branch != null && e.Branch.CompanyId == cid))))
+                    ||
+                    (_dbContext.Companies.Any(c => c.Id == cid && c.Email != null && c.Email.ToLower() == EF.Property<string>(u, "Email").ToLower()))
+                )
+            );
         }
 
         if (!string.IsNullOrWhiteSpace(searchTerm))

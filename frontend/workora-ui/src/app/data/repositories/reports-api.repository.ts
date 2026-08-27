@@ -31,8 +31,9 @@ export class ReportsApiRepository implements IReportsRepository {
 
   constructor(private readonly http: HttpClient) {}
 
-  getHeadcountReport(companyId = 1): Observable<HeadcountReport> {
-    const params = new HttpParams().set('companyId', companyId.toString());
+  getHeadcountReport(companyId?: number): Observable<HeadcountReport> {
+    let params = new HttpParams();
+    if (companyId) params = params.set('companyId', companyId.toString());
     return this.http.get<ApiResponse<HeadcountReportDto>>(`${this.baseUrl}/headcount`, { params }).pipe(
       map(response => {
         if (!response.isSuccess || !response.data) {
@@ -43,8 +44,9 @@ export class ReportsApiRepository implements IReportsRepository {
     );
   }
 
-  getAttendanceReport(companyId = 1): Observable<AttendanceReport> {
-    const params = new HttpParams().set('companyId', companyId.toString());
+  getAttendanceReport(companyId?: number): Observable<AttendanceReport> {
+    let params = new HttpParams();
+    if (companyId) params = params.set('companyId', companyId.toString());
     return this.http.get<ApiResponse<AttendanceReportDto>>(`${this.baseUrl}/attendance`, { params }).pipe(
       map(response => {
         if (!response.isSuccess || !response.data) {
@@ -55,8 +57,9 @@ export class ReportsApiRepository implements IReportsRepository {
     );
   }
 
-  getLeaveReport(companyId = 1, year?: number): Observable<LeaveReport> {
-    let params = new HttpParams().set('companyId', companyId.toString());
+  getLeaveReport(companyId?: number, year?: number): Observable<LeaveReport> {
+    let params = new HttpParams();
+    if (companyId) params = params.set('companyId', companyId.toString());
     if (year) params = params.set('year', year.toString());
 
     return this.http.get<ApiResponse<LeaveReportDto>>(`${this.baseUrl}/leave`, { params }).pipe(
@@ -69,8 +72,9 @@ export class ReportsApiRepository implements IReportsRepository {
     );
   }
 
-  getPayrollReport(companyId = 1): Observable<PayrollReport> {
-    const params = new HttpParams().set('companyId', companyId.toString());
+  getPayrollReport(companyId?: number): Observable<PayrollReport> {
+    let params = new HttpParams();
+    if (companyId) params = params.set('companyId', companyId.toString());
     return this.http.get<ApiResponse<PayrollReportDto>>(`${this.baseUrl}/payroll`, { params }).pipe(
       map(response => {
         if (!response.isSuccess || !response.data) {
@@ -81,8 +85,10 @@ export class ReportsApiRepository implements IReportsRepository {
     );
   }
 
-  getAttritionReport(companyId = 1, year = new Date().getFullYear()): Observable<AttritionReport> {
-    const params = new HttpParams().set('companyId', companyId.toString()).set('year', year.toString());
+  getAttritionReport(companyId?: number, year = new Date().getFullYear()): Observable<AttritionReport> {
+    let params = new HttpParams();
+    if (companyId) params = params.set('companyId', companyId.toString());
+    if (year) params = params.set('year', year.toString());
     return this.http.get<ApiResponse<AttritionReportDto>>(`${this.baseUrl}/attrition`, { params }).pipe(
       map(response => {
         if (!response.isSuccess || !response.data) {

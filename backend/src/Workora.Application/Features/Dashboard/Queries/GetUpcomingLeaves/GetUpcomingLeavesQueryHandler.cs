@@ -1,4 +1,5 @@
-﻿using MediatR;
+using MediatR;
+using Workora.Application.Common.Interfaces;
 using Workora.Application.Features.Dashboard.DTOs;
 using Workora.Domain.Interfaces;
 using Workora.Shared.Responses;
@@ -11,19 +12,26 @@ namespace Workora.Application.Features.Dashboard.Queries.GetUpcomingLeaves;
 public class GetUpcomingLeavesQueryHandler : IRequestHandler<GetUpcomingLeavesQuery, ApiResponse<IReadOnlyList<UpcomingLeaveDto>>>
 {
     private readonly IAnalyticsRepository _analyticsRepository;
+    private readonly ITenantResolutionService _tenantResolutionService;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="GetUpcomingLeavesQueryHandler"/> class.
     /// </summary>
-    public GetUpcomingLeavesQueryHandler(IAnalyticsRepository analyticsRepository)
+    public GetUpcomingLeavesQueryHandler(
+        IAnalyticsRepository analyticsRepository,
+        ITenantResolutionService tenantResolutionService)
     {
         _analyticsRepository = analyticsRepository;
+        _tenantResolutionService = tenantResolutionService;
     }
 
     /// <inheritdoc />
     public async Task<ApiResponse<IReadOnlyList<UpcomingLeaveDto>>> Handle(GetUpcomingLeavesQuery request, CancellationToken ct)
     {
-        var leaves = await _analyticsRepository.GetUpcomingLeavesAsync(request.CompanyId, request.DaysAhead, ct);
+        var targetCompanyId = await _tenantResolutionService.GetCurrentCompanyIdAsync(request.CompanyId, ct);
+        var effectiveCompanyId = targetCompanyId ?? 1;
+
+        var leaves = await _analyticsRepository.GetUpcomingLeavesAsync(effectiveCompanyId, request.DaysAhead, ct);
 
         var dtos = leaves.Select(l => new UpcomingLeaveDto(
             l.Id,

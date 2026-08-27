@@ -9,10 +9,10 @@ import {
 } from '../models/reports.model';
 
 export interface IReportsRepository {
-  getHeadcountReport(companyId: number): Observable<HeadcountReport>;
-  getAttendanceReport(companyId: number): Observable<AttendanceReport>;
-  getLeaveReport(companyId: number, year?: number): Observable<LeaveReport>;
-  getPayrollReport(companyId: number): Observable<PayrollReport>;
-  getAttritionReport(companyId: number, year?: number): Observable<AttritionReport>;
+  getHeadcountReport(companyId?: number): Observable<HeadcountReport>;
+  getAttendanceReport(companyId?: number): Observable<AttendanceReport>;
+  getLeaveReport(companyId?: number, year?: number): Observable<LeaveReport>;
+  getPayrollReport(companyId?: number): Observable<PayrollReport>;
+  getAttritionReport(companyId?: number, year?: number): Observable<AttritionReport>;
   exportCustomReport(companyId: number, reportType: string, format: string): Observable<CustomReportExport>;
 }

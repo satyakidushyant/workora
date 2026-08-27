@@ -1,4 +1,4 @@
-﻿using AutoMapper;
+using AutoMapper;
 using MediatR;
 using Workora.Application.Features.Recruitment.DTOs;
 using Workora.Domain.Enums;
@@ -15,4 +15,5 @@ public record GetCandidatesListQuery(
     int PageSize = 25,
     int? JobPostingId = null,
     CandidateStage? Stage = null,
-    string? SearchTerm = null) : IRequest<ApiResponse<PagedResponse<CandidateDto>>>;
+    string? SearchTerm = null,
+    int? CompanyId = null) : IRequest<ApiResponse<PagedResponse<CandidateDto>>>;

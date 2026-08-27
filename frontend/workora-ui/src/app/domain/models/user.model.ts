@@ -12,6 +12,7 @@ export interface UserSummary {
   employeeId?: number | null;
   isActive: boolean;
   createdAt: string;
+  roles?: string[];
 }
 
 /**
@@ -43,6 +44,7 @@ export interface CreateUserParams {
   lastName: string;
   password: string;
   employeeId?: number | null;
+  roleId?: number | null;
 }
 
 /**
@@ -53,6 +55,7 @@ export interface UpdateUserParams {
   firstName: string;
   lastName: string;
   employeeId?: number | null;
+  roleId?: number | null;
 }
 
 /**

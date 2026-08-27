@@ -14,9 +14,9 @@ public interface IExpenseClaimRepository : IRepository<ExpenseClaim>
     Task<List<ExpenseClaim>> GetByEmployeeIdAsync(int employeeId, CancellationToken ct = default);
 
     /// <summary>
-    /// Gets company claims filtered by status and category.
+    /// Gets company claims filtered by status, category, and company.
     /// </summary>
-    Task<List<ExpenseClaim>> GetClaimsAsync(ExpenseStatus? status, ExpenseCategory? category, CancellationToken ct = default);
+    Task<List<ExpenseClaim>> GetClaimsAsync(ExpenseStatus? status, ExpenseCategory? category, int? companyId = null, CancellationToken ct = default);
 
     /// <summary>
     /// Gets claims approved for reimbursement in upcoming payroll.

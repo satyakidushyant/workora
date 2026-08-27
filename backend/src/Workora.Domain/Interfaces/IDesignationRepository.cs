@@ -26,12 +26,12 @@ public interface IDesignationRepository : IRepository<Designation>
     Task<bool> IsTitleUniqueAsync(int departmentId, string title, int? excludeId = null, CancellationToken ct = default);
 
     /// <summary>
-    /// Gets a paginated list of designations with optional department and search filters.
+    /// Gets a paginated list of designations with optional department, search, and company filters.
     /// </summary>
-    Task<IReadOnlyList<Designation>> GetPagedListAsync(int pageNumber, int pageSize, string? searchTerm = null, int? departmentId = null, CancellationToken ct = default);
+    Task<IReadOnlyList<Designation>> GetPagedListAsync(int pageNumber, int pageSize, string? searchTerm = null, int? departmentId = null, int? companyId = null, CancellationToken ct = default);
 
     /// <summary>
     /// Gets total count of designations matching filters.
     /// </summary>
-    Task<int> GetCountAsync(string? searchTerm = null, int? departmentId = null, CancellationToken ct = default);
+    Task<int> GetCountAsync(string? searchTerm = null, int? departmentId = null, int? companyId = null, CancellationToken ct = default);
 }

@@ -29,6 +29,7 @@ public interface ILeaveRequestRepository : IRepository<LeaveRequest>
         LeaveRequestStatus? status = null,
         DateOnly? fromDate = null,
         DateOnly? toDate = null,
+        int? companyId = null,
         CancellationToken ct = default);
 
     /// <summary>
@@ -40,6 +41,7 @@ public interface ILeaveRequestRepository : IRepository<LeaveRequest>
         LeaveRequestStatus? status = null,
         DateOnly? fromDate = null,
         DateOnly? toDate = null,
+        int? companyId = null,
         CancellationToken ct = default);
 
     /// <summary>

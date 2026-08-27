@@ -4,6 +4,7 @@ using Workora.Application.Common.Interfaces;
 using Workora.Infrastructure.Authentication;
 using Workora.Infrastructure.Caching;
 using Workora.Infrastructure.Email;
+using Workora.Infrastructure.Services;
 using Workora.Infrastructure.Storage;
 
 namespace Workora.Infrastructure;
@@ -24,6 +25,7 @@ public static class DependencyInjection
         services.AddSingleton<ITokenService, TokenService>();
         services.AddSingleton<IPasswordHasher, PasswordHasher>();
         services.AddScoped<IEmailService, SmtpEmailService>();
+        services.AddScoped<ITenantResolutionService, TenantResolutionService>();
 
         services.Configure<CloudinarySettings>(configuration.GetSection(CloudinarySettings.SectionName));
         services.AddScoped<IFileStorageService, CloudinaryFileStorageService>();

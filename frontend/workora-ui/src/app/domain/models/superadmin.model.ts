@@ -1,38 +1,58 @@
+/**
+ * Domain model representing a tenant organization / company.
+ */
 export interface TenantOrganization {
   id: number;
-  uuid: string;
   name: string;
-  slug: string;
-  subdomain: string;
-  adminEmail: string;
-  subscriptionPlanId: number;
-  subscriptionPlanName?: string | null;
-  status: string; // 'Active' | 'Suspended' | 'Trial'
+  code: string;
+  registrationNumber?: string | null;
+  taxId?: string | null;
+  email?: string | null;
+  phone?: string | null;
+  website?: string | null;
+  logoUrl?: string | null;
+  currency: string;
+  isActive: boolean;
   createdAt: string;
 }
 
+/**
+ * Domain model representing a platform subscription plan.
+ */
 export interface SubscriptionPlan {
   id: number;
   name: string;
   description: string;
-  monthlyPrice: number;
-  annualPrice: number;
+  price: number;
   maxEmployees: number;
-  features: string[];
+  billingCycle: number | string;
   isActive: boolean;
 }
 
+/**
+ * Domain model representing platform global metrics.
+ */
 export interface SuperAdminMetrics {
   totalOrganizations: number;
   activeOrganizations: number;
-  totalSubscribedUsers: number;
-  monthlyRecurringRevenue: number;
+  suspendedOrganizations: number;
+  totalSystemUsers: number;
+  totalEmployees: number;
+  activeSubscriptionPlans: number;
 }
 
+/**
+ * Parameters for registering a new tenant organization.
+ */
 export interface RegisterOrganizationParams {
   name: string;
-  slug: string;
-  subdomain: string;
-  adminEmail: string;
-  subscriptionPlanId: number;
+  code: string;
+  registrationNumber?: string | null;
+  taxId?: string | null;
+  email?: string | null;
+  phone?: string | null;
+  website?: string | null;
+  fiscalYearStartMonth?: number;
+  currency?: string;
+  address?: string | null;
 }

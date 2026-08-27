@@ -16,13 +16,14 @@ public class UserMappingProfile : Profile
     {
         CreateMap<User, UserDto>()
             .ForMember(dest => dest.Email, opt => opt.MapFrom(src => src.Email.Value))
-            .ForMember(dest => dest.CreatedAt, opt => opt.MapFrom(src => src.CreatedAt));
+            .ForMember(dest => dest.CreatedAt, opt => opt.MapFrom(src => src.CreatedAt))
+            .ForMember(dest => dest.Roles, opt => opt.MapFrom(src => src.UserRoles.Where(ur => ur.Role != null).Select(ur => ur.Role.Name)));
 
         CreateMap<User, UserDetailDto>()
             .IncludeBase<User, UserDto>()
             .ForMember(dest => dest.Email, opt => opt.MapFrom(src => src.Email.Value))
             .ForMember(dest => dest.IsLockedOut, opt => opt.MapFrom(src => src.IsLockedOut))
-            .ForMember(dest => dest.Roles, opt => opt.MapFrom(src => src.UserRoles.Select(ur => ur.Role.Name)));
+            .ForMember(dest => dest.Roles, opt => opt.MapFrom(src => src.UserRoles.Where(ur => ur.Role != null).Select(ur => ur.Role.Name)));
 
     }
 }

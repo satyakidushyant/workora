@@ -1,4 +1,4 @@
-﻿using AutoMapper;
+using AutoMapper;
 using Workora.Domain.Enums;
 using Workora.Domain.Extensions;
 using MediatR;
@@ -18,21 +18,24 @@ namespace Workora.Application.Features.Users.Commands.CreateUser;
 public class CreateUserCommandHandler : IRequestHandler<CreateUserCommand, ApiResponse<UserDto>>
 {
     private readonly IUserRepository _userRepository;
+    private readonly IRoleRepository _roleRepository;
+    private readonly IUnitOfWork _unitOfWork;
     private readonly IPasswordHasher _passwordHasher;
     private readonly IMapper _mapper;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="CreateUserCommandHandler"/> class.
     /// </summary>
-    /// <param name="userRepository">The user repository.</param>
-    /// <param name="passwordHasher">The password hasher service.</param>
-    /// <param name="mapper">The mapper instance.</param>
     public CreateUserCommandHandler(
         IUserRepository userRepository,
+        IRoleRepository roleRepository,
+        IUnitOfWork unitOfWork,
         IPasswordHasher passwordHasher,
         IMapper mapper)
     {
         _userRepository = userRepository;
+        _roleRepository = roleRepository;
+        _unitOfWork = unitOfWork;
         _passwordHasher = passwordHasher;
         _mapper = mapper;
     }
@@ -60,8 +63,18 @@ public class CreateUserCommandHandler : IRequestHandler<CreateUserCommand, ApiRe
         var user = User.Create(emailObj, request.FirstName, request.LastName, hashedPassword, request.EmployeeId);
 
         await _userRepository.AddAsync(user, ct);
+        await _unitOfWork.SaveChangesAsync(ct);
 
-        var dto = _mapper.Map<UserDto>(user);
+        // Assign default Employee role if role exists
+        var defaultRole = await _roleRepository.GetByNameAsync("Employee", ct);
+        if (defaultRole != null)
+        {
+            await _userRepository.AssignUserRolesAsync(user.Id, new[] { defaultRole.Id }, ct);
+            await _unitOfWork.SaveChangesAsync(ct);
+        }
+
+        var freshUser = await _userRepository.GetByIdAsync(user.Id, ct) ?? user;
+        var dto = _mapper.Map<UserDto>(freshUser);
         return ApiResponse<UserDto>.Success(dto);
     }
 }

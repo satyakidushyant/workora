@@ -41,4 +41,35 @@ public class CompanyRepository : GenericRepository<Company>, ICompanyRepository
             .OrderBy(c => c.Name)
             .ToListAsync(ct);
     }
+
+    /// <inheritdoc />
+    public async Task<Company?> GetByEmailOrDomainAsync(string email, CancellationToken ct = default)
+    {
+        if (string.IsNullOrWhiteSpace(email)) return null;
+        var normEmail = email.Trim().ToLowerInvariant();
+
+        var company = await _dbContext.Companies
+            .Include(c => c.Branches)
+            .Include(c => c.Departments)
+            .FirstOrDefaultAsync(c => c.Email != null && c.Email.ToLower() == normEmail, ct);
+
+        if (company != null) return company;
+
+        if (normEmail.Contains('@'))
+        {
+            var domain = normEmail.Split('@')[1];
+            var ignoredDomains = new[] { "workora.com", "gmail.com", "outlook.com", "yahoo.com", "hotmail.com" };
+            if (!ignoredDomains.Contains(domain))
+            {
+                company = await _dbContext.Companies
+                    .Include(c => c.Branches)
+                    .Include(c => c.Departments)
+                    .FirstOrDefaultAsync(c => 
+                        (c.Email != null && c.Email.ToLower().EndsWith("@" + domain)) ||
+                        (c.Website != null && c.Website.ToLower().Contains(domain)), ct);
+            }
+        }
+
+        return company;
+    }
 }

@@ -46,9 +46,10 @@ public class LeaveRequestRepository : GenericRepository<LeaveRequest>, ILeaveReq
         LeaveRequestStatus? status = null,
         DateOnly? fromDate = null,
         DateOnly? toDate = null,
+        int? companyId = null,
         CancellationToken ct = default)
     {
-        var query = BuildQuery(employeeId, departmentId, status, fromDate, toDate);
+        var query = BuildQuery(employeeId, departmentId, status, fromDate, toDate, companyId);
 
         return await query
             .OrderByDescending(l => l.CreatedAt)
@@ -64,9 +65,10 @@ public class LeaveRequestRepository : GenericRepository<LeaveRequest>, ILeaveReq
         LeaveRequestStatus? status = null,
         DateOnly? fromDate = null,
         DateOnly? toDate = null,
+        int? companyId = null,
         CancellationToken ct = default)
     {
-        var query = BuildQuery(employeeId, departmentId, status, fromDate, toDate);
+        var query = BuildQuery(employeeId, departmentId, status, fromDate, toDate, companyId);
         return await query.CountAsync(ct);
     }
 
@@ -123,7 +125,8 @@ public class LeaveRequestRepository : GenericRepository<LeaveRequest>, ILeaveReq
         int? departmentId,
         LeaveRequestStatus? status,
         DateOnly? fromDate,
-        DateOnly? toDate)
+        DateOnly? toDate,
+        int? companyId = null)
     {
         var query = _dbContext.Set<LeaveRequest>()
             .AsNoTracking()
@@ -131,6 +134,12 @@ public class LeaveRequestRepository : GenericRepository<LeaveRequest>, ILeaveReq
             .Include(l => l.LeaveType)
             .Include(l => l.Approvals)
             .AsQueryable();
+
+        if (companyId.HasValue)
+        {
+            var cid = companyId.Value;
+            query = query.Where(l => (l.Employee != null && ((l.Employee.Department != null && l.Employee.Department.CompanyId == cid) || (l.Employee.Branch != null && l.Employee.Branch.CompanyId == cid))) || (l.LeaveType != null && l.LeaveType.CompanyId == cid));
+        }
 
         if (employeeId.HasValue)
         {

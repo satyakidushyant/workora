@@ -19,9 +19,4 @@ public class UserDetailDto : UserDto
     /// Indicates whether the user account is currently locked out.
     /// </summary>
     public bool IsLockedOut { get; set; }
-
-    /// <summary>
-    /// The list of assigned role names.
-    /// </summary>
-    public List<string> Roles { get; set; } = new();
 }
