@@ -1,3 +1,5 @@
+﻿using Workora.Shared.Responses;
+
 namespace Workora.Application.Features.Companies.DTOs;
 
 /// <summary>
@@ -19,23 +21,3 @@ public record CompanyDto(
     string? Address,
     bool IsActive,
     DateTimeOffset CreatedAt);
-
-/// <summary>
-/// Data transfer object for updating the company profile.
-/// </summary>
-public record UpdateCompanyProfileRequestDto(
-    string Name,
-    string? RegistrationNumber,
-    string? TaxId,
-    string? Email,
-    string? Phone,
-    string? Website,
-    int FiscalYearStartMonth,
-    string Currency,
-    string? Address);
-
-/// <summary>
-/// Data transfer object for uploading or setting the company logo.
-/// </summary>
-public record UploadCompanyLogoRequestDto(
-    string LogoUrl);

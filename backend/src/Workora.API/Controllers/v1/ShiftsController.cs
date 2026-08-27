@@ -1,4 +1,4 @@
-using MediatR;
+﻿using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Workora.Application.Features.Shifts.Commands.AssignShift;
@@ -9,7 +9,9 @@ using Workora.Application.Features.Shifts.Commands.UpdateShift;
 using Workora.Application.Features.Shifts.DTOs;
 using Workora.Application.Features.Shifts.Queries.GetShiftById;
 using Workora.Application.Features.Shifts.Queries.GetShiftsList;
-using Workora.Application.Features.Shifts.Rosters;
+using Workora.Application.Features.Shifts.Queries.GetMonthlyShiftRoster;
+using Workora.Application.Features.Shifts.Commands.AssignRotationalRoster;
+using Workora.Application.Features.Shifts.Commands.SwapEmployeeShifts;
 using Workora.Shared.Responses;
 
 namespace Workora.API.Controllers.v1;

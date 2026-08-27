@@ -1,4 +1,4 @@
-using MediatR;
+﻿using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Workora.Application.Features.Assets.Commands.AssignAsset;
@@ -8,6 +8,9 @@ using Workora.Application.Features.Assets.DTOs;
 using Workora.Application.Features.Assets.Queries.GetAssetsList;
 using Workora.Shared.Responses;
 
+using Workora.Application.Features.Assets.Queries.GetAssetById;
+using Workora.Application.Features.Assets.Commands.UpdateAsset;
+using Workora.Application.Features.Assets.Queries.GetMyAssignedAssets;
 namespace Workora.API.Controllers.v1;
 
 /// <summary>
@@ -76,7 +79,7 @@ public class AssetsController : ControllerBase
     [HttpGet("{id:int}")]
     [Authorize(Policy = "assets.view")]
     public async Task<ApiResponse<AssetDto>> GetAssetById(int id)
-        => await _mediator.Send(new Workora.Application.Features.Assets.Details.GetAssetByIdQuery(id));
+        => await _mediator.Send(new GetAssetByIdQuery(id));
 
     /// <summary>
     /// Updates metadata for an existing asset.
@@ -86,7 +89,7 @@ public class AssetsController : ControllerBase
     /// <returns>Updated asset details.</returns>
     [HttpPut("{id:int}")]
     [Authorize(Policy = "assets.manage")]
-    public async Task<ApiResponse<AssetDto>> UpdateAsset(int id, [FromBody] Workora.Application.Features.Assets.Details.UpdateAssetCommand command)
+    public async Task<ApiResponse<AssetDto>> UpdateAsset(int id, [FromBody] UpdateAssetCommand command)
         => await _mediator.Send(command with { Id = id });
 
     /// <summary>
@@ -96,5 +99,5 @@ public class AssetsController : ControllerBase
     [HttpGet("me")]
     [Authorize]
     public async Task<ApiResponse<IReadOnlyList<AssetDto>>> GetMyAssets()
-        => await _mediator.Send(new Workora.Application.Features.Assets.Details.GetMyAssignedAssetsQuery());
+        => await _mediator.Send(new GetMyAssignedAssetsQuery());
 }

@@ -1,10 +1,12 @@
-using MediatR;
+﻿using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Workora.Application.Features.AuditLogs.DTOs;
 using Workora.Application.Features.AuditLogs.Queries.GetAuditLogsList;
 using Workora.Shared.Responses;
 
+using Workora.Application.Features.AuditLogs.Queries.GetEntityAuditLogs;
+using Workora.Application.Features.AuditLogs.Queries.ExportAuditLogs;
 namespace Workora.API.Controllers.v1;
 
 /// <summary>
@@ -44,7 +46,7 @@ public class AuditLogsController : ControllerBase
     [HttpGet("{entity}/{id:int}")]
     [Authorize(Policy = "audit.view")]
     public async Task<ApiResponse<IReadOnlyList<AuditLogDto>>> GetEntityAuditLogs(string entity, int id)
-        => await _mediator.Send(new Workora.Application.Features.AuditLogs.EntityLogs.GetEntityAuditLogsQuery(entity, id));
+        => await _mediator.Send(new GetEntityAuditLogsQuery(entity, id));
 
     /// <summary>
     /// Exports audit log records as a CSV file.
@@ -54,5 +56,5 @@ public class AuditLogsController : ControllerBase
     [HttpGet("export")]
     [Authorize(Policy = "audit.view")]
     public async Task<ApiResponse<string>> ExportAuditLogs([FromQuery] int companyId)
-        => await _mediator.Send(new Workora.Application.Features.AuditLogs.EntityLogs.ExportAuditLogsQuery(companyId));
+        => await _mediator.Send(new ExportAuditLogsQuery(companyId));
 }

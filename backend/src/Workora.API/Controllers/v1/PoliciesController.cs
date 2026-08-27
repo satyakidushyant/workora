@@ -1,4 +1,4 @@
-using MediatR;
+﻿using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Workora.Application.Features.Policies.Commands.AcknowledgePolicy;
@@ -8,6 +8,8 @@ using Workora.Application.Features.Policies.Queries.GetPolicyById;
 using Workora.Application.Features.Policies.Queries.GetPoliciesList;
 using Workora.Shared.Responses;
 
+using Workora.Application.Features.Policies.Commands.CreatePolicyVersion;
+using Workora.Application.Features.Policies.Queries.GetPolicyComplianceReport;
 namespace Workora.API.Controllers.v1;
 
 /// <summary>
@@ -76,7 +78,7 @@ public class PoliciesController : ControllerBase
     /// <returns>Updated policy details.</returns>
     [HttpPost("{id:int}/versions")]
     [Authorize(Policy = "policies.manage")]
-    public async Task<ApiResponse<PolicyDto>> CreatePolicyVersion(int id, [FromBody] Workora.Application.Features.Policies.Versions.CreatePolicyVersionCommand command)
+    public async Task<ApiResponse<PolicyDto>> CreatePolicyVersion(int id, [FromBody] CreatePolicyVersionCommand command)
         => await _mediator.Send(command with { PolicyId = id });
 
     /// <summary>
@@ -86,6 +88,6 @@ public class PoliciesController : ControllerBase
     /// <returns>Compliance audit statistics.</returns>
     [HttpGet("{id:int}/compliance")]
     [Authorize(Policy = "policies.manage")]
-    public async Task<ApiResponse<Workora.Application.Features.Policies.Versions.PolicyComplianceAuditDto>> GetComplianceReport(int id)
-        => await _mediator.Send(new Workora.Application.Features.Policies.Versions.GetPolicyComplianceReportQuery(id));
+    public async Task<ApiResponse<PolicyComplianceAuditDto>> GetComplianceReport(int id)
+        => await _mediator.Send(new GetPolicyComplianceReportQuery(id));
 }

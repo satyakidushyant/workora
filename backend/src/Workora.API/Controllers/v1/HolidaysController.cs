@@ -1,4 +1,4 @@
-using MediatR;
+﻿using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Workora.Application.Features.Holidays.Commands.CreateHoliday;
@@ -8,7 +8,8 @@ using Workora.Application.Features.Holidays.DTOs;
 using Workora.Application.Features.Holidays.Queries.GetHolidayById;
 using Workora.Application.Features.Holidays.Queries.GetHolidaysList;
 using Workora.Application.Features.Holidays.Commands.BulkImportHolidays;
-using Workora.Application.Features.Holidays.WeeklyOffs;
+using Workora.Application.Features.Holidays.Queries.GetWeeklyOffPolicy;
+using Workora.Application.Features.Holidays.Commands.UpdateWeeklyOffPolicy;
 using Workora.Shared.Responses;
 
 namespace Workora.API.Controllers.v1;

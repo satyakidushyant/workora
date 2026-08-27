@@ -1,7 +1,7 @@
 import { Injectable, inject, signal, computed } from '@angular/core';
 import { Router } from '@angular/router';
 import { Observable, of, throwError } from 'rxjs';
-import { tap, catchError } from 'rxjs/operators';
+import { tap, catchError, switchMap, shareReplay } from 'rxjs/operators';
 import { AUTH_REPOSITORY, IAuthRepository } from '../../domain/repositories/i-auth.repository';
 import {
   UserProfile,
@@ -26,6 +26,11 @@ export class AuthService {
   private readonly tokenService: TokenService = inject(TokenService) as TokenService;
   private readonly notificationService: NotificationService = inject(NotificationService) as NotificationService;
   private readonly router: Router = inject(Router) as Router;
+
+  /**
+   * Cached in-flight profile request to prevent duplicate parallel /auth/me calls during route transitions.
+   */
+  private inFlightProfile$: Observable<UserProfile> | null = null;
 
   /**
    * Signal holding the currently authenticated user profile details.
@@ -54,36 +59,45 @@ export class AuthService {
   });
 
   /**
-   * Authenticates user with credentials, stores returned tokens, and loads user profile.
+   * Authenticates user with credentials, stores returned tokens, and atomically loads user profile before completion.
    *
    * @param credentials User email and password.
-   * @returns Observable emitting authentication tokens.
+   * @returns Observable emitting loaded UserProfile.
    */
-  login(credentials: LoginCredentials): Observable<AuthTokens> {
+  login(credentials: LoginCredentials): Observable<UserProfile> {
     return this.authRepository.login(credentials).pipe(
       tap((tokens: AuthTokens) => {
         this.tokenService.setAccessToken(tokens.accessToken);
         this.tokenService.setRefreshToken(tokens.refreshToken);
-        this.loadProfile().subscribe();
-      })
+      }),
+      switchMap(() => this.loadProfile())
     );
   }
 
   /**
-   * Loads profile details of current authenticated user from backend.
+   * Loads profile details of current authenticated user from backend with in-flight deduplication.
    *
    * @returns Observable emitting user profile.
    */
   loadProfile(): Observable<UserProfile> {
-    return this.authRepository.getMyProfile().pipe(
+    if (this.inFlightProfile$) {
+      return this.inFlightProfile$;
+    }
+
+    this.inFlightProfile$ = this.authRepository.getMyProfile().pipe(
       tap((profile: UserProfile) => {
         this.currentUser.set(profile);
+        this.inFlightProfile$ = null;
       }),
       catchError((err: Error) => {
         this.currentUser.set(null);
+        this.inFlightProfile$ = null;
         return throwError(() => err);
-      })
+      }),
+      shareReplay(1)
     );
+
+    return this.inFlightProfile$;
   }
 
   /**

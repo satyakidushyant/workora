@@ -1,4 +1,4 @@
-using MediatR;
+﻿using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Workora.Application.Features.Documents.Commands.CreateDocument;
@@ -8,6 +8,8 @@ using Workora.Application.Features.Documents.Queries.GetDocumentById;
 using Workora.Application.Features.Documents.Queries.GetDocumentsList;
 using Workora.Shared.Responses;
 
+using Workora.Application.Features.Documents.Queries.DownloadDocument;
+using Workora.Application.Features.Documents.Queries.GetExpiringDocuments;
 namespace Workora.API.Controllers.v1;
 
 /// <summary>
@@ -75,8 +77,8 @@ public class DocumentsController : ControllerBase
     /// <returns>Secure download payload.</returns>
     [HttpGet("{id:int}/download")]
     [Authorize(Policy = "documents.view")]
-    public async Task<ApiResponse<Workora.Application.Features.Documents.Actions.DocumentDownloadDto>> DownloadDocument(int id)
-        => await _mediator.Send(new Workora.Application.Features.Documents.Actions.DownloadDocumentQuery(id));
+    public async Task<ApiResponse<DocumentDownloadDto>> DownloadDocument(int id)
+        => await _mediator.Send(new DownloadDocumentQuery(id));
 
     /// <summary>
     /// Retrieves documents expiring in the next 30 days.
@@ -86,5 +88,5 @@ public class DocumentsController : ControllerBase
     [HttpGet("expiring")]
     [Authorize(Policy = "documents.view")]
     public async Task<ApiResponse<IReadOnlyList<DocumentDto>>> GetExpiringDocuments([FromQuery] int companyId)
-        => await _mediator.Send(new Workora.Application.Features.Documents.Actions.GetExpiringDocumentsQuery(companyId));
+        => await _mediator.Send(new GetExpiringDocumentsQuery(companyId));
 }

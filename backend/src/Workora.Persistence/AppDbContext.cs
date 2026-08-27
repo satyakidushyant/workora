@@ -297,6 +297,26 @@ public class AppDbContext : DbContext, IUnitOfWork
     public DbSet<HelpdeskTicketComment> HelpdeskTicketComments { get; set; } = null!;
 
     /// <summary>
+    /// Gets or sets the OvertimeRequests table.
+    /// </summary>
+    public DbSet<OvertimeRequest> OvertimeRequests { get; set; } = null!;
+
+    /// <summary>
+    /// Gets or sets the OnboardingChecklists table.
+    /// </summary>
+    public DbSet<OnboardingChecklist> OnboardingChecklists { get; set; } = null!;
+
+    /// <summary>
+    /// Gets or sets the EmployeeOnboardings table.
+    /// </summary>
+    public DbSet<EmployeeOnboarding> EmployeeOnboardings { get; set; } = null!;
+
+    /// <summary>
+    /// Gets or sets the FinancialYears table.
+    /// </summary>
+    public DbSet<FinancialYear> FinancialYears { get; set; } = null!;
+
+    /// <summary>
     /// Saves all changes made in this context to the database, populating CreatedAt/UpdatedAt timestamps.
     /// </summary>
     public override Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)

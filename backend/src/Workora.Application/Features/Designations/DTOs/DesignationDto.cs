@@ -1,3 +1,5 @@
+﻿using Workora.Shared.Responses;
+
 namespace Workora.Application.Features.Designations.DTOs;
 
 /// <summary>
@@ -14,23 +16,3 @@ public record DesignationDto(
     string? Description,
     bool IsActive,
     DateTimeOffset CreatedAt);
-
-/// <summary>
-/// Request payload for creating a designation.
-/// </summary>
-public record CreateDesignationRequestDto(
-    int DepartmentId,
-    string Title,
-    int Level,
-    string? Grade,
-    string? Description);
-
-/// <summary>
-/// Request payload for updating a designation.
-/// </summary>
-public record UpdateDesignationRequestDto(
-    int DepartmentId,
-    string Title,
-    int Level,
-    string? Grade,
-    string? Description);

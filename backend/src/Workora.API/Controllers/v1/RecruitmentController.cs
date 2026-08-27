@@ -1,4 +1,4 @@
-using MediatR;
+﻿using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Workora.Application.Features.Recruitment.Commands.AcceptJobOffer;
@@ -25,6 +25,8 @@ using Workora.Application.Features.Recruitment.Queries.GetRecruitmentPipeline;
 using Workora.Domain.Enums;
 using Workora.Shared.Responses;
 
+using Workora.Application.Features.Recruitment.Queries.GetOfferLetterPdf;
+using Workora.Application.Features.Recruitment.Commands.ResendOfferLetter;
 namespace Workora.API.Controllers.v1;
 
 /// <summary>
@@ -251,8 +253,8 @@ public class RecruitmentController : ControllerBase
     /// <returns>Offer letter PDF details.</returns>
     [HttpGet("offers/{id:int}/pdf")]
     [Authorize(Policy = "recruitment.view")]
-    public async Task<ApiResponse<Workora.Application.Features.Recruitment.Offers.OfferLetterPdfDto>> GetOfferPdf(int id)
-        => await _mediator.Send(new Workora.Application.Features.Recruitment.Offers.GetOfferLetterPdfQuery(id));
+    public async Task<ApiResponse<OfferLetterPdfDto>> GetOfferPdf(int id)
+        => await _mediator.Send(new GetOfferLetterPdfQuery(id));
 
     /// <summary>
     /// Resends job offer notification email to a candidate.
@@ -262,7 +264,7 @@ public class RecruitmentController : ControllerBase
     [HttpPost("offers/{id:int}/resend")]
     [Authorize(Policy = "recruitment.manage")]
     public async Task<ApiResponse<bool>> ResendOffer(int id)
-        => await _mediator.Send(new Workora.Application.Features.Recruitment.Offers.ResendOfferLetterCommand(id));
+        => await _mediator.Send(new ResendOfferLetterCommand(id));
 
     /// <summary>
     /// Gets recruitment pipeline funnel metrics by candidate stage.

@@ -1,5 +1,6 @@
-using FluentValidation;
+﻿using FluentValidation;
 
+using Workora.Application.Features.Users.DTOs;
 namespace Workora.Application.Features.Users.Commands.CreateUser;
 
 /// <summary>

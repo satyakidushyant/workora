@@ -18,6 +18,7 @@ using Workora.Application.Features.Employees.Queries.GetEmployeeOrgChart;
 using Workora.Application.Features.Employees.Queries.GetEmployeesList;
 using Workora.Application.Features.Employees.Queries.GetMyEmployeeProfile;
 using Workora.Application.Features.Employees.Commands.BulkImportEmployees;
+using Workora.Application.Features.Employees.Commands.PromoteEmployee;
 using Workora.Shared.Responses;
 
 namespace Workora.API.Controllers.v1;
@@ -204,4 +205,15 @@ public class EmployeesController : ControllerBase
     [Authorize(Policy = "employees.create")]
     public async Task<ApiResponse<int>> BulkImport([FromBody] BulkImportEmployeesCommand command)
         => await _mediator.Send(command);
+
+    /// <summary>
+    /// Promotes an employee to a new designation.
+    /// </summary>
+    /// <param name="id">The employee ID.</param>
+    /// <param name="command">The promotion command payload.</param>
+    /// <returns>The updated employee.</returns>
+    [HttpPatch("{id:int}/promote")]
+    [Authorize(Policy = "employees.update")]
+    public async Task<ApiResponse<EmployeeDto>> PromoteEmployee(int id, [FromBody] PromoteEmployeeCommand command)
+        => await _mediator.Send(command with { Id = id });
 }

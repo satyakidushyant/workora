@@ -1,4 +1,4 @@
-using MediatR;
+﻿using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Workora.Application.Features.Payroll.Commands.ApprovePayrollRun;
@@ -16,7 +16,10 @@ using Workora.Application.Features.Payroll.Queries.GetPayslipById;
 using Workora.Application.Features.Payroll.Queries.GetSalaryStructureById;
 using Workora.Application.Features.Payroll.Queries.GetSalaryStructuresList;
 using Workora.Application.Features.Payroll.Queries.GetSalaryStructureHistory;
-using Workora.Application.Features.Payroll.Processing;
+using Workora.Application.Features.Payroll.Commands.ProcessPayrollRun;
+using Workora.Application.Features.Payroll.Queries.GetEmployeePayslip;
+using Workora.Application.Features.Payroll.Queries.GetPayrollDisbursementFile;
+using Workora.Application.Features.Payroll.Queries.GetBulkPayslipsExport;
 using Workora.Shared.Responses;
 
 namespace Workora.API.Controllers.v1;

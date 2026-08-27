@@ -1,4 +1,4 @@
-using MediatR;
+﻿using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Workora.Application.Features.Reports.DTOs;
@@ -8,6 +8,8 @@ using Workora.Application.Features.Reports.Queries.GetLeaveReport;
 using Workora.Application.Features.Reports.Queries.GetPayrollReport;
 using Workora.Shared.Responses;
 
+using Workora.Application.Features.Reports.Queries.GetAttritionReport;
+using Workora.Application.Features.Reports.Commands.ExportCustomReport;
 namespace Workora.API.Controllers.v1;
 
 /// <summary>
@@ -79,8 +81,8 @@ public class ReportsController : ControllerBase
     /// <returns>Attrition report metrics.</returns>
     [HttpGet("attrition")]
     [Authorize(Policy = "reports.view")]
-    public async Task<ApiResponse<Workora.Application.Features.Reports.Attrition.AttritionReportDto>> GetAttritionReport([FromQuery] int companyId, [FromQuery] int year = 0)
-        => await _mediator.Send(new Workora.Application.Features.Reports.Attrition.GetAttritionReportQuery(companyId, year == 0 ? DateTime.UtcNow.Year : year));
+    public async Task<ApiResponse<AttritionReportDto>> GetAttritionReport([FromQuery] int companyId, [FromQuery] int year = 0)
+        => await _mediator.Send(new GetAttritionReportQuery(companyId, year == 0 ? DateTime.UtcNow.Year : year));
 
     /// <summary>
     /// Generates a custom dynamic Excel report export.
@@ -89,6 +91,6 @@ public class ReportsController : ControllerBase
     /// <returns>Export file metadata.</returns>
     [HttpPost("custom/export")]
     [Authorize(Policy = "reports.export")]
-    public async Task<ApiResponse<Workora.Application.Features.Reports.Attrition.CustomReportExportDto>> ExportCustomReport([FromBody] Workora.Application.Features.Reports.Attrition.ExportCustomReportCommand command)
+    public async Task<ApiResponse<CustomReportExportDto>> ExportCustomReport([FromBody] ExportCustomReportCommand command)
         => await _mediator.Send(command);
 }

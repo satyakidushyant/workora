@@ -1,4 +1,4 @@
-using MediatR;
+﻿using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Workora.Application.Features.Performance.Commands.CreateAppraisal;
@@ -14,6 +14,8 @@ using Workora.Application.Features.Performance.Queries.GetEmployeeGoals;
 using Workora.Domain.Enums;
 using Workora.Shared.Responses;
 
+using Workora.Application.Features.Performance.Queries.GetPerformanceCycles;
+using Workora.Application.Features.Performance.Commands.CreatePerformanceCycle;
 namespace Workora.API.Controllers.v1;
 
 /// <summary>
@@ -138,8 +140,8 @@ public class PerformanceController : ControllerBase
     /// <returns>List of performance appraisal review cycles.</returns>
     [HttpGet("cycles")]
     [Authorize(Policy = "performance.view")]
-    public async Task<ApiResponse<IReadOnlyList<Workora.Application.Features.Performance.Cycles.PerformanceCycleDto>>> GetCycles([FromQuery] int companyId)
-        => await _mediator.Send(new Workora.Application.Features.Performance.Cycles.GetPerformanceCyclesQuery(companyId));
+    public async Task<ApiResponse<IReadOnlyList<PerformanceCycleDto>>> GetCycles([FromQuery] int companyId)
+        => await _mediator.Send(new GetPerformanceCyclesQuery(companyId));
 
     /// <summary>
     /// Creates a new performance appraisal review cycle.
@@ -148,6 +150,6 @@ public class PerformanceController : ControllerBase
     /// <returns>Created performance review cycle details.</returns>
     [HttpPost("cycles")]
     [Authorize(Policy = "performance.manage")]
-    public async Task<ApiResponse<Workora.Application.Features.Performance.Cycles.PerformanceCycleDto>> CreateCycle([FromBody] Workora.Application.Features.Performance.Cycles.CreatePerformanceCycleCommand command)
+    public async Task<ApiResponse<PerformanceCycleDto>> CreateCycle([FromBody] CreatePerformanceCycleCommand command)
         => await _mediator.Send(command);
 }

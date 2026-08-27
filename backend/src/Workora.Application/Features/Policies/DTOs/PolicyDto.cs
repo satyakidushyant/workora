@@ -1,3 +1,5 @@
+﻿using Workora.Shared.Responses;
+
 namespace Workora.Application.Features.Policies.DTOs;
 
 /// <summary>
@@ -15,14 +17,3 @@ public record PolicyDto(
     int AcknowledgmentsCount,
     bool IsActive,
     DateTimeOffset CreatedAt);
-
-/// <summary>
-/// Request payload for creating a policy.
-/// </summary>
-public record CreatePolicyRequestDto(
-    int CompanyId,
-    string Title,
-    string Content,
-    string Version,
-    DateOnly EffectiveDate,
-    bool RequiresAcknowledgment = true);

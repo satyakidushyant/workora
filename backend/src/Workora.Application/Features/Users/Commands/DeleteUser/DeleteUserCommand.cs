@@ -1,6 +1,7 @@
-using MediatR;
+﻿using MediatR;
 using Workora.Shared.Responses;
 
+using Workora.Application.Features.Users.DTOs;
 namespace Workora.Application.Features.Users.Commands.DeleteUser;
 
 /// <summary>

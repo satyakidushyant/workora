@@ -15,6 +15,7 @@ namespace Workora.Application.UnitTests.Features.Authentication.Commands.Login;
 public class LoginCommandHandlerTests
 {
     private readonly Mock<IUserRepository> _userRepositoryMock;
+    private readonly Mock<IPermissionRepository> _permissionRepositoryMock;
     private readonly Mock<IPasswordHasher> _passwordHasherMock;
     private readonly Mock<ITokenService> _tokenServiceMock;
     private readonly Mock<IRefreshTokenRepository> _refreshTokenRepositoryMock;
@@ -24,6 +25,7 @@ public class LoginCommandHandlerTests
     public LoginCommandHandlerTests()
     {
         _userRepositoryMock = new Mock<IUserRepository>();
+        _permissionRepositoryMock = new Mock<IPermissionRepository>();
         _passwordHasherMock = new Mock<IPasswordHasher>();
         _tokenServiceMock = new Mock<ITokenService>();
         _refreshTokenRepositoryMock = new Mock<IRefreshTokenRepository>();
@@ -31,6 +33,7 @@ public class LoginCommandHandlerTests
 
         _handler = new LoginCommandHandler(
             _userRepositoryMock.Object,
+            _permissionRepositoryMock.Object,
             _passwordHasherMock.Object,
             _tokenServiceMock.Object,
             _refreshTokenRepositoryMock.Object,
@@ -50,7 +53,7 @@ public class LoginCommandHandlerTests
         _passwordHasherMock.Setup(hasher => hasher.VerifyPassword(command.Password, user.PasswordHash))
             .Returns(true);
 
-        _tokenServiceMock.Setup(ts => ts.GenerateAccessToken(user, It.IsAny<string[]>(), It.IsAny<string[]>()))
+        _tokenServiceMock.Setup(ts => ts.GenerateAccessToken(user, It.IsAny<IEnumerable<string>>(), It.IsAny<IEnumerable<string>>()))
             .Returns("access_token");
 
         _tokenServiceMock.Setup(ts => ts.GenerateRefreshToken())

@@ -1,5 +1,6 @@
-using FluentValidation;
+﻿using FluentValidation;
 
+using Workora.Application.Features.Authentication.DTOs;
 namespace Workora.Application.Features.Authentication.Commands.Login;
 
 /// <summary>

@@ -1,4 +1,5 @@
-using Workora.Domain.Enums;
+﻿using Workora.Domain.Enums;
+using Workora.Shared.Responses;
 
 namespace Workora.Application.Features.Notifications.DTOs;
 
@@ -16,9 +17,3 @@ public record NotificationDto(
     bool IsRead,
     DateTimeOffset? ReadAt,
     DateTimeOffset CreatedAt);
-
-/// <summary>
-/// DTO representing unread notification count.
-/// </summary>
-public record UnreadNotificationCountDto(
-    int UnreadCount);

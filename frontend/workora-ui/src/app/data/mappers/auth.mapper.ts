@@ -45,8 +45,14 @@ export class AuthMapper {
       firstName: dto.firstName,
       lastName: dto.lastName,
       employeeId: dto.employeeId,
+      employeeCode: dto.employeeCode,
       roles: dto.roles ? [...dto.roles] : [],
-      permissions: dto.permissions ? [...dto.permissions] : []
+      permissions: dto.permissions ? [...dto.permissions] : [],
+      companyId: dto.companyId,
+      companyName: dto.companyName,
+      companyCode: dto.companyCode,
+      departmentName: dto.departmentName,
+      designationTitle: dto.designationTitle
     };
   }
 

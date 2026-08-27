@@ -1,17 +1,17 @@
-import { Component, ElementRef, AfterViewInit, OnDestroy, inject, signal, HostListener, PLATFORM_ID, OnInit } from '@angular/core';
+import { Component, ElementRef, AfterViewInit, OnDestroy, inject, signal, computed, HostListener, PLATFORM_ID, OnInit } from '@angular/core';
 import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { RouterOutlet, RouterLink, RouterLinkActive } from '@angular/router';
 import { gsap } from 'gsap';
 import { AuthService } from '../../core/services/auth.service';
 import { NotificationService } from '../../core/services/notification.service';
 import { NotificationApiRepository } from '../../data/repositories/notification-api.repository';
-import { NotificationItem } from '../../domain/models/notification.model';
 import { AiAssistantModalComponent } from '../features/ai-assistant/components/ai-assistant-modal.component';
 
 /**
  * Humanized Workora Dashboard Layout Shell.
  * Provides a calm, structured workspace navigation layout
- * with friendly micro-interactions, responsive mobile drawer, and clear shortcuts.
+ * with friendly micro-interactions, responsive mobile drawer, 3-tier RBAC sidebar,
+ * and topbar organization context with color-coded role badges.
  */
 @Component({
   selector: 'app-dashboard-layout',
@@ -35,7 +35,7 @@ import { AiAssistantModalComponent } from '../features/ai-assistant/components/a
           'translate-x-0 shadow-2xl': isMobileMenuOpen(),
           '-translate-x-full lg:translate-x-0': !isMobileMenuOpen()
         }"
-        class="h-screen w-72 xs:w-64 fixed left-0 top-0 bg-[#063B39] text-white border-r border-[#063B39]/80 shadow-2xl flex flex-col py-5 z-50 transition-transform duration-300 ease-in-out sidebar-shell"
+        class="h-screen w-64 fixed left-0 top-0 bg-[#063B39] text-white border-r border-[#063B39]/80 shadow-2xl flex flex-col py-5 z-50 transition-transform duration-300 ease-in-out sidebar-shell"
       >
         
         <!-- Brand Header with Workora Logo -->
@@ -65,20 +65,28 @@ import { AiAssistantModalComponent } from '../features/ai-assistant/components/a
         <!-- Navigation Links -->
         <nav class="flex-1 space-y-1.5 px-3 overflow-y-auto sidebar-nav">
           
-          <!-- SuperAdmin Platform Section -->
+          <!-- ================================================================= -->
+          <!-- 1. LEVEL 1: SUPER ADMIN PLATFORM SECTION                         -->
+          <!-- ================================================================= -->
           @if (authService.hasRole('SuperAdmin')) {
-            <div class="px-3 pb-2 text-[10px] font-bold uppercase tracking-wider text-amber-400/90">Platform Control</div>
+            <div class="px-3 pb-2 text-[10px] font-bold uppercase tracking-wider text-amber-400/90 flex items-center gap-1.5">
+              <span class="material-symbols-outlined text-sm text-amber-400">admin_panel_settings</span>
+              <span>Platform Control</span>
+            </div>
             <a
               routerLink="/superadmin"
               (click)="closeMobileMenu()"
-              routerLinkActive="bg-[#0E6E68] text-white font-bold shadow-md border-l-4 border-[#3FA79B]"
+              routerLinkActive="bg-[#0E6E68] text-white font-bold shadow-md border-l-4 border-amber-400"
               class="text-white/80 hover:bg-[#3FA79B]/15 hover:text-white flex items-center px-3.5 py-2.5 rounded-xl cursor-pointer transition-all text-xs font-semibold group nav-item">
-              <span class="material-symbols-outlined mr-3 text-lg text-amber-400 group-hover:text-white group-hover:scale-105 transition-all">admin_panel_settings</span>
+              <span class="material-symbols-outlined mr-3 text-lg text-amber-400 group-hover:text-white group-hover:scale-105 transition-all">hub</span>
               <span>Platform Admin Console</span>
             </a>
           }
 
-          <div class="px-3 pb-2 text-[10px] font-bold uppercase tracking-wider text-[#3FA79B]/80">Core Workforce</div>
+          <!-- ================================================================= -->
+          <!-- 2. CORE WORKFORCE & DIRECTORY                                    -->
+          <!-- ================================================================= -->
+          <div class="px-3 pt-2 pb-2 text-[10px] font-bold uppercase tracking-wider text-[#3FA79B]/80">Core Workforce</div>
 
           <!-- Dashboard Tab (Always visible) -->
           <a
@@ -91,32 +99,32 @@ import { AiAssistantModalComponent } from '../features/ai-assistant/components/a
             <span>Dashboard</span>
           </a>
 
-          <!-- Employees Tab -->
-          @if (authService.hasPermission('employees.view')) {
+          <!-- Employees Directory Tab -->
+          @if (authService.hasPermission('employees.view') || authService.hasPermission('employees.self')) {
             <a
               routerLink="/employees"
               (click)="closeMobileMenu()"
               routerLinkActive="bg-[#0E6E68] text-white font-bold shadow-md border-l-4 border-[#3FA79B]"
               class="text-white/80 hover:bg-[#3FA79B]/15 hover:text-white flex items-center px-3.5 py-2.5 rounded-xl cursor-pointer transition-all text-xs font-semibold group nav-item">
               <span class="material-symbols-outlined mr-3 text-lg text-[#3FA79B] group-hover:text-white group-hover:scale-105 transition-all">badge</span>
-              <span>People &amp; Employees</span>
+              <span>{{ authService.hasPermission('employees.view') ? 'People & Employees' : 'Team Directory' }}</span>
             </a>
           }
 
-          <!-- Organization Tab -->
-          @if (authService.hasPermission('company.view') || authService.hasPermission('branches.view')) {
+          <!-- Organization Master Tab -->
+          @if (authService.hasAnyPermission(['company.view', 'companies.view', 'branches.view', 'departments.view', 'designations.view'])) {
             <a
               routerLink="/organization"
               (click)="closeMobileMenu()"
               routerLinkActive="bg-[#0E6E68] text-white font-bold shadow-md border-l-4 border-[#3FA79B]"
               class="text-white/80 hover:bg-[#3FA79B]/15 hover:text-white flex items-center px-3.5 py-2.5 rounded-xl cursor-pointer transition-all text-xs font-semibold group nav-item">
               <span class="material-symbols-outlined mr-3 text-lg text-[#3FA79B] group-hover:text-white group-hover:scale-105 transition-all">account_tree</span>
-              <span>Organization</span>
+              <span>Organization Structure</span>
             </a>
           }
 
-          <!-- Roles & Permissions Tab -->
-          @if (authService.hasPermission('roles.view')) {
+          <!-- Roles & Permissions Tab (SuperAdmin & RBAC Admins) -->
+          @if (authService.hasRole('SuperAdmin') || authService.hasPermission('roles.view')) {
             <a
               routerLink="/roles"
               (click)="closeMobileMenu()"
@@ -139,8 +147,10 @@ import { AiAssistantModalComponent } from '../features/ai-assistant/components/a
             </a>
           }
 
-          <!-- Time & Attendance Section -->
-          @if (authService.hasAnyPermission(['attendance.view', 'attendance.self', 'leave.view', 'leave.self', 'holidays.view', 'shifts.view'])) {
+          <!-- ================================================================= -->
+          <!-- 3. TIME & ATTENDANCE SECTION                                     -->
+          <!-- ================================================================= -->
+          @if (authService.hasAnyPermission(['attendance.view', 'attendance.self', 'leave.view', 'leave.self', 'leave.apply', 'holidays.view', 'shifts.view'])) {
             <div class="px-3 pt-3 pb-2 text-[10px] font-bold uppercase tracking-wider text-[#3FA79B]/80">Time &amp; Attendance</div>
 
             <!-- Attendance Tab -->
@@ -151,24 +161,24 @@ import { AiAssistantModalComponent } from '../features/ai-assistant/components/a
                 routerLinkActive="bg-[#0E6E68] text-white font-bold shadow-md border-l-4 border-[#3FA79B]"
                 class="text-white/80 hover:bg-[#3FA79B]/15 hover:text-white flex items-center px-3.5 py-2.5 rounded-xl cursor-pointer transition-all text-xs font-semibold group nav-item">
                 <span class="material-symbols-outlined mr-3 text-lg text-[#3FA79B] group-hover:text-white group-hover:scale-105 transition-all">schedule</span>
-                <span>Attendance &amp; Punches</span>
+                <span>{{ authService.hasPermission('attendance.view') ? 'Attendance & Punches' : 'My Attendance Clock' }}</span>
               </a>
             }
 
             <!-- Leave Tab -->
-            @if (authService.hasPermission('leave.view') || authService.hasPermission('leave.self')) {
+            @if (authService.hasAnyPermission(['leave.view', 'leave.self', 'leave.apply'])) {
               <a
                 routerLink="/leave"
                 (click)="closeMobileMenu()"
                 routerLinkActive="bg-[#0E6E68] text-white font-bold shadow-md border-l-4 border-[#3FA79B]"
                 class="text-white/80 hover:bg-[#3FA79B]/15 hover:text-white flex items-center px-3.5 py-2.5 rounded-xl cursor-pointer transition-all text-xs font-semibold group nav-item">
                 <span class="material-symbols-outlined mr-3 text-lg text-[#3FA79B] group-hover:text-white group-hover:scale-105 transition-all">beach_access</span>
-                <span>Leave &amp; Time Off</span>
+                <span>{{ authService.hasPermission('leave.view') ? 'Leave & Time Off' : 'My Leave Requests' }}</span>
               </a>
             }
 
             <!-- Holidays Tab -->
-            @if (authService.hasPermission('holidays.view') || authService.hasPermission('employees.self')) {
+            @if (authService.hasPermission('holidays.view')) {
               <a
                 routerLink="/holidays"
                 (click)="closeMobileMenu()"
@@ -187,17 +197,19 @@ import { AiAssistantModalComponent } from '../features/ai-assistant/components/a
                 routerLinkActive="bg-[#0E6E68] text-white font-bold shadow-md border-l-4 border-[#3FA79B]"
                 class="text-white/80 hover:bg-[#3FA79B]/15 hover:text-white flex items-center px-3.5 py-2.5 rounded-xl cursor-pointer transition-all text-xs font-semibold group nav-item">
                 <span class="material-symbols-outlined mr-3 text-lg text-[#3FA79B] group-hover:text-white group-hover:scale-105 transition-all">more_time</span>
-                <span>Shift Schedules</span>
+                <span>{{ authService.hasPermission('shifts.manage') ? 'Shift Schedules & Rosters' : 'My Shift Timing' }}</span>
               </a>
             }
           }
 
-          <!-- Payroll & Financials Section -->
-          @if (authService.hasAnyPermission(['payroll.manage', 'payroll.self', 'loans.view', 'loans.apply', 'expenses.view', 'expenses.submit'])) {
+          <!-- ================================================================= -->
+          <!-- 4. PAYROLL & FINANCIALS SECTION                                  -->
+          <!-- ================================================================= -->
+          @if (authService.hasAnyPermission(['payroll.manage', 'payroll.process', 'payroll.view', 'payroll.self', 'loans.view', 'loans.apply', 'expenses.view', 'expenses.submit'])) {
             <div class="px-3 pt-3 pb-2 text-[10px] font-bold uppercase tracking-wider text-[#3FA79B]/80">Payroll &amp; Finance</div>
 
-            <!-- Payroll Runs Tab -->
-            @if (authService.hasPermission('payroll.manage') || authService.hasRole('FinanceManager')) {
+            <!-- Payroll Runs Tab (Finance & Leadership) -->
+            @if (authService.hasAnyPermission(['payroll.manage', 'payroll.process', 'payroll.view']) || authService.hasRole('FinanceManager') || authService.hasRole('SuperAdmin')) {
               <a
                 routerLink="/payroll"
                 (click)="closeMobileMenu()"
@@ -208,7 +220,7 @@ import { AiAssistantModalComponent } from '../features/ai-assistant/components/a
               </a>
             }
 
-            <!-- My Payslips Tab -->
+            <!-- My Payslips Tab (Self-Service) -->
             @if (authService.hasPermission('payroll.self')) {
               <a
                 routerLink="/my-payslips"
@@ -228,7 +240,7 @@ import { AiAssistantModalComponent } from '../features/ai-assistant/components/a
                 routerLinkActive="bg-[#0E6E68] text-white font-bold shadow-md border-l-4 border-[#3FA79B]"
                 class="text-white/80 hover:bg-[#3FA79B]/15 hover:text-white flex items-center px-3.5 py-2.5 rounded-xl cursor-pointer transition-all text-xs font-semibold group nav-item">
                 <span class="material-symbols-outlined mr-3 text-lg text-[#3FA79B] group-hover:text-white group-hover:scale-105 transition-all">account_balance</span>
-                <span>Loans &amp; Advances</span>
+                <span>{{ authService.hasPermission('loans.approve') ? 'Loans & Advances' : 'My Loans & Advances' }}</span>
               </a>
             }
 
@@ -240,16 +252,18 @@ import { AiAssistantModalComponent } from '../features/ai-assistant/components/a
                 routerLinkActive="bg-[#0E6E68] text-white font-bold shadow-md border-l-4 border-[#3FA79B]"
                 class="text-white/80 hover:bg-[#3FA79B]/15 hover:text-white flex items-center px-3.5 py-2.5 rounded-xl cursor-pointer transition-all text-xs font-semibold group nav-item">
                 <span class="material-symbols-outlined mr-3 text-lg text-[#3FA79B] group-hover:text-white group-hover:scale-105 transition-all">receipt</span>
-                <span>Expense Claims</span>
+                <span>{{ authService.hasPermission('expenses.approve') ? 'Expense Claims' : 'My Expense Claims' }}</span>
               </a>
             }
           }
 
-          <!-- Talent & Growth Section -->
+          <!-- ================================================================= -->
+          <!-- 5. TALENT & GROWTH SECTION                                       -->
+          <!-- ================================================================= -->
           @if (authService.hasAnyPermission(['recruitment.view', 'performance.view', 'performance.self', 'training.view'])) {
             <div class="px-3 pt-3 pb-2 text-[10px] font-bold uppercase tracking-wider text-[#3FA79B]/80">Talent &amp; Growth</div>
 
-            <!-- Jobs Tab -->
+            <!-- Jobs & Recruitment Tabs -->
             @if (authService.hasPermission('recruitment.view')) {
               <a
                 routerLink="/jobs"
@@ -278,7 +292,7 @@ import { AiAssistantModalComponent } from '../features/ai-assistant/components/a
                 routerLinkActive="bg-[#0E6E68] text-white font-bold shadow-md border-l-4 border-[#3FA79B]"
                 class="text-white/80 hover:bg-[#3FA79B]/15 hover:text-white flex items-center px-3.5 py-2.5 rounded-xl cursor-pointer transition-all text-xs font-semibold group nav-item">
                 <span class="material-symbols-outlined mr-3 text-lg text-[#3FA79B] group-hover:text-white group-hover:scale-105 transition-all">stars</span>
-                <span>Performance &amp; OKRs</span>
+                <span>{{ authService.hasPermission('performance.view') ? 'Performance & OKRs' : 'My Performance & Goals' }}</span>
               </a>
             }
 
@@ -295,7 +309,9 @@ import { AiAssistantModalComponent } from '../features/ai-assistant/components/a
             }
           }
 
-          <!-- Operations & Tasks Section -->
+          <!-- ================================================================= -->
+          <!-- 6. OPERATIONS & TASKS SECTION                                    -->
+          <!-- ================================================================= -->
           @if (authService.hasAnyPermission(['tasks.view', 'helpdesk.view', 'helpdesk.create', 'field.view', 'documents.view', 'assets.view'])) {
             <div class="px-3 pt-3 pb-2 text-[10px] font-bold uppercase tracking-wider text-[#3FA79B]/80">Operations &amp; Tasks</div>
 
@@ -360,7 +376,9 @@ import { AiAssistantModalComponent } from '../features/ai-assistant/components/a
             }
           }
 
-          <!-- Intelligence, Governance & Compliance Section -->
+          <!-- ================================================================= -->
+          <!-- 7. GOVERNANCE, COMPLIANCE & REPORTS                              -->
+          <!-- ================================================================= -->
           @if (authService.hasAnyPermission(['compliance.view', 'reports.view', 'settings.view', 'audit.view'])) {
             <div class="px-3 pt-3 pb-2 text-[10px] font-bold uppercase tracking-wider text-[#3FA79B]/80">Governance &amp; Reports</div>
 
@@ -413,7 +431,9 @@ import { AiAssistantModalComponent } from '../features/ai-assistant/components/a
             }
           }
 
-          <!-- Account Security Tab (Always accessible to authenticated user) -->
+          <!-- ================================================================= -->
+          <!-- 8. MY ACCOUNT & SECURITY (ALWAYS ACCESSIBLE)                     -->
+          <!-- ================================================================= -->
           <div class="px-3 pt-3 pb-2 text-[10px] font-bold uppercase tracking-wider text-[#3FA79B]/80">My Account</div>
           <a
             routerLink="/change-password"
@@ -434,7 +454,7 @@ import { AiAssistantModalComponent } from '../features/ai-assistant/components/a
             </div>
             <div class="overflow-hidden flex-1">
               <p class="text-xs font-bold text-white truncate leading-none">{{ currentUser()?.firstName || 'Workora' }} {{ currentUser()?.lastName || 'User' }}</p>
-              <p class="text-[10px] text-[#3FA79B] font-semibold mt-0.5 truncate uppercase tracking-wider">{{ currentUser()?.roles?.[0] || 'Member' }}</p>
+              <p class="text-[10px] text-[#3FA79B] font-semibold mt-0.5 truncate uppercase tracking-wider">{{ primaryRole() }}</p>
             </div>
           </div>
 
@@ -478,8 +498,23 @@ import { AiAssistantModalComponent } from '../features/ai-assistant/components/a
                 <span class="font-extrabold text-[#063B39] text-base font-heading">Workora</span>
               </div>
 
+              <!-- Topbar Tenant Context Badge (FR-AC.10) -->
+              @if (currentUser()?.companyName) {
+                <div class="hidden sm:flex items-center gap-1.5 px-3 py-1 bg-[#DCEBE7]/50 border border-[#DCEBE7] rounded-xl text-xs shrink-0">
+                  <span class="material-symbols-outlined text-[#0E6E68] text-base">domain</span>
+                  <span class="font-extrabold text-[#063B39]">{{ currentUser()?.companyCode || 'CORP' }}</span>
+                  <span class="text-slate-400">•</span>
+                  <span class="text-slate-600 font-semibold truncate max-w-[130px] md:max-w-[180px]">{{ currentUser()?.companyName }}</span>
+                </div>
+              } @else if (authService.hasRole('SuperAdmin')) {
+                <div class="hidden sm:flex items-center gap-1.5 px-3 py-1 bg-amber-50 border border-amber-200 rounded-xl text-xs text-amber-800 font-bold shrink-0">
+                  <span class="material-symbols-outlined text-amber-600 text-base">admin_panel_settings</span>
+                  <span>Platform Owner (Global)</span>
+                </div>
+              }
+
               <!-- Top Navigation Breadcrumbs (Role & Permission Aware) -->
-              <nav class="hidden md:flex items-center gap-3 text-xs font-semibold text-slate-500 shrink-0">
+              <nav class="hidden md:flex items-center gap-2.5 text-xs font-semibold text-slate-500 shrink-0">
                 <a routerLink="/dashboard" routerLinkActive="text-[#0E6E68] font-bold" [routerLinkActiveOptions]="{ exact: true }" class="hover:text-[#0E6E68] transition-colors cursor-pointer">Dashboard</a>
                 
                 @if (authService.hasRole('SuperAdmin')) {
@@ -497,12 +532,12 @@ import { AiAssistantModalComponent } from '../features/ai-assistant/components/a
                   <a routerLink="/organization" routerLinkActive="text-[#0E6E68] font-bold" class="hover:text-[#0E6E68] transition-colors cursor-pointer">Organization</a>
                 }
 
-                @if (authService.hasPermission('roles.view')) {
+                @if (authService.hasRole('SuperAdmin') || authService.hasPermission('roles.view')) {
                   <span>•</span>
                   <a routerLink="/roles" routerLinkActive="text-[#0E6E68] font-bold" class="hover:text-[#0E6E68] transition-colors cursor-pointer">Roles &amp; RBAC</a>
                 }
 
-                @if (authService.hasPermission('payroll.manage')) {
+                @if (authService.hasPermission('payroll.manage') || authService.hasRole('FinanceManager')) {
                   <span>•</span>
                   <a routerLink="/payroll" routerLinkActive="text-[#0E6E68] font-bold" class="hover:text-[#0E6E68] transition-colors cursor-pointer">Payroll</a>
                 } @else if (authService.hasPermission('payroll.self')) {
@@ -514,17 +549,22 @@ import { AiAssistantModalComponent } from '../features/ai-assistant/components/a
                   <span>•</span>
                   <a routerLink="/attendance" routerLinkActive="text-[#0E6E68] font-bold" class="hover:text-[#0E6E68] transition-colors cursor-pointer">Attendance</a>
                 }
+
+                @if (authService.hasPermission('leave.view') || authService.hasPermission('leave.self')) {
+                  <span>•</span>
+                  <a routerLink="/leave" routerLinkActive="text-[#0E6E68] font-bold" class="hover:text-[#0E6E68] transition-colors cursor-pointer">Leaves</a>
+                }
               </nav>
             </div>
 
-            <div class="flex items-center gap-2 sm:gap-4 relative shrink-0">
+            <div class="flex items-center gap-2 sm:gap-3.5 relative shrink-0">
               <!-- Search Input -->
-              <div class="relative hidden sm:block">
+              <div class="relative hidden lg:block">
                 <div class="relative flex items-center">
                   <span class="material-symbols-outlined absolute left-3.5 text-[#0E6E68]/70 pointer-events-none text-lg">search</span>
                   <input 
-                    class="w-48 md:w-64 lg:w-72 bg-[#F4F8F7] hover:bg-white focus:bg-white text-xs text-[#063B39] placeholder-slate-400 font-medium pl-10 pr-12 py-2 rounded-full border border-[#DCEBE7] focus:border-[#0E6E68] focus:ring-2 focus:ring-[#0E6E68]/15 outline-none transition-all shadow-2xs" 
-                    placeholder="Search people, teams..." 
+                    class="w-48 md:w-56 lg:w-64 bg-[#F4F8F7] hover:bg-white focus:bg-white text-xs text-[#063B39] placeholder-slate-400 font-medium pl-10 pr-12 py-2 rounded-full border border-[#DCEBE7] focus:border-[#0E6E68] focus:ring-2 focus:ring-[#0E6E68]/15 outline-none transition-all shadow-2xs" 
+                    placeholder="Search workforce..." 
                     type="text"
                   />
                   <div class="absolute right-2.5 flex items-center pointer-events-none">
@@ -560,7 +600,7 @@ import { AiAssistantModalComponent } from '../features/ai-assistant/components/a
 
               <div class="h-5 w-px bg-[#DCEBE7] mx-0.5 hidden sm:block"></div>
               
-              <!-- User Profile Dropdown -->
+              <!-- User Profile & Role Badge Dropdown Trigger -->
               <div class="relative">
                 <button 
                   (click)="toggleProfileMenu($event)"
@@ -572,7 +612,9 @@ import { AiAssistantModalComponent } from '../features/ai-assistant/components/a
                   </div>
                   <div class="hidden lg:block text-left">
                     <p class="text-xs font-bold text-[#063B39] leading-none">{{ currentUser()?.firstName || 'User' }}</p>
-                    <p class="text-[10px] text-slate-500 mt-0.5">Account ▾</p>
+                    <span [ngClass]="roleBadgeClasses()" class="inline-block text-[9px] font-extrabold px-1.5 py-0.2 rounded border mt-0.5 uppercase tracking-wide">
+                      {{ primaryRole() }}
+                    </span>
                   </div>
                 </button>
 
@@ -580,11 +622,17 @@ import { AiAssistantModalComponent } from '../features/ai-assistant/components/a
                 @if (isProfileMenuOpen()) {
                   <div 
                     (click)="$event.stopPropagation()"
-                    class="absolute right-0 top-full mt-2 w-56 bg-white border border-[#DCEBE7] rounded-2xl shadow-xl p-2 z-50 animate-in fade-in slide-in-from-top-2 duration-150"
+                    class="absolute right-0 top-full mt-2 w-64 bg-white border border-[#DCEBE7] rounded-2xl shadow-xl p-2 z-50 animate-in fade-in slide-in-from-top-2 duration-150"
                   >
                     <div class="px-3 py-2 border-b border-[#DCEBE7] mb-1">
                       <p class="text-xs font-bold text-[#063B39]">{{ currentUser()?.firstName }} {{ currentUser()?.lastName }}</p>
                       <p class="text-[10px] text-slate-500 truncate">{{ currentUser()?.email }}</p>
+                      @if (currentUser()?.employeeCode) {
+                        <p class="text-[10px] text-[#0E6E68] font-bold mt-0.5">Emp Code: {{ currentUser()?.employeeCode }}</p>
+                      }
+                      @if (currentUser()?.departmentName) {
+                        <p class="text-[10px] text-slate-400 font-medium">{{ currentUser()?.departmentName }} • {{ currentUser()?.designationTitle }}</p>
+                      }
                     </div>
 
                     <a 
@@ -596,19 +644,21 @@ import { AiAssistantModalComponent } from '../features/ai-assistant/components/a
                       <span>Account Security</span>
                     </a>
 
-                    <a 
-                      routerLink="/users" 
-                      (click)="isProfileMenuOpen.set(false)"
-                      class="flex items-center gap-2.5 px-3 py-2 text-xs font-semibold text-[#163331] hover:bg-[#DCEBE7]/50 rounded-xl transition-colors cursor-pointer"
-                    >
-                      <span class="material-symbols-outlined text-base text-[#0E6E68]">badge</span>
-                      <span>Team Directory</span>
-                    </a>
+                    @if (authService.hasPermission('users.view')) {
+                      <a 
+                        routerLink="/users" 
+                        (click)="isProfileMenuOpen.set(false)"
+                        class="flex items-center gap-2.5 px-3 py-2 text-xs font-semibold text-[#163331] hover:bg-[#DCEBE7]/50 rounded-xl transition-colors cursor-pointer"
+                      >
+                        <span class="material-symbols-outlined text-base text-[#0E6E68]">manage_accounts</span>
+                        <span>User Accounts</span>
+                      </a>
+                    }
 
                     <div class="h-px bg-[#DCEBE7] my-1"></div>
 
                     <button 
-                      (click)="onLogout()"
+                      (click)="onLogout()" 
                       class="w-full flex items-center gap-2.5 px-3 py-2 text-xs font-bold text-rose-600 hover:bg-rose-50 rounded-xl transition-colors border-none bg-transparent cursor-pointer"
                     >
                       <span class="material-symbols-outlined text-base">logout</span>
@@ -651,6 +701,38 @@ export class DashboardLayoutComponent implements OnInit, AfterViewInit, OnDestro
   readonly isAiModalOpen = signal<boolean>(false);
   readonly unreadNotificationsCount = signal<number>(0);
 
+  /**
+   * Primary active role label for display.
+   */
+  readonly primaryRole = computed<string>(() => {
+    const roles = this.currentUser()?.roles;
+    if (!roles || roles.length === 0) return 'Employee';
+    if (roles.includes('SuperAdmin')) return 'Super Admin';
+    if (roles.includes('HRAdmin')) return 'HR Admin';
+    if (roles.includes('FinanceManager')) return 'Finance Manager';
+    if (roles.includes('Manager')) return 'Manager';
+    return roles[0];
+  });
+
+  /**
+   * Color-coded styling classes for user role badge in topbar header.
+   */
+  readonly roleBadgeClasses = computed<string>(() => {
+    const role = this.primaryRole();
+    switch (role) {
+      case 'Super Admin':
+        return 'bg-amber-100 text-amber-800 border-amber-300';
+      case 'HR Admin':
+        return 'bg-emerald-100 text-emerald-800 border-emerald-300';
+      case 'Finance Manager':
+        return 'bg-teal-100 text-teal-800 border-teal-300';
+      case 'Manager':
+        return 'bg-blue-100 text-blue-800 border-blue-300';
+      default:
+        return 'bg-slate-100 text-slate-700 border-slate-300';
+    }
+  });
+
   private ctx?: gsap.Context;
 
   @HostListener('document:click')
@@ -680,17 +762,6 @@ export class DashboardLayoutComponent implements OnInit, AfterViewInit, OnDestro
     if (prefersReducedMotion) return;
 
     this.ctx = gsap.context(() => {
-      const navItems = this.elementRef.nativeElement.querySelectorAll('.sidebar-nav .nav-item');
-      if (navItems.length > 0) {
-        gsap.from(navItems, {
-          x: -15,
-          opacity: 0,
-          stagger: 0.03,
-          duration: 0.35,
-          ease: 'power2.out'
-        });
-      }
-
       gsap.from('.dashboard-topbar', {
         y: -10,
         opacity: 0,

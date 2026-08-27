@@ -1,64 +1,14 @@
-using FluentValidation;
+﻿using FluentValidation;
 using MediatR;
 using Workora.Application.Common.Models;
 using Workora.Domain.Entities;
 using Workora.Domain.Interfaces;
 using Workora.Shared.Responses;
 
+using Workora.Application.Features.SuperAdmin.DTOs;
 namespace Workora.Application.Features.SuperAdmin.Commands.DeleteSubscriptionPlan;
 
 /// <summary>
 /// Command to delete a platform subscription plan.
 /// </summary>
 public record DeleteSubscriptionPlanCommand(int Id) : IRequest<ApiResponse<bool>>;
-
-/// <summary>
-/// Validator for <see cref="DeleteSubscriptionPlanCommand"/>.
-/// </summary>
-public class DeleteSubscriptionPlanCommandValidator : AbstractValidator<DeleteSubscriptionPlanCommand>
-{
-    /// <summary>
-    /// Initializes validation rules for DeleteSubscriptionPlanCommand.
-    /// </summary>
-    public DeleteSubscriptionPlanCommandValidator()
-    {
-        RuleFor(x => x.Id).GreaterThan(0).WithMessage("Valid subscription plan ID is required.");
-    }
-}
-
-/// <summary>
-/// Handler for <see cref="DeleteSubscriptionPlanCommand"/>.
-/// </summary>
-public class DeleteSubscriptionPlanCommandHandler : IRequestHandler<DeleteSubscriptionPlanCommand, ApiResponse<bool>>
-{
-    private readonly IGenericRepository<SubscriptionPlan> _planRepository;
-    private readonly IUnitOfWork _unitOfWork;
-
-    /// <summary>
-    /// Initializes a new instance of the <see cref="DeleteSubscriptionPlanCommandHandler"/> class.
-    /// </summary>
-    public DeleteSubscriptionPlanCommandHandler(
-        IGenericRepository<SubscriptionPlan> planRepository,
-        IUnitOfWork unitOfWork)
-    {
-        _planRepository = planRepository;
-        _unitOfWork = unitOfWork;
-    }
-
-    /// <summary>
-    /// Executes deletion of a subscription plan.
-    /// </summary>
-    public async Task<ApiResponse<bool>> Handle(DeleteSubscriptionPlanCommand request, CancellationToken cancellationToken)
-    {
-        var plan = await _planRepository.GetByIdAsync(request.Id, cancellationToken);
-        if (plan == null)
-        {
-            return ApiResponse<bool>.Fail("Subscription plan not found.");
-        }
-
-        _planRepository.Remove(plan);
-        await _unitOfWork.SaveChangesAsync(cancellationToken);
-
-        return ApiResponse<bool>.Success(true, "Subscription plan deleted successfully.");
-    }
-}

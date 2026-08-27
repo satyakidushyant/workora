@@ -125,6 +125,29 @@ h1, h2, h3, h4, h5, h6, .font-heading {
   background: var(--workora-accent);
 }
 
+/* Sidebar Nav Dark Scrollbar */
+.sidebar-nav {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(63, 167, 155, 0.35) transparent;
+}
+
+.sidebar-nav::-webkit-scrollbar {
+  width: 5px;
+}
+
+.sidebar-nav::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.sidebar-nav::-webkit-scrollbar-thumb {
+  background: rgba(63, 167, 155, 0.35);
+  border-radius: 4px;
+}
+
+.sidebar-nav::-webkit-scrollbar-thumb:hover {
+  background: rgba(63, 167, 155, 0.65);
+}
+
 /* Selection */
 ::selection {
   background-color: var(--workora-light);

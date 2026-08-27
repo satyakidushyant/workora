@@ -30,7 +30,7 @@ export const routes: Routes = [
   {
     path: '',
     loadComponent: () => import('./presentation/layouts/dashboard-layout.component').then(m => m.DashboardLayoutComponent),
-    canMatch: [authGuard],
+    canActivate: [authGuard],
     children: [
       {
         path: 'dashboard',
@@ -39,158 +39,158 @@ export const routes: Routes = [
       {
         path: 'organization',
         loadComponent: () => import('./presentation/features/organization/pages/organization-page.component').then(m => m.OrganizationPageComponent),
-        canMatch: [rbacGuard],
-        data: { requiredPermission: 'company.view' }
+        canActivate: [rbacGuard],
+        data: { requiredPermissions: ['company.view', 'companies.view', 'branches.view', 'departments.view', 'designations.view'] }
       },
       {
         path: 'roles',
         loadComponent: () => import('./presentation/features/roles/pages/role-list-page.component').then(m => m.RoleListPageComponent),
-        canMatch: [rbacGuard],
-        data: { requiredPermission: 'roles.view' }
+        canActivate: [rbacGuard],
+        data: { requiredPermissions: ['roles.view'] }
       },
       {
         path: 'employees',
         loadComponent: () => import('./presentation/features/employees/pages/employee-list-page.component').then(m => m.EmployeeListPageComponent),
-        canMatch: [rbacGuard],
-        data: { requiredPermission: 'employees.view' }
+        canActivate: [rbacGuard],
+        data: { requiredPermissions: ['employees.view', 'employees.self'] }
       },
       {
         path: 'attendance',
         loadComponent: () => import('./presentation/features/attendance/pages/attendance-page.component').then(m => m.AttendancePageComponent),
-        canMatch: [rbacGuard],
-        data: { requiredPermission: 'attendance.self' }
+        canActivate: [rbacGuard],
+        data: { requiredPermissions: ['attendance.self', 'attendance.view', 'attendance.manage', 'attendance.approve'] }
       },
       {
         path: 'leave',
         loadComponent: () => import('./presentation/features/leave/pages/leave-page.component').then(m => m.LeavePageComponent),
-        canMatch: [rbacGuard],
-        data: { requiredPermission: 'leave.view' }
+        canActivate: [rbacGuard],
+        data: { requiredPermissions: ['leave.view', 'leave.self', 'leave.apply', 'leave.approve'] }
       },
       {
         path: 'holidays',
         loadComponent: () => import('./presentation/features/scheduling/pages/holidays-page.component').then(m => m.HolidaysPageComponent),
-        canMatch: [rbacGuard],
-        data: { requiredPermission: 'holidays.view' }
+        canActivate: [rbacGuard],
+        data: { requiredPermissions: ['holidays.view', 'holidays.manage'] }
       },
       {
         path: 'shifts',
         loadComponent: () => import('./presentation/features/scheduling/pages/shifts-page.component').then(m => m.ShiftsPageComponent),
-        canMatch: [rbacGuard],
-        data: { requiredPermission: 'shifts.view' }
+        canActivate: [rbacGuard],
+        data: { requiredPermissions: ['shifts.view', 'shifts.manage'] }
       },
       {
         path: 'payroll',
         loadComponent: () => import('./presentation/features/payroll/pages/payroll-page.component').then(m => m.PayrollPageComponent),
-        canMatch: [rbacGuard],
-        data: { requiredPermission: 'payroll.manage' }
+        canActivate: [rbacGuard],
+        data: { requiredPermissions: ['payroll.manage', 'payroll.process', 'payroll.view', 'payroll.create'] }
       },
       {
         path: 'my-payslips',
         loadComponent: () => import('./presentation/features/payroll/pages/payslips-page.component').then(m => m.PayslipsPageComponent),
-        canMatch: [rbacGuard],
-        data: { requiredPermission: 'payroll.self' }
+        canActivate: [rbacGuard],
+        data: { requiredPermissions: ['payroll.self'] }
       },
       {
         path: 'loans',
         loadComponent: () => import('./presentation/features/financials/pages/loans-page.component').then(m => m.LoansPageComponent),
-        canMatch: [rbacGuard],
-        data: { requiredPermission: 'loans.view' }
+        canActivate: [rbacGuard],
+        data: { requiredPermissions: ['loans.view', 'loans.apply', 'loans.approve'] }
       },
       {
         path: 'expenses',
         loadComponent: () => import('./presentation/features/financials/pages/expenses-page.component').then(m => m.ExpensesPageComponent),
-        canMatch: [rbacGuard],
-        data: { requiredPermission: 'expenses.view' }
+        canActivate: [rbacGuard],
+        data: { requiredPermissions: ['expenses.view', 'expenses.submit', 'expenses.approve', 'expenses.finance'] }
       },
       {
         path: 'jobs',
         loadComponent: () => import('./presentation/features/recruitment/pages/jobs-page.component').then(m => m.JobsPageComponent),
-        canMatch: [rbacGuard],
-        data: { requiredPermission: 'recruitment.view' }
+        canActivate: [rbacGuard],
+        data: { requiredPermissions: ['recruitment.view', 'recruitment.manage', 'recruitment.create'] }
       },
       {
         path: 'candidates',
         loadComponent: () => import('./presentation/features/recruitment/pages/candidates-page.component').then(m => m.CandidatesPageComponent),
-        canMatch: [rbacGuard],
-        data: { requiredPermission: 'recruitment.view' }
+        canActivate: [rbacGuard],
+        data: { requiredPermissions: ['recruitment.view', 'recruitment.manage'] }
       },
       {
         path: 'performance',
         loadComponent: () => import('./presentation/features/performance/pages/performance-page.component').then(m => m.PerformancePageComponent),
-        canMatch: [rbacGuard],
-        data: { requiredPermission: 'performance.view' }
+        canActivate: [rbacGuard],
+        data: { requiredPermissions: ['performance.view', 'performance.self', 'performance.manage'] }
       },
       {
         path: 'training',
         loadComponent: () => import('./presentation/features/learning/pages/training-page.component').then(m => m.TrainingPageComponent),
-        canMatch: [rbacGuard],
-        data: { requiredPermission: 'training.view' }
+        canActivate: [rbacGuard],
+        data: { requiredPermissions: ['training.view', 'training.manage'] }
       },
       {
         path: 'helpdesk',
         loadComponent: () => import('./presentation/features/helpdesk/pages/helpdesk-page.component').then(m => m.HelpdeskPageComponent),
-        canMatch: [rbacGuard],
-        data: { requiredPermission: 'helpdesk.view' }
+        canActivate: [rbacGuard],
+        data: { requiredPermissions: ['helpdesk.view', 'helpdesk.create', 'helpdesk.manage'] }
       },
       {
         path: 'tasks',
         loadComponent: () => import('./presentation/features/tasks/pages/tasks-page.component').then(m => m.TasksPageComponent),
-        canMatch: [rbacGuard],
-        data: { requiredPermission: 'tasks.view' }
+        canActivate: [rbacGuard],
+        data: { requiredPermissions: ['tasks.view', 'tasks.create', 'tasks.manage'] }
       },
       {
         path: 'compliance',
         loadComponent: () => import('./presentation/features/compliance/pages/compliance-page.component').then(m => m.CompliancePageComponent),
-        canMatch: [rbacGuard],
-        data: { requiredPermission: 'compliance.view' }
+        canActivate: [rbacGuard],
+        data: { requiredPermissions: ['compliance.view', 'compliance.manage', 'compliance.export'] }
       },
       {
         path: 'field-tracking',
         loadComponent: () => import('./presentation/features/field/pages/field-tracking-page.component').then(m => m.FieldTrackingPageComponent),
-        canMatch: [rbacGuard],
-        data: { requiredPermission: 'field.view' }
+        canActivate: [rbacGuard],
+        data: { requiredPermissions: ['field.view', 'field.track'] }
       },
       {
         path: 'reports',
         loadComponent: () => import('./presentation/features/reports/pages/reports-page.component').then(m => m.ReportsPageComponent),
-        canMatch: [rbacGuard],
-        data: { requiredPermission: 'reports.view' }
+        canActivate: [rbacGuard],
+        data: { requiredPermissions: ['reports.view', 'reports.financial', 'reports.export'] }
       },
       {
         path: 'superadmin',
         loadComponent: () => import('./presentation/features/superadmin/pages/superadmin-page.component').then(m => m.SuperAdminPageComponent),
-        canMatch: [rbacGuard],
-        data: { requiredPermission: 'superadmin.access' }
+        canActivate: [rbacGuard],
+        data: { requiredPermissions: ['superadmin.access'] }
       },
       {
         path: 'documents',
         loadComponent: () => import('./presentation/features/operations/pages/documents-page.component').then(m => m.DocumentsPageComponent),
-        canMatch: [rbacGuard],
-        data: { requiredPermission: 'documents.view' }
+        canActivate: [rbacGuard],
+        data: { requiredPermissions: ['documents.view', 'documents.manage', 'policies.view'] }
       },
       {
         path: 'assets',
         loadComponent: () => import('./presentation/features/operations/pages/assets-page.component').then(m => m.AssetsPageComponent),
-        canMatch: [rbacGuard],
-        data: { requiredPermission: 'assets.view' }
+        canActivate: [rbacGuard],
+        data: { requiredPermissions: ['assets.view', 'assets.manage'] }
       },
       {
         path: 'settings',
         loadComponent: () => import('./presentation/features/settings/pages/settings-page.component').then(m => m.SettingsPageComponent),
-        canMatch: [rbacGuard],
-        data: { requiredPermission: 'settings.view' }
+        canActivate: [rbacGuard],
+        data: { requiredPermissions: ['settings.view', 'settings.manage'] }
       },
       {
         path: 'audit-logs',
         loadComponent: () => import('./presentation/features/settings/pages/audit-logs-page.component').then(m => m.AuditLogsPageComponent),
-        canMatch: [rbacGuard],
-        data: { requiredPermission: 'audit.view' }
+        canActivate: [rbacGuard],
+        data: { requiredPermissions: ['audit.view'] }
       },
       {
         path: 'users',
         loadComponent: () => import('./presentation/features/users/pages/user-list-page.component').then(m => m.UserListPageComponent),
-        canMatch: [rbacGuard],
-        data: { requiredPermission: 'users.view' }
+        canActivate: [rbacGuard],
+        data: { requiredPermissions: ['users.view', 'users.manage'] }
       },
       {
         path: 'change-password',

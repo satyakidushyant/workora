@@ -48,6 +48,11 @@ export interface UserProfile {
   employeeId?: number | null;
 
   /**
+   * Alphanumeric employee code (e.g., EMP-2026-0001).
+   */
+  employeeCode?: string | null;
+
+  /**
    * List of assigned user roles.
    */
   roles: string[];
@@ -56,6 +61,31 @@ export interface UserProfile {
    * List of granular user permissions.
    */
   permissions: string[];
+
+  /**
+   * Associated company identifier.
+   */
+  companyId?: number | null;
+
+  /**
+   * Associated company name.
+   */
+  companyName?: string | null;
+
+  /**
+   * Associated company code.
+   */
+  companyCode?: string | null;
+
+  /**
+   * Department name of the employee.
+   */
+  departmentName?: string | null;
+
+  /**
+   * Designation / job title of the employee.
+   */
+  designationTitle?: string | null;
 }
 
 /**

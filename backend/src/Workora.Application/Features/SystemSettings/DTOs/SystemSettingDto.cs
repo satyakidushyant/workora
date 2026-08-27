@@ -1,3 +1,5 @@
+﻿using Workora.Shared.Responses;
+
 namespace Workora.Application.Features.SystemSettings.DTOs;
 
 /// <summary>
@@ -11,19 +13,3 @@ public record SystemSettingDto(
     string? Description,
     string Group,
     bool IsActive);
-
-/// <summary>
-/// Request payload for setting item.
-/// </summary>
-public record SettingItemDto(
-    string Key,
-    string Value,
-    string? Description,
-    string Group);
-
-/// <summary>
-/// Request payload for updating batch company settings.
-/// </summary>
-public record UpdateCompanySettingsRequestDto(
-    int CompanyId,
-    IReadOnlyList<SettingItemDto> Settings);

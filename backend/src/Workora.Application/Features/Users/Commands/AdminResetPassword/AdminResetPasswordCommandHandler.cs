@@ -1,8 +1,9 @@
-using MediatR;
+﻿using MediatR;
 using Workora.Application.Common.Interfaces;
 using Workora.Domain.Interfaces;
 using Workora.Shared.Responses;
 
+using Workora.Application.Features.Users.DTOs;
 namespace Workora.Application.Features.Users.Commands.AdminResetPassword;
 
 /// <summary>

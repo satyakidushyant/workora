@@ -1,7 +1,8 @@
-using MediatR;
+﻿using MediatR;
 using Workora.Application.Common.Interfaces;
 using Workora.Domain.Events.Authentication;
 
+using Workora.Application.Features.Authentication.DTOs;
 namespace Workora.Application.Features.Authentication.EventHandlers;
 
 /// <summary>

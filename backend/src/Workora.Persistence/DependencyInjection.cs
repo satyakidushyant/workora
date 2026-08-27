@@ -64,6 +64,9 @@ public static class DependencyInjection
         services.AddScoped<IFieldVisitRepository, FieldVisitRepository>();
         services.AddScoped<ITaskItemRepository, TaskItemRepository>();
         services.AddScoped<IHelpdeskTicketRepository, HelpdeskTicketRepository>();
+        services.AddScoped<IOvertimeRequestRepository, OvertimeRequestRepository>();
+        services.AddScoped<IOnboardingRepository, OnboardingRepository>();
+        services.AddScoped<IFinancialYearRepository, FinancialYearRepository>();
 
         services.AddScoped<DatabaseSeeder>();
 

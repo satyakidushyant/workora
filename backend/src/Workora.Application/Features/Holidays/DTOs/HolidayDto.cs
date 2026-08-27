@@ -1,4 +1,5 @@
-using Workora.Domain.Enums;
+﻿using Workora.Domain.Enums;
+using Workora.Shared.Responses;
 
 namespace Workora.Application.Features.Holidays.DTOs;
 
@@ -17,24 +18,3 @@ public record HolidayDto(
     string? Description,
     bool IsActive,
     DateTimeOffset CreatedAt);
-
-/// <summary>
-/// Request payload for creating a holiday.
-/// </summary>
-public record CreateHolidayRequestDto(
-    int CompanyId,
-    string Name,
-    DateOnly Date,
-    HolidayType Type,
-    int? BranchId,
-    string? Description);
-
-/// <summary>
-/// Request payload for updating a holiday.
-/// </summary>
-public record UpdateHolidayRequestDto(
-    string Name,
-    DateOnly Date,
-    HolidayType Type,
-    int? BranchId,
-    string? Description);

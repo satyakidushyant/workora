@@ -56,6 +56,46 @@ export interface UserProfileDto {
    * User permission identifiers list.
    */
   permissions: string[];
+
+  /**
+   * Integer user account ID.
+   */
+  userId?: number | null;
+
+  /**
+   * Tenant UUID context.
+   */
+  tenantId?: string | null;
+
+  /**
+   * Company ID context.
+   */
+  companyId?: number | null;
+
+  /**
+   * Company display name.
+   */
+  companyName?: string | null;
+
+  /**
+   * Company short code.
+   */
+  companyCode?: string | null;
+
+  /**
+   * Employee alphanumeric code.
+   */
+  employeeCode?: string | null;
+
+  /**
+   * Department name.
+   */
+  departmentName?: string | null;
+
+  /**
+   * Designation / Job title.
+   */
+  designationTitle?: string | null;
 }
 
 /**
