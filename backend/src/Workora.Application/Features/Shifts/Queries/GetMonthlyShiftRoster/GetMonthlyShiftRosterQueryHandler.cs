@@ -1,4 +1,6 @@
-using MediatR;
+﻿using MediatR;
+using Workora.Domain.Enums;
+using Workora.Domain.Extensions;
 using Workora.Application.Features.Shifts.DTOs;
 using Workora.Domain.Entities;
 using Workora.Domain.Interfaces;
@@ -39,6 +41,6 @@ public class GetMonthlyShiftRosterQueryHandler : IRequestHandler<GetMonthlyShift
             })
             .ToList();
 
-        return Task.FromResult(ApiResponse<IReadOnlyList<EmployeeRosterDto>>.Success(assignments, "Monthly shift roster schedule retrieved successfully."));
+        return Task.FromResult(ApiResponse<IReadOnlyList<EmployeeRosterDto>>.Success(assignments, ResponseMessage.ShiftRosterRetrieved.GetDescription()));
     }
 }

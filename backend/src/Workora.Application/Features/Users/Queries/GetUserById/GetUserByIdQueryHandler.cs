@@ -1,4 +1,6 @@
-using AutoMapper;
+﻿using AutoMapper;
+using Workora.Domain.Enums;
+using Workora.Domain.Extensions;
 using MediatR;
 using Workora.Application.Features.Users.DTOs;
 using Workora.Domain.Interfaces;
@@ -31,7 +33,7 @@ public class GetUserByIdQueryHandler : IRequestHandler<GetUserByIdQuery, ApiResp
         var user = await _userRepository.GetByIdAsync(request.Id, ct);
         if (user == null)
         {
-            return ApiResponse<UserDetailDto>.Fail($"User with ID {request.Id} was not found.");
+            return ApiResponse<UserDetailDto>.Fail(ResponseMessage.UserNotFound.GetDescription());
         }
 
         var dto = _mapper.Map<UserDetailDto>(user);

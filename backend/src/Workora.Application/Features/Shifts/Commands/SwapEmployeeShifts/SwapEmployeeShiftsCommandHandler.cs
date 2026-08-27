@@ -1,4 +1,6 @@
 ﻿using MediatR;
+using Workora.Domain.Enums;
+using Workora.Domain.Extensions;
 using Workora.Domain.Entities;
 using Workora.Domain.Interfaces;
 using Workora.Shared.Responses;
@@ -35,7 +37,7 @@ public class SwapEmployeeShiftsCommandHandler : IRequestHandler<SwapEmployeeShif
 
         if (a1 == null || a2 == null)
         {
-            return ApiResponse<bool>.Fail("Active shift assignments not found for one or both target employees.");
+            return ApiResponse<bool>.Fail(ResponseMessage.ShiftSwapInvalidAssignments.GetDescription());
         }
 
         int shift1 = a1.ShiftId;
@@ -51,6 +53,6 @@ public class SwapEmployeeShiftsCommandHandler : IRequestHandler<SwapEmployeeShif
         await _assignmentRepository.AddAsync(newA2, cancellationToken);
 
         await _unitOfWork.SaveChangesAsync(cancellationToken);
-        return ApiResponse<bool>.Success(true, "Employee shift assignments swapped successfully.");
+        return ApiResponse<bool>.Success(true, ResponseMessage.ShiftSwapped.GetDescription());
     }
 }

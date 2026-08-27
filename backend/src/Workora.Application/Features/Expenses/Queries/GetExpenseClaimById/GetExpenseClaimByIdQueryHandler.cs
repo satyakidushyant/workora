@@ -1,4 +1,6 @@
 ﻿using AutoMapper;
+using Workora.Domain.Enums;
+using Workora.Domain.Extensions;
 using MediatR;
 using Workora.Application.Features.Expenses.DTOs;
 using Workora.Domain.Interfaces;
@@ -29,7 +31,7 @@ public class GetExpenseClaimByIdQueryHandler : IRequestHandler<GetExpenseClaimBy
         var claim = await _expenseRepository.GetByIdAsync(request.ClaimId, ct);
         if (claim == null)
         {
-            return ApiResponse<ExpenseClaimDto>.Fail("Expense claim not found.");
+            return ApiResponse<ExpenseClaimDto>.Fail(ResponseMessage.ExpenseClaimNotFound.GetDescription());
         }
 
         var dto = _mapper.Map<ExpenseClaimDto>(claim);

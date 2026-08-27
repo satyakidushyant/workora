@@ -1,4 +1,6 @@
 ﻿using MediatR;
+using Workora.Domain.Enums;
+using Workora.Domain.Extensions;
 using Workora.Application.Features.Recruitment.DTOs;
 using Workora.Domain.Entities;
 using Workora.Domain.Interfaces;
@@ -29,7 +31,7 @@ public class GetOfferLetterPdfQueryHandler : IRequestHandler<GetOfferLetterPdfQu
         var offer = await _offerRepository.GetByIdAsync(request.OfferId, cancellationToken);
         if (offer == null)
         {
-            return ApiResponse<OfferLetterPdfDto>.Fail($"Job offer {request.OfferId} not found.");
+            return ApiResponse<OfferLetterPdfDto>.Fail(ResponseMessage.JobOfferNotFound.GetDescription());
         }
 
         var dto = new OfferLetterPdfDto
@@ -39,6 +41,6 @@ public class GetOfferLetterPdfQueryHandler : IRequestHandler<GetOfferLetterPdfQu
             DownloadUrl = $"/api/v1/recruitment/offers/{offer.Id}/download-pdf"
         };
 
-        return ApiResponse<OfferLetterPdfDto>.Success(dto, "Offer letter PDF URL generated successfully.");
+        return ApiResponse<OfferLetterPdfDto>.Success(dto, ResponseMessage.OfferLetterPdfGenerated.GetDescription());
     }
 }

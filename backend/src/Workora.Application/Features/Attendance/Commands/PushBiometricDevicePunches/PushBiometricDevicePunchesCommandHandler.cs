@@ -4,6 +4,7 @@ using Workora.Application.Common.Models;
 using Workora.Shared.Responses;
 using Workora.Domain.Entities;
 using Workora.Domain.Enums;
+using Workora.Domain.Extensions;
 using Workora.Domain.Interfaces;
 
 using Workora.Application.Features.Attendance.DTOs;
@@ -56,6 +57,6 @@ public class PushBiometricDevicePunchesCommandHandler : IRequestHandler<PushBiom
         }
 
         await _unitOfWork.SaveChangesAsync(cancellationToken);
-        return ApiResponse<int>.Success(count, $"{count} biometric punches ingested successfully.");
+        return ApiResponse<int>.Success(count, ResponseMessage.BiometricPunchesIngested.GetDescription());
     }
 }

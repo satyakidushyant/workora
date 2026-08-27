@@ -1,4 +1,6 @@
 ﻿using MediatR;
+using Workora.Domain.Enums;
+using Workora.Domain.Extensions;
 using Workora.Domain.Entities;
 using Workora.Domain.Interfaces;
 using Workora.Shared.Responses;
@@ -37,6 +39,6 @@ public class AssignRotationalRosterCommandHandler : IRequestHandler<AssignRotati
         }
 
         await _unitOfWork.SaveChangesAsync(cancellationToken);
-        return ApiResponse<bool>.Success(true, $"Rotational shift assigned to {request.EmployeeIds.Count} employees successfully.");
+        return ApiResponse<bool>.Success(true, ResponseMessage.ShiftRosterAssigned.GetDescription());
     }
 }

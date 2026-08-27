@@ -47,7 +47,7 @@ public class CreateBranchCommandHandler : IRequestHandler<CreateBranchCommand, A
         var isUnique = await _branchRepository.IsCodeUniqueAsync(request.CompanyId, request.Code, null, ct);
         if (!isUnique)
         {
-            return ApiResponse<BranchDto>.Fail("A branch with this code already exists for this company.");
+            return ApiResponse<BranchDto>.Fail(ResponseMessage.BranchCodeAlreadyExists.GetDescription());
         }
 
         var branch = Branch.Create(

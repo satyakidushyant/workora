@@ -1,4 +1,6 @@
 ﻿using MediatR;
+using Workora.Domain.Enums;
+using Workora.Domain.Extensions;
 using Workora.Application.Features.Performance.DTOs;
 using Workora.Domain.Entities;
 using Workora.Domain.Interfaces;
@@ -39,6 +41,6 @@ public class GetPerformanceCyclesQueryHandler : IRequestHandler<GetPerformanceCy
             })
             .ToList();
 
-        return Task.FromResult(ApiResponse<IReadOnlyList<PerformanceCycleDto>>.Success(items, "Performance review cycles retrieved successfully."));
+        return Task.FromResult(ApiResponse<IReadOnlyList<PerformanceCycleDto>>.Success(items, ResponseMessage.PerformanceCyclesRetrieved.GetDescription()));
     }
 }

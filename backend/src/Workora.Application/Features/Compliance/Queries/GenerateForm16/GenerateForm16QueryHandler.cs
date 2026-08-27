@@ -1,4 +1,6 @@
 ﻿using MediatR;
+using Workora.Domain.Enums;
+using Workora.Domain.Extensions;
 using Workora.Application.Common.Models;
 using Workora.Shared.Responses;
 using Workora.Application.Features.Compliance.DTOs;
@@ -30,7 +32,7 @@ public class GenerateForm16QueryHandler : IRequestHandler<GenerateForm16Query, A
         var emp = await _employeeRepository.GetByIdAsync(request.EmployeeId, cancellationToken);
         if (emp == null)
         {
-            return ApiResponse<StatutoryExportFileDto>.Fail($"Employee {request.EmployeeId} not found.");
+            return ApiResponse<StatutoryExportFileDto>.Fail(ResponseMessage.EmployeeNotFound.GetDescription());
         }
 
         var dto = new StatutoryExportFileDto(
@@ -38,6 +40,6 @@ public class GenerateForm16QueryHandler : IRequestHandler<GenerateForm16Query, A
             "application/pdf",
             System.Convert.ToBase64String(System.Text.Encoding.UTF8.GetBytes($"Form 16 Certificate for {emp.FirstName} {emp.LastName} ({request.FinancialYear})")));
 
-        return ApiResponse<StatutoryExportFileDto>.Success(dto, "Form 16 tax certificate generated successfully.");
+        return ApiResponse<StatutoryExportFileDto>.Success(dto, ResponseMessage.Form16Generated.GetDescription());
     }
 }

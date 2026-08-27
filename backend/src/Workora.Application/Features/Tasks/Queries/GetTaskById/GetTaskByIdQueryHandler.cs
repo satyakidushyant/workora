@@ -1,4 +1,6 @@
 ﻿using AutoMapper;
+using Workora.Domain.Enums;
+using Workora.Domain.Extensions;
 using MediatR;
 using Workora.Application.Features.Tasks.DTOs;
 using Workora.Domain.Interfaces;
@@ -29,7 +31,7 @@ public class GetTaskByIdQueryHandler : IRequestHandler<GetTaskByIdQuery, ApiResp
         var task = await _taskRepository.GetByIdAsync(request.TaskId, ct);
         if (task == null)
         {
-            return ApiResponse<TaskItemDto>.Fail("Task not found.");
+            return ApiResponse<TaskItemDto>.Fail(ResponseMessage.TaskNotFound.GetDescription());
         }
 
         var dto = _mapper.Map<TaskItemDto>(task);

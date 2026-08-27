@@ -1,4 +1,6 @@
 ﻿using AutoMapper;
+using Workora.Domain.Enums;
+using Workora.Domain.Extensions;
 using MediatR;
 using Workora.Application.Common.Interfaces;
 using Workora.Application.Features.Helpdesk.DTOs;
@@ -38,13 +40,13 @@ public class AssignTicketCommandHandler : IRequestHandler<AssignTicketCommand, A
         var ticket = await _ticketRepository.GetByIdAsync(request.TicketId, ct);
         if (ticket == null)
         {
-            return ApiResponse<HelpdeskTicketDto>.Fail("Ticket not found.");
+            return ApiResponse<HelpdeskTicketDto>.Fail(ResponseMessage.TicketNotFound.GetDescription());
         }
 
         var assignee = await _employeeRepository.GetByIdAsync(request.AssignedToEmployeeId, ct);
         if (assignee == null)
         {
-            return ApiResponse<HelpdeskTicketDto>.Fail("Assignee employee not found.");
+            return ApiResponse<HelpdeskTicketDto>.Fail(ResponseMessage.EmployeeNotFound.GetDescription());
         }
 
         ticket.Assign(request.AssignedToEmployeeId);
@@ -53,6 +55,6 @@ public class AssignTicketCommandHandler : IRequestHandler<AssignTicketCommand, A
 
         var fullyLoaded = await _ticketRepository.GetWithCommentsAsync(ticket.Id, ct);
         var dto = _mapper.Map<HelpdeskTicketDto>(fullyLoaded ?? ticket);
-        return ApiResponse<HelpdeskTicketDto>.Success(dto, "Ticket assigned successfully.");
+        return ApiResponse<HelpdeskTicketDto>.Success(dto, ResponseMessage.TicketAssigned.GetDescription());
     }
 }

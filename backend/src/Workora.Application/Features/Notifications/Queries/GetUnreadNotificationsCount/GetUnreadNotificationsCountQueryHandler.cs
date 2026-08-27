@@ -1,4 +1,6 @@
 ﻿using MediatR;
+using Workora.Domain.Enums;
+using Workora.Domain.Extensions;
 using Workora.Application.Common.Interfaces;
 using Workora.Application.Features.Notifications.DTOs;
 using Workora.Domain.Interfaces;
@@ -33,13 +35,13 @@ public class GetUnreadNotificationsCountQueryHandler : IRequestHandler<GetUnread
     {
         if (!_currentUserService.UserId.HasValue)
         {
-            return ApiResponse<UnreadNotificationCountDto>.Fail("User not authenticated.");
+            return ApiResponse<UnreadNotificationCountDto>.Fail(ResponseMessage.Unauthorized.GetDescription());
         }
 
         var user = await _userRepository.GetByUuidAsync(_currentUserService.UserId.Value, ct);
         if (user == null)
         {
-            return ApiResponse<UnreadNotificationCountDto>.Fail("User not found.");
+            return ApiResponse<UnreadNotificationCountDto>.Fail(ResponseMessage.UserNotFound.GetDescription());
         }
 
         var count = await _notificationRepository.GetUnreadCountAsync(user.Id, ct);

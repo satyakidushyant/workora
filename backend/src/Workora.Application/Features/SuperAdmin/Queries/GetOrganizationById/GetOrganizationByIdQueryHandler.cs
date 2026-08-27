@@ -1,4 +1,6 @@
 ﻿using MediatR;
+using Workora.Domain.Enums;
+using Workora.Domain.Extensions;
 using Workora.Application.Common.Models;
 using Workora.Application.Features.SuperAdmin.DTOs;
 using Workora.Domain.Entities;
@@ -30,7 +32,7 @@ public class GetOrganizationByIdQueryHandler : IRequestHandler<GetOrganizationBy
         var company = await _companyRepository.GetByIdAsync(request.Id, cancellationToken);
         if (company == null)
         {
-            return ApiResponse<OrganizationDto>.Fail("Organization not found.");
+            return ApiResponse<OrganizationDto>.Fail(ResponseMessage.OrganizationNotFound.GetDescription());
         }
 
         var dto = new OrganizationDto
@@ -49,6 +51,6 @@ public class GetOrganizationByIdQueryHandler : IRequestHandler<GetOrganizationBy
             CreatedAt = company.CreatedAt
         };
 
-        return ApiResponse<OrganizationDto>.Success(dto, "Organization details retrieved successfully.");
+        return ApiResponse<OrganizationDto>.Success(dto, ResponseMessage.OrganizationRetrieved.GetDescription());
     }
 }

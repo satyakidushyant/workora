@@ -5,6 +5,7 @@ using Workora.Shared.Responses;
 using Workora.Application.Features.SuperAdmin.DTOs;
 using Workora.Domain.Entities;
 using Workora.Domain.Enums;
+using Workora.Domain.Extensions;
 using Workora.Domain.Interfaces;
 
 namespace Workora.Application.Features.SuperAdmin.Commands.CreateSubscriptionPlan;
@@ -54,6 +55,6 @@ public class CreateSubscriptionPlanCommandHandler : IRequestHandler<CreateSubscr
             IsActive = plan.IsActive
         };
 
-        return ApiResponse<SubscriptionPlanDto>.Success(dto, "Subscription plan created successfully.");
+        return ApiResponse<SubscriptionPlanDto>.Success(dto, ResponseMessage.SubscriptionPlanCreated.GetDescription());
     }
 }

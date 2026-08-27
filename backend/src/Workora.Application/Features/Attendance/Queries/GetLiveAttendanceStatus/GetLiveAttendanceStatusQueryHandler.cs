@@ -3,6 +3,7 @@ using Workora.Application.Common.Models;
 using Workora.Shared.Responses;
 using Workora.Domain.Entities;
 using Workora.Domain.Enums;
+using Workora.Domain.Extensions;
 using Workora.Domain.Interfaces;
 
 using Workora.Application.Features.Attendance.DTOs;
@@ -45,6 +46,6 @@ public class GetLiveAttendanceStatusQueryHandler : IRequestHandler<GetLiveAttend
             TotalHeadcount = totalHeadcount
         };
 
-        return Task.FromResult(ApiResponse<LiveAttendanceStatusDto>.Success(dto, "Live attendance status retrieved successfully."));
+        return Task.FromResult(ApiResponse<LiveAttendanceStatusDto>.Success(dto, ResponseMessage.LiveAttendanceStatusRetrieved.GetDescription()));
     }
 }

@@ -42,7 +42,7 @@ public class AcknowledgePolicyCommandHandler : IRequestHandler<AcknowledgePolicy
     {
         if (!_currentUserService.UserId.HasValue)
         {
-            return ApiResponse<bool>.Fail("User context not available.");
+            return ApiResponse<bool>.Fail(ResponseMessage.UserContextUnavailable.GetDescription());
         }
 
         var user = await _userRepository.GetByUuidAsync(_currentUserService.UserId.Value, ct);
@@ -66,7 +66,7 @@ public class AcknowledgePolicyCommandHandler : IRequestHandler<AcknowledgePolicy
         var alreadyAcknowledged = await _policyRepository.HasAcknowledgedAsync(policy.Id, employee.Id, ct);
         if (alreadyAcknowledged)
         {
-            return ApiResponse<bool>.Success(true, "Policy already acknowledged.");
+            return ApiResponse<bool>.Success(true, ResponseMessage.PolicyAlreadyAcknowledged.GetDescription());
         }
 
         var ack = PolicyAcknowledgment.Create(policy.Id, employee.Id);

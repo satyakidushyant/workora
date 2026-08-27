@@ -5,6 +5,7 @@ using Workora.Application.Common.Interfaces;
 using Workora.Application.Features.Expenses.DTOs;
 using Workora.Domain.Entities;
 using Workora.Domain.Enums;
+using Workora.Domain.Extensions;
 using Workora.Domain.Interfaces;
 using Workora.Shared.Responses;
 
@@ -41,7 +42,7 @@ public class SubmitExpenseClaimCommandHandler : IRequestHandler<SubmitExpenseCla
         var employee = await _employeeRepository.GetByIdAsync(request.EmployeeId, ct);
         if (employee == null)
         {
-            return ApiResponse<ExpenseClaimDto>.Fail("Employee not found.");
+            return ApiResponse<ExpenseClaimDto>.Fail(ResponseMessage.EmployeeNotFound.GetDescription());
         }
 
         var claim = ExpenseClaim.Create(
@@ -57,6 +58,6 @@ public class SubmitExpenseClaimCommandHandler : IRequestHandler<SubmitExpenseCla
         await _unitOfWork.SaveChangesAsync(ct);
 
         var dto = _mapper.Map<ExpenseClaimDto>(claim);
-        return ApiResponse<ExpenseClaimDto>.Success(dto, "Expense claim submitted successfully.");
+        return ApiResponse<ExpenseClaimDto>.Success(dto, ResponseMessage.ExpenseClaimSubmitted.GetDescription());
     }
 }

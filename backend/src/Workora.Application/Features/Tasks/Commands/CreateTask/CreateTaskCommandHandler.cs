@@ -5,6 +5,7 @@ using Workora.Application.Common.Interfaces;
 using Workora.Application.Features.Tasks.DTOs;
 using Workora.Domain.Entities;
 using Workora.Domain.Enums;
+using Workora.Domain.Extensions;
 using Workora.Domain.Interfaces;
 using Workora.Shared.Responses;
 
@@ -41,7 +42,7 @@ public class CreateTaskCommandHandler : IRequestHandler<CreateTaskCommand, ApiRe
         var assignee = await _employeeRepository.GetByIdAsync(request.AssignedToEmployeeId, ct);
         if (assignee == null)
         {
-            return ApiResponse<TaskItemDto>.Fail("Assignee employee not found.");
+            return ApiResponse<TaskItemDto>.Fail(ResponseMessage.EmployeeNotFound.GetDescription());
         }
 
         var task = TaskItem.Create(
@@ -57,6 +58,6 @@ public class CreateTaskCommandHandler : IRequestHandler<CreateTaskCommand, ApiRe
         await _unitOfWork.SaveChangesAsync(ct);
 
         var dto = _mapper.Map<TaskItemDto>(task);
-        return ApiResponse<TaskItemDto>.Success(dto, "Task created successfully.");
+        return ApiResponse<TaskItemDto>.Success(dto, ResponseMessage.TaskCreated.GetDescription());
     }
 }

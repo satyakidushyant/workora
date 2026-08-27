@@ -47,7 +47,7 @@ public class CreateDepartmentCommandHandler : IRequestHandler<CreateDepartmentCo
         var isUnique = await _departmentRepository.IsCodeUniqueAsync(request.CompanyId, request.Code, null, ct);
         if (!isUnique)
         {
-            return ApiResponse<DepartmentDto>.Fail("A department with this code already exists for this company.");
+            return ApiResponse<DepartmentDto>.Fail(ResponseMessage.DepartmentCodeAlreadyExists.GetDescription());
         }
 
         var department = Department.Create(

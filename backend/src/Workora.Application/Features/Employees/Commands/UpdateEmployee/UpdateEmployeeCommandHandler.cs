@@ -42,7 +42,7 @@ public class UpdateEmployeeCommandHandler : IRequestHandler<UpdateEmployeeComman
 
         if (request.ManagerId.HasValue && request.ManagerId.Value == request.Id)
         {
-            return ApiResponse<EmployeeDto>.Fail("An employee cannot be their own manager.");
+            return ApiResponse<EmployeeDto>.Fail(ResponseMessage.EmployeeCannotBeOwnManager.GetDescription());
         }
 
         employee.UpdateProfile(

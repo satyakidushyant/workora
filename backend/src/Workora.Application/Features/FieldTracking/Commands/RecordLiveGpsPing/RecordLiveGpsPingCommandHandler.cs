@@ -1,4 +1,6 @@
 ﻿using MediatR;
+using Workora.Domain.Enums;
+using Workora.Domain.Extensions;
 using Workora.Application.Common.Interfaces;
 using Workora.Domain.Entities;
 using Workora.Domain.Interfaces;
@@ -38,6 +40,6 @@ public class RecordLiveGpsPingCommandHandler : IRequestHandler<RecordLiveGpsPing
         await _fieldVisitRepository.AddGpsPingAsync(ping, ct);
         await _unitOfWork.SaveChangesAsync(ct);
 
-        return ApiResponse<bool>.Success(true, "GPS telemetry ping recorded.");
+        return ApiResponse<bool>.Success(true, ResponseMessage.GpsPingRecorded.GetDescription());
     }
 }

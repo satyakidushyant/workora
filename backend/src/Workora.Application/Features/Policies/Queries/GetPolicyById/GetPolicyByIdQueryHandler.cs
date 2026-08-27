@@ -1,4 +1,6 @@
 ﻿using AutoMapper;
+using Workora.Domain.Enums;
+using Workora.Domain.Extensions;
 using MediatR;
 using Workora.Application.Features.Policies.DTOs;
 using Workora.Domain.Interfaces;
@@ -29,7 +31,7 @@ public class GetPolicyByIdQueryHandler : IRequestHandler<GetPolicyByIdQuery, Api
         var policy = await _policyRepository.GetWithAcknowledgmentsAsync(request.Id, ct);
         if (policy == null)
         {
-            return ApiResponse<PolicyDto>.Fail("Policy not found.");
+            return ApiResponse<PolicyDto>.Fail(ResponseMessage.PolicyNotFound.GetDescription());
         }
 
         var dto = _mapper.Map<PolicyDto>(policy);

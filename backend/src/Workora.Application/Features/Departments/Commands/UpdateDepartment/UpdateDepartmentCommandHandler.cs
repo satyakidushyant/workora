@@ -43,7 +43,7 @@ public class UpdateDepartmentCommandHandler : IRequestHandler<UpdateDepartmentCo
         var isUnique = await _departmentRepository.IsCodeUniqueAsync(department.CompanyId, request.Code, request.Id, ct);
         if (!isUnique)
         {
-            return ApiResponse<DepartmentDto>.Fail("A department with this code already exists for this company.");
+            return ApiResponse<DepartmentDto>.Fail(ResponseMessage.DepartmentCodeAlreadyExists.GetDescription());
         }
 
         department.Update(request.Code, request.Name, request.HeadEmployeeId, request.ParentDepartmentId);

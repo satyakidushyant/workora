@@ -1,4 +1,6 @@
 ﻿using AutoMapper;
+using Workora.Domain.Enums;
+using Workora.Domain.Extensions;
 using MediatR;
 using Workora.Application.Features.Helpdesk.DTOs;
 using Workora.Domain.Interfaces;
@@ -29,7 +31,7 @@ public class GetTicketByIdQueryHandler : IRequestHandler<GetTicketByIdQuery, Api
         var ticket = await _ticketRepository.GetWithCommentsAsync(request.TicketId, ct);
         if (ticket == null)
         {
-            return ApiResponse<HelpdeskTicketDto>.Fail("Ticket not found.");
+            return ApiResponse<HelpdeskTicketDto>.Fail(ResponseMessage.TicketNotFound.GetDescription());
         }
 
         var dto = _mapper.Map<HelpdeskTicketDto>(ticket);

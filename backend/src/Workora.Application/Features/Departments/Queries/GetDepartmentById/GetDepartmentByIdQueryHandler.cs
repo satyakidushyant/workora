@@ -1,4 +1,6 @@
 ﻿using AutoMapper;
+using Workora.Domain.Enums;
+using Workora.Domain.Extensions;
 using MediatR;
 using Workora.Application.Features.Departments.DTOs;
 using Workora.Domain.Interfaces;
@@ -29,7 +31,7 @@ public class GetDepartmentByIdQueryHandler : IRequestHandler<GetDepartmentByIdQu
         var department = await _departmentRepository.GetWithDetailsAsync(request.Id, ct);
         if (department == null)
         {
-            return ApiResponse<DepartmentDetailDto>.Fail("Department not found.");
+            return ApiResponse<DepartmentDetailDto>.Fail(ResponseMessage.DepartmentNotFound.GetDescription());
         }
 
         var dto = _mapper.Map<DepartmentDetailDto>(department);

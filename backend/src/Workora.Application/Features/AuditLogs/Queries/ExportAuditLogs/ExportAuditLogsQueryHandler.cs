@@ -1,4 +1,6 @@
 ﻿using MediatR;
+using Workora.Domain.Enums;
+using Workora.Domain.Extensions;
 using Workora.Shared.Responses;
 
 using Workora.Application.Features.AuditLogs.DTOs;
@@ -15,6 +17,6 @@ public class ExportAuditLogsQueryHandler : IRequestHandler<ExportAuditLogsQuery,
     public Task<ApiResponse<string>> Handle(ExportAuditLogsQuery request, CancellationToken cancellationToken)
     {
         var downloadUrl = $"/api/v1/audit-logs/download-csv?companyId={request.CompanyId}";
-        return Task.FromResult(ApiResponse<string>.Success(downloadUrl, "Audit log CSV export generated successfully."));
+        return Task.FromResult(ApiResponse<string>.Success(downloadUrl, ResponseMessage.AuditLogExportGenerated.GetDescription()));
     }
 }

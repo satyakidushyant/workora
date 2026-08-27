@@ -1,4 +1,6 @@
 ﻿using AutoMapper;
+using Workora.Domain.Enums;
+using Workora.Domain.Extensions;
 using MediatR;
 using Workora.Application.Common.Interfaces;
 using Workora.Application.Features.FieldTracking.DTOs;
@@ -35,7 +37,7 @@ public class CheckOutClientVisitCommandHandler : IRequestHandler<CheckOutClientV
         var visit = await _fieldVisitRepository.GetByIdAsync(request.VisitId, ct);
         if (visit == null)
         {
-            return ApiResponse<FieldVisitDto>.Fail("Field visit record not found.");
+            return ApiResponse<FieldVisitDto>.Fail(ResponseMessage.FieldVisitNotFound.GetDescription());
         }
 
         visit.CheckOut(
@@ -49,6 +51,6 @@ public class CheckOutClientVisitCommandHandler : IRequestHandler<CheckOutClientV
         await _unitOfWork.SaveChangesAsync(ct);
 
         var dto = _mapper.Map<FieldVisitDto>(visit);
-        return ApiResponse<FieldVisitDto>.Success(dto, "Visit check-out recorded successfully.");
+        return ApiResponse<FieldVisitDto>.Success(dto, ResponseMessage.FieldVisitCheckedOut.GetDescription());
     }
 }

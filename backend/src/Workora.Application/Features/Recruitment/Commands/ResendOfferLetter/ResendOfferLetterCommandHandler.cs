@@ -1,4 +1,6 @@
 ﻿using MediatR;
+using Workora.Domain.Enums;
+using Workora.Domain.Extensions;
 using Workora.Domain.Entities;
 using Workora.Domain.Interfaces;
 using Workora.Shared.Responses;
@@ -29,9 +31,9 @@ public class ResendOfferLetterCommandHandler : IRequestHandler<ResendOfferLetter
         var offer = await _offerRepository.GetByIdAsync(request.OfferId, cancellationToken);
         if (offer == null)
         {
-            return ApiResponse<bool>.Fail($"Job offer {request.OfferId} not found.");
+            return ApiResponse<bool>.Fail(ResponseMessage.JobOfferNotFound.GetDescription());
         }
 
-        return ApiResponse<bool>.Success(true, "Job offer letter email resent successfully to candidate.");
+        return ApiResponse<bool>.Success(true, ResponseMessage.JobOfferResent.GetDescription());
     }
 }

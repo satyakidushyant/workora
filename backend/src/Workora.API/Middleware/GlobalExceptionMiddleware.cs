@@ -1,4 +1,4 @@
-using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 using System.Net;
 using System.Text.Json;
@@ -60,7 +60,7 @@ public class GlobalExceptionMiddleware
         {
             case ValidationException ex:
                 context.Response.StatusCode = (int)HttpStatusCode.BadRequest;
-                response = ApiResponse<object>.Fail("Validation failed", ex.Errors);
+                response = ApiResponse<object>.Fail(ResponseMessage.ValidationFailed.GetDescription(), ex.Errors);
                 break;
             case UnauthorizedException ex:
                 context.Response.StatusCode = (int)HttpStatusCode.Unauthorized;

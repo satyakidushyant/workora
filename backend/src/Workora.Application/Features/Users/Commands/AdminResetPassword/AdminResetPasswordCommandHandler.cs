@@ -1,4 +1,6 @@
 ﻿using MediatR;
+using Workora.Domain.Enums;
+using Workora.Domain.Extensions;
 using Workora.Application.Common.Interfaces;
 using Workora.Domain.Interfaces;
 using Workora.Shared.Responses;
@@ -31,7 +33,7 @@ public class AdminResetPasswordCommandHandler : IRequestHandler<AdminResetPasswo
         var user = await _userRepository.GetByIdAsync(request.UserId, ct);
         if (user == null)
         {
-            return ApiResponse<bool>.Fail($"User with ID {request.UserId} was not found.");
+            return ApiResponse<bool>.Fail(ResponseMessage.UserNotFound.GetDescription());
         }
 
         var newPasswordHash = _passwordHasher.HashPassword(request.NewPassword);

@@ -1,4 +1,6 @@
 ﻿using AutoMapper;
+using Workora.Domain.Enums;
+using Workora.Domain.Extensions;
 using MediatR;
 using Workora.Application.Common.Interfaces;
 using Workora.Application.Features.Tasks.DTOs;
@@ -38,13 +40,13 @@ public class AssignTaskCommandHandler : IRequestHandler<AssignTaskCommand, ApiRe
         var task = await _taskRepository.GetByIdAsync(request.TaskId, ct);
         if (task == null)
         {
-            return ApiResponse<TaskItemDto>.Fail("Task not found.");
+            return ApiResponse<TaskItemDto>.Fail(ResponseMessage.TaskNotFound.GetDescription());
         }
 
         var assignee = await _employeeRepository.GetByIdAsync(request.NewAssigneeEmployeeId, ct);
         if (assignee == null)
         {
-            return ApiResponse<TaskItemDto>.Fail("New assignee employee not found.");
+            return ApiResponse<TaskItemDto>.Fail(ResponseMessage.EmployeeNotFound.GetDescription());
         }
 
         task.Reassign(request.NewAssigneeEmployeeId);
@@ -52,6 +54,6 @@ public class AssignTaskCommandHandler : IRequestHandler<AssignTaskCommand, ApiRe
         await _unitOfWork.SaveChangesAsync(ct);
 
         var dto = _mapper.Map<TaskItemDto>(task);
-        return ApiResponse<TaskItemDto>.Success(dto, "Task reassigned successfully.");
+        return ApiResponse<TaskItemDto>.Success(dto, ResponseMessage.TaskReassigned.GetDescription());
     }
 }

@@ -1,4 +1,6 @@
 ﻿using AutoMapper;
+using Workora.Domain.Enums;
+using Workora.Domain.Extensions;
 using MediatR;
 using Workora.Application.Features.Recruitment.DTOs;
 using Workora.Domain.Interfaces;
@@ -29,7 +31,7 @@ public class GetCandidateByIdQueryHandler : IRequestHandler<GetCandidateByIdQuer
         var candidate = await _recruitmentRepository.GetCandidateByIdAsync(request.Id, ct);
         if (candidate == null)
         {
-            return ApiResponse<CandidateDetailDto>.Fail("Candidate not found.");
+            return ApiResponse<CandidateDetailDto>.Fail(ResponseMessage.CandidateNotFound.GetDescription());
         }
 
         var dto = _mapper.Map<CandidateDetailDto>(candidate);

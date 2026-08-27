@@ -1,4 +1,6 @@
 ﻿using MediatR;
+using Workora.Domain.Enums;
+using Workora.Domain.Extensions;
 using Workora.Application.Features.Employees.DTOs;
 using Workora.Domain.Interfaces;
 using Workora.Shared.Responses;
@@ -26,7 +28,7 @@ public class GetEmployeeOrgChartQueryHandler : IRequestHandler<GetEmployeeOrgCha
         var employee = await _employeeRepository.GetWithFullDetailsAsync(request.Id, ct);
         if (employee == null)
         {
-            return ApiResponse<OrgChartNodeDto>.Fail("Employee not found.");
+            return ApiResponse<OrgChartNodeDto>.Fail(ResponseMessage.EmployeeNotFound.GetDescription());
         }
 
         var directReports = await _employeeRepository.GetDirectReportsAsync(employee.Id, ct);

@@ -1,4 +1,6 @@
 ﻿using System.Text;
+using Workora.Domain.Enums;
+using Workora.Domain.Extensions;
 using MediatR;
 using Workora.Application.Features.Compliance.DTOs;
 using Workora.Domain.Interfaces;
@@ -49,6 +51,6 @@ public class ExportEpfEcrQueryHandler : IRequestHandler<ExportEpfEcrQuery, ApiRe
         var base64 = Convert.ToBase64String(bytes);
         var exportDto = new StatutoryExportFileDto($"EPF_ECR_{request.Year}_{request.Month:D2}.txt", "text/plain", base64);
 
-        return ApiResponse<StatutoryExportFileDto>.Success(exportDto, "EPF ECR text file generated.");
+        return ApiResponse<StatutoryExportFileDto>.Success(exportDto, ResponseMessage.EpfEcrGenerated.GetDescription());
     }
 }

@@ -1,4 +1,6 @@
 ﻿using AutoMapper;
+using Workora.Domain.Enums;
+using Workora.Domain.Extensions;
 using FluentValidation;
 using MediatR;
 using Workora.Application.Common.Interfaces;
@@ -40,7 +42,7 @@ public class CheckInClientVisitCommandHandler : IRequestHandler<CheckInClientVis
         var employee = await _employeeRepository.GetByIdAsync(request.EmployeeId, ct);
         if (employee == null)
         {
-            return ApiResponse<FieldVisitDto>.Fail("Employee not found.");
+            return ApiResponse<FieldVisitDto>.Fail(ResponseMessage.EmployeeNotFound.GetDescription());
         }
 
         var visit = FieldVisit.CheckIn(
@@ -55,6 +57,6 @@ public class CheckInClientVisitCommandHandler : IRequestHandler<CheckInClientVis
         await _unitOfWork.SaveChangesAsync(ct);
 
         var dto = _mapper.Map<FieldVisitDto>(visit);
-        return ApiResponse<FieldVisitDto>.Success(dto, "Visit check-in recorded successfully.");
+        return ApiResponse<FieldVisitDto>.Success(dto, ResponseMessage.FieldVisitCheckedIn.GetDescription());
     }
 }

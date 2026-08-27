@@ -1,4 +1,6 @@
 ﻿using MediatR;
+using Workora.Domain.Enums;
+using Workora.Domain.Extensions;
 using Workora.Application.Features.Assets.DTOs;
 using Workora.Domain.Entities;
 using Workora.Domain.Interfaces;
@@ -29,7 +31,7 @@ public class GetAssetByIdQueryHandler : IRequestHandler<GetAssetByIdQuery, ApiRe
         var asset = await _assetRepository.GetByIdAsync(request.Id, cancellationToken);
         if (asset == null)
         {
-            return ApiResponse<AssetDto>.Fail($"Asset {request.Id} not found.");
+            return ApiResponse<AssetDto>.Fail(ResponseMessage.AssetNotFound.GetDescription());
         }
 
         var dto = new AssetDto(
@@ -48,6 +50,6 @@ public class GetAssetByIdQueryHandler : IRequestHandler<GetAssetByIdQuery, ApiRe
             asset.IsActive,
             asset.CreatedAt);
 
-        return ApiResponse<AssetDto>.Success(dto, "Asset details retrieved successfully.");
+        return ApiResponse<AssetDto>.Success(dto, ResponseMessage.AssetRetrieved.GetDescription());
     }
 }

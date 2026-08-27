@@ -1,4 +1,6 @@
 ﻿using AutoMapper;
+using Workora.Domain.Enums;
+using Workora.Domain.Extensions;
 using MediatR;
 using Workora.Application.Features.Designations.DTOs;
 using Workora.Domain.Interfaces;
@@ -29,7 +31,7 @@ public class GetDesignationByIdQueryHandler : IRequestHandler<GetDesignationById
         var designation = await _designationRepository.GetByIdAsync(request.Id, ct);
         if (designation == null)
         {
-            return ApiResponse<DesignationDto>.Fail("Designation not found.");
+            return ApiResponse<DesignationDto>.Fail(ResponseMessage.DesignationNotFound.GetDescription());
         }
 
         var dto = _mapper.Map<DesignationDto>(designation);

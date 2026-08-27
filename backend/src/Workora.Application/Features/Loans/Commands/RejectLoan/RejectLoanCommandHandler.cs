@@ -1,4 +1,6 @@
 ﻿using AutoMapper;
+using Workora.Domain.Enums;
+using Workora.Domain.Extensions;
 using FluentValidation;
 using MediatR;
 using Workora.Application.Common.Interfaces;
@@ -37,7 +39,7 @@ public class RejectLoanCommandHandler : IRequestHandler<RejectLoanCommand, ApiRe
         var loan = await _loanRepository.GetByIdAsync(request.LoanId, ct);
         if (loan == null)
         {
-            return ApiResponse<LoanDto>.Fail("Loan record not found.");
+            return ApiResponse<LoanDto>.Fail(ResponseMessage.LoanNotFound.GetDescription());
         }
 
         try
@@ -47,7 +49,7 @@ public class RejectLoanCommandHandler : IRequestHandler<RejectLoanCommand, ApiRe
             await _unitOfWork.SaveChangesAsync(ct);
 
             var dto = _mapper.Map<LoanDto>(loan);
-            return ApiResponse<LoanDto>.Success(dto, "Loan application rejected.");
+            return ApiResponse<LoanDto>.Success(dto, ResponseMessage.LoanRejected.GetDescription());
         }
         catch (DomainException ex)
         {

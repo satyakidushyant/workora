@@ -1,4 +1,6 @@
 ﻿using MediatR;
+using Workora.Domain.Enums;
+using Workora.Domain.Extensions;
 using Workora.Application.Features.Assets.DTOs;
 using Workora.Domain.Entities;
 using Workora.Domain.Interfaces;
@@ -33,7 +35,7 @@ public class UpdateAssetCommandHandler : IRequestHandler<UpdateAssetCommand, Api
         var asset = await _assetRepository.GetByIdAsync(request.Id, cancellationToken);
         if (asset == null)
         {
-            return ApiResponse<AssetDto>.Fail($"Asset {request.Id} not found.");
+            return ApiResponse<AssetDto>.Fail(ResponseMessage.AssetNotFound.GetDescription());
         }
 
         _assetRepository.Update(asset);
@@ -55,6 +57,6 @@ public class UpdateAssetCommandHandler : IRequestHandler<UpdateAssetCommand, Api
             asset.IsActive,
             asset.CreatedAt);
 
-        return ApiResponse<AssetDto>.Success(dto, "Asset details updated successfully.");
+        return ApiResponse<AssetDto>.Success(dto, ResponseMessage.AssetUpdated.GetDescription());
     }
 }

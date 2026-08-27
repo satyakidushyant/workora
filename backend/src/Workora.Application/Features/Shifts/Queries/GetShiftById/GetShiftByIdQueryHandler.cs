@@ -1,4 +1,6 @@
 ﻿using AutoMapper;
+using Workora.Domain.Enums;
+using Workora.Domain.Extensions;
 using MediatR;
 using Workora.Application.Features.Shifts.DTOs;
 using Workora.Domain.Interfaces;
@@ -29,7 +31,7 @@ public class GetShiftByIdQueryHandler : IRequestHandler<GetShiftByIdQuery, ApiRe
         var shift = await _shiftRepository.GetByIdAsync(request.Id, ct);
         if (shift == null)
         {
-            return ApiResponse<ShiftDto>.Fail("Shift not found.");
+            return ApiResponse<ShiftDto>.Fail(ResponseMessage.ShiftNotFound.GetDescription());
         }
 
         var dto = _mapper.Map<ShiftDto>(shift);

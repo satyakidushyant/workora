@@ -52,7 +52,7 @@ public class RejectOvertimeRequestCommandHandler : IRequestHandler<RejectOvertim
         if (overtimeRequest.Status != OvertimeRequestStatus.PendingManagerApproval &&
             overtimeRequest.Status != OvertimeRequestStatus.PendingHrApproval)
         {
-            return ApiResponse<OvertimeRequestDto>.Fail("Only pending overtime requests can be rejected.");
+            return ApiResponse<OvertimeRequestDto>.Fail(ResponseMessage.OvertimeOnlyPendingCanBeRejected.GetDescription());
         }
 
         var approverEmpId = 0;

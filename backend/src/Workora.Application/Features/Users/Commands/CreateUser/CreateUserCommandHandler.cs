@@ -1,4 +1,6 @@
-using AutoMapper;
+﻿using AutoMapper;
+using Workora.Domain.Enums;
+using Workora.Domain.Extensions;
 using MediatR;
 using Workora.Application.Common.Interfaces;
 using Workora.Application.Features.Users.DTOs;
@@ -51,7 +53,7 @@ public class CreateUserCommandHandler : IRequestHandler<CreateUserCommand, ApiRe
         var isUnique = await _userRepository.IsEmailUniqueAsync(emailObj, ct);
         if (!isUnique)
         {
-            return ApiResponse<UserDto>.Fail("A user with this email address already exists.");
+            return ApiResponse<UserDto>.Fail(ResponseMessage.UserEmailAlreadyExists.GetDescription());
         }
 
         var hashedPassword = _passwordHasher.HashPassword(request.Password);

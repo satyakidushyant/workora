@@ -47,7 +47,7 @@ public class CreateDesignationCommandHandler : IRequestHandler<CreateDesignation
         var isUnique = await _designationRepository.IsTitleUniqueAsync(request.DepartmentId, request.Title, null, ct);
         if (!isUnique)
         {
-            return ApiResponse<DesignationDto>.Fail("A designation with this title already exists in the department.");
+            return ApiResponse<DesignationDto>.Fail(ResponseMessage.DesignationTitleAlreadyExists.GetDescription());
         }
 
         var designation = Designation.Create(

@@ -1,4 +1,6 @@
 ﻿using System.Text;
+using Workora.Domain.Enums;
+using Workora.Domain.Extensions;
 using MediatR;
 using Workora.Application.Features.Compliance.DTOs;
 using Workora.Domain.Interfaces;
@@ -43,6 +45,6 @@ public class ExportPtReturnQueryHandler : IRequestHandler<ExportPtReturnQuery, A
         var base64 = Convert.ToBase64String(bytes);
         var exportDto = new StatutoryExportFileDto($"PT_Return_{request.Year}_{request.Month:D2}.csv", "text/csv", base64);
 
-        return ApiResponse<StatutoryExportFileDto>.Success(exportDto, "PT monthly return generated.");
+        return ApiResponse<StatutoryExportFileDto>.Success(exportDto, ResponseMessage.PtReturnGenerated.GetDescription());
     }
 }

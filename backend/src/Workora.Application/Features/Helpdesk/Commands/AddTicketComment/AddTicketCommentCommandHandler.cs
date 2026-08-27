@@ -1,4 +1,6 @@
 ﻿using AutoMapper;
+using Workora.Domain.Enums;
+using Workora.Domain.Extensions;
 using FluentValidation;
 using MediatR;
 using Workora.Application.Common.Interfaces;
@@ -40,7 +42,7 @@ public class AddTicketCommentCommandHandler : IRequestHandler<AddTicketCommentCo
         var ticket = await _ticketRepository.GetByIdAsync(request.TicketId, ct);
         if (ticket == null)
         {
-            return ApiResponse<TicketCommentDto>.Fail("Ticket not found.");
+            return ApiResponse<TicketCommentDto>.Fail(ResponseMessage.TicketNotFound.GetDescription());
         }
 
         var comment = HelpdeskTicketComment.Create(
@@ -65,6 +67,6 @@ public class AddTicketCommentCommandHandler : IRequestHandler<AddTicketCommentCo
             comment.IsInternalOnly,
             comment.CreatedAt);
 
-        return ApiResponse<TicketCommentDto>.Success(dto, "Comment posted.");
+        return ApiResponse<TicketCommentDto>.Success(dto, ResponseMessage.TicketCommentPosted.GetDescription());
     }
 }

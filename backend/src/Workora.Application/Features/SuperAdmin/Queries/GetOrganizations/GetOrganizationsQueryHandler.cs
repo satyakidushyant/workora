@@ -1,4 +1,6 @@
 ﻿using MediatR;
+using Workora.Domain.Enums;
+using Workora.Domain.Extensions;
 using Workora.Application.Common.Models;
 using Workora.Shared.Responses;
 using Workora.Application.Features.SuperAdmin.DTOs;
@@ -45,6 +47,6 @@ public class GetOrganizationsQueryHandler : IRequestHandler<GetOrganizationsQuer
             .ToList();
 
         var paged = new PagedResponse<OrganizationDto>(items, totalCount, request.PageNumber, request.PageSize);
-        return Task.FromResult(ApiResponse<PagedResponse<OrganizationDto>>.Success(paged, "Organizations retrieved successfully."));
+        return Task.FromResult(ApiResponse<PagedResponse<OrganizationDto>>.Success(paged, ResponseMessage.OrganizationsRetrieved.GetDescription()));
     }
 }

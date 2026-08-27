@@ -1,4 +1,4 @@
-namespace Workora.Application.Features.SuperAdmin.DTOs;
+﻿namespace Workora.Application.Features.SuperAdmin.DTOs;
 
 /// <summary>
 /// Data Transfer Object representing a tenant organization / company for SuperAdmin operations.

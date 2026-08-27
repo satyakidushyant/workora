@@ -1,4 +1,4 @@
-using System.ComponentModel;
+﻿using System.ComponentModel;
 
 namespace Workora.Domain.Enums;
 
@@ -34,6 +34,9 @@ public enum ResponseMessage
 
     [Description("User context not available or unauthenticated.")]
     UserContextUnavailable,
+
+    [Description("Validation failed.")]
+    ValidationFailed,
 
     [Description("An unexpected error occurred.")]
     UnexpectedError,
@@ -75,6 +78,21 @@ public enum ResponseMessage
     [Description("Incorrect old password.")]
     IncorrectOldPassword,
 
+    [Description("User identity could not be resolved from token.")]
+    UserIdentityUnresolved,
+
+    [Description("A user with this email address already exists.")]
+    UserEmailAlreadyExists,
+
+    [Description("Cannot deactivate the sole active user account in the system.")]
+    CannotDeactivateSoleUser,
+
+    [Description("Cannot delete the sole user account in the system.")]
+    CannotDeleteSoleUser,
+
+    [Description("No employee record is linked to this user account.")]
+    NoEmployeeLinkedToUser,
+
     // Roles & Permissions
     [Description("Role created successfully.")]
     RoleCreated,
@@ -93,6 +111,12 @@ public enum ResponseMessage
 
     [Description("Role permissions updated successfully.")]
     RolePermissionsUpdated,
+
+    [Description("A role with this name already exists.")]
+    RoleNameAlreadyExists,
+
+    [Description("Role cannot be deleted because it is currently assigned to one or more users.")]
+    RoleInUseCannotBeDeleted,
 
     // Companies & Structure
     [Description("Company created successfully.")]
@@ -116,6 +140,9 @@ public enum ResponseMessage
     [Description("Branch not found.")]
     BranchNotFound,
 
+    [Description("A branch with this code already exists for this company.")]
+    BranchCodeAlreadyExists,
+
     [Description("Department created successfully.")]
     DepartmentCreated,
 
@@ -131,6 +158,9 @@ public enum ResponseMessage
     [Description("Department not found.")]
     DepartmentNotFound,
 
+    [Description("A department with this code already exists for this company.")]
+    DepartmentCodeAlreadyExists,
+
     [Description("Designation created successfully.")]
     DesignationCreated,
 
@@ -145,6 +175,9 @@ public enum ResponseMessage
 
     [Description("Designation not found.")]
     DesignationNotFound,
+
+    [Description("A designation with this title already exists in the department.")]
+    DesignationTitleAlreadyExists,
 
     // Employees
     [Description("Employee onboarded successfully.")]
@@ -171,6 +204,24 @@ public enum ResponseMessage
     [Description("Employee not found.")]
     EmployeeNotFound,
 
+    [Description("An employee with this email already exists.")]
+    EmployeeEmailAlreadyExists,
+
+    [Description("An employee with this national ID already exists.")]
+    EmployeeNationalIdAlreadyExists,
+
+    [Description("Only active employees can be promoted.")]
+    OnlyActiveEmployeesCanBePromoted,
+
+    [Description("Employee is already at the target designation.")]
+    EmployeeAlreadyAtDesignation,
+
+    [Description("An employee cannot be their own manager.")]
+    EmployeeCannotBeOwnManager,
+
+    [Description("Employees imported successfully.")]
+    EmployeesBulkImported,
+
     // Shifts
     [Description("Shift template created successfully.")]
     ShiftCreated,
@@ -190,6 +241,24 @@ public enum ResponseMessage
     [Description("Shift template not found.")]
     ShiftNotFound,
 
+    [Description("A shift with this code already exists for the company.")]
+    ShiftCodeAlreadyExists,
+
+    [Description("No active shift assignment found for this employee.")]
+    ShiftNoActiveAssignment,
+
+    [Description("Active shift assignments not found for one or both target employees.")]
+    ShiftSwapInvalidAssignments,
+
+    [Description("Employee shift assignments swapped successfully.")]
+    ShiftSwapped,
+
+    [Description("Rotational shift assigned to employees successfully.")]
+    ShiftRosterAssigned,
+
+    [Description("Monthly shift roster schedule retrieved successfully.")]
+    ShiftRosterRetrieved,
+
     // Holidays
     [Description("Holiday created successfully.")]
     HolidayCreated,
@@ -202,6 +271,18 @@ public enum ResponseMessage
 
     [Description("Holiday not found.")]
     HolidayNotFound,
+
+    [Description("A holiday is already configured for this date and scope.")]
+    HolidayAlreadyExists,
+
+    [Description("Holidays imported successfully.")]
+    HolidaysBulkImported,
+
+    [Description("Weekly off policy updated successfully.")]
+    WeeklyOffPolicyUpdated,
+
+    [Description("Weekly off policy retrieved successfully.")]
+    WeeklyOffPolicyRetrieved,
 
     // Attendance
     [Description("Attendance check-in recorded successfully.")]
@@ -227,6 +308,18 @@ public enum ResponseMessage
 
     [Description("Attendance bulk records imported successfully.")]
     AttendanceBulkImported,
+
+    [Description("You have already checked in today.")]
+    AttendanceAlreadyCheckedIn,
+
+    [Description("You must check in first before checking out.")]
+    AttendanceMustCheckInFirst,
+
+    [Description("Biometric punches ingested successfully.")]
+    BiometricPunchesIngested,
+
+    [Description("Live attendance status retrieved successfully.")]
+    LiveAttendanceStatusRetrieved,
 
     // Leave
     [Description("Leave application submitted successfully.")]
@@ -256,6 +349,21 @@ public enum ResponseMessage
     [Description("Insufficient leave balance for this request.")]
     InsufficientLeaveBalance,
 
+    [Description("You already have an approved leave request in this date range.")]
+    LeaveAlreadyRequestedForRange,
+
+    [Description("Only pending leave requests can be approved.")]
+    LeaveOnlyPendingCanBeApproved,
+
+    [Description("Only pending leave requests can be rejected.")]
+    LeaveOnlyPendingCanBeRejected,
+
+    [Description("This leave request is already closed.")]
+    LeaveRequestAlreadyClosed,
+
+    [Description("Leave balances retrieved successfully.")]
+    LeaveBalancesRetrieved,
+
     // Salary & Payroll
     [Description("Salary structure created successfully.")]
     SalaryStructureCreated,
@@ -268,6 +376,21 @@ public enum ResponseMessage
 
     [Description("Salary structure not found.")]
     SalaryStructureNotFound,
+
+    [Description("No active salary structure assigned to this employee.")]
+    SalaryStructureNotAssigned,
+
+    [Description("Salary payhead created successfully.")]
+    PayheadCreated,
+
+    [Description("Salary payhead updated successfully.")]
+    PayheadUpdated,
+
+    [Description("Salary payhead not found.")]
+    PayheadNotFound,
+
+    [Description("Payheads list retrieved successfully.")]
+    PayheadsRetrieved,
 
     [Description("Payroll run computed successfully.")]
     PayrollRunCalculated,
@@ -284,8 +407,20 @@ public enum ResponseMessage
     [Description("Payroll run not found.")]
     PayrollRunNotFound,
 
+    [Description("A payroll run for this period already exists.")]
+    PayrollRunAlreadyExists,
+
     [Description("Payslip not found.")]
     PayslipNotFound,
+
+    [Description("Employee payslip retrieved successfully.")]
+    PayslipRetrieved,
+
+    [Description("Bulk payslips archive prepared successfully.")]
+    BulkPayslipsArchivePrepared,
+
+    [Description("Bank disbursement payment file generated successfully.")]
+    PayrollDisbursementFileGenerated,
 
     [Description("Only calculated payroll runs can be approved.")]
     PayrollRunMustBeCalculatedToApprove,
@@ -348,6 +483,12 @@ public enum ResponseMessage
     [Description("Job offer not found.")]
     JobOfferNotFound,
 
+    [Description("Job offer letter email resent successfully to candidate.")]
+    JobOfferResent,
+
+    [Description("Offer letter PDF URL generated successfully.")]
+    OfferLetterPdfGenerated,
+
     // Performance
     [Description("Appraisal review cycle initiated.")]
     AppraisalCreated,
@@ -372,6 +513,12 @@ public enum ResponseMessage
 
     [Description("Goal not found.")]
     GoalNotFound,
+
+    [Description("Performance review cycle initialized successfully.")]
+    PerformanceCycleCreated,
+
+    [Description("Performance review cycles retrieved successfully.")]
+    PerformanceCyclesRetrieved,
 
     // Training
     [Description("Training program created successfully.")]
@@ -399,6 +546,9 @@ public enum ResponseMessage
     [Description("Asset created successfully.")]
     AssetCreated,
 
+    [Description("Asset details updated successfully.")]
+    AssetUpdated,
+
     [Description("Asset assigned to employee.")]
     AssetAssigned,
 
@@ -408,11 +558,20 @@ public enum ResponseMessage
     [Description("Asset not found.")]
     AssetNotFound,
 
+    [Description("Asset details retrieved successfully.")]
+    AssetRetrieved,
+
     [Description("No active assignment found for this asset.")]
     AssetNoActiveAssignment,
 
     [Description("No active assignment found for this asset.")]
     AssetNotAssigned,
+
+    [Description("Asset is currently not available and cannot be assigned.")]
+    AssetNotAvailable,
+
+    [Description("Assigned assets list retrieved successfully.")]
+    CallerAssignedAssetsRetrieved,
 
     // Documents
     [Description("Document recorded successfully.")]
@@ -427,6 +586,12 @@ public enum ResponseMessage
     [Description("Document not found.")]
     DocumentNotFound,
 
+    [Description("Document download link generated successfully.")]
+    DocumentDownloadLinkGenerated,
+
+    [Description("Expiring documents list retrieved successfully.")]
+    ExpiringDocumentsRetrieved,
+
     // Policies
     [Description("Policy created successfully.")]
     PolicyCreated,
@@ -439,6 +604,12 @@ public enum ResponseMessage
 
     [Description("Policy not found.")]
     PolicyNotFound,
+
+    [Description("Policy version published successfully.")]
+    PolicyVersionPublished,
+
+    [Description("Policy compliance audit report calculated successfully.")]
+    PolicyComplianceReportCalculated,
 
     // Notifications & Settings
     [Description("Notification marked as read.")]
@@ -454,5 +625,199 @@ public enum ResponseMessage
     SettingsUpdated,
 
     [Description("System settings updated successfully.")]
-    SystemSettingUpdated
+    SystemSettingUpdated,
+
+    // Tasks
+    [Description("Task created successfully.")]
+    TaskCreated,
+
+    [Description("Task updated successfully.")]
+    TaskUpdated,
+
+    [Description("Task deleted successfully.")]
+    TaskDeleted,
+
+    [Description("Task not found.")]
+    TaskNotFound,
+
+    [Description("Task status updated.")]
+    TaskStatusUpdated,
+
+    [Description("Task reassigned successfully.")]
+    TaskReassigned,
+
+    // Helpdesk
+    [Description("Ticket created successfully.")]
+    TicketCreated,
+
+    [Description("Ticket assigned successfully.")]
+    TicketAssigned,
+
+    [Description("Ticket closed.")]
+    TicketClosed,
+
+    [Description("Ticket resolved successfully.")]
+    TicketResolved,
+
+    [Description("Ticket not found.")]
+    TicketNotFound,
+
+    [Description("Ticket comment posted successfully.")]
+    TicketCommentPosted,
+
+    // Loans
+    [Description("Loan application submitted successfully.")]
+    LoanApplied,
+
+    [Description("Loan approved and EMI schedule generated successfully.")]
+    LoanApproved,
+
+    [Description("Loan application rejected.")]
+    LoanRejected,
+
+    [Description("Loan record not found.")]
+    LoanNotFound,
+
+    // Expenses
+    [Description("Expense claim submitted successfully.")]
+    ExpenseClaimSubmitted,
+
+    [Description("Expense claim approved successfully.")]
+    ExpenseClaimApproved,
+
+    [Description("Expense claim rejected.")]
+    ExpenseClaimRejected,
+
+    [Description("Expense claim not found.")]
+    ExpenseClaimNotFound,
+
+    // Field Tracking
+    [Description("Field visit record not found.")]
+    FieldVisitNotFound,
+
+    [Description("Visit check-in recorded successfully.")]
+    FieldVisitCheckedIn,
+
+    [Description("Visit check-out recorded successfully.")]
+    FieldVisitCheckedOut,
+
+    [Description("GPS telemetry ping recorded.")]
+    GpsPingRecorded,
+
+    // Financial Years
+    [Description("An active financial year already exists. Please close it first.")]
+    FinancialYearActiveAlreadyExists,
+
+    [Description("This financial year is already closed.")]
+    FinancialYearAlreadyClosed,
+
+    // Overtime
+    [Description("Overtime request created successfully.")]
+    OvertimeRequestCreated,
+
+    [Description("Overtime request approved successfully.")]
+    OvertimeRequestApproved,
+
+    [Description("Overtime request rejected successfully.")]
+    OvertimeRequestRejected,
+
+    [Description("Overtime request cancelled successfully.")]
+    OvertimeRequestCancelled,
+
+    [Description("Overtime request not found.")]
+    OvertimeRequestNotFound,
+
+    [Description("An overtime request already exists for this employee on this date.")]
+    OvertimeRequestAlreadyExists,
+
+    [Description("Only pending overtime requests can be approved.")]
+    OvertimeOnlyPendingCanBeApproved,
+
+    [Description("Only pending overtime requests can be rejected.")]
+    OvertimeOnlyPendingCanBeRejected,
+
+    [Description("This overtime request is already closed.")]
+    OvertimeRequestAlreadyClosed,
+
+    [Description("Cannot cancel an approved overtime request. Please contact HR.")]
+    OvertimeApprovedCannotCancel,
+
+    // Onboarding
+    [Description("Onboarding record not found for this employee and checklist item.")]
+    OnboardingItemNotFound,
+
+    [Description("This onboarding item is already verified.")]
+    OnboardingItemAlreadyVerified,
+
+    // Compliance
+    [Description("Tax declaration submitted successfully.")]
+    TaxDeclarationSubmitted,
+
+    [Description("EPF ECR text file generated successfully.")]
+    EpfEcrGenerated,
+
+    [Description("ESIC monthly return generated successfully.")]
+    EsicReturnGenerated,
+
+    [Description("PT monthly return generated successfully.")]
+    PtReturnGenerated,
+
+    [Description("Form 16 tax certificate generated successfully.")]
+    Form16Generated,
+
+    // Reports & Audit
+    [Description("Audit log CSV export generated successfully.")]
+    AuditLogExportGenerated,
+
+    [Description("Audit logs retrieved successfully.")]
+    AuditLogsRetrieved,
+
+    [Description("Custom report export generated successfully.")]
+    CustomReportExportGenerated,
+
+    [Description("Attrition report metrics computed successfully.")]
+    AttritionReportComputed,
+
+    // SuperAdmin
+    [Description("Organization not found.")]
+    OrganizationNotFound,
+
+    [Description("An organization with this code already exists.")]
+    OrganizationCodeAlreadyExists,
+
+    [Description("Tenant organization registered successfully.")]
+    OrganizationRegistered,
+
+    [Description("Organization reactivated successfully.")]
+    OrganizationReactivated,
+
+    [Description("Organization suspended successfully.")]
+    OrganizationSuspended,
+
+    [Description("Organization updated successfully.")]
+    OrganizationUpdated,
+
+    [Description("Organization details retrieved successfully.")]
+    OrganizationRetrieved,
+
+    [Description("Organizations retrieved successfully.")]
+    OrganizationsRetrieved,
+
+    [Description("Subscription plan not found.")]
+    SubscriptionPlanNotFound,
+
+    [Description("Subscription plan created successfully.")]
+    SubscriptionPlanCreated,
+
+    [Description("Subscription plan updated successfully.")]
+    SubscriptionPlanUpdated,
+
+    [Description("Subscription plan deleted successfully.")]
+    SubscriptionPlanDeleted,
+
+    [Description("Subscription plans retrieved successfully.")]
+    SubscriptionPlansRetrieved,
+
+    [Description("Global platform metrics retrieved successfully.")]
+    SuperAdminMetricsRetrieved
 }

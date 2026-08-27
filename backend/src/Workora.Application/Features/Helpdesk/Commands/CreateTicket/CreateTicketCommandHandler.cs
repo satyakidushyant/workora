@@ -5,6 +5,7 @@ using Workora.Application.Common.Interfaces;
 using Workora.Application.Features.Helpdesk.DTOs;
 using Workora.Domain.Entities;
 using Workora.Domain.Enums;
+using Workora.Domain.Extensions;
 using Workora.Domain.Interfaces;
 using Workora.Shared.Responses;
 
@@ -41,7 +42,7 @@ public class CreateTicketCommandHandler : IRequestHandler<CreateTicketCommand, A
         var employee = await _employeeRepository.GetByIdAsync(request.RaisedByEmployeeId, ct);
         if (employee == null)
         {
-            return ApiResponse<HelpdeskTicketDto>.Fail("Employee not found.");
+            return ApiResponse<HelpdeskTicketDto>.Fail(ResponseMessage.EmployeeNotFound.GetDescription());
         }
 
         var year = DateTimeOffset.UtcNow.Year;
@@ -61,6 +62,6 @@ public class CreateTicketCommandHandler : IRequestHandler<CreateTicketCommand, A
         await _unitOfWork.SaveChangesAsync(ct);
 
         var dto = _mapper.Map<HelpdeskTicketDto>(ticket);
-        return ApiResponse<HelpdeskTicketDto>.Success(dto, "Ticket created successfully.");
+        return ApiResponse<HelpdeskTicketDto>.Success(dto, ResponseMessage.TicketCreated.GetDescription());
     }
 }

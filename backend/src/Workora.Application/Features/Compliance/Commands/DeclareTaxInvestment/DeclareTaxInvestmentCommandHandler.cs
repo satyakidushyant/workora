@@ -1,4 +1,6 @@
 ﻿using FluentValidation;
+using Workora.Domain.Enums;
+using Workora.Domain.Extensions;
 using MediatR;
 using Workora.Application.Common.Interfaces;
 using Workora.Application.Features.Compliance.DTOs;
@@ -30,7 +32,7 @@ public class DeclareTaxInvestmentCommandHandler : IRequestHandler<DeclareTaxInve
         var employee = await _employeeRepository.GetByIdAsync(request.EmployeeId, ct);
         if (employee == null)
         {
-            return ApiResponse<TaxDeclarationDto>.Fail("Employee not found.");
+            return ApiResponse<TaxDeclarationDto>.Fail(ResponseMessage.EmployeeNotFound.GetDescription());
         }
 
         var dto = new TaxDeclarationDto(
@@ -44,6 +46,6 @@ public class DeclareTaxInvestmentCommandHandler : IRequestHandler<DeclareTaxInve
             DateTimeOffset.UtcNow);
 
         await _unitOfWork.SaveChangesAsync(ct);
-        return ApiResponse<TaxDeclarationDto>.Success(dto, "Tax declaration submitted successfully.");
+        return ApiResponse<TaxDeclarationDto>.Success(dto, ResponseMessage.TaxDeclarationSubmitted.GetDescription());
     }
 }

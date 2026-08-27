@@ -74,7 +74,7 @@ public class ApplyLeaveCommandHandler : IRequestHandler<ApplyLeaveCommand, ApiRe
         var hasOverlap = await _leaveRequestRepository.HasOverlappingApprovedLeaveAsync(employee.Id, request.StartDate, request.EndDate, null, ct);
         if (hasOverlap)
         {
-            return ApiResponse<LeaveRequestDto>.Fail("You already have an approved leave request in this date range.");
+            return ApiResponse<LeaveRequestDto>.Fail(ResponseMessage.LeaveAlreadyRequestedForRange.GetDescription());
         }
 
         var year = request.StartDate.Year;

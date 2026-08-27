@@ -1,4 +1,6 @@
 ﻿using AutoMapper;
+using Workora.Domain.Enums;
+using Workora.Domain.Extensions;
 using MediatR;
 using Workora.Application.Common.Interfaces;
 using Workora.Application.Features.Loans.DTOs;
@@ -40,19 +42,19 @@ public class ListMyLoansQueryHandler : IRequestHandler<ListMyLoansQuery, ApiResp
     {
         if (_currentUserService.UserId == null)
         {
-            return ApiResponse<List<LoanDto>>.Fail("User context not found.");
+            return ApiResponse<List<LoanDto>>.Fail(ResponseMessage.UserContextUnavailable.GetDescription());
         }
 
         var user = await _userRepository.GetByUuidAsync(_currentUserService.UserId.Value, ct);
         if (user == null)
         {
-            return ApiResponse<List<LoanDto>>.Fail("User account not found.");
+            return ApiResponse<List<LoanDto>>.Fail(ResponseMessage.UserNotFound.GetDescription());
         }
 
         var employee = await _employeeRepository.GetByUserIdAsync(user.Id, ct);
         if (employee == null)
         {
-            return ApiResponse<List<LoanDto>>.Fail("Authenticated user is not linked to an employee record.");
+            return ApiResponse<List<LoanDto>>.Fail(ResponseMessage.NoEmployeeLinkedToUser.GetDescription());
         }
 
         var loans = await _loanRepository.GetByEmployeeIdAsync(employee.Id, ct);

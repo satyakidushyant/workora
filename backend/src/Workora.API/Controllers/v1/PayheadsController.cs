@@ -6,8 +6,8 @@ using Workora.Application.Features.Payroll.Queries.GetPayheadsList;
 using Workora.Application.Features.Payroll.Commands.CreatePayhead;
 using Workora.Application.Features.Payroll.Commands.UpdatePayhead;
 using Workora.Shared.Responses;
-
 using Workora.Application.Features.Payroll.DTOs;
+
 namespace Workora.API.Controllers.v1;
 
 /// <summary>

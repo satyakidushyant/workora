@@ -1,6 +1,7 @@
 ﻿using MediatR;
 using Workora.Application.Features.Attendance.DTOs;
 using Workora.Domain.Enums;
+using Workora.Domain.Extensions;
 using Workora.Domain.Interfaces;
 using Workora.Shared.Responses;
 
@@ -31,7 +32,7 @@ public class GetAttendanceSummaryQueryHandler : IRequestHandler<GetAttendanceSum
         var employee = await _employeeRepository.GetByIdAsync(request.EmployeeId, ct);
         if (employee == null)
         {
-            return ApiResponse<AttendanceSummaryDto>.Fail("Employee not found.");
+            return ApiResponse<AttendanceSummaryDto>.Fail(ResponseMessage.EmployeeNotFound.GetDescription());
         }
 
         var startDate = new DateOnly(request.Year, request.Month, 1);

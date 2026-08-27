@@ -55,7 +55,7 @@ public class RejectLeaveCommandHandler : IRequestHandler<RejectLeaveCommand, Api
         if (leaveRequest.Status != LeaveRequestStatus.PendingManagerApproval &&
             leaveRequest.Status != LeaveRequestStatus.PendingHrApproval)
         {
-            return ApiResponse<LeaveRequestDto>.Fail("Only pending leave requests can be rejected.");
+            return ApiResponse<LeaveRequestDto>.Fail(ResponseMessage.LeaveOnlyPendingCanBeRejected.GetDescription());
         }
 
         var approverEmpId = 0;

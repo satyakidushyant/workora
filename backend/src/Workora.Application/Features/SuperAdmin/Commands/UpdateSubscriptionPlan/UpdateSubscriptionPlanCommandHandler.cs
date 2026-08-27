@@ -4,6 +4,7 @@ using Workora.Application.Common.Models;
 using Workora.Application.Features.SuperAdmin.DTOs;
 using Workora.Domain.Entities;
 using Workora.Domain.Enums;
+using Workora.Domain.Extensions;
 using Workora.Domain.Interfaces;
 using Workora.Shared.Responses;
 
@@ -36,7 +37,7 @@ public class UpdateSubscriptionPlanCommandHandler : IRequestHandler<UpdateSubscr
         var plan = await _planRepository.GetByIdAsync(request.Id, cancellationToken);
         if (plan == null)
         {
-            return ApiResponse<SubscriptionPlanDto>.Fail("Subscription plan not found.");
+            return ApiResponse<SubscriptionPlanDto>.Fail(ResponseMessage.SubscriptionPlanNotFound.GetDescription());
         }
 
         plan.Update(
@@ -61,6 +62,6 @@ public class UpdateSubscriptionPlanCommandHandler : IRequestHandler<UpdateSubscr
             IsActive = plan.IsActive
         };
 
-        return ApiResponse<SubscriptionPlanDto>.Success(dto, "Subscription plan updated successfully.");
+        return ApiResponse<SubscriptionPlanDto>.Success(dto, ResponseMessage.SubscriptionPlanUpdated.GetDescription());
     }
 }

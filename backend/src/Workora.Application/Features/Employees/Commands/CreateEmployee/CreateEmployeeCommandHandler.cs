@@ -58,13 +58,13 @@ public class CreateEmployeeCommandHandler : IRequestHandler<CreateEmployeeComman
         var isEmailUnique = await _employeeRepository.IsEmailUniqueAsync(emailObj, null, ct);
         if (!isEmailUnique)
         {
-            return ApiResponse<EmployeeDto>.Fail("An employee with this email already exists.");
+            return ApiResponse<EmployeeDto>.Fail(ResponseMessage.EmployeeEmailAlreadyExists.GetDescription());
         }
 
         var isNationalIdUnique = await _employeeRepository.IsNationalIdUniqueAsync(request.NationalId, null, ct);
         if (!isNationalIdUnique)
         {
-            return ApiResponse<EmployeeDto>.Fail("An employee with this national ID already exists.");
+            return ApiResponse<EmployeeDto>.Fail(ResponseMessage.EmployeeNationalIdAlreadyExists.GetDescription());
         }
 
         var department = await _departmentRepository.GetByIdAsync(request.DepartmentId, ct);

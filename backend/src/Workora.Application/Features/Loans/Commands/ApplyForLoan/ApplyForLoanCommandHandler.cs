@@ -5,6 +5,7 @@ using Workora.Application.Common.Interfaces;
 using Workora.Application.Features.Loans.DTOs;
 using Workora.Domain.Entities;
 using Workora.Domain.Enums;
+using Workora.Domain.Extensions;
 using Workora.Domain.Interfaces;
 using Workora.Shared.Responses;
 
@@ -41,7 +42,7 @@ public class ApplyForLoanCommandHandler : IRequestHandler<ApplyForLoanCommand, A
         var employee = await _employeeRepository.GetByIdAsync(request.EmployeeId, ct);
         if (employee == null)
         {
-            return ApiResponse<LoanDto>.Fail("Employee not found.");
+            return ApiResponse<LoanDto>.Fail(ResponseMessage.EmployeeNotFound.GetDescription());
         }
 
         var loan = LoanRecord.Create(
@@ -56,6 +57,6 @@ public class ApplyForLoanCommandHandler : IRequestHandler<ApplyForLoanCommand, A
         await _unitOfWork.SaveChangesAsync(ct);
 
         var dto = _mapper.Map<LoanDto>(loan);
-        return ApiResponse<LoanDto>.Success(dto, "Loan application submitted successfully.");
+        return ApiResponse<LoanDto>.Success(dto, ResponseMessage.LoanApplied.GetDescription());
     }
 }

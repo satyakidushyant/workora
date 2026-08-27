@@ -1,4 +1,4 @@
-namespace Workora.Application.Features.AuditLogs.DTOs;
+﻿namespace Workora.Application.Features.AuditLogs.DTOs;
 
 /// <summary>
 /// DTO representing an audit trail log entry.

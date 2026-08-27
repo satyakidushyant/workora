@@ -1,4 +1,6 @@
 ﻿using MediatR;
+using Workora.Domain.Enums;
+using Workora.Domain.Extensions;
 using Workora.Application.Features.Payroll.DTOs;
 using Workora.Domain.Entities;
 using Workora.Domain.Interfaces;
@@ -33,7 +35,7 @@ public class ProcessPayrollRunCommandHandler : IRequestHandler<ProcessPayrollRun
         var run = await _runRepository.GetByIdAsync(request.PayrollRunId, cancellationToken);
         if (run == null)
         {
-            return ApiResponse<PayrollRunDto>.Fail($"Payroll run {request.PayrollRunId} not found.");
+            return ApiResponse<PayrollRunDto>.Fail(ResponseMessage.PayrollRunNotFound.GetDescription());
         }
 
         await _unitOfWork.SaveChangesAsync(cancellationToken);
@@ -55,6 +57,6 @@ public class ProcessPayrollRunCommandHandler : IRequestHandler<ProcessPayrollRun
             null,
             run.CreatedAt);
 
-        return ApiResponse<PayrollRunDto>.Success(dto, "Payroll run processed and computed successfully.");
+        return ApiResponse<PayrollRunDto>.Success(dto, ResponseMessage.PayrollRunCalculated.GetDescription());
     }
 }

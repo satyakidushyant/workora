@@ -3,6 +3,7 @@ using MediatR;
 using Workora.Application.Features.Attendance.DTOs;
 using Workora.Domain.Entities;
 using Workora.Domain.Enums;
+using Workora.Domain.Extensions;
 using Workora.Domain.Interfaces;
 using Workora.Shared.Responses;
 
@@ -84,6 +85,6 @@ public class BulkImportAttendanceCommandHandler : IRequestHandler<BulkImportAtte
         }
 
         await _unitOfWork.SaveChangesAsync(ct);
-        return ApiResponse<int>.Success(importedCount, $"{importedCount} attendance records imported successfully.");
+        return ApiResponse<int>.Success(importedCount, ResponseMessage.AttendanceBulkImported.GetDescription());
     }
 }

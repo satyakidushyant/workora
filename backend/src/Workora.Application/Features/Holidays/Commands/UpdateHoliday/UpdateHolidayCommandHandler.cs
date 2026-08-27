@@ -43,7 +43,7 @@ public class UpdateHolidayCommandHandler : IRequestHandler<UpdateHolidayCommand,
         var isUnique = await _holidayRepository.IsDateUniqueAsync(holiday.CompanyId, request.Date, request.BranchId, request.Id, ct);
         if (!isUnique)
         {
-            return ApiResponse<HolidayDto>.Fail("A holiday is already configured for this date and scope.");
+            return ApiResponse<HolidayDto>.Fail(ResponseMessage.HolidayAlreadyExists.GetDescription());
         }
 
         holiday.Update(request.Name, request.Date, request.Type, request.BranchId, request.Description);

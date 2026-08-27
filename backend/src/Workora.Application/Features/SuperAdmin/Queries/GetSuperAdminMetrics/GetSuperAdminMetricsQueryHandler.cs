@@ -1,4 +1,6 @@
 ﻿using MediatR;
+using Workora.Domain.Enums;
+using Workora.Domain.Extensions;
 using Workora.Application.Common.Models;
 using Workora.Shared.Responses;
 using Workora.Application.Features.SuperAdmin.DTOs;
@@ -52,6 +54,6 @@ public class GetSuperAdminMetricsQueryHandler : IRequestHandler<GetSuperAdminMet
             ActiveSubscriptionPlans = plans.Count
         };
 
-        return Task.FromResult(ApiResponse<SuperAdminMetricsDto>.Success(metrics, "Global platform metrics retrieved successfully."));
+        return Task.FromResult(ApiResponse<SuperAdminMetricsDto>.Success(metrics, ResponseMessage.SuperAdminMetricsRetrieved.GetDescription()));
     }
 }

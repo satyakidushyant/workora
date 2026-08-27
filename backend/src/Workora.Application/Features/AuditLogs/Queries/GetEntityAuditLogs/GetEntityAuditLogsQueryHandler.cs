@@ -1,4 +1,6 @@
 ﻿using MediatR;
+using Workora.Domain.Enums;
+using Workora.Domain.Extensions;
 using Workora.Application.Features.AuditLogs.DTOs;
 using Workora.Domain.Entities;
 using Workora.Domain.Interfaces;
@@ -43,6 +45,6 @@ public class GetEntityAuditLogsQueryHandler : IRequestHandler<GetEntityAuditLogs
                 a.Timestamp))
             .ToList();
 
-        return Task.FromResult(ApiResponse<IReadOnlyList<AuditLogDto>>.Success(logs, $"Audit logs for {request.EntityName} ID {request.EntityId} retrieved successfully."));
+        return Task.FromResult(ApiResponse<IReadOnlyList<AuditLogDto>>.Success(logs, ResponseMessage.AuditLogsRetrieved.GetDescription()));
     }
 }

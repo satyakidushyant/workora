@@ -1,4 +1,6 @@
 ﻿using AutoMapper;
+using Workora.Domain.Enums;
+using Workora.Domain.Extensions;
 using MediatR;
 using Workora.Application.Common.Interfaces;
 using Workora.Application.Features.Helpdesk.DTOs;
@@ -40,19 +42,19 @@ public class ListMyTicketsQueryHandler : IRequestHandler<ListMyTicketsQuery, Api
     {
         if (_currentUserService.UserId == null)
         {
-            return ApiResponse<List<HelpdeskTicketDto>>.Fail("User context not found.");
+            return ApiResponse<List<HelpdeskTicketDto>>.Fail(ResponseMessage.UserContextUnavailable.GetDescription());
         }
 
         var user = await _userRepository.GetByUuidAsync(_currentUserService.UserId.Value, ct);
         if (user == null)
         {
-            return ApiResponse<List<HelpdeskTicketDto>>.Fail("User account not found.");
+            return ApiResponse<List<HelpdeskTicketDto>>.Fail(ResponseMessage.UserNotFound.GetDescription());
         }
 
         var employee = await _employeeRepository.GetByUserIdAsync(user.Id, ct);
         if (employee == null)
         {
-            return ApiResponse<List<HelpdeskTicketDto>>.Fail("Authenticated user is not linked to an employee record.");
+            return ApiResponse<List<HelpdeskTicketDto>>.Fail(ResponseMessage.NoEmployeeLinkedToUser.GetDescription());
         }
 
         var tickets = await _ticketRepository.GetTicketsByEmployeeAsync(employee.Id, ct);

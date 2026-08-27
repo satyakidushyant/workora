@@ -47,7 +47,7 @@ public class CreateOvertimeRequestCommandHandler : IRequestHandler<CreateOvertim
         var hasOverlap = await _overtimeRequestRepository.HasOverlappingRequestAsync(request.EmployeeId, request.OvertimeDate, null, ct);
         if (hasOverlap)
         {
-            return ApiResponse<OvertimeRequestDto>.Fail("An overtime request already exists for this employee on this date.");
+            return ApiResponse<OvertimeRequestDto>.Fail(ResponseMessage.OvertimeRequestAlreadyExists.GetDescription());
         }
 
         var overtimeRequest = OvertimeRequest.Create(

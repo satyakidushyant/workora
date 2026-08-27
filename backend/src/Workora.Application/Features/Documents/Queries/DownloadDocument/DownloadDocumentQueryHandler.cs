@@ -1,4 +1,6 @@
 ﻿using MediatR;
+using Workora.Domain.Enums;
+using Workora.Domain.Extensions;
 using Workora.Application.Features.Documents.DTOs;
 using Workora.Domain.Entities;
 using Workora.Domain.Interfaces;
@@ -29,7 +31,7 @@ public class DownloadDocumentQueryHandler : IRequestHandler<DownloadDocumentQuer
         var doc = await _documentRepository.GetByIdAsync(request.DocumentId, cancellationToken);
         if (doc == null)
         {
-            return ApiResponse<DocumentDownloadDto>.Fail($"Document {request.DocumentId} not found.");
+            return ApiResponse<DocumentDownloadDto>.Fail(ResponseMessage.DocumentNotFound.GetDescription());
         }
 
         var dto = new DocumentDownloadDto
@@ -40,6 +42,6 @@ public class DownloadDocumentQueryHandler : IRequestHandler<DownloadDocumentQuer
             DownloadUrl = doc.FilePath
         };
 
-        return ApiResponse<DocumentDownloadDto>.Success(dto, "Document download link generated successfully.");
+        return ApiResponse<DocumentDownloadDto>.Success(dto, ResponseMessage.DocumentDownloadLinkGenerated.GetDescription());
     }
 }

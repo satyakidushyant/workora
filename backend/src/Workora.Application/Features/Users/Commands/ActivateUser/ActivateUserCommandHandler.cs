@@ -1,4 +1,6 @@
 ﻿using MediatR;
+using Workora.Domain.Enums;
+using Workora.Domain.Extensions;
 using Workora.Domain.Interfaces;
 using Workora.Shared.Responses;
 
@@ -27,7 +29,7 @@ public class ActivateUserCommandHandler : IRequestHandler<ActivateUserCommand, A
         var user = await _userRepository.GetByIdAsync(request.Id, ct);
         if (user == null)
         {
-            return ApiResponse<bool>.Fail($"User with ID {request.Id} was not found.");
+            return ApiResponse<bool>.Fail(ResponseMessage.UserNotFound.GetDescription());
         }
 
         user.Activate();

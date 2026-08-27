@@ -1,4 +1,6 @@
 ﻿using MediatR;
+using Workora.Domain.Enums;
+using Workora.Domain.Extensions;
 using Workora.Application.Features.Assets.DTOs;
 using Workora.Domain.Entities;
 using Workora.Domain.Interfaces;
@@ -46,6 +48,6 @@ public class GetMyAssignedAssetsQueryHandler : IRequestHandler<GetMyAssignedAsse
                 a.CreatedAt))
             .ToList();
 
-        return Task.FromResult(ApiResponse<IReadOnlyList<AssetDto>>.Success(items, "Caller assigned assets list retrieved."));
+        return Task.FromResult(ApiResponse<IReadOnlyList<AssetDto>>.Success(items, ResponseMessage.CallerAssignedAssetsRetrieved.GetDescription()));
     }
 }

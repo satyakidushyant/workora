@@ -43,7 +43,7 @@ public class UpdateDesignationCommandHandler : IRequestHandler<UpdateDesignation
         var isUnique = await _designationRepository.IsTitleUniqueAsync(request.DepartmentId, request.Title, request.Id, ct);
         if (!isUnique)
         {
-            return ApiResponse<DesignationDto>.Fail("A designation with this title already exists in the department.");
+            return ApiResponse<DesignationDto>.Fail(ResponseMessage.DesignationTitleAlreadyExists.GetDescription());
         }
 
         designation.Update(request.DepartmentId, request.Title, request.Level, request.Grade, request.Description);

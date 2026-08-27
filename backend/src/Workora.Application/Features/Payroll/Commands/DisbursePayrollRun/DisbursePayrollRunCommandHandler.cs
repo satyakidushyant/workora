@@ -41,7 +41,7 @@ public class DisbursePayrollRunCommandHandler : IRequestHandler<DisbursePayrollR
 
         if (run.Status != PayrollStatus.Approved)
         {
-            return ApiResponse<PayrollRunDto>.Fail("Only approved payroll runs can be disbursed.");
+            return ApiResponse<PayrollRunDto>.Fail(ResponseMessage.PayrollRunMustBeApprovedToDisburse.GetDescription());
         }
 
         run.Disburse();

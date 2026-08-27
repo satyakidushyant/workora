@@ -1,4 +1,6 @@
 ﻿using AutoMapper;
+using Workora.Domain.Enums;
+using Workora.Domain.Extensions;
 using MediatR;
 using Workora.Application.Features.Training.DTOs;
 using Workora.Domain.Interfaces;
@@ -29,7 +31,7 @@ public class GetTrainingProgramByIdQueryHandler : IRequestHandler<GetTrainingPro
         var program = await _trainingRepository.GetWithEnrollmentsAsync(request.Id, ct);
         if (program == null)
         {
-            return ApiResponse<TrainingProgramDto>.Fail("Training program not found.");
+            return ApiResponse<TrainingProgramDto>.Fail(ResponseMessage.TrainingProgramNotFound.GetDescription());
         }
 
         var dto = _mapper.Map<TrainingProgramDto>(program);

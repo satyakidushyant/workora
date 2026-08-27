@@ -43,7 +43,7 @@ public class UpdateShiftCommandHandler : IRequestHandler<UpdateShiftCommand, Api
         var isUnique = await _shiftRepository.IsCodeUniqueAsync(shift.CompanyId, request.Code, request.Id, ct);
         if (!isUnique)
         {
-            return ApiResponse<ShiftDto>.Fail("A shift with this code already exists for the company.");
+            return ApiResponse<ShiftDto>.Fail(ResponseMessage.ShiftCodeAlreadyExists.GetDescription());
         }
 
         shift.Update(

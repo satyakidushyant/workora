@@ -46,7 +46,7 @@ public class PromoteEmployeeCommandHandler : IRequestHandler<PromoteEmployeeComm
 
         if (employee.EmploymentStatus != EmploymentStatus.Active)
         {
-            return ApiResponse<EmployeeDto>.Fail("Only active employees can be promoted.");
+            return ApiResponse<EmployeeDto>.Fail(ResponseMessage.OnlyActiveEmployeesCanBePromoted.GetDescription());
         }
 
         var newDesignation = await _designationRepository.GetByIdAsync(request.NewDesignationId, ct);
@@ -57,7 +57,7 @@ public class PromoteEmployeeCommandHandler : IRequestHandler<PromoteEmployeeComm
 
         if (employee.DesignationId == request.NewDesignationId)
         {
-            return ApiResponse<EmployeeDto>.Fail("Employee is already at the target designation.");
+            return ApiResponse<EmployeeDto>.Fail(ResponseMessage.EmployeeAlreadyAtDesignation.GetDescription());
         }
 
         employee.Transfer(

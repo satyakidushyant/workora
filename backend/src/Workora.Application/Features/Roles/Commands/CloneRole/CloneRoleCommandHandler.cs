@@ -1,4 +1,4 @@
-using AutoMapper;
+﻿using AutoMapper;
 using MediatR;
 using Workora.Application.Features.Roles.DTOs;
 using Workora.Domain.Entities;
@@ -40,7 +40,7 @@ public class CloneRoleCommandHandler : IRequestHandler<CloneRoleCommand, ApiResp
         var isUnique = await _roleRepository.IsNameUniqueAsync(request.NewName, ct: ct);
         if (!isUnique)
         {
-            return ApiResponse<RoleDto>.Fail($"A role with the name '{request.NewName}' already exists.");
+            return ApiResponse<RoleDto>.Fail(ResponseMessage.RoleNameAlreadyExists.GetDescription());
         }
 
         var description = request.Description ?? $"Cloned from {sourceRole.Name}";

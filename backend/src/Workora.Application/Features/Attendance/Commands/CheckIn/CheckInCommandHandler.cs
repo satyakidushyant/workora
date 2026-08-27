@@ -70,7 +70,7 @@ public class CheckInCommandHandler : IRequestHandler<CheckInCommand, ApiResponse
         var existing = await _attendanceRepository.GetByDateAsync(employee.Id, today, ct);
         if (existing != null && existing.CheckInTime.HasValue)
         {
-            return ApiResponse<AttendanceRecordDto>.Fail("You have already checked in today.");
+            return ApiResponse<AttendanceRecordDto>.Fail(ResponseMessage.AttendanceAlreadyCheckedIn.GetDescription());
         }
 
         var shiftAssignment = await _shiftRepository.GetActiveAssignmentAsync(employee.Id, today, ct);

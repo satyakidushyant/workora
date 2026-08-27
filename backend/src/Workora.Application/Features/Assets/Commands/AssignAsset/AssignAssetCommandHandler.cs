@@ -42,7 +42,7 @@ public class AssignAssetCommandHandler : IRequestHandler<AssignAssetCommand, Api
 
         if (asset.Status != AssetStatus.Available)
         {
-            return ApiResponse<bool>.Fail($"Asset is currently {asset.Status} and cannot be assigned.");
+            return ApiResponse<bool>.Fail(ResponseMessage.AssetNotAvailable.GetDescription());
         }
 
         var employee = await _employeeRepository.GetByIdAsync(request.EmployeeId, ct);

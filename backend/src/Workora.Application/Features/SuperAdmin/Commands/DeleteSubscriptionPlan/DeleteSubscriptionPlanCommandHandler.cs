@@ -1,4 +1,6 @@
 ﻿using FluentValidation;
+using Workora.Domain.Enums;
+using Workora.Domain.Extensions;
 using MediatR;
 using Workora.Application.Common.Models;
 using Workora.Domain.Entities;
@@ -35,12 +37,12 @@ public class DeleteSubscriptionPlanCommandHandler : IRequestHandler<DeleteSubscr
         var plan = await _planRepository.GetByIdAsync(request.Id, cancellationToken);
         if (plan == null)
         {
-            return ApiResponse<bool>.Fail("Subscription plan not found.");
+            return ApiResponse<bool>.Fail(ResponseMessage.SubscriptionPlanNotFound.GetDescription());
         }
 
         _planRepository.Remove(plan);
         await _unitOfWork.SaveChangesAsync(cancellationToken);
 
-        return ApiResponse<bool>.Success(true, "Subscription plan deleted successfully.");
+        return ApiResponse<bool>.Success(true, ResponseMessage.SubscriptionPlanDeleted.GetDescription());
     }
 }

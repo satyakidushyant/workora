@@ -42,7 +42,7 @@ public class CloseFinancialYearCommandHandler : IRequestHandler<CloseFinancialYe
 
         if (financialYear.IsClosed)
         {
-            return ApiResponse<FinancialYearDto>.Fail("This financial year is already closed.");
+            return ApiResponse<FinancialYearDto>.Fail(ResponseMessage.FinancialYearAlreadyClosed.GetDescription());
         }
 
         financialYear.Close();

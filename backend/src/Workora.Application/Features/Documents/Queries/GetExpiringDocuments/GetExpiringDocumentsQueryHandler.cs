@@ -1,4 +1,6 @@
 ﻿using MediatR;
+using Workora.Domain.Enums;
+using Workora.Domain.Extensions;
 using Workora.Application.Features.Documents.DTOs;
 using Workora.Domain.Entities;
 using Workora.Domain.Interfaces;
@@ -45,6 +47,6 @@ public class GetExpiringDocumentsQueryHandler : IRequestHandler<GetExpiringDocum
                 d.CreatedAt))
             .ToList();
 
-        return Task.FromResult(ApiResponse<IReadOnlyList<DocumentDto>>.Success(items, "Expiring documents list retrieved successfully."));
+        return Task.FromResult(ApiResponse<IReadOnlyList<DocumentDto>>.Success(items, ResponseMessage.ExpiringDocumentsRetrieved.GetDescription()));
     }
 }

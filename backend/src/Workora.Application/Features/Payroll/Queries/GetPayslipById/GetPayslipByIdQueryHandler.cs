@@ -1,4 +1,6 @@
 ﻿using AutoMapper;
+using Workora.Domain.Enums;
+using Workora.Domain.Extensions;
 using MediatR;
 using Workora.Application.Features.Payroll.DTOs;
 using Workora.Domain.Interfaces;
@@ -29,7 +31,7 @@ public class GetPayslipByIdQueryHandler : IRequestHandler<GetPayslipByIdQuery, A
         var payslip = await _payrollRepository.GetPayslipByIdAsync(request.Id, ct);
         if (payslip == null)
         {
-            return ApiResponse<PayslipDto>.Fail("Payslip not found.");
+            return ApiResponse<PayslipDto>.Fail(ResponseMessage.PayslipNotFound.GetDescription());
         }
 
         var dto = _mapper.Map<PayslipDto>(payslip);

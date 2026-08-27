@@ -1,4 +1,6 @@
 ﻿using AutoMapper;
+using Workora.Domain.Enums;
+using Workora.Domain.Extensions;
 using MediatR;
 using Workora.Application.Common.Interfaces;
 using Workora.Application.Features.Helpdesk.DTOs;
@@ -35,7 +37,7 @@ public class CloseTicketCommandHandler : IRequestHandler<CloseTicketCommand, Api
         var ticket = await _ticketRepository.GetByIdAsync(request.TicketId, ct);
         if (ticket == null)
         {
-            return ApiResponse<HelpdeskTicketDto>.Fail("Ticket not found.");
+            return ApiResponse<HelpdeskTicketDto>.Fail(ResponseMessage.TicketNotFound.GetDescription());
         }
 
         ticket.Close();
@@ -44,6 +46,6 @@ public class CloseTicketCommandHandler : IRequestHandler<CloseTicketCommand, Api
 
         var fullyLoaded = await _ticketRepository.GetWithCommentsAsync(ticket.Id, ct);
         var dto = _mapper.Map<HelpdeskTicketDto>(fullyLoaded ?? ticket);
-        return ApiResponse<HelpdeskTicketDto>.Success(dto, "Ticket closed.");
+        return ApiResponse<HelpdeskTicketDto>.Success(dto, ResponseMessage.TicketClosed.GetDescription());
     }
 }

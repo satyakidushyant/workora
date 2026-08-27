@@ -1,4 +1,6 @@
 ﻿using AutoMapper;
+using Workora.Domain.Enums;
+using Workora.Domain.Extensions;
 using FluentValidation;
 using MediatR;
 using Workora.Application.Common.Interfaces;
@@ -37,7 +39,7 @@ public class RejectExpenseClaimCommandHandler : IRequestHandler<RejectExpenseCla
         var claim = await _expenseRepository.GetByIdAsync(request.ClaimId, ct);
         if (claim == null)
         {
-            return ApiResponse<ExpenseClaimDto>.Fail("Expense claim not found.");
+            return ApiResponse<ExpenseClaimDto>.Fail(ResponseMessage.ExpenseClaimNotFound.GetDescription());
         }
 
         try
@@ -47,7 +49,7 @@ public class RejectExpenseClaimCommandHandler : IRequestHandler<RejectExpenseCla
             await _unitOfWork.SaveChangesAsync(ct);
 
             var dto = _mapper.Map<ExpenseClaimDto>(claim);
-            return ApiResponse<ExpenseClaimDto>.Success(dto, "Expense claim rejected.");
+            return ApiResponse<ExpenseClaimDto>.Success(dto, ResponseMessage.ExpenseClaimRejected.GetDescription());
         }
         catch (DomainException ex)
         {

@@ -1,4 +1,6 @@
 ﻿using MediatR;
+using Workora.Domain.Enums;
+using Workora.Domain.Extensions;
 using Workora.Domain.Interfaces;
 using Workora.Shared.Responses;
 
@@ -27,13 +29,13 @@ public class DeleteUserCommandHandler : IRequestHandler<DeleteUserCommand, ApiRe
         var user = await _userRepository.GetByIdAsync(request.Id, ct);
         if (user == null)
         {
-            return ApiResponse<bool>.Fail($"User with ID {request.Id} was not found.");
+            return ApiResponse<bool>.Fail(ResponseMessage.UserNotFound.GetDescription());
         }
 
         var hasOtherAdmin = await _userRepository.HasOtherSuperAdminAsync(user.Id, ct);
         if (!hasOtherAdmin)
         {
-            return ApiResponse<bool>.Fail("Cannot delete the sole user account in the system.");
+            return ApiResponse<bool>.Fail(ResponseMessage.CannotDeleteSoleUser.GetDescription());
         }
 
         _userRepository.Remove(user);

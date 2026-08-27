@@ -1,4 +1,6 @@
 ﻿using MediatR;
+using Workora.Domain.Enums;
+using Workora.Domain.Extensions;
 using Workora.Application.Features.Policies.DTOs;
 using Workora.Domain.Entities;
 using Workora.Domain.Interfaces;
@@ -36,7 +38,7 @@ public class GetPolicyComplianceReportQueryHandler : IRequestHandler<GetPolicyCo
         var policy = await _policyRepository.GetByIdAsync(request.PolicyId, cancellationToken);
         if (policy == null)
         {
-            return ApiResponse<PolicyComplianceAuditDto>.Fail($"Policy {request.PolicyId} not found.");
+            return ApiResponse<PolicyComplianceAuditDto>.Fail(ResponseMessage.PolicyNotFound.GetDescription());
         }
 
         var totalEmployees = _employeeRepository.GetQueryable().Count(e => e.IsActive);
@@ -53,6 +55,6 @@ public class GetPolicyComplianceReportQueryHandler : IRequestHandler<GetPolicyCo
             CompliancePercentage = percentage
         };
 
-        return ApiResponse<PolicyComplianceAuditDto>.Success(dto, "Policy compliance audit report calculated successfully.");
+        return ApiResponse<PolicyComplianceAuditDto>.Success(dto, ResponseMessage.PolicyComplianceReportCalculated.GetDescription());
     }
 }

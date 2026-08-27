@@ -53,7 +53,7 @@ public class CreatePayrollRunCommandHandler : IRequestHandler<CreatePayrollRunCo
         var existing = await _payrollRepository.GetByPeriodAsync(request.CompanyId, request.PeriodMonth, request.PeriodYear, ct);
         if (existing != null && existing.Status != PayrollStatus.Draft)
         {
-            return ApiResponse<PayrollRunDetailDto>.Fail($"A payroll run for {request.PeriodMonth}/{request.PeriodYear} already exists with status {existing.Status}.");
+            return ApiResponse<PayrollRunDetailDto>.Fail(ResponseMessage.PayrollRunAlreadyExists.GetDescription());
         }
 
         var payrollRun = existing ?? PayrollRun.Create(request.CompanyId, request.PeriodMonth, request.PeriodYear);

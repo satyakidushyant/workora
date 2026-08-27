@@ -3,6 +3,7 @@ using MediatR;
 using Workora.Application.Common.Interfaces;
 using Workora.Application.Features.Tasks.DTOs;
 using Workora.Domain.Enums;
+using Workora.Domain.Extensions;
 using Workora.Domain.Interfaces;
 using Workora.Shared.Responses;
 
@@ -41,19 +42,19 @@ public class ListMyTasksQueryHandler : IRequestHandler<ListMyTasksQuery, ApiResp
     {
         if (_currentUserService.UserId == null)
         {
-            return ApiResponse<List<TaskItemDto>>.Fail("User context not found.");
+            return ApiResponse<List<TaskItemDto>>.Fail(ResponseMessage.UserContextUnavailable.GetDescription());
         }
 
         var user = await _userRepository.GetByUuidAsync(_currentUserService.UserId.Value, ct);
         if (user == null)
         {
-            return ApiResponse<List<TaskItemDto>>.Fail("User account not found.");
+            return ApiResponse<List<TaskItemDto>>.Fail(ResponseMessage.UserNotFound.GetDescription());
         }
 
         var employee = await _employeeRepository.GetByUserIdAsync(user.Id, ct);
         if (employee == null)
         {
-            return ApiResponse<List<TaskItemDto>>.Fail("Authenticated user is not linked to an employee record.");
+            return ApiResponse<List<TaskItemDto>>.Fail(ResponseMessage.NoEmployeeLinkedToUser.GetDescription());
         }
 
         var tasks = await _taskRepository.GetTasksByAssigneeAsync(employee.Id, request.Status, ct);

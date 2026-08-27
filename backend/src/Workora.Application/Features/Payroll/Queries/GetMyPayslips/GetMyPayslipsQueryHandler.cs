@@ -1,4 +1,6 @@
 ﻿using AutoMapper;
+using Workora.Domain.Enums;
+using Workora.Domain.Extensions;
 using MediatR;
 using Workora.Application.Common.Interfaces;
 using Workora.Application.Features.Payroll.DTOs;
@@ -40,19 +42,19 @@ public class GetMyPayslipsQueryHandler : IRequestHandler<GetMyPayslipsQuery, Api
     {
         if (_currentUserService.UserId == null)
         {
-            return ApiResponse<IReadOnlyList<PayslipDto>>.Fail("User context not found.");
+            return ApiResponse<IReadOnlyList<PayslipDto>>.Fail(ResponseMessage.UserContextUnavailable.GetDescription());
         }
 
         var user = await _userRepository.GetByUuidAsync(_currentUserService.UserId.Value, ct);
         if (user == null)
         {
-            return ApiResponse<IReadOnlyList<PayslipDto>>.Fail("User account not found.");
+            return ApiResponse<IReadOnlyList<PayslipDto>>.Fail(ResponseMessage.UserNotFound.GetDescription());
         }
 
         var employee = await _employeeRepository.GetByUserIdAsync(user.Id, ct);
         if (employee == null)
         {
-            return ApiResponse<IReadOnlyList<PayslipDto>>.Fail("No employee linked to this user account.");
+            return ApiResponse<IReadOnlyList<PayslipDto>>.Fail(ResponseMessage.NoEmployeeLinkedToUser.GetDescription());
         }
 
         var payslips = await _payrollRepository.GetEmployeePayslipsAsync(employee.Id, request.Year, ct);

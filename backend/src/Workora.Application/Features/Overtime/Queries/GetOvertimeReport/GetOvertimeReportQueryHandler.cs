@@ -1,4 +1,6 @@
 ﻿using AutoMapper;
+using Workora.Domain.Enums;
+using Workora.Domain.Extensions;
 using MediatR;
 using Workora.Application.Features.Overtime.DTOs;
 using Workora.Domain.Interfaces;
@@ -34,7 +36,7 @@ public class GetOvertimeReportQueryHandler : IRequestHandler<GetOvertimeReportQu
         var employee = await _employeeRepository.GetByIdAsync(request.EmployeeId, ct);
         if (employee == null)
         {
-            return ApiResponse<OvertimeReportDto>.Fail("Employee not found.");
+            return ApiResponse<OvertimeReportDto>.Fail(ResponseMessage.EmployeeNotFound.GetDescription());
         }
 
         var overtimeRequests = await _overtimeRequestRepository.GetEmployeeOvertimeReportAsync(

@@ -44,7 +44,7 @@ public class CancelLeaveCommandHandler : IRequestHandler<CancelLeaveCommand, Api
 
         if (leaveRequest.Status == LeaveRequestStatus.Cancelled || leaveRequest.Status == LeaveRequestStatus.Rejected)
         {
-            return ApiResponse<LeaveRequestDto>.Fail("This leave request is already closed.");
+            return ApiResponse<LeaveRequestDto>.Fail(ResponseMessage.LeaveRequestAlreadyClosed.GetDescription());
         }
 
         var wasApproved = leaveRequest.Status == LeaveRequestStatus.Approved;

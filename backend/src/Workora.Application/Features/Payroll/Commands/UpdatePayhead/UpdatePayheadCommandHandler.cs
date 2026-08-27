@@ -1,4 +1,6 @@
 ﻿using MediatR;
+using Workora.Domain.Enums;
+using Workora.Domain.Extensions;
 using Workora.Application.Features.Payroll.DTOs;
 using Workora.Domain.Entities;
 using Workora.Domain.Interfaces;
@@ -33,7 +35,7 @@ public class UpdatePayheadCommandHandler : IRequestHandler<UpdatePayheadCommand,
         var comp = await _componentRepository.GetByIdAsync(request.Id, cancellationToken);
         if (comp == null)
         {
-            return ApiResponse<PayheadDto>.Fail("Salary payhead not found.");
+            return ApiResponse<PayheadDto>.Fail(ResponseMessage.PayheadNotFound.GetDescription());
         }
 
         comp.Update(
@@ -58,6 +60,6 @@ public class UpdatePayheadCommandHandler : IRequestHandler<UpdatePayheadCommand,
             IsTaxable = comp.IsTaxable
         };
 
-        return ApiResponse<PayheadDto>.Success(dto, "Salary payhead updated successfully.");
+        return ApiResponse<PayheadDto>.Success(dto, ResponseMessage.PayheadUpdated.GetDescription());
     }
 }

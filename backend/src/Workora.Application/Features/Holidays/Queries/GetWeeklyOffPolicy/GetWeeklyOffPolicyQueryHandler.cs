@@ -1,4 +1,6 @@
 ﻿using MediatR;
+using Workora.Domain.Enums;
+using Workora.Domain.Extensions;
 using Workora.Application.Features.Holidays.DTOs;
 using Workora.Domain.Entities;
 using Workora.Domain.Interfaces;
@@ -36,6 +38,6 @@ public class GetWeeklyOffPolicyQueryHandler : IRequestHandler<GetWeeklyOffPolicy
             AlternateSaturdayOff = setting?.Value?.Contains("AlternateSaturday") ?? false
         };
 
-        return ApiResponse<WeeklyOffPolicyDto>.Success(dto, "Weekly off policy retrieved successfully.");
+        return ApiResponse<WeeklyOffPolicyDto>.Success(dto, ResponseMessage.WeeklyOffPolicyRetrieved.GetDescription());
     }
 }

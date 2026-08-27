@@ -1,4 +1,6 @@
 ﻿using AutoMapper;
+using Workora.Domain.Enums;
+using Workora.Domain.Extensions;
 using MediatR;
 using Workora.Application.Features.Payroll.DTOs;
 using Workora.Domain.Interfaces;
@@ -29,7 +31,7 @@ public class GetEmployeeSalaryStructureQueryHandler : IRequestHandler<GetEmploye
         var assignment = await _salaryStructureRepository.GetActiveEmployeeAssignmentAsync(request.EmployeeId, null, ct);
         if (assignment == null)
         {
-            return ApiResponse<EmployeeSalaryAssignmentDto>.Fail("No active salary structure assigned to this employee.");
+            return ApiResponse<EmployeeSalaryAssignmentDto>.Fail(ResponseMessage.SalaryStructureNotAssigned.GetDescription());
         }
 
         var dto = _mapper.Map<EmployeeSalaryAssignmentDto>(assignment);

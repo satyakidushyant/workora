@@ -1,4 +1,6 @@
 ﻿using AutoMapper;
+using Workora.Domain.Enums;
+using Workora.Domain.Extensions;
 using MediatR;
 using Workora.Application.Common.Interfaces;
 using Workora.Application.Features.Notifications.DTOs;
@@ -37,13 +39,13 @@ public class GetNotificationsListQueryHandler : IRequestHandler<GetNotifications
     {
         if (!_currentUserService.UserId.HasValue)
         {
-            return ApiResponse<PagedResponse<NotificationDto>>.Fail("User not authenticated.");
+            return ApiResponse<PagedResponse<NotificationDto>>.Fail(ResponseMessage.Unauthorized.GetDescription());
         }
 
         var user = await _userRepository.GetByUuidAsync(_currentUserService.UserId.Value, ct);
         if (user == null)
         {
-            return ApiResponse<PagedResponse<NotificationDto>>.Fail("User not found.");
+            return ApiResponse<PagedResponse<NotificationDto>>.Fail(ResponseMessage.UserNotFound.GetDescription());
         }
 
         var notifications = await _notificationRepository.GetUserNotificationsPagedAsync(

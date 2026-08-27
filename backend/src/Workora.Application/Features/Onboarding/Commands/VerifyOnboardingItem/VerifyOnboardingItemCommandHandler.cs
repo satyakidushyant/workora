@@ -50,12 +50,12 @@ public class VerifyOnboardingItemCommandHandler : IRequestHandler<VerifyOnboardi
         var onboarding = await _onboardingRepository.GetEmployeeOnboardingItemAsync(request.EmployeeId, request.ChecklistId, ct);
         if (onboarding == null)
         {
-            return ApiResponse<bool>.Fail("No onboarding record found for this employee and checklist item.");
+            return ApiResponse<bool>.Fail(ResponseMessage.OnboardingItemNotFound.GetDescription());
         }
 
         if (onboarding.IsCompleted)
         {
-            return ApiResponse<bool>.Fail("This onboarding item is already verified.");
+            return ApiResponse<bool>.Fail(ResponseMessage.OnboardingItemAlreadyVerified.GetDescription());
         }
 
         var verifierEmpId = 0;

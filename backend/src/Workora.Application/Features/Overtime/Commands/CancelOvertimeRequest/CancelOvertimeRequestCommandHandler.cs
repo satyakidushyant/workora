@@ -41,12 +41,12 @@ public class CancelOvertimeRequestCommandHandler : IRequestHandler<CancelOvertim
 
         if (overtimeRequest.Status == OvertimeRequestStatus.Cancelled || overtimeRequest.Status == OvertimeRequestStatus.Rejected)
         {
-            return ApiResponse<OvertimeRequestDto>.Fail("This overtime request is already closed.");
+            return ApiResponse<OvertimeRequestDto>.Fail(ResponseMessage.OvertimeRequestAlreadyClosed.GetDescription());
         }
 
         if (overtimeRequest.Status == OvertimeRequestStatus.Approved)
         {
-            return ApiResponse<OvertimeRequestDto>.Fail("Cannot cancel an approved overtime request. Please contact HR.");
+            return ApiResponse<OvertimeRequestDto>.Fail(ResponseMessage.OvertimeApprovedCannotCancel.GetDescription());
         }
 
         overtimeRequest.Cancel();

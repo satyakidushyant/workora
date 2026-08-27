@@ -2,6 +2,7 @@
 using Workora.Application.Features.Payroll.DTOs;
 using Workora.Domain.Entities;
 using Workora.Domain.Enums;
+using Workora.Domain.Extensions;
 using Workora.Domain.Interfaces;
 using Workora.Shared.Responses;
 
@@ -32,7 +33,7 @@ public class GetEmployeePayslipQueryHandler : IRequestHandler<GetEmployeePayslip
 
         if (payslip == null)
         {
-            return ApiResponse<PayslipDto>.Fail("Payslip not found for specified employee and payroll run.");
+            return ApiResponse<PayslipDto>.Fail(ResponseMessage.PayslipNotFound.GetDescription());
         }
 
         var dto = new PayslipDto(
@@ -50,6 +51,6 @@ public class GetEmployeePayslipQueryHandler : IRequestHandler<GetEmployeePayslip
             new List<PayslipItemDto>(),
             payslip.CreatedAt);
 
-        return ApiResponse<PayslipDto>.Success(dto, "Employee payslip retrieved successfully.");
+        return ApiResponse<PayslipDto>.Success(dto, ResponseMessage.PayslipRetrieved.GetDescription());
     }
 }

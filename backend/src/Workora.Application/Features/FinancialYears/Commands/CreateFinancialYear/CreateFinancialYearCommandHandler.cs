@@ -42,7 +42,7 @@ public class CreateFinancialYearCommandHandler : IRequestHandler<CreateFinancial
             var hasCurrent = await _financialYearRepository.HasCurrentYearAsync(0, ct);
             if (hasCurrent)
             {
-                return ApiResponse<FinancialYearDto>.Fail("A current financial year already exists. Close it first.");
+                return ApiResponse<FinancialYearDto>.Fail(ResponseMessage.FinancialYearActiveAlreadyExists.GetDescription());
             }
             financialYear.SetAsCurrent();
         }

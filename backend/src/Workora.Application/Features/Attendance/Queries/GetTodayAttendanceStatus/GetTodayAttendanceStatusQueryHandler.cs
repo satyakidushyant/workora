@@ -1,4 +1,6 @@
 ﻿using AutoMapper;
+using Workora.Domain.Enums;
+using Workora.Domain.Extensions;
 using MediatR;
 using Workora.Application.Common.Interfaces;
 using Workora.Application.Features.Attendance.DTOs;
@@ -40,19 +42,19 @@ public class GetTodayAttendanceStatusQueryHandler : IRequestHandler<GetTodayAtte
     {
         if (_currentUserService.UserId == null)
         {
-            return ApiResponse<AttendanceRecordDto?>.Fail("User context not found.");
+            return ApiResponse<AttendanceRecordDto?>.Fail(ResponseMessage.UserContextUnavailable.GetDescription());
         }
 
         var user = await _userRepository.GetByUuidAsync(_currentUserService.UserId.Value, ct);
         if (user == null)
         {
-            return ApiResponse<AttendanceRecordDto?>.Fail("User not found.");
+            return ApiResponse<AttendanceRecordDto?>.Fail(ResponseMessage.UserNotFound.GetDescription());
         }
 
         var employee = await _employeeRepository.GetByUserIdAsync(user.Id, ct);
         if (employee == null)
         {
-            return ApiResponse<AttendanceRecordDto?>.Fail("No employee linked to this account.");
+            return ApiResponse<AttendanceRecordDto?>.Fail(ResponseMessage.NoEmployeeLinkedToUser.GetDescription());
         }
 
         var today = DateOnly.FromDateTime(DateTime.UtcNow);

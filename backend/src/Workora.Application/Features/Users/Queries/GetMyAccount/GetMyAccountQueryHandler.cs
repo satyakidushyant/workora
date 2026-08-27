@@ -1,4 +1,6 @@
-using AutoMapper;
+﻿using AutoMapper;
+using Workora.Domain.Enums;
+using Workora.Domain.Extensions;
 using MediatR;
 using Workora.Application.Common.Interfaces;
 using Workora.Application.Features.Users.DTOs;
@@ -38,13 +40,13 @@ public class GetMyAccountQueryHandler : IRequestHandler<GetMyAccountQuery, ApiRe
         var userUuid = _currentUserService.UserId;
         if (!userUuid.HasValue)
         {
-            return ApiResponse<UserDetailDto>.Fail("User identity could not be resolved from token.");
+            return ApiResponse<UserDetailDto>.Fail(ResponseMessage.UserIdentityUnresolved.GetDescription());
         }
 
         var user = await _userRepository.GetByUuidAsync(userUuid.Value, ct);
         if (user == null)
         {
-            return ApiResponse<UserDetailDto>.Fail("User account not found.");
+            return ApiResponse<UserDetailDto>.Fail(ResponseMessage.UserNotFound.GetDescription());
         }
 
         var dto = _mapper.Map<UserDetailDto>(user);

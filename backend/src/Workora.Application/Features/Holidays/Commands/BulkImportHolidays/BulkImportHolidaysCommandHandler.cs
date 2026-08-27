@@ -5,6 +5,7 @@ using Workora.Shared.Responses;
 using Workora.Application.Features.Holidays.DTOs;
 using Workora.Domain.Entities;
 using Workora.Domain.Enums;
+using Workora.Domain.Extensions;
 using Workora.Domain.Interfaces;
 
 namespace Workora.Application.Features.Holidays.Commands.BulkImportHolidays;
@@ -48,6 +49,6 @@ public class BulkImportHolidaysCommandHandler : IRequestHandler<BulkImportHolida
         }
 
         await _unitOfWork.SaveChangesAsync(cancellationToken);
-        return ApiResponse<int>.Success(count, $"{count} holidays imported successfully.");
+        return ApiResponse<int>.Success(count, ResponseMessage.HolidaysBulkImported.GetDescription());
     }
 }

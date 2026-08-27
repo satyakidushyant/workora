@@ -46,7 +46,7 @@ public class EnrollInTrainingCommandHandler : IRequestHandler<EnrollInTrainingCo
 
         if (program.Enrollments.Count >= program.Capacity)
         {
-            return ApiResponse<TrainingEnrollmentDto>.Fail("Training program is at full capacity.");
+            return ApiResponse<TrainingEnrollmentDto>.Fail(ResponseMessage.TrainingProgramFull.GetDescription());
         }
 
         var employee = await _employeeRepository.GetByIdAsync(request.EmployeeId, ct);

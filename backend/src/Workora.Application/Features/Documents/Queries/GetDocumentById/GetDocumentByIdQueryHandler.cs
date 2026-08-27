@@ -1,4 +1,6 @@
 ﻿using AutoMapper;
+using Workora.Domain.Enums;
+using Workora.Domain.Extensions;
 using MediatR;
 using Workora.Application.Features.Documents.DTOs;
 using Workora.Domain.Interfaces;
@@ -29,7 +31,7 @@ public class GetDocumentByIdQueryHandler : IRequestHandler<GetDocumentByIdQuery,
         var doc = await _documentRepository.GetByIdAsync(request.Id, ct);
         if (doc == null)
         {
-            return ApiResponse<DocumentDto>.Fail("Document not found.");
+            return ApiResponse<DocumentDto>.Fail(ResponseMessage.DocumentNotFound.GetDescription());
         }
 
         var dto = _mapper.Map<DocumentDto>(doc);

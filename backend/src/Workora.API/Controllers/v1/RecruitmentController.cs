@@ -24,9 +24,9 @@ using Workora.Application.Features.Recruitment.Queries.GetJobPostingsList;
 using Workora.Application.Features.Recruitment.Queries.GetRecruitmentPipeline;
 using Workora.Domain.Enums;
 using Workora.Shared.Responses;
-
 using Workora.Application.Features.Recruitment.Queries.GetOfferLetterPdf;
 using Workora.Application.Features.Recruitment.Commands.ResendOfferLetter;
+
 namespace Workora.API.Controllers.v1;
 
 /// <summary>

@@ -1,4 +1,6 @@
 ﻿using MediatR;
+using Workora.Domain.Enums;
+using Workora.Domain.Extensions;
 using Workora.Application.Common.Interfaces;
 using Workora.Domain.Interfaces;
 using Workora.Shared.Responses;
@@ -29,12 +31,12 @@ public class DeleteTaskCommandHandler : IRequestHandler<DeleteTaskCommand, ApiRe
         var task = await _taskRepository.GetByIdAsync(request.TaskId, ct);
         if (task == null)
         {
-            return ApiResponse<bool>.Fail("Task not found.");
+            return ApiResponse<bool>.Fail(ResponseMessage.TaskNotFound.GetDescription());
         }
 
         _taskRepository.Remove(task);
         await _unitOfWork.SaveChangesAsync(ct);
 
-        return ApiResponse<bool>.Success(true, "Task deleted successfully.");
+        return ApiResponse<bool>.Success(true, ResponseMessage.TaskDeleted.GetDescription());
     }
 }

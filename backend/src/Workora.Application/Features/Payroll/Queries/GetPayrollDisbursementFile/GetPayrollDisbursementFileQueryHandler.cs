@@ -1,4 +1,6 @@
 ﻿using MediatR;
+using Workora.Domain.Enums;
+using Workora.Domain.Extensions;
 using Workora.Application.Features.Payroll.DTOs;
 using Workora.Domain.Entities;
 using Workora.Domain.Interfaces;
@@ -29,7 +31,7 @@ public class GetPayrollDisbursementFileQueryHandler : IRequestHandler<GetPayroll
         var run = await _runRepository.GetByIdAsync(request.PayrollRunId, cancellationToken);
         if (run == null)
         {
-            return ApiResponse<PayrollDisbursementFileDto>.Fail($"Payroll run {request.PayrollRunId} not found.");
+            return ApiResponse<PayrollDisbursementFileDto>.Fail(ResponseMessage.PayrollRunNotFound.GetDescription());
         }
 
         var dto = new PayrollDisbursementFileDto
@@ -39,6 +41,6 @@ public class GetPayrollDisbursementFileQueryHandler : IRequestHandler<GetPayroll
             DownloadUrl = $"/api/v1/payroll/runs/{run.Id}/download-disbursement-csv"
         };
 
-        return ApiResponse<PayrollDisbursementFileDto>.Success(dto, "Bank disbursement payment file generated successfully.");
+        return ApiResponse<PayrollDisbursementFileDto>.Success(dto, ResponseMessage.PayrollDisbursementFileGenerated.GetDescription());
     }
 }

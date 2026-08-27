@@ -1,4 +1,6 @@
 ﻿using MediatR;
+using Workora.Domain.Enums;
+using Workora.Domain.Extensions;
 using Workora.Application.Features.Performance.DTOs;
 using Workora.Domain.Entities;
 using Workora.Domain.Interfaces;
@@ -60,6 +62,6 @@ public class CreatePerformanceCycleCommandHandler : IRequestHandler<CreatePerfor
             IsActive = true
         };
 
-        return ApiResponse<PerformanceCycleDto>.Success(dto, $"Performance review cycle '{request.Title}' initialized successfully for {employees.Count} employees.");
+        return ApiResponse<PerformanceCycleDto>.Success(dto, ResponseMessage.PerformanceCycleCreated.GetDescription());
     }
 }

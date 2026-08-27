@@ -3,6 +3,7 @@ using MediatR;
 using Workora.Application.Common.Interfaces;
 using Workora.Application.Features.Tasks.DTOs;
 using Workora.Domain.Enums;
+using Workora.Domain.Extensions;
 using Workora.Domain.Interfaces;
 using Workora.Shared.Responses;
 
@@ -36,7 +37,7 @@ public class UpdateTaskStatusCommandHandler : IRequestHandler<UpdateTaskStatusCo
         var task = await _taskRepository.GetByIdAsync(request.TaskId, ct);
         if (task == null)
         {
-            return ApiResponse<TaskItemDto>.Fail("Task not found.");
+            return ApiResponse<TaskItemDto>.Fail(ResponseMessage.TaskNotFound.GetDescription());
         }
 
         task.UpdateStatus(request.NewStatus);
@@ -44,6 +45,6 @@ public class UpdateTaskStatusCommandHandler : IRequestHandler<UpdateTaskStatusCo
         await _unitOfWork.SaveChangesAsync(ct);
 
         var dto = _mapper.Map<TaskItemDto>(task);
-        return ApiResponse<TaskItemDto>.Success(dto, "Task status updated.");
+        return ApiResponse<TaskItemDto>.Success(dto, ResponseMessage.TaskStatusUpdated.GetDescription());
     }
 }

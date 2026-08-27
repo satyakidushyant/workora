@@ -1,4 +1,6 @@
 ﻿using AutoMapper;
+using Workora.Domain.Enums;
+using Workora.Domain.Extensions;
 using MediatR;
 using Workora.Application.Features.Performance.DTOs;
 using Workora.Domain.Interfaces;
@@ -29,7 +31,7 @@ public class GetAppraisalByIdQueryHandler : IRequestHandler<GetAppraisalByIdQuer
         var appraisal = await _performanceRepository.GetAppraisalWithDetailsAsync(request.Id, ct);
         if (appraisal == null)
         {
-            return ApiResponse<AppraisalDto>.Fail("Appraisal record not found.");
+            return ApiResponse<AppraisalDto>.Fail(ResponseMessage.AppraisalNotFound.GetDescription());
         }
 
         var dto = _mapper.Map<AppraisalDto>(appraisal);

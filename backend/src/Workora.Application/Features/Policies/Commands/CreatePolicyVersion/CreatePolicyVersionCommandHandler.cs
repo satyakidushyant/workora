@@ -1,4 +1,6 @@
 ﻿using MediatR;
+using Workora.Domain.Enums;
+using Workora.Domain.Extensions;
 using Workora.Application.Features.Policies.DTOs;
 using Workora.Domain.Entities;
 using Workora.Domain.Interfaces;
@@ -33,7 +35,7 @@ public class CreatePolicyVersionCommandHandler : IRequestHandler<CreatePolicyVer
         var policy = await _policyRepository.GetByIdAsync(request.PolicyId, cancellationToken);
         if (policy == null)
         {
-            return ApiResponse<PolicyDto>.Fail($"Policy {request.PolicyId} not found.");
+            return ApiResponse<PolicyDto>.Fail(ResponseMessage.PolicyNotFound.GetDescription());
         }
 
         var newPolicy = Policy.Create(
@@ -60,6 +62,6 @@ public class CreatePolicyVersionCommandHandler : IRequestHandler<CreatePolicyVer
             newPolicy.IsActive,
             newPolicy.CreatedAt);
 
-        return ApiResponse<PolicyDto>.Success(dto, $"Policy version {request.VersionNumber} published successfully.");
+        return ApiResponse<PolicyDto>.Success(dto, ResponseMessage.PolicyVersionPublished.GetDescription());
     }
 }

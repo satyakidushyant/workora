@@ -43,7 +43,7 @@ public class UpdateBranchCommandHandler : IRequestHandler<UpdateBranchCommand, A
         var isUnique = await _branchRepository.IsCodeUniqueAsync(branch.CompanyId, request.Code, request.Id, ct);
         if (!isUnique)
         {
-            return ApiResponse<BranchDto>.Fail("A branch with this code already exists for this company.");
+            return ApiResponse<BranchDto>.Fail(ResponseMessage.BranchCodeAlreadyExists.GetDescription());
         }
 
         branch.Update(

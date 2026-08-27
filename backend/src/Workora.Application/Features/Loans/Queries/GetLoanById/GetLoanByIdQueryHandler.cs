@@ -1,4 +1,6 @@
 ﻿using AutoMapper;
+using Workora.Domain.Enums;
+using Workora.Domain.Extensions;
 using MediatR;
 using Workora.Application.Features.Loans.DTOs;
 using Workora.Domain.Interfaces;
@@ -29,7 +31,7 @@ public class GetLoanByIdQueryHandler : IRequestHandler<GetLoanByIdQuery, ApiResp
         var loan = await _loanRepository.GetWithSchedulesAsync(request.LoanId, ct);
         if (loan == null)
         {
-            return ApiResponse<LoanDto>.Fail("Loan record not found.");
+            return ApiResponse<LoanDto>.Fail(ResponseMessage.LoanNotFound.GetDescription());
         }
 
         var dto = _mapper.Map<LoanDto>(loan);

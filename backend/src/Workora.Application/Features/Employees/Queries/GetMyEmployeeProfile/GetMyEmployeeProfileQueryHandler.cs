@@ -1,4 +1,6 @@
 ﻿using AutoMapper;
+using Workora.Domain.Enums;
+using Workora.Domain.Extensions;
 using MediatR;
 using Workora.Application.Common.Interfaces;
 using Workora.Application.Features.Employees.DTOs;
@@ -37,19 +39,19 @@ public class GetMyEmployeeProfileQueryHandler : IRequestHandler<GetMyEmployeePro
     {
         if (_currentUserService.UserId == null)
         {
-            return ApiResponse<EmployeeDetailDto>.Fail("User context not found.");
+            return ApiResponse<EmployeeDetailDto>.Fail(ResponseMessage.UserContextUnavailable.GetDescription());
         }
 
         var user = await _userRepository.GetByUuidAsync(_currentUserService.UserId.Value, ct);
         if (user == null)
         {
-            return ApiResponse<EmployeeDetailDto>.Fail("User account not found.");
+            return ApiResponse<EmployeeDetailDto>.Fail(ResponseMessage.UserNotFound.GetDescription());
         }
 
         var employee = await _employeeRepository.GetByUserIdAsync(user.Id, ct);
         if (employee == null)
         {
-            return ApiResponse<EmployeeDetailDto>.Fail("No employee record is linked to this user account.");
+            return ApiResponse<EmployeeDetailDto>.Fail(ResponseMessage.NoEmployeeLinkedToUser.GetDescription());
         }
 
         var dto = _mapper.Map<EmployeeDetailDto>(employee);

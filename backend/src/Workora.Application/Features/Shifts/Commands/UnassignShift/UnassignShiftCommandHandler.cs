@@ -31,7 +31,7 @@ public class UnassignShiftCommandHandler : IRequestHandler<UnassignShiftCommand,
         var activeAssignment = await _shiftRepository.GetActiveAssignmentAsync(request.EmployeeId, request.EffectiveTo, ct);
         if (activeAssignment == null)
         {
-            return ApiResponse<bool>.Fail("No active shift assignment found for this employee.");
+            return ApiResponse<bool>.Fail(ResponseMessage.ShiftNoActiveAssignment.GetDescription());
         }
 
         activeAssignment.EndAssignment(request.EffectiveTo);

@@ -1,4 +1,6 @@
 ﻿using MediatR;
+using Workora.Domain.Enums;
+using Workora.Domain.Extensions;
 using Workora.Application.Features.Payroll.DTOs;
 using Workora.Domain.Entities;
 using Workora.Domain.Interfaces;
@@ -33,7 +35,7 @@ public class GetBulkPayslipsExportQueryHandler : IRequestHandler<GetBulkPayslips
         var run = await _runRepository.GetByIdAsync(request.PayrollRunId, cancellationToken);
         if (run == null)
         {
-            return ApiResponse<BulkPayslipsExportDto>.Fail($"Payroll run {request.PayrollRunId} not found.");
+            return ApiResponse<BulkPayslipsExportDto>.Fail(ResponseMessage.PayrollRunNotFound.GetDescription());
         }
 
         var count = _payslipRepository.GetQueryable()
@@ -47,6 +49,6 @@ public class GetBulkPayslipsExportQueryHandler : IRequestHandler<GetBulkPayslips
             DownloadUrl = $"/api/v1/payroll/runs/{run.Id}/payslips/download-bulk-zip"
         };
 
-        return ApiResponse<BulkPayslipsExportDto>.Success(dto, "Bulk payslips archive prepared successfully.");
+        return ApiResponse<BulkPayslipsExportDto>.Success(dto, ResponseMessage.BulkPayslipsArchivePrepared.GetDescription());
     }
 }

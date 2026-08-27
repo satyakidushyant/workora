@@ -1,4 +1,4 @@
-namespace Workora.Application.Features.SuperAdmin.DTOs;
+﻿namespace Workora.Application.Features.SuperAdmin.DTOs;
 
 /// <summary>
 /// Data Transfer Object representing platform-wide global metrics for SuperAdmin dashboard.

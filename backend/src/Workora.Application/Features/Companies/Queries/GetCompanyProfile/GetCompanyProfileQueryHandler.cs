@@ -1,4 +1,6 @@
 ﻿using AutoMapper;
+using Workora.Domain.Enums;
+using Workora.Domain.Extensions;
 using MediatR;
 using Workora.Application.Common.Interfaces;
 using Workora.Application.Features.Companies.DTOs;
@@ -65,7 +67,7 @@ public class GetCompanyProfileQueryHandler : IRequestHandler<GetCompanyProfileQu
 
         if (company == null)
         {
-            return ApiResponse<CompanyDto>.Fail("Company profile not found.");
+            return ApiResponse<CompanyDto>.Fail(ResponseMessage.CompanyNotFound.GetDescription());
         }
 
         var dto = _mapper.Map<CompanyDto>(company);

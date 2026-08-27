@@ -1,4 +1,6 @@
 ﻿using AutoMapper;
+using Workora.Domain.Enums;
+using Workora.Domain.Extensions;
 using MediatR;
 using Workora.Application.Features.Payroll.DTOs;
 using Workora.Domain.Interfaces;
@@ -29,7 +31,7 @@ public class GetSalaryStructureByIdQueryHandler : IRequestHandler<GetSalaryStruc
         var structure = await _salaryStructureRepository.GetWithComponentsAsync(request.Id, ct);
         if (structure == null)
         {
-            return ApiResponse<SalaryStructureDto>.Fail("Salary structure not found.");
+            return ApiResponse<SalaryStructureDto>.Fail(ResponseMessage.SalaryStructureNotFound.GetDescription());
         }
 
         var dto = _mapper.Map<SalaryStructureDto>(structure);

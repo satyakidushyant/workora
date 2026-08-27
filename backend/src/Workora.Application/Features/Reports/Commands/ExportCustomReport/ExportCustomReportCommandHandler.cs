@@ -1,4 +1,6 @@
 ﻿using MediatR;
+using Workora.Domain.Enums;
+using Workora.Domain.Extensions;
 using Workora.Application.Features.Reports.DTOs;
 using Workora.Shared.Responses;
 
@@ -20,6 +22,6 @@ public class ExportCustomReportCommandHandler : IRequestHandler<ExportCustomRepo
             DownloadUrl = $"/api/v1/reports/download-export?type={request.ReportType}"
         };
 
-        return Task.FromResult(ApiResponse<CustomReportExportDto>.Success(dto, "Custom report export generated successfully."));
+        return Task.FromResult(ApiResponse<CustomReportExportDto>.Success(dto, ResponseMessage.CustomReportExportGenerated.GetDescription()));
     }
 }

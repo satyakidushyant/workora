@@ -1,4 +1,6 @@
 ﻿using MediatR;
+using Workora.Domain.Enums;
+using Workora.Domain.Extensions;
 using Workora.Application.Features.Payroll.DTOs;
 using Workora.Domain.Entities;
 using Workora.Domain.Interfaces;
@@ -39,6 +41,6 @@ public class GetPayheadsListQueryHandler : IRequestHandler<GetPayheadsListQuery,
             })
             .ToList();
 
-        return Task.FromResult(ApiResponse<IReadOnlyList<PayheadDto>>.Success(items, "Payheads list retrieved successfully."));
+        return Task.FromResult(ApiResponse<IReadOnlyList<PayheadDto>>.Success(items, ResponseMessage.PayheadsRetrieved.GetDescription()));
     }
 }

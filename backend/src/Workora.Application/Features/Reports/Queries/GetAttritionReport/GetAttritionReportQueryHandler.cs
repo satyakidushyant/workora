@@ -1,4 +1,6 @@
 ﻿using MediatR;
+using Workora.Domain.Enums;
+using Workora.Domain.Extensions;
 using Workora.Application.Features.Reports.DTOs;
 using Workora.Domain.Entities;
 using Workora.Domain.Interfaces;
@@ -42,6 +44,6 @@ public class GetAttritionReportQueryHandler : IRequestHandler<GetAttritionReport
             AttritionRatePercentage = rate
         };
 
-        return Task.FromResult(ApiResponse<AttritionReportDto>.Success(dto, "Attrition report metrics computed successfully."));
+        return Task.FromResult(ApiResponse<AttritionReportDto>.Success(dto, ResponseMessage.AttritionReportComputed.GetDescription()));
     }
 }

@@ -41,7 +41,7 @@ public class DeleteRoleCommandHandler : IRequestHandler<DeleteRoleCommand, ApiRe
         var inUse = await _roleRepository.IsInUseAsync(request.Id, ct);
         if (inUse)
         {
-            return ApiResponse<bool>.Fail($"Role '{role.Name}' cannot be deleted because it is currently assigned to one or more users.");
+            return ApiResponse<bool>.Fail(ResponseMessage.RoleInUseCannotBeDeleted.GetDescription());
         }
 
         _roleRepository.Remove(role);

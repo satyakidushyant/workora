@@ -1,4 +1,6 @@
 ﻿using MediatR;
+using Workora.Domain.Enums;
+using Workora.Domain.Extensions;
 using Workora.Application.Common.Interfaces;
 using Workora.Application.Common.Models;
 using Workora.Shared.Responses;
@@ -62,6 +64,6 @@ public class GetMyLeaveBalancesQueryHandler : IRequestHandler<GetMyLeaveBalances
                 b.AvailableDays))
             .ToList();
 
-        return ApiResponse<IReadOnlyList<LeaveBalanceDto>>.Success(balances, "Caller leave balances retrieved successfully.");
+        return ApiResponse<IReadOnlyList<LeaveBalanceDto>>.Success(balances, ResponseMessage.LeaveBalancesRetrieved.GetDescription());
     }
 }

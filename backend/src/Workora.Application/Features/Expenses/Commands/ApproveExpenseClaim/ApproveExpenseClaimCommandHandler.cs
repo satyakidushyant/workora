@@ -1,4 +1,6 @@
 ﻿using AutoMapper;
+using Workora.Domain.Enums;
+using Workora.Domain.Extensions;
 using MediatR;
 using Workora.Application.Common.Interfaces;
 using Workora.Application.Features.Expenses.DTOs;
@@ -36,7 +38,7 @@ public class ApproveExpenseClaimCommandHandler : IRequestHandler<ApproveExpenseC
         var claim = await _expenseRepository.GetByIdAsync(request.ClaimId, ct);
         if (claim == null)
         {
-            return ApiResponse<ExpenseClaimDto>.Fail("Expense claim not found.");
+            return ApiResponse<ExpenseClaimDto>.Fail(ResponseMessage.ExpenseClaimNotFound.GetDescription());
         }
 
         try
@@ -54,7 +56,7 @@ public class ApproveExpenseClaimCommandHandler : IRequestHandler<ApproveExpenseC
             await _unitOfWork.SaveChangesAsync(ct);
 
             var dto = _mapper.Map<ExpenseClaimDto>(claim);
-            return ApiResponse<ExpenseClaimDto>.Success(dto, "Expense claim approved successfully.");
+            return ApiResponse<ExpenseClaimDto>.Success(dto, ResponseMessage.ExpenseClaimApproved.GetDescription());
         }
         catch (DomainException ex)
         {

@@ -4,6 +4,7 @@ using Workora.Application.Common.Models;
 using Workora.Shared.Responses;
 using Workora.Domain.Entities;
 using Workora.Domain.Enums;
+using Workora.Domain.Extensions;
 using Workora.Domain.Interfaces;
 using Workora.Domain.ValueObjects;
 
@@ -62,6 +63,6 @@ public class BulkImportEmployeesCommandHandler : IRequestHandler<BulkImportEmplo
         }
 
         await _unitOfWork.SaveChangesAsync(cancellationToken);
-        return ApiResponse<int>.Success(count, $"{count} employees imported successfully.");
+        return ApiResponse<int>.Success(count, ResponseMessage.EmployeesBulkImported.GetDescription());
     }
 }

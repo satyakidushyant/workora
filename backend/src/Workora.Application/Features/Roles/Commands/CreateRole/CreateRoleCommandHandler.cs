@@ -1,4 +1,4 @@
-using AutoMapper;
+﻿using AutoMapper;
 using MediatR;
 using Workora.Application.Features.Roles.DTOs;
 using Workora.Domain.Entities;
@@ -37,7 +37,7 @@ public class CreateRoleCommandHandler : IRequestHandler<CreateRoleCommand, ApiRe
         var isUnique = await _roleRepository.IsNameUniqueAsync(request.Name, ct: ct);
         if (!isUnique)
         {
-            return ApiResponse<RoleDto>.Fail($"A role with the name '{request.Name}' already exists.");
+            return ApiResponse<RoleDto>.Fail(ResponseMessage.RoleNameAlreadyExists.GetDescription());
         }
 
         var role = Role.Create(request.Name, request.Description);

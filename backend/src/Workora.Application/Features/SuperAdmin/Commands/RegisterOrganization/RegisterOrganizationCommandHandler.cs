@@ -1,4 +1,6 @@
 ﻿using FluentValidation;
+using Workora.Domain.Enums;
+using Workora.Domain.Extensions;
 using MediatR;
 using Workora.Application.Common.Models;
 using Workora.Application.Features.SuperAdmin.DTOs;
@@ -37,7 +39,7 @@ public class RegisterOrganizationCommandHandler : IRequestHandler<RegisterOrgani
 
         if (existing != null)
         {
-            return ApiResponse<OrganizationDto>.Fail($"Organization with code '{request.Code}' already exists.");
+            return ApiResponse<OrganizationDto>.Fail(ResponseMessage.OrganizationCodeAlreadyExists.GetDescription());
         }
 
         var company = Company.Create(
@@ -71,6 +73,6 @@ public class RegisterOrganizationCommandHandler : IRequestHandler<RegisterOrgani
             CreatedAt = company.CreatedAt
         };
 
-        return ApiResponse<OrganizationDto>.Success(dto, "Tenant organization registered successfully.");
+        return ApiResponse<OrganizationDto>.Success(dto, ResponseMessage.OrganizationRegistered.GetDescription());
     }
 }

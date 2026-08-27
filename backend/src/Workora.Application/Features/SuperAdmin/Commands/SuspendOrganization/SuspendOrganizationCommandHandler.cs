@@ -1,4 +1,6 @@
 ﻿using FluentValidation;
+using Workora.Domain.Enums;
+using Workora.Domain.Extensions;
 using MediatR;
 using Workora.Application.Common.Models;
 using Workora.Domain.Entities;
@@ -35,13 +37,13 @@ public class SuspendOrganizationCommandHandler : IRequestHandler<SuspendOrganiza
         var company = await _companyRepository.GetByIdAsync(request.Id, cancellationToken);
         if (company == null)
         {
-            return ApiResponse<bool>.Fail("Organization not found.");
+            return ApiResponse<bool>.Fail(ResponseMessage.OrganizationNotFound.GetDescription());
         }
 
         company.IsActive = false;
         _companyRepository.Update(company);
         await _unitOfWork.SaveChangesAsync(cancellationToken);
 
-        return ApiResponse<bool>.Success(true, "Organization suspended successfully.");
+        return ApiResponse<bool>.Success(true, ResponseMessage.OrganizationSuspended.GetDescription());
     }
 }

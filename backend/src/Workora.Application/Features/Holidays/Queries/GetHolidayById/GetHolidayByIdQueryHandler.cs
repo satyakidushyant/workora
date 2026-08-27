@@ -1,4 +1,6 @@
 ﻿using AutoMapper;
+using Workora.Domain.Enums;
+using Workora.Domain.Extensions;
 using MediatR;
 using Workora.Application.Features.Holidays.DTOs;
 using Workora.Domain.Interfaces;
@@ -29,7 +31,7 @@ public class GetHolidayByIdQueryHandler : IRequestHandler<GetHolidayByIdQuery, A
         var holiday = await _holidayRepository.GetByIdAsync(request.Id, ct);
         if (holiday == null)
         {
-            return ApiResponse<HolidayDto>.Fail("Holiday not found.");
+            return ApiResponse<HolidayDto>.Fail(ResponseMessage.HolidayNotFound.GetDescription());
         }
 
         var dto = _mapper.Map<HolidayDto>(holiday);

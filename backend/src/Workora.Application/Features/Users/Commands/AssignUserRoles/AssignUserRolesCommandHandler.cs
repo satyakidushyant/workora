@@ -1,4 +1,6 @@
 ﻿using MediatR;
+using Workora.Domain.Enums;
+using Workora.Domain.Extensions;
 using Workora.Domain.Interfaces;
 using Workora.Shared.Responses;
 
@@ -32,7 +34,7 @@ public class AssignUserRolesCommandHandler : IRequestHandler<AssignUserRolesComm
         var user = await _userRepository.GetByIdAsync(request.UserId, ct);
         if (user == null)
         {
-            return ApiResponse<bool>.Fail($"User with ID {request.UserId} was not found.");
+            return ApiResponse<bool>.Fail(ResponseMessage.UserNotFound.GetDescription());
         }
 
         await _userRepository.AssignUserRolesAsync(request.UserId, request.RoleIds ?? new List<int>(), ct);

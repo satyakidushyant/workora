@@ -1,4 +1,6 @@
 ﻿using AutoMapper;
+using Workora.Domain.Enums;
+using Workora.Domain.Extensions;
 using MediatR;
 using Workora.Application.Features.Branches.DTOs;
 using Workora.Domain.Interfaces;
@@ -29,7 +31,7 @@ public class GetBranchByIdQueryHandler : IRequestHandler<GetBranchByIdQuery, Api
         var branch = await _branchRepository.GetByIdAsync(request.Id, ct);
         if (branch == null)
         {
-            return ApiResponse<BranchDto>.Fail("Branch not found.");
+            return ApiResponse<BranchDto>.Fail(ResponseMessage.BranchNotFound.GetDescription());
         }
 
         var dto = _mapper.Map<BranchDto>(branch);

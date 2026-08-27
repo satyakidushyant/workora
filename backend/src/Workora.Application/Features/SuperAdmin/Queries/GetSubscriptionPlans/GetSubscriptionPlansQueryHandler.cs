@@ -1,4 +1,6 @@
 ﻿using MediatR;
+using Workora.Domain.Enums;
+using Workora.Domain.Extensions;
 using Workora.Application.Common.Models;
 using Workora.Shared.Responses;
 using Workora.Application.Features.SuperAdmin.DTOs;
@@ -40,6 +42,6 @@ public class GetSubscriptionPlansQueryHandler : IRequestHandler<GetSubscriptionP
             })
             .ToList();
 
-        return Task.FromResult(ApiResponse<IReadOnlyList<SubscriptionPlanDto>>.Success(plans, "Subscription plans retrieved successfully."));
+        return Task.FromResult(ApiResponse<IReadOnlyList<SubscriptionPlanDto>>.Success(plans, ResponseMessage.SubscriptionPlansRetrieved.GetDescription()));
     }
 }

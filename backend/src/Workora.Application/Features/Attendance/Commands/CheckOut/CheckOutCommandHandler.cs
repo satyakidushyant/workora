@@ -66,7 +66,7 @@ public class CheckOutCommandHandler : IRequestHandler<CheckOutCommand, ApiRespon
         var existing = await _attendanceRepository.GetByDateAsync(employee.Id, today, ct);
         if (existing == null || !existing.CheckInTime.HasValue)
         {
-            return ApiResponse<AttendanceRecordDto>.Fail("You must check in first before checking out.");
+            return ApiResponse<AttendanceRecordDto>.Fail(ResponseMessage.AttendanceMustCheckInFirst.GetDescription());
         }
 
         existing.CheckOut(now, 8.0m);

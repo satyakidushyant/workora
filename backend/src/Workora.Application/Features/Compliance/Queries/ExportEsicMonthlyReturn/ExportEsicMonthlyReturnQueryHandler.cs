@@ -1,4 +1,6 @@
 ﻿using System.Text;
+using Workora.Domain.Enums;
+using Workora.Domain.Extensions;
 using MediatR;
 using Workora.Application.Features.Compliance.DTOs;
 using Workora.Domain.Interfaces;
@@ -42,6 +44,6 @@ public class ExportEsicMonthlyReturnQueryHandler : IRequestHandler<ExportEsicMon
         var base64 = Convert.ToBase64String(bytes);
         var exportDto = new StatutoryExportFileDto($"ESIC_Monthly_{request.Year}_{request.Month:D2}.csv", "text/csv", base64);
 
-        return ApiResponse<StatutoryExportFileDto>.Success(exportDto, "ESIC monthly return generated.");
+        return ApiResponse<StatutoryExportFileDto>.Success(exportDto, ResponseMessage.EsicReturnGenerated.GetDescription());
     }
 }

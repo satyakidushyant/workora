@@ -1,4 +1,4 @@
-namespace Workora.Application.Features.WorkoraAI.DTOs;
+﻿namespace Workora.Application.Features.WorkoraAI.DTOs;
 
 /// <summary>
 /// Response payload returned by the Workora AI Assistant.

@@ -1,4 +1,6 @@
 ﻿using MediatR;
+using Workora.Domain.Enums;
+using Workora.Domain.Extensions;
 using Workora.Application.Features.Payroll.DTOs;
 using Workora.Domain.Entities;
 using Workora.Domain.Interfaces;
@@ -53,6 +55,6 @@ public class CreatePayheadCommandHandler : IRequestHandler<CreatePayheadCommand,
             IsTaxable = comp.IsTaxable
         };
 
-        return ApiResponse<PayheadDto>.Success(dto, "Salary payhead created successfully.");
+        return ApiResponse<PayheadDto>.Success(dto, ResponseMessage.PayheadCreated.GetDescription());
     }
 }

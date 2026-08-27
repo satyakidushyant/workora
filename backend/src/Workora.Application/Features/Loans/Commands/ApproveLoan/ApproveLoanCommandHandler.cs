@@ -1,4 +1,6 @@
 ﻿using AutoMapper;
+using Workora.Domain.Enums;
+using Workora.Domain.Extensions;
 using MediatR;
 using Workora.Application.Common.Interfaces;
 using Workora.Application.Features.Loans.DTOs;
@@ -36,7 +38,7 @@ public class ApproveLoanCommandHandler : IRequestHandler<ApproveLoanCommand, Api
         var loan = await _loanRepository.GetWithSchedulesAsync(request.LoanId, ct);
         if (loan == null)
         {
-            return ApiResponse<LoanDto>.Fail("Loan record not found.");
+            return ApiResponse<LoanDto>.Fail(ResponseMessage.LoanNotFound.GetDescription());
         }
 
         try
@@ -46,7 +48,7 @@ public class ApproveLoanCommandHandler : IRequestHandler<ApproveLoanCommand, Api
             await _unitOfWork.SaveChangesAsync(ct);
 
             var dto = _mapper.Map<LoanDto>(loan);
-            return ApiResponse<LoanDto>.Success(dto, "Loan approved and EMI schedule generated successfully.");
+            return ApiResponse<LoanDto>.Success(dto, ResponseMessage.LoanApproved.GetDescription());
         }
         catch (DomainException ex)
         {

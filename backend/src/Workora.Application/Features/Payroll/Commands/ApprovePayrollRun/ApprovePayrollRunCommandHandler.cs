@@ -48,7 +48,7 @@ public class ApprovePayrollRunCommandHandler : IRequestHandler<ApprovePayrollRun
 
         if (run.Status != PayrollStatus.Calculated)
         {
-            return ApiResponse<PayrollRunDto>.Fail("Only calculated payroll runs can be approved.");
+            return ApiResponse<PayrollRunDto>.Fail(ResponseMessage.PayrollRunMustBeCalculatedToApprove.GetDescription());
         }
 
         var approverUserId = 0;

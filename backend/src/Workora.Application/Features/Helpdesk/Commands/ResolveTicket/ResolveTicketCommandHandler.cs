@@ -1,4 +1,6 @@
 ﻿using AutoMapper;
+using Workora.Domain.Enums;
+using Workora.Domain.Extensions;
 using FluentValidation;
 using MediatR;
 using Workora.Application.Common.Interfaces;
@@ -36,7 +38,7 @@ public class ResolveTicketCommandHandler : IRequestHandler<ResolveTicketCommand,
         var ticket = await _ticketRepository.GetByIdAsync(request.TicketId, ct);
         if (ticket == null)
         {
-            return ApiResponse<HelpdeskTicketDto>.Fail("Ticket not found.");
+            return ApiResponse<HelpdeskTicketDto>.Fail(ResponseMessage.TicketNotFound.GetDescription());
         }
 
         ticket.Resolve(request.ResolutionNotes);
@@ -45,6 +47,6 @@ public class ResolveTicketCommandHandler : IRequestHandler<ResolveTicketCommand,
 
         var fullyLoaded = await _ticketRepository.GetWithCommentsAsync(ticket.Id, ct);
         var dto = _mapper.Map<HelpdeskTicketDto>(fullyLoaded ?? ticket);
-        return ApiResponse<HelpdeskTicketDto>.Success(dto, "Ticket resolved successfully.");
+        return ApiResponse<HelpdeskTicketDto>.Success(dto, ResponseMessage.TicketResolved.GetDescription());
     }
 }

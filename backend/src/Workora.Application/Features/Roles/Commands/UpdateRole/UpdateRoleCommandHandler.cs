@@ -1,4 +1,4 @@
-using AutoMapper;
+﻿using AutoMapper;
 using MediatR;
 using Workora.Application.Features.Roles.DTOs;
 using Workora.Domain.Enums;
@@ -39,7 +39,7 @@ public class UpdateRoleCommandHandler : IRequestHandler<UpdateRoleCommand, ApiRe
         var isUnique = await _roleRepository.IsNameUniqueAsync(request.Name, request.Id, ct);
         if (!isUnique)
         {
-            return ApiResponse<RoleDto>.Fail($"Another role with the name '{request.Name}' already exists.");
+            return ApiResponse<RoleDto>.Fail(ResponseMessage.RoleNameAlreadyExists.GetDescription());
         }
 
         role.Update(request.Name, request.Description);

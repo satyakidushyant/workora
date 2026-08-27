@@ -1,4 +1,6 @@
 ﻿using AutoMapper;
+using Workora.Domain.Enums;
+using Workora.Domain.Extensions;
 using MediatR;
 using Workora.Application.Features.Employees.DTOs;
 using Workora.Domain.Interfaces;
@@ -29,7 +31,7 @@ public class GetEmployeeEmploymentHistoryQueryHandler : IRequestHandler<GetEmplo
         var employee = await _employeeRepository.GetWithFullDetailsAsync(request.Id, ct);
         if (employee == null)
         {
-            return ApiResponse<IReadOnlyList<EmploymentHistoryDto>>.Fail("Employee not found.");
+            return ApiResponse<IReadOnlyList<EmploymentHistoryDto>>.Fail(ResponseMessage.EmployeeNotFound.GetDescription());
         }
 
         var dtos = _mapper.Map<IReadOnlyList<EmploymentHistoryDto>>(employee.EmploymentHistory);

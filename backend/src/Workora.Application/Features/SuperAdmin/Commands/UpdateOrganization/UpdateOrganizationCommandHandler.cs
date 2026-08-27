@@ -1,4 +1,6 @@
 ﻿using FluentValidation;
+using Workora.Domain.Enums;
+using Workora.Domain.Extensions;
 using MediatR;
 using Workora.Application.Common.Models;
 using Workora.Application.Features.SuperAdmin.DTOs;
@@ -35,7 +37,7 @@ public class UpdateOrganizationCommandHandler : IRequestHandler<UpdateOrganizati
         var company = await _companyRepository.GetByIdAsync(request.Id, cancellationToken);
         if (company == null)
         {
-            return ApiResponse<OrganizationDto>.Fail("Organization not found.");
+            return ApiResponse<OrganizationDto>.Fail(ResponseMessage.OrganizationNotFound.GetDescription());
         }
 
         company.UpdateProfile(
@@ -68,6 +70,6 @@ public class UpdateOrganizationCommandHandler : IRequestHandler<UpdateOrganizati
             CreatedAt = company.CreatedAt
         };
 
-        return ApiResponse<OrganizationDto>.Success(dto, "Organization updated successfully.");
+        return ApiResponse<OrganizationDto>.Success(dto, ResponseMessage.OrganizationUpdated.GetDescription());
     }
 }
