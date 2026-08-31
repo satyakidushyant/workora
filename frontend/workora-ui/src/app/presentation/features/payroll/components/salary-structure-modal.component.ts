@@ -1,4 +1,4 @@
-import { Component, Input, Output, EventEmitter, inject, OnChanges, SimpleChanges, ChangeDetectionStrategy } from '@angular/core';
+import { Component, Input, Output, EventEmitter, inject, OnChanges, SimpleChanges, ChangeDetectionStrategy, HostListener } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, FormArray, ReactiveFormsModule, Validators } from '@angular/forms';
 import { SalaryStructure, Payhead, SaveSalaryStructureParams } from '../../../../domain/models/payroll.model';
@@ -9,11 +9,11 @@ import { SalaryStructure, Payhead, SaveSalaryStructureParams } from '../../../..
   imports: [CommonModule, ReactiveFormsModule],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    <div class="fixed inset-0 z-50 bg-[#063B39]/60 backdrop-blur-xs flex items-center justify-center p-4 overflow-y-auto">
-      <div class="bg-white rounded-3xl p-6 sm:p-8 w-full max-w-xl border border-[#DCEBE7] shadow-2xl space-y-6 my-8 animate-in fade-in zoom-in-95 duration-150">
+    <div class="workora-modal-overlay" (click)="closeModal.emit()">
+      <div class="workora-modal-card max-w-xl" (click)="$event.stopPropagation()">
         
         <!-- Header -->
-        <div class="flex items-center justify-between border-b border-[#DCEBE7] pb-4">
+        <div class="workora-modal-header">
           <div class="flex items-center gap-3">
             <div class="w-10 h-10 rounded-xl bg-[#3FA79B]/15 text-[#0E6E68] flex items-center justify-center font-bold">
               <span class="material-symbols-outlined">account_balance_wallet</span>
@@ -28,109 +28,111 @@ import { SalaryStructure, Payhead, SaveSalaryStructureParams } from '../../../..
           <button 
             type="button" 
             (click)="closeModal.emit()"
-            class="text-slate-400 hover:text-slate-600 rounded-lg p-1 transition-colors border-none bg-transparent cursor-pointer">
+            class="text-slate-400 hover:text-slate-600 rounded-lg p-1.5 transition-colors border-none bg-transparent cursor-pointer">
             <span class="material-symbols-outlined text-xl">close</span>
           </button>
         </div>
 
         <!-- Form -->
-        <form [formGroup]="form" (ngSubmit)="onSubmit()" class="space-y-4">
-          <div>
-            <label class="block text-xs font-bold text-[#063B39] mb-1">Structure Template Name <span class="text-rose-500">*</span></label>
-            <input 
-              type="text" 
-              formControlName="name" 
-              placeholder="e.g. Standard Full-Time Engineering Grade A"
-              class="w-full px-3.5 py-2.5 bg-[#F4F8F7] text-xs text-[#063B39] rounded-xl border border-[#DCEBE7] focus:border-[#0E6E68] outline-none font-medium transition-all"
-            />
-          </div>
-
-          <div>
-            <label class="block text-xs font-bold text-[#063B39] mb-1">Description</label>
-            <input 
-              type="text" 
-              formControlName="description" 
-              placeholder="Optional notes regarding designation eligibility"
-              class="w-full px-3.5 py-2.5 bg-[#F4F8F7] text-xs text-[#063B39] rounded-xl border border-[#DCEBE7] focus:border-[#0E6E68] outline-none font-medium transition-all"
-            />
-          </div>
-
-          <!-- Components Array -->
-          <div class="space-y-3 pt-2">
-            <div class="flex items-center justify-between">
-              <label class="text-xs font-bold text-[#063B39]">Salary Components (Earnings &amp; Deductions)</label>
-              <button 
-                type="button" 
-                (click)="addComponent()"
-                class="px-2.5 py-1 bg-[#0E6E68]/10 hover:bg-[#0E6E68]/20 text-[#0E6E68] text-xs font-bold rounded-lg transition-colors border-none cursor-pointer">
-                + Add Component
-              </button>
+        <form [formGroup]="form" (ngSubmit)="onSubmit()" class="flex flex-col flex-1 overflow-hidden">
+          <div class="workora-modal-body space-y-4">
+            <div>
+              <label class="workora-label">Structure Template Name <span class="text-rose-500">*</span></label>
+              <input 
+                type="text" 
+                formControlName="name" 
+                placeholder="e.g. Standard Full-Time Engineering Grade A"
+                class="workora-input !py-2.5"
+              />
             </div>
 
-            <div formArrayName="components" class="space-y-2 max-h-56 overflow-y-auto pr-1">
-              @for (c of componentsArray.controls; track $index) {
-                <div [formGroupName]="$index" class="p-3 bg-[#F4F8F7] rounded-2xl border border-[#DCEBE7] grid grid-cols-12 gap-2 items-center text-xs">
-                  <div class="col-span-4">
-                    <input 
-                      type="text" 
-                      formControlName="name" 
-                      placeholder="Name (e.g. HRA)"
-                      class="w-full px-2.5 py-1.5 bg-white text-xs text-[#063B39] rounded-lg border border-[#DCEBE7] outline-none font-medium"
-                    />
-                  </div>
+            <div>
+              <label class="workora-label">Description</label>
+              <input 
+                type="text" 
+                formControlName="description" 
+                placeholder="Optional notes regarding designation eligibility"
+                class="workora-input !py-2.5"
+              />
+            </div>
 
-                  <div class="col-span-2">
-                    <input 
-                      type="text" 
-                      formControlName="code" 
-                      placeholder="Code"
-                      class="w-full px-2.5 py-1.5 bg-white text-xs text-[#063B39] rounded-lg border border-[#DCEBE7] outline-none font-medium font-mono uppercase"
-                    />
-                  </div>
+            <!-- Components Array -->
+            <div class="space-y-3 pt-2">
+              <div class="flex items-center justify-between">
+                <label class="workora-label !mb-0">Salary Components (Earnings &amp; Deductions)</label>
+                <button 
+                  type="button" 
+                  (click)="addComponent()"
+                  class="px-2.5 py-1 bg-[#0E6E68]/10 hover:bg-[#0E6E68]/20 text-[#0E6E68] text-xs font-bold rounded-lg transition-colors border-none cursor-pointer">
+                  + Add Component
+                </button>
+              </div>
 
-                  <div class="col-span-3">
-                    <select 
-                      formControlName="type"
-                      class="w-full px-2 py-1.5 bg-white text-xs text-[#063B39] rounded-lg border border-[#DCEBE7] outline-none font-medium">
-                      <option value="Earning">Earning</option>
-                      <option value="Deduction">Deduction</option>
-                    </select>
-                  </div>
+              <div formArrayName="components" class="space-y-2 max-h-56 overflow-y-auto pr-1 custom-scrollbar">
+                @for (c of componentsArray.controls; track $index) {
+                  <div [formGroupName]="$index" class="p-3 bg-[#F4F8F7] rounded-2xl border border-[#DCEBE7] grid grid-cols-12 gap-2 items-center text-xs">
+                    <div class="col-span-4">
+                      <input 
+                        type="text" 
+                        formControlName="name" 
+                        placeholder="Name (e.g. HRA)"
+                        class="workora-input !py-1.5 !px-2.5 !text-xs !bg-white"
+                      />
+                    </div>
 
-                  <div class="col-span-2">
-                    <input 
-                      type="number" 
-                      formControlName="defaultValue" 
-                      placeholder="Val"
-                      class="w-full px-2 py-1.5 bg-white text-xs text-[#063B39] rounded-lg border border-[#DCEBE7] outline-none font-medium"
-                    />
-                  </div>
+                    <div class="col-span-2">
+                      <input 
+                        type="text" 
+                        formControlName="code" 
+                        placeholder="Code"
+                        class="workora-input !py-1.5 !px-2.5 !text-xs !bg-white font-mono uppercase"
+                      />
+                    </div>
 
-                  <div class="col-span-1 text-right">
-                    <button 
-                      type="button" 
-                      (click)="removeComponent($index)"
-                      class="text-rose-500 hover:text-rose-700 p-1 border-none bg-transparent cursor-pointer"
-                      title="Remove Component">
-                      <span class="material-symbols-outlined text-base">close</span>
-                    </button>
+                    <div class="col-span-3">
+                      <select 
+                        formControlName="type"
+                        class="workora-select !py-1.5 !px-2 !text-xs !bg-white">
+                        <option value="Earning">Earning</option>
+                        <option value="Deduction">Deduction</option>
+                      </select>
+                    </div>
+
+                    <div class="col-span-2">
+                      <input 
+                        type="number" 
+                        formControlName="defaultValue" 
+                        placeholder="Val"
+                        class="workora-input !py-1.5 !px-2 !text-xs !bg-white text-center"
+                      />
+                    </div>
+
+                    <div class="col-span-1 text-right">
+                      <button 
+                        type="button" 
+                        (click)="removeComponent($index)"
+                        class="text-rose-500 hover:text-rose-700 p-1 border-none bg-transparent cursor-pointer"
+                        title="Remove Component">
+                        <span class="material-symbols-outlined text-base">close</span>
+                      </button>
+                    </div>
                   </div>
-                </div>
-              }
+                }
+              </div>
             </div>
           </div>
 
-          <div class="flex items-center justify-end gap-3 pt-4 border-t border-[#DCEBE7]">
+          <div class="workora-modal-footer">
             <button 
               type="button" 
               (click)="closeModal.emit()"
-              class="px-4 py-2 text-xs font-bold text-slate-600 hover:bg-slate-100 rounded-xl transition-colors cursor-pointer border-none bg-transparent">
+              class="workora-btn-secondary">
               Cancel
             </button>
             <button 
               type="submit" 
               [disabled]="form.invalid || isSubmitting"
-              class="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-[#0E6E68] hover:bg-[#063B39] text-white text-xs font-bold shadow-md hover:shadow-lg disabled:opacity-50 transition-all cursor-pointer border-none">
+              class="workora-btn-primary">
               @if (isSubmitting) {
                 <span class="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
                 <span>Saving...</span>
@@ -164,6 +166,11 @@ export class SalaryStructureModalComponent implements OnChanges {
 
   get componentsArray(): FormArray {
     return this.form.get('components') as FormArray;
+  }
+
+  @HostListener('document:keydown.escape')
+  onEscape(): void {
+    this.closeModal.emit();
   }
 
   ngOnChanges(changes: SimpleChanges): void {

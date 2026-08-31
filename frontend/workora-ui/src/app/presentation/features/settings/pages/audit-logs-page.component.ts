@@ -173,33 +173,35 @@ import { WorkoraEmptyStateComponent } from '../../../shared/components/workora-e
 
       <!-- Diff Modal -->
       @if (selectedLog(); as log) {
-        <div class="fixed inset-0 z-50 bg-[#063B39]/60 backdrop-blur-xs flex items-center justify-center p-4">
-          <div class="bg-white rounded-3xl p-6 sm:p-8 w-full max-w-2xl border border-[#DCEBE7] shadow-2xl space-y-5 animate-in fade-in zoom-in-95 duration-150">
-            <div class="flex items-center justify-between border-b border-[#DCEBE7] pb-4">
+        <div class="workora-modal-overlay" (click)="selectedLog.set(null)">
+          <div class="workora-modal-card max-w-2xl" (click)="$event.stopPropagation()">
+            <div class="workora-modal-header">
               <div>
                 <h3 class="text-base font-extrabold text-[#063B39] font-heading">
                   Payload State Change: {{ log.entityName }} #{{ log.entityId }}
                 </h3>
                 <p class="text-xs text-slate-500">{{ log.action }} by {{ log.actorEmail || 'System' }}</p>
               </div>
-              <button (click)="selectedLog.set(null)" class="text-slate-400 hover:text-slate-600 border-none bg-transparent cursor-pointer">
-                <span class="material-symbols-outlined">close</span>
+              <button (click)="selectedLog.set(null)" class="text-slate-400 hover:text-slate-600 rounded-lg p-1.5 transition-colors border-none bg-transparent cursor-pointer">
+                <span class="material-symbols-outlined text-xl">close</span>
               </button>
             </div>
 
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div>
-                <span class="text-[10px] font-bold uppercase text-slate-400 block mb-1">Previous Values</span>
-                <pre class="p-3.5 bg-slate-900 text-slate-200 rounded-2xl text-[11px] font-mono overflow-auto max-h-60">{{ formatJson(log.oldValues) }}</pre>
-              </div>
-              <div>
-                <span class="text-[10px] font-bold uppercase text-slate-400 block mb-1">New Values</span>
-                <pre class="p-3.5 bg-slate-900 text-emerald-300 rounded-2xl text-[11px] font-mono overflow-auto max-h-60">{{ formatJson(log.newValues) }}</pre>
+            <div class="workora-modal-body">
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <span class="text-[10px] font-bold uppercase text-slate-400 block mb-1">Previous Values</span>
+                  <pre class="p-3.5 bg-slate-900 text-slate-200 rounded-2xl text-[11px] font-mono overflow-auto max-h-60 custom-scrollbar">{{ formatJson(log.oldValues) }}</pre>
+                </div>
+                <div>
+                  <span class="text-[10px] font-bold uppercase text-slate-400 block mb-1">New Values</span>
+                  <pre class="p-3.5 bg-slate-900 text-emerald-300 rounded-2xl text-[11px] font-mono overflow-auto max-h-60 custom-scrollbar">{{ formatJson(log.newValues) }}</pre>
+                </div>
               </div>
             </div>
 
-            <div class="flex items-center justify-end pt-3 border-t border-[#DCEBE7]">
-              <button type="button" (click)="selectedLog.set(null)" class="px-5 py-2 text-xs font-bold text-slate-600 hover:bg-slate-100 rounded-xl transition-colors cursor-pointer border-none bg-transparent">
+            <div class="workora-modal-footer">
+              <button type="button" (click)="selectedLog.set(null)" class="workora-btn-secondary">
                 Close
               </button>
             </div>

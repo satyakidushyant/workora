@@ -1,4 +1,4 @@
-import { Component, Input, Output, EventEmitter, signal, ChangeDetectionStrategy } from '@angular/core';
+import { Component, Input, Output, EventEmitter, signal, ChangeDetectionStrategy, HostListener } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { EmployeeDetail } from '../../../../domain/models/employee.model';
 
@@ -13,8 +13,8 @@ type DossierTab = 'overview' | 'history' | 'bank' | 'contacts';
   imports: [CommonModule],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    <div class="fixed inset-0 z-50 bg-[#063B39]/60 backdrop-blur-xs flex items-center justify-center p-3 sm:p-6">
-      <div class="bg-white rounded-3xl w-full max-w-4xl max-h-[92vh] border border-[#DCEBE7] shadow-2xl flex flex-col overflow-hidden animate-in fade-in zoom-in-95 duration-150">
+    <div class="workora-modal-overlay" (click)="closeModal.emit()">
+      <div class="workora-modal-card max-w-4xl max-h-[92vh] flex flex-col" (click)="$event.stopPropagation()">
         
         <!-- Header Banner -->
         <div class="p-5 sm:p-6 bg-gradient-to-r from-[#063B39] to-[#0E6E68] text-white flex flex-col sm:flex-row sm:items-center justify-between gap-4 shrink-0 relative overflow-hidden">
@@ -90,7 +90,7 @@ type DossierTab = 'overview' | 'history' | 'bank' | 'contacts';
         </div>
 
         <!-- Tab Content Body -->
-        <div class="flex-1 overflow-y-auto p-5 sm:p-8 space-y-6">
+        <div class="flex-1 overflow-y-auto p-5 sm:p-8 space-y-6 custom-scrollbar">
 
           <!-- ======================================================== -->
           <!-- TAB 1: OVERVIEW -->
@@ -279,6 +279,11 @@ export class EmployeeDossierModalComponent {
   @Output() closeModal = new EventEmitter<void>();
 
   readonly activeTab = signal<DossierTab>('overview');
+
+  @HostListener('document:keydown.escape')
+  onEscape(): void {
+    this.closeModal.emit();
+  }
 
   getInitials(firstName?: string, lastName?: string): string {
     const f = firstName ? firstName.charAt(0).toUpperCase() : 'E';

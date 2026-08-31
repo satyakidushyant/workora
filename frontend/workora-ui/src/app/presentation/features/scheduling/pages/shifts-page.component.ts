@@ -1,4 +1,4 @@
-import { Component, OnInit, inject, signal, ChangeDetectionStrategy } from '@angular/core';
+import { Component, OnInit, inject, signal, computed, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { finalize } from 'rxjs/operators';
@@ -10,6 +10,7 @@ import { NotificationService } from '../../../../core/services/notification.serv
 import { WorkoraSkeletonComponent } from '../../../shared/components/workora-skeleton.component';
 import { WorkoraPaginationComponent } from '../../../shared/components/workora-pagination.component';
 import { WorkoraEmptyStateComponent } from '../../../shared/components/workora-empty-state.component';
+import { WorkoraSelectComponent, WorkoraSelectOption } from '../../../shared/components/workora-select.component';
 
 @Component({
   selector: 'app-shifts-page',
@@ -18,6 +19,7 @@ import { WorkoraEmptyStateComponent } from '../../../shared/components/workora-e
     CommonModule,
     FormsModule,
     ReactiveFormsModule,
+    WorkoraSelectComponent,
     WorkoraSkeletonComponent,
     WorkoraPaginationComponent,
     WorkoraEmptyStateComponent
@@ -153,9 +155,9 @@ import { WorkoraEmptyStateComponent } from '../../../shared/components/workora-e
 
       <!-- Create Shift Modal -->
       @if (isCreateModalOpen()) {
-        <div class="fixed inset-0 z-50 bg-[#063B39]/60 backdrop-blur-xs flex items-center justify-center p-4">
-          <div class="bg-white rounded-3xl p-6 sm:p-8 w-full max-w-md border border-[#DCEBE7] shadow-2xl space-y-6 animate-in fade-in zoom-in-95 duration-150">
-            <div class="flex items-center justify-between border-b border-[#DCEBE7] pb-4">
+        <div class="workora-modal-overlay" (click)="isCreateModalOpen.set(false)">
+          <div class="workora-modal-card max-w-md" (click)="$event.stopPropagation()">
+            <div class="workora-modal-header">
               <div class="flex items-center gap-3">
                 <div class="w-10 h-10 rounded-xl bg-[#3FA79B]/15 text-[#0E6E68] flex items-center justify-center font-bold">
                   <span class="material-symbols-outlined">schedule</span>
@@ -165,56 +167,58 @@ import { WorkoraEmptyStateComponent } from '../../../shared/components/workora-e
                   <p class="text-xs text-slate-500">Define working hours and grace period rules.</p>
                 </div>
               </div>
-              <button (click)="isCreateModalOpen.set(false)" class="text-slate-400 hover:text-slate-600 border-none bg-transparent cursor-pointer">
-                <span class="material-symbols-outlined">close</span>
+              <button (click)="isCreateModalOpen.set(false)" class="text-slate-400 hover:text-slate-600 rounded-lg p-1.5 transition-colors border-none bg-transparent cursor-pointer">
+                <span class="material-symbols-outlined text-xl">close</span>
               </button>
             </div>
 
-            <form [formGroup]="createForm" (ngSubmit)="onSaveShift()" class="space-y-4">
-              <div>
-                <label class="block text-xs font-bold text-[#063B39] mb-1">Shift Name <span class="text-rose-500">*</span></label>
-                <input type="text" formControlName="name" placeholder="e.g. Standard General Shift" class="w-full px-3.5 py-2.5 bg-[#F4F8F7] text-xs text-[#063B39] rounded-xl border border-[#DCEBE7] focus:border-[#0E6E68] outline-none font-medium transition-all" />
-              </div>
-
-              <div>
-                <label class="block text-xs font-bold text-[#063B39] mb-1">Code <span class="text-rose-500">*</span></label>
-                <input type="text" formControlName="code" placeholder="e.g. GS-01" class="w-full px-3.5 py-2.5 bg-[#F4F8F7] text-xs text-[#063B39] rounded-xl border border-[#DCEBE7] focus:border-[#0E6E68] outline-none font-medium uppercase font-mono transition-all" />
-              </div>
-
-              <div class="grid grid-cols-2 gap-4">
+            <form [formGroup]="createForm" (ngSubmit)="onSaveShift()" class="flex flex-col flex-1 overflow-hidden">
+              <div class="workora-modal-body space-y-4">
                 <div>
-                  <label class="block text-xs font-bold text-[#063B39] mb-1">Start Time <span class="text-rose-500">*</span></label>
-                  <input type="time" formControlName="startTime" class="w-full px-3.5 py-2.5 bg-[#F4F8F7] text-xs text-[#063B39] rounded-xl border border-[#DCEBE7] focus:border-[#0E6E68] outline-none font-medium transition-all" />
+                  <label class="workora-label">Shift Name <span class="text-rose-500">*</span></label>
+                  <input type="text" formControlName="name" placeholder="e.g. Standard General Shift" class="workora-input !py-2.5" />
                 </div>
 
                 <div>
-                  <label class="block text-xs font-bold text-[#063B39] mb-1">End Time <span class="text-rose-500">*</span></label>
-                  <input type="time" formControlName="endTime" class="w-full px-3.5 py-2.5 bg-[#F4F8F7] text-xs text-[#063B39] rounded-xl border border-[#DCEBE7] focus:border-[#0E6E68] outline-none font-medium transition-all" />
+                  <label class="workora-label">Code <span class="text-rose-500">*</span></label>
+                  <input type="text" formControlName="code" placeholder="e.g. GS-01" class="workora-input !py-2.5 uppercase font-mono" />
                 </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div>
+                    <label class="workora-label">Start Time <span class="text-rose-500">*</span></label>
+                    <input type="time" formControlName="startTime" class="workora-input !py-2.5" />
+                  </div>
+
+                  <div>
+                    <label class="workora-label">End Time <span class="text-rose-500">*</span></label>
+                    <input type="time" formControlName="endTime" class="workora-input !py-2.5" />
+                  </div>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div>
+                    <label class="workora-label">Grace Period (Mins)</label>
+                    <input type="number" formControlName="gracePeriodMinutes" class="workora-input !py-2.5" />
+                  </div>
+
+                  <div>
+                    <label class="workora-label">Break Duration (Mins)</label>
+                    <input type="number" formControlName="breakMinutes" class="workora-input !py-2.5" />
+                  </div>
+                </div>
+
+                <label class="flex items-center gap-2 text-xs font-bold text-[#063B39] cursor-pointer">
+                  <input type="checkbox" formControlName="spansMidnight" class="workora-checkbox" />
+                  <span>Shift Spans Midnight (Night Shift)</span>
+                </label>
               </div>
 
-              <div class="grid grid-cols-2 gap-4">
-                <div>
-                  <label class="block text-xs font-bold text-[#063B39] mb-1">Grace Period (Mins)</label>
-                  <input type="number" formControlName="gracePeriodMinutes" class="w-full px-3.5 py-2.5 bg-[#F4F8F7] text-xs text-[#063B39] rounded-xl border border-[#DCEBE7] focus:border-[#0E6E68] outline-none font-medium transition-all" />
-                </div>
-
-                <div>
-                  <label class="block text-xs font-bold text-[#063B39] mb-1">Break Duration (Mins)</label>
-                  <input type="number" formControlName="breakMinutes" class="w-full px-3.5 py-2.5 bg-[#F4F8F7] text-xs text-[#063B39] rounded-xl border border-[#DCEBE7] focus:border-[#0E6E68] outline-none font-medium transition-all" />
-                </div>
-              </div>
-
-              <label class="flex items-center gap-2 text-xs font-bold text-[#063B39] cursor-pointer">
-                <input type="checkbox" formControlName="spansMidnight" class="rounded text-[#0E6E68]" />
-                <span>Shift Spans Midnight (Night Shift)</span>
-              </label>
-
-              <div class="flex items-center justify-end gap-3 pt-4 border-t border-[#DCEBE7]">
-                <button type="button" (click)="isCreateModalOpen.set(false)" class="px-4 py-2 text-xs font-bold text-slate-600 hover:bg-slate-100 rounded-xl transition-colors cursor-pointer border-none bg-transparent">
+              <div class="workora-modal-footer">
+                <button type="button" (click)="isCreateModalOpen.set(false)" class="workora-btn-secondary">
                   Cancel
                 </button>
-                <button type="submit" [disabled]="createForm.invalid || isSubmitting()" class="inline-flex items-center gap-2 px-5 py-2 rounded-xl bg-[#0E6E68] hover:bg-[#063B39] text-white text-xs font-bold shadow-xs cursor-pointer border-none">
+                <button type="submit" [disabled]="createForm.invalid || isSubmitting()" class="workora-btn-primary">
                   Create Shift
                 </button>
               </div>
@@ -225,9 +229,9 @@ import { WorkoraEmptyStateComponent } from '../../../shared/components/workora-e
 
       <!-- Assign Shift Modal -->
       @if (isAssignModalOpen()) {
-        <div class="fixed inset-0 z-50 bg-[#063B39]/60 backdrop-blur-xs flex items-center justify-center p-4">
-          <div class="bg-white rounded-3xl p-6 sm:p-8 w-full max-w-md border border-[#DCEBE7] shadow-2xl space-y-6 animate-in fade-in zoom-in-95 duration-150">
-            <div class="flex items-center justify-between border-b border-[#DCEBE7] pb-4">
+        <div class="workora-modal-overlay" (click)="isAssignModalOpen.set(false)">
+          <div class="workora-modal-card max-w-md" (click)="$event.stopPropagation()">
+            <div class="workora-modal-header">
               <div class="flex items-center gap-3">
                 <div class="w-10 h-10 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center font-bold">
                   <span class="material-symbols-outlined">person_pin</span>
@@ -237,43 +241,47 @@ import { WorkoraEmptyStateComponent } from '../../../shared/components/workora-e
                   <p class="text-xs text-slate-500">Attach shift schedule to an employee.</p>
                 </div>
               </div>
-              <button (click)="isAssignModalOpen.set(false)" class="text-slate-400 hover:text-slate-600 border-none bg-transparent cursor-pointer">
-                <span class="material-symbols-outlined">close</span>
+              <button (click)="isAssignModalOpen.set(false)" class="text-slate-400 hover:text-slate-600 rounded-lg p-1.5 transition-colors border-none bg-transparent cursor-pointer">
+                <span class="material-symbols-outlined text-xl">close</span>
               </button>
             </div>
 
-            <div class="space-y-4">
+            <div class="workora-modal-body space-y-4">
               <div>
-                <label class="block text-xs font-bold text-[#063B39] mb-1">Select Employee <span class="text-rose-500">*</span></label>
-                <select [(ngModel)]="assignedEmpId" class="w-full px-3.5 py-2.5 bg-[#F4F8F7] text-xs text-[#063B39] rounded-xl border border-[#DCEBE7] focus:border-[#0E6E68] outline-none font-medium transition-all">
-                  @for (emp of employees(); track emp.id) {
-                    <option [ngValue]="emp.id">{{ emp.fullName }} ({{ emp.employeeCode }})</option>
-                  }
-                </select>
+                <label class="workora-label">Select Employee <span class="text-rose-500">*</span></label>
+                <app-workora-select
+                  [(ngModel)]="assignedEmpId"
+                  [options]="employeeOptions()"
+                  [searchable]="true"
+                  searchPlaceholder="Search employee..."
+                  placeholder="Select employee"
+                  icon="person"
+                ></app-workora-select>
               </div>
 
               <div>
-                <label class="block text-xs font-bold text-[#063B39] mb-1">Select Shift <span class="text-rose-500">*</span></label>
-                <select [(ngModel)]="assignedShiftId" class="w-full px-3.5 py-2.5 bg-[#F4F8F7] text-xs text-[#063B39] rounded-xl border border-[#DCEBE7] focus:border-[#0E6E68] outline-none font-medium transition-all">
-                  @for (s of shifts(); track s.id) {
-                    <option [ngValue]="s.id">{{ s.name }} ({{ s.startTime }} - {{ s.endTime }})</option>
-                  }
-                </select>
+                <label class="workora-label">Select Shift <span class="text-rose-500">*</span></label>
+                <app-workora-select
+                  [(ngModel)]="assignedShiftId"
+                  [options]="shiftOptions()"
+                  placeholder="Select shift"
+                  icon="timer"
+                ></app-workora-select>
               </div>
 
               <div>
-                <label class="block text-xs font-bold text-[#063B39] mb-1">Effective From Date <span class="text-rose-500">*</span></label>
-                <input type="date" [(ngModel)]="effectiveFromDate" class="w-full px-3.5 py-2.5 bg-[#F4F8F7] text-xs text-[#063B39] rounded-xl border border-[#DCEBE7] focus:border-[#0E6E68] outline-none font-medium transition-all" />
+                <label class="workora-label">Effective From Date <span class="text-rose-500">*</span></label>
+                <input type="date" [(ngModel)]="effectiveFromDate" class="workora-input !py-2.5" />
               </div>
+            </div>
 
-              <div class="flex items-center justify-end gap-3 pt-4 border-t border-[#DCEBE7]">
-                <button type="button" (click)="isAssignModalOpen.set(false)" class="px-4 py-2 text-xs font-bold text-slate-600 hover:bg-slate-100 rounded-xl transition-colors cursor-pointer border-none bg-transparent">
-                  Cancel
-                </button>
-                <button type="button" (click)="onConfirmAssignShift()" [disabled]="!assignedEmpId || !assignedShiftId || isSubmitting()" class="inline-flex items-center gap-2 px-5 py-2 rounded-xl bg-[#0E6E68] hover:bg-[#063B39] text-white text-xs font-bold shadow-xs cursor-pointer border-none">
-                  Confirm Assignment
-                </button>
-              </div>
+            <div class="workora-modal-footer">
+              <button type="button" (click)="isAssignModalOpen.set(false)" class="workora-btn-secondary">
+                Cancel
+              </button>
+              <button type="button" (click)="onConfirmAssignShift()" [disabled]="!assignedEmpId || !assignedShiftId || isSubmitting()" class="workora-btn-primary">
+                Confirm Assignment
+              </button>
             </div>
           </div>
         </div>
@@ -296,6 +304,24 @@ export class ShiftsPageComponent implements OnInit {
   readonly pageSize = 9;
 
   readonly employees = signal<Employee[]>([]);
+
+  readonly employeeOptions = computed<WorkoraSelectOption<number>[]>(() => {
+    return this.employees().map(emp => ({
+      value: emp.id,
+      label: emp.fullName,
+      sublabel: `${emp.employeeCode} • ${emp.designationTitle || emp.departmentName || 'Staff'}`,
+      icon: 'person'
+    }));
+  });
+
+  readonly shiftOptions = computed<WorkoraSelectOption<number>[]>(() => {
+    return this.shifts().map(s => ({
+      value: s.id,
+      label: s.name,
+      sublabel: `${s.startTime} – ${s.endTime} (${s.code})`,
+      icon: 'timer'
+    }));
+  });
 
   readonly isCreateModalOpen = signal<boolean>(false);
   readonly isAssignModalOpen = signal<boolean>(false);

@@ -11,6 +11,13 @@ export interface TenantOrganization {
   phone?: string | null;
   website?: string | null;
   logoUrl?: string | null;
+  address?: string | null;
+  fiscalYearStartMonth?: number;
+  branchCount?: number;
+  employeeCount?: number;
+  subscriptionPlan?: string;
+  industry?: string | null;
+  primaryContactName?: string | null;
   currency: string;
   isActive: boolean;
   createdAt: string;

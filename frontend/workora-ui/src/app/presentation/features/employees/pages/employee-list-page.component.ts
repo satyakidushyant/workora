@@ -1,4 +1,5 @@
-import { Component, OnInit, inject, signal, ChangeDetectionStrategy } from '@angular/core';
+import { WorkoraSelectComponent, WorkoraSelectOption } from '../../../shared/components/workora-select.component';
+import { Component, OnInit, inject, signal, computed, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { finalize } from 'rxjs/operators';
@@ -34,6 +35,7 @@ type ViewMode = 'grid' | 'table';
   imports: [
     CommonModule,
     FormsModule,
+    WorkoraSelectComponent,
     WorkoraSkeletonComponent,
     WorkoraPaginationComponent,
     WorkoraEmptyStateComponent,
@@ -105,37 +107,40 @@ type ViewMode = 'grid' | 'table';
           <!-- Dropdown Filters -->
           <div class="flex flex-wrap items-center gap-2.5">
             <!-- Department Filter -->
-            <select 
-              [(ngModel)]="selectedDeptFilter" 
-              (ngModelChange)="onFilterChange()"
-              class="px-3 py-2 bg-[#F4F8F7] text-xs text-[#063B39] rounded-xl border border-[#DCEBE7] focus:border-[#0E6E68] outline-none font-medium transition-all">
-              <option [ngValue]="undefined">All Departments</option>
-              @for (d of departments(); track d.id) {
-                <option [ngValue]="d.id">{{ d.name }}</option>
-              }
-            </select>
+            <div class="w-44">
+              <app-workora-select
+                [(ngModel)]="selectedDeptFilter"
+                (selectionChange)="onFilterChange()"
+                [options]="deptFilterOptions()"
+                [clearable]="true"
+                placeholder="All Departments"
+                icon="account_tree"
+              ></app-workora-select>
+            </div>
 
             <!-- Branch Filter -->
-            <select 
-              [(ngModel)]="selectedBranchFilter" 
-              (ngModelChange)="onFilterChange()"
-              class="px-3 py-2 bg-[#F4F8F7] text-xs text-[#063B39] rounded-xl border border-[#DCEBE7] focus:border-[#0E6E68] outline-none font-medium transition-all">
-              <option [ngValue]="undefined">All Branches</option>
-              @for (b of branches(); track b.id) {
-                <option [ngValue]="b.id">{{ b.name }}</option>
-              }
-            </select>
+            <div class="w-40">
+              <app-workora-select
+                [(ngModel)]="selectedBranchFilter"
+                (selectionChange)="onFilterChange()"
+                [options]="branchFilterOptions()"
+                [clearable]="true"
+                placeholder="All Branches"
+                icon="location_on"
+              ></app-workora-select>
+            </div>
 
             <!-- Status Filter -->
-            <select 
-              [(ngModel)]="selectedStatusFilter" 
-              (ngModelChange)="onFilterChange()"
-              class="px-3 py-2 bg-[#F4F8F7] text-xs text-[#063B39] rounded-xl border border-[#DCEBE7] focus:border-[#0E6E68] outline-none font-medium transition-all">
-              <option [ngValue]="undefined">All Statuses</option>
-              <option value="Active">Active</option>
-              <option value="Probation">On Probation</option>
-              <option value="Terminated">Terminated</option>
-            </select>
+            <div class="w-36">
+              <app-workora-select
+                [(ngModel)]="selectedStatusFilter"
+                (selectionChange)="onFilterChange()"
+                [options]="statusFilterOptions"
+                [clearable]="true"
+                placeholder="All Statuses"
+                icon="filter_alt"
+              ></app-workora-select>
+            </div>
 
             <!-- View Toggle -->
             <div class="flex items-center p-1 bg-[#F4F8F7] rounded-xl border border-[#DCEBE7] ml-auto">
@@ -448,6 +453,29 @@ export class EmployeeListPageComponent implements OnInit {
   readonly departments = signal<Department[]>([]);
   readonly designations = signal<Designation[]>([]);
   readonly branches = signal<Branch[]>([]);
+
+  readonly deptFilterOptions = computed<WorkoraSelectOption<number>[]>(() => {
+    return this.departments().map(d => ({
+      value: d.id,
+      label: d.name,
+      icon: 'account_tree'
+    }));
+  });
+
+  readonly branchFilterOptions = computed<WorkoraSelectOption<number>[]>(() => {
+    return this.branches().map(b => ({
+      value: b.id,
+      label: b.name,
+      sublabel: b.location,
+      icon: 'location_on'
+    }));
+  });
+
+  readonly statusFilterOptions: WorkoraSelectOption<string>[] = [
+    { value: 'Active', label: 'Active', icon: 'check_circle', badge: 'Active', badgeClass: 'bg-emerald-50 text-emerald-700 border-emerald-200' },
+    { value: 'Probation', label: 'On Probation', icon: 'pending', badge: 'Probation', badgeClass: 'bg-amber-50 text-amber-700 border-amber-200' },
+    { value: 'Terminated', label: 'Terminated', icon: 'cancel', badge: 'Terminated', badgeClass: 'bg-rose-50 text-rose-700 border-rose-200' }
+  ];
 
   // Modals & Action Signals
   readonly isOnboardingModalOpen = signal<boolean>(false);

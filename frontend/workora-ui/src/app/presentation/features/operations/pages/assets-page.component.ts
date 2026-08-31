@@ -190,9 +190,9 @@ import { WorkoraEmptyStateComponent } from '../../../shared/components/workora-e
 
       <!-- Create Asset Modal -->
       @if (isCreateModalOpen()) {
-        <div class="fixed inset-0 z-50 bg-[#063B39]/60 backdrop-blur-xs flex items-center justify-center p-4">
-          <div class="bg-white rounded-3xl p-6 sm:p-8 w-full max-w-md border border-[#DCEBE7] shadow-2xl space-y-6 animate-in fade-in zoom-in-95 duration-150">
-            <div class="flex items-center justify-between border-b border-[#DCEBE7] pb-4">
+        <div class="workora-modal-overlay" (click)="isCreateModalOpen.set(false)">
+          <div class="workora-modal-card max-w-md" (click)="$event.stopPropagation()">
+            <div class="workora-modal-header">
               <div class="flex items-center gap-3">
                 <div class="w-10 h-10 rounded-xl bg-[#3FA79B]/15 text-[#0E6E68] flex items-center justify-center font-bold">
                   <span class="material-symbols-outlined">devices</span>
@@ -202,45 +202,47 @@ import { WorkoraEmptyStateComponent } from '../../../shared/components/workora-e
                   <p class="text-xs text-slate-500">Record hardware device into inventory.</p>
                 </div>
               </div>
-              <button (click)="isCreateModalOpen.set(false)" class="text-slate-400 hover:text-slate-600 border-none bg-transparent cursor-pointer">
-                <span class="material-symbols-outlined">close</span>
+              <button (click)="isCreateModalOpen.set(false)" class="text-slate-400 hover:text-slate-600 rounded-lg p-1.5 transition-colors border-none bg-transparent cursor-pointer">
+                <span class="material-symbols-outlined text-xl">close</span>
               </button>
             </div>
 
-            <form [formGroup]="createForm" (ngSubmit)="onSaveAsset()" class="space-y-4">
-              <div>
-                <label class="block text-xs font-bold text-[#063B39] mb-1">Asset Name <span class="text-rose-500">*</span></label>
-                <input type="text" formControlName="name" placeholder="e.g. MacBook Pro 16 M3 Max" class="w-full px-3.5 py-2.5 bg-[#F4F8F7] text-xs text-[#063B39] rounded-xl border border-[#DCEBE7] focus:border-[#0E6E68] outline-none font-medium transition-all" />
-              </div>
-
-              <div>
-                <label class="block text-xs font-bold text-[#063B39] mb-1">Asset Tag Code <span class="text-rose-500">*</span></label>
-                <input type="text" formControlName="assetTag" placeholder="e.g. AST-2026-0042" class="w-full px-3.5 py-2.5 bg-[#F4F8F7] text-xs text-[#063B39] rounded-xl border border-[#DCEBE7] focus:border-[#0E6E68] outline-none font-medium uppercase font-mono transition-all" />
-              </div>
-
-              <div class="grid grid-cols-2 gap-4">
+            <form [formGroup]="createForm" (ngSubmit)="onSaveAsset()" class="flex flex-col flex-1 overflow-hidden">
+              <div class="workora-modal-body space-y-4">
                 <div>
-                  <label class="block text-xs font-bold text-[#063B39] mb-1">Category <span class="text-rose-500">*</span></label>
-                  <select formControlName="category" class="w-full px-3.5 py-2.5 bg-[#F4F8F7] text-xs text-[#063B39] rounded-xl border border-[#DCEBE7] focus:border-[#0E6E68] outline-none font-medium transition-all">
-                    <option value="Laptop">Laptop</option>
-                    <option value="Desktop">Desktop</option>
-                    <option value="Monitor">Monitor</option>
-                    <option value="Mobile">Mobile</option>
-                    <option value="Furniture">Furniture</option>
-                  </select>
+                  <label class="workora-label">Asset Name <span class="text-rose-500">*</span></label>
+                  <input type="text" formControlName="name" placeholder="e.g. MacBook Pro 16 M3 Max" class="workora-input !py-2.5" />
                 </div>
 
                 <div>
-                  <label class="block text-xs font-bold text-[#063B39] mb-1">Serial Number</label>
-                  <input type="text" formControlName="serialNumber" placeholder="e.g. C02G90..." class="w-full px-3.5 py-2.5 bg-[#F4F8F7] text-xs text-[#063B39] rounded-xl border border-[#DCEBE7] focus:border-[#0E6E68] outline-none font-medium transition-all" />
+                  <label class="workora-label">Asset Tag Code <span class="text-rose-500">*</span></label>
+                  <input type="text" formControlName="assetTag" placeholder="e.g. AST-2026-0042" class="workora-input !py-2.5 uppercase font-mono" />
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div>
+                    <label class="workora-label">Category <span class="text-rose-500">*</span></label>
+                    <select formControlName="category" class="workora-select">
+                      <option value="Laptop">Laptop</option>
+                      <option value="Desktop">Desktop</option>
+                      <option value="Monitor">Monitor</option>
+                      <option value="Mobile">Mobile</option>
+                      <option value="Furniture">Furniture</option>
+                    </select>
+                  </div>
+
+                  <div>
+                    <label class="workora-label">Serial Number</label>
+                    <input type="text" formControlName="serialNumber" placeholder="e.g. C02G90..." class="workora-input !py-2.5" />
+                  </div>
                 </div>
               </div>
 
-              <div class="flex items-center justify-end gap-3 pt-4 border-t border-[#DCEBE7]">
-                <button type="button" (click)="isCreateModalOpen.set(false)" class="px-4 py-2 text-xs font-bold text-slate-600 hover:bg-slate-100 rounded-xl transition-colors cursor-pointer border-none bg-transparent">
+              <div class="workora-modal-footer">
+                <button type="button" (click)="isCreateModalOpen.set(false)" class="workora-btn-secondary">
                   Cancel
                 </button>
-                <button type="submit" [disabled]="createForm.invalid || isSubmitting()" class="inline-flex items-center gap-2 px-5 py-2 rounded-xl bg-[#0E6E68] hover:bg-[#063B39] text-white text-xs font-bold shadow-xs cursor-pointer border-none">
+                <button type="submit" [disabled]="createForm.invalid || isSubmitting()" class="workora-btn-primary">
                   Register
                 </button>
               </div>
@@ -251,9 +253,9 @@ import { WorkoraEmptyStateComponent } from '../../../shared/components/workora-e
 
       <!-- Assign Modal -->
       @if (isAssignModalOpen()) {
-        <div class="fixed inset-0 z-50 bg-[#063B39]/60 backdrop-blur-xs flex items-center justify-center p-4">
-          <div class="bg-white rounded-3xl p-6 sm:p-8 w-full max-w-md border border-[#DCEBE7] shadow-2xl space-y-6 animate-in fade-in zoom-in-95 duration-150">
-            <div class="flex items-center justify-between border-b border-[#DCEBE7] pb-4">
+        <div class="workora-modal-overlay" (click)="isAssignModalOpen.set(false)">
+          <div class="workora-modal-card max-w-md" (click)="$event.stopPropagation()">
+            <div class="workora-modal-header">
               <div class="flex items-center gap-3">
                 <div class="w-10 h-10 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center font-bold">
                   <span class="material-symbols-outlined">person_pin</span>
@@ -263,32 +265,32 @@ import { WorkoraEmptyStateComponent } from '../../../shared/components/workora-e
                   <p class="text-xs text-slate-500">{{ selectedAsset()?.name }} ({{ selectedAsset()?.assetTag }})</p>
                 </div>
               </div>
-              <button (click)="isAssignModalOpen.set(false)" class="text-slate-400 hover:text-slate-600 border-none bg-transparent cursor-pointer">
-                <span class="material-symbols-outlined">close</span>
+              <button (click)="isAssignModalOpen.set(false)" class="text-slate-400 hover:text-slate-600 rounded-lg p-1.5 transition-colors border-none bg-transparent cursor-pointer">
+                <span class="material-symbols-outlined text-xl">close</span>
               </button>
             </div>
 
-            <div class="space-y-4">
+            <div class="workora-modal-body space-y-4">
               <div>
-                <label class="block text-xs font-bold text-[#063B39] mb-1">Assign to Employee <span class="text-rose-500">*</span></label>
+                <label class="workora-label">Assign to Employee <span class="text-rose-500">*</span></label>
                 <select 
                   [(ngModel)]="assignedEmployeeId"
-                  class="w-full px-3.5 py-2.5 bg-[#F4F8F7] text-xs text-[#063B39] rounded-xl border border-[#DCEBE7] focus:border-[#0E6E68] outline-none font-medium transition-all">
+                  class="workora-select">
                   <option [ngValue]="undefined" disabled>-- Select Employee --</option>
                   @for (emp of employees(); track emp.id) {
                     <option [ngValue]="emp.id">{{ emp.fullName }} ({{ emp.employeeCode }})</option>
                   }
                 </select>
               </div>
+            </div>
 
-              <div class="flex items-center justify-end gap-3 pt-4 border-t border-[#DCEBE7]">
-                <button type="button" (click)="isAssignModalOpen.set(false)" class="px-4 py-2 text-xs font-bold text-slate-600 hover:bg-slate-100 rounded-xl transition-colors cursor-pointer border-none bg-transparent">
-                  Cancel
-                </button>
-                <button type="button" (click)="onConfirmAssign()" [disabled]="!assignedEmployeeId || isSubmitting()" class="inline-flex items-center gap-2 px-5 py-2 rounded-xl bg-[#0E6E68] hover:bg-[#063B39] text-white text-xs font-bold shadow-xs cursor-pointer border-none">
-                  Confirm Checkout
-                </button>
-              </div>
+            <div class="workora-modal-footer">
+              <button type="button" (click)="isAssignModalOpen.set(false)" class="workora-btn-secondary">
+                Cancel
+              </button>
+              <button type="button" (click)="onConfirmAssign()" [disabled]="!assignedEmployeeId || isSubmitting()" class="workora-btn-primary">
+                Confirm Checkout
+              </button>
             </div>
           </div>
         </div>
@@ -296,9 +298,9 @@ import { WorkoraEmptyStateComponent } from '../../../shared/components/workora-e
 
       <!-- Return Modal -->
       @if (isReturnModalOpen()) {
-        <div class="fixed inset-0 z-50 bg-[#063B39]/60 backdrop-blur-xs flex items-center justify-center p-4">
-          <div class="bg-white rounded-3xl p-6 sm:p-8 w-full max-w-md border border-[#DCEBE7] shadow-2xl space-y-6 animate-in fade-in zoom-in-95 duration-150">
-            <div class="flex items-center justify-between border-b border-[#DCEBE7] pb-4">
+        <div class="workora-modal-overlay" (click)="isReturnModalOpen.set(false)">
+          <div class="workora-modal-card max-w-md" (click)="$event.stopPropagation()">
+            <div class="workora-modal-header">
               <div class="flex items-center gap-3">
                 <div class="w-10 h-10 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center font-bold">
                   <span class="material-symbols-outlined">assignment_return</span>
@@ -308,30 +310,30 @@ import { WorkoraEmptyStateComponent } from '../../../shared/components/workora-e
                   <p class="text-xs text-slate-500">{{ selectedAsset()?.name }}</p>
                 </div>
               </div>
-              <button (click)="isReturnModalOpen.set(false)" class="text-slate-400 hover:text-slate-600 border-none bg-transparent cursor-pointer">
-                <span class="material-symbols-outlined">close</span>
+              <button (click)="isReturnModalOpen.set(false)" class="text-slate-400 hover:text-slate-600 rounded-lg p-1.5 transition-colors border-none bg-transparent cursor-pointer">
+                <span class="material-symbols-outlined text-xl">close</span>
               </button>
             </div>
 
-            <div class="space-y-4">
+            <div class="workora-modal-body space-y-4">
               <div>
-                <label class="block text-xs font-bold text-[#063B39] mb-1">Return Condition Note</label>
+                <label class="workora-label">Return Condition Note</label>
                 <input 
                   type="text" 
                   [(ngModel)]="returnCondition" 
                   placeholder="e.g. Good condition, normal wear, formatted"
-                  class="w-full px-3.5 py-2.5 bg-[#F4F8F7] text-xs text-[#063B39] rounded-xl border border-[#DCEBE7] focus:border-[#0E6E68] outline-none font-medium transition-all"
+                  class="workora-input !py-2.5"
                 />
               </div>
+            </div>
 
-              <div class="flex items-center justify-end gap-3 pt-4 border-t border-[#DCEBE7]">
-                <button type="button" (click)="isReturnModalOpen.set(false)" class="px-4 py-2 text-xs font-bold text-slate-600 hover:bg-slate-100 rounded-xl transition-colors cursor-pointer border-none bg-transparent">
-                  Cancel
-                </button>
-                <button type="button" (click)="onConfirmReturn()" [disabled]="isSubmitting()" class="inline-flex items-center gap-2 px-5 py-2 rounded-xl bg-amber-500 hover:bg-amber-600 text-white text-xs font-bold shadow-xs cursor-pointer border-none">
-                  Confirm Return
-                </button>
-              </div>
+            <div class="workora-modal-footer">
+              <button type="button" (click)="isReturnModalOpen.set(false)" class="workora-btn-secondary">
+                Cancel
+              </button>
+              <button type="button" (click)="onConfirmReturn()" [disabled]="isSubmitting()" class="workora-btn-primary">
+                Confirm Return
+              </button>
             </div>
           </div>
         </div>

@@ -334,7 +334,7 @@ export interface TopMenubarTab {
       </aside>
 
       <!-- Main Content Canvas Wrapper -->
-      <div class="flex-1 lg:ml-64 min-h-screen flex flex-col relative z-10 w-full min-w-0">
+      <div class="flex-1 lg:ml-64 min-h-screen flex flex-col w-full min-w-0">
         
         <!-- Top Menubar Header (Role Context, Quick Tabs, Search & User Menu) -->
         <header class="sticky top-0 z-30 bg-white/95 backdrop-blur-md border-b border-[#DCEBE7] h-14 sm:h-16 flex items-center px-3 xs:px-4 sm:px-6 lg:px-8 shadow-xs dashboard-topbar">
@@ -457,7 +457,7 @@ export interface TopMenubarTab {
                 @if (isProfileMenuOpen()) {
                   <div 
                     (click)="$event.stopPropagation()"
-                    class="absolute right-0 top-full mt-2 w-64 bg-white border border-[#DCEBE7] rounded-2xl shadow-xl p-2 z-50 animate-in fade-in slide-in-from-top-2 duration-150"
+                    class="workora-dropdown-menu right-0 top-full mt-2 w-64 shadow-xl p-2 z-50"
                   >
                     <div class="px-3 py-2 border-b border-[#DCEBE7] mb-1">
                       <p class="text-xs font-bold text-[#063B39]">{{ currentUser()?.firstName }} {{ currentUser()?.lastName }}</p>
@@ -473,7 +473,7 @@ export interface TopMenubarTab {
                     <a 
                       routerLink="/change-password" 
                       (click)="isProfileMenuOpen.set(false)"
-                      class="flex items-center gap-2.5 px-3 py-2 text-xs font-semibold text-[#163331] hover:bg-[#DCEBE7]/50 rounded-xl transition-colors cursor-pointer"
+                      class="workora-dropdown-item"
                     >
                       <span class="material-symbols-outlined text-base text-[#0E6E68]">lock_reset</span>
                       <span>Account Security</span>
@@ -483,7 +483,7 @@ export interface TopMenubarTab {
                       <a 
                         routerLink="/users" 
                         (click)="isProfileMenuOpen.set(false)"
-                        class="flex items-center gap-2.5 px-3 py-2 text-xs font-semibold text-[#163331] hover:bg-[#DCEBE7]/50 rounded-xl transition-colors cursor-pointer"
+                        class="workora-dropdown-item"
                       >
                         <span class="material-symbols-outlined text-base text-[#0E6E68]">manage_accounts</span>
                         <span>User Accounts</span>
@@ -494,7 +494,7 @@ export interface TopMenubarTab {
 
                     <button 
                       (click)="onLogout()" 
-                      class="w-full flex items-center gap-2.5 px-3 py-2 text-xs font-bold text-rose-600 hover:bg-rose-50 rounded-xl transition-colors border-none bg-transparent cursor-pointer"
+                      class="workora-dropdown-item-danger"
                     >
                       <span class="material-symbols-outlined text-base">logout</span>
                       <span>Sign Out</span>
@@ -576,9 +576,34 @@ export class DashboardLayoutComponent implements OnInit, AfterViewInit, OnDestro
       requiredRoles: ['SuperAdmin'],
       items: [
         {
-          label: 'Platform Admin Console',
+          label: 'Platform Overview',
+          route: '/dashboard',
+          icon: 'dashboard',
+          exact: true,
+          requiredRoles: ['SuperAdmin']
+        },
+        {
+          label: 'Organizations',
+          route: '/organization',
+          icon: 'domain',
+          requiredRoles: ['SuperAdmin']
+        },
+        {
+          label: 'Subscription Plans',
           route: '/superadmin',
-          icon: 'hub',
+          icon: 'stars',
+          requiredRoles: ['SuperAdmin']
+        },
+        {
+          label: 'Platform Users',
+          route: '/users',
+          icon: 'manage_accounts',
+          requiredRoles: ['SuperAdmin']
+        },
+        {
+          label: 'System Audit Logs',
+          route: '/audit-logs',
+          icon: 'verified_user',
           requiredRoles: ['SuperAdmin']
         }
       ]
@@ -602,10 +627,22 @@ export class DashboardLayoutComponent implements OnInit, AfterViewInit, OnDestro
           requiredPermissions: ['employees.view', 'employees.self']
         },
         {
-          label: 'Organization Structure',
-          route: '/organization',
+          label: 'Branches & Locations',
+          route: '/branches',
+          icon: 'location_city',
+          requiredPermissions: ['branches.view', 'company.view', 'superadmin.access']
+        },
+        {
+          label: 'Departments',
+          route: '/departments',
           icon: 'account_tree',
-          requiredPermissions: ['company.view', 'companies.view', 'branches.view', 'departments.view', 'designations.view']
+          requiredPermissions: ['departments.view', 'company.view', 'superadmin.access']
+        },
+        {
+          label: 'Designations',
+          route: '/designations',
+          icon: 'military_tech',
+          requiredPermissions: ['designations.view', 'company.view', 'superadmin.access']
         },
         {
           label: 'Roles & RBAC',

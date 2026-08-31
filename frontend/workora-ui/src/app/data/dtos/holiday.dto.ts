@@ -14,13 +14,20 @@ export interface HolidayDto {
 
 export interface WeeklyOffPolicyDto {
   companyId: number;
-  mondayOff: boolean;
-  tuesdayOff: boolean;
-  wednesdayOff: boolean;
-  thursdayOff: boolean;
-  fridayOff: boolean;
-  saturdayOff: boolean;
-  sundayOff: boolean;
+  weeklyOffDays?: string;
+  alternateSaturdayOff: boolean;
+  mondayOff?: boolean;
+  tuesdayOff?: boolean;
+  wednesdayOff?: boolean;
+  thursdayOff?: boolean;
+  fridayOff?: boolean;
+  saturdayOff?: boolean;
+  sundayOff?: boolean;
+}
+
+export interface UpdateWeeklyOffPolicyRequestDto {
+  companyId: number;
+  weeklyOffDays: string;
   alternateSaturdayOff: boolean;
 }
 

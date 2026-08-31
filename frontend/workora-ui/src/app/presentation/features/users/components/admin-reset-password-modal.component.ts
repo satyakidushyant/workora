@@ -1,4 +1,4 @@
-import { Component, ElementRef, Input, Output, EventEmitter, OnInit, AfterViewInit, OnDestroy, inject, signal, PLATFORM_ID } from '@angular/core';
+import { Component, ElementRef, Input, Output, EventEmitter, OnInit, AfterViewInit, OnDestroy, inject, signal, PLATFORM_ID, HostListener } from '@angular/core';
 import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { gsap } from 'gsap';
@@ -13,11 +13,11 @@ import { UserSummary, AdminResetPasswordParams } from '../../../../domain/models
   standalone: true,
   imports: [CommonModule, ReactiveFormsModule],
   template: `
-    <div class="fixed inset-0 z-50 flex items-center justify-center p-3.5 xs:p-4 bg-[#063B39]/50 backdrop-blur-xs modal-backdrop">
-      <div class="relative w-full max-w-md p-5 xs:p-6 sm:p-8 bg-white border border-[#DCEBE7] rounded-2xl sm:rounded-3xl shadow-2xl workora-modal-container overflow-hidden modal-box">
+    <div class="workora-modal-overlay" (click)="onCancel()">
+      <div class="workora-modal-card max-w-md" (click)="$event.stopPropagation()">
         
         <!-- Header -->
-        <div class="flex items-center justify-between pb-3.5 sm:pb-4 mb-4 sm:mb-6 border-b border-[#DCEBE7]">
+        <div class="workora-modal-header">
           <div>
             <h2 class="text-lg sm:text-xl font-extrabold text-[#063B39] tracking-tight font-heading">
               Reset User Password
@@ -36,84 +36,85 @@ import { UserSummary, AdminResetPasswordParams } from '../../../../domain/models
         </div>
 
         <!-- Form (with scroll body for small screens) -->
-        <form [formGroup]="resetForm" (ngSubmit)="onSubmit()" class="space-y-4 workora-modal-body">
-          
-          <!-- New Password -->
-          <div class="space-y-1">
-            <label class="workora-label">
-              New Password
-            </label>
-            <div class="relative flex items-center">
-              <input
-                [type]="showPassword() ? 'text' : 'password'"
-                formControlName="newPassword"
-                placeholder="Enter new strong password"
-                class="workora-input text-xs pl-4 pr-11 !py-2.5" 
-                [ngClass]="{'workora-input-error': resetForm.get('newPassword')?.touched && resetForm.get('newPassword')?.invalid}"
-              />
-              <button 
-                type="button"
-                (click)="showPassword.set(!showPassword())"
-                class="material-symbols-outlined text-slate-400 hover:text-[#063B39] transition-colors cursor-pointer text-base absolute right-3.5 flex items-center justify-center border-none bg-transparent"
-                aria-label="Toggle password visibility"
-              >
-                {{ showPassword() ? 'visibility_off' : 'visibility' }}
-              </button>
-            </div>
-            @if (resetForm.get('newPassword')?.touched && resetForm.get('newPassword')?.invalid) {
-              <div class="text-red-600 text-xs mt-1 font-medium">
-                Password must be at least 8 characters long.
+        <form [formGroup]="resetForm" (ngSubmit)="onSubmit()" class="flex flex-col flex-1 overflow-hidden">
+          <div class="workora-modal-body space-y-4">
+            <!-- New Password -->
+            <div class="space-y-1">
+              <label class="workora-label">
+                New Password
+              </label>
+              <div class="relative flex items-center">
+                <input
+                  [type]="showPassword() ? 'text' : 'password'"
+                  formControlName="newPassword"
+                  placeholder="Enter new strong password"
+                  class="workora-input text-xs pl-4 pr-11 !py-2.5" 
+                  [ngClass]="{'workora-input-error': resetForm.get('newPassword')?.touched && resetForm.get('newPassword')?.invalid}"
+                />
+                <button 
+                  type="button"
+                  (click)="showPassword.set(!showPassword())"
+                  class="material-symbols-outlined text-slate-400 hover:text-[#063B39] transition-colors cursor-pointer text-base absolute right-3.5 flex items-center justify-center border-none bg-transparent"
+                  aria-label="Toggle password visibility"
+                >
+                  {{ showPassword() ? 'visibility_off' : 'visibility' }}
+                </button>
               </div>
-            }
-          </div>
-
-          <!-- Confirm Password -->
-          <div class="space-y-1">
-            <label class="workora-label">
-              Confirm New Password
-            </label>
-            <div class="relative flex items-center">
-              <input
-                [type]="showConfirmPassword() ? 'text' : 'password'"
-                formControlName="confirmPassword"
-                placeholder="Re-enter new password"
-                class="workora-input text-xs pl-4 pr-11 !py-2.5" 
-                [ngClass]="{'workora-input-error': resetForm.errors?.['mismatch'] && resetForm.get('confirmPassword')?.touched}"
-              />
-              <button 
-                type="button"
-                (click)="showConfirmPassword.set(!showConfirmPassword())"
-                class="material-symbols-outlined text-slate-400 hover:text-[#063B39] transition-colors cursor-pointer text-base absolute right-3.5 flex items-center justify-center border-none bg-transparent"
-                aria-label="Toggle confirm password visibility"
-              >
-                {{ showConfirmPassword() ? 'visibility_off' : 'visibility' }}
-              </button>
+              @if (resetForm.get('newPassword')?.touched && resetForm.get('newPassword')?.invalid) {
+                <div class="text-red-600 text-xs mt-1 font-medium">
+                  Password must be at least 8 characters long.
+                </div>
+              }
             </div>
-            @if (resetForm.errors?.['mismatch'] && resetForm.get('confirmPassword')?.touched) {
-              <div class="text-red-600 text-xs mt-1 font-medium">
-                Passwords do not match.
-              </div>
-            }
-          </div>
 
-          <!-- Security Notice -->
-          <div class="p-3 rounded-xl bg-[#DCEBE7]/40 border border-[#0E6E68]/15 text-[11px] text-[#063B39] leading-relaxed">
-            <span class="font-bold">Security Note:</span> The user will be required to authenticate with these new credentials on their next session.
+            <!-- Confirm Password -->
+            <div class="space-y-1">
+              <label class="workora-label">
+                Confirm New Password
+              </label>
+              <div class="relative flex items-center">
+                <input
+                  [type]="showConfirmPassword() ? 'text' : 'password'"
+                  formControlName="confirmPassword"
+                  placeholder="Re-enter new password"
+                  class="workora-input text-xs pl-4 pr-11 !py-2.5" 
+                  [ngClass]="{'workora-input-error': resetForm.errors?.['mismatch'] && resetForm.get('confirmPassword')?.touched}"
+                />
+                <button 
+                  type="button"
+                  (click)="showConfirmPassword.set(!showConfirmPassword())"
+                  class="material-symbols-outlined text-slate-400 hover:text-[#063B39] transition-colors cursor-pointer text-base absolute right-3.5 flex items-center justify-center border-none bg-transparent"
+                  aria-label="Toggle confirm password visibility"
+                >
+                  {{ showConfirmPassword() ? 'visibility_off' : 'visibility' }}
+                </button>
+              </div>
+              @if (resetForm.errors?.['mismatch'] && resetForm.get('confirmPassword')?.touched) {
+                <div class="text-red-600 text-xs mt-1 font-medium">
+                  Passwords do not match.
+                </div>
+              }
+            </div>
+
+            <!-- Security Notice -->
+            <div class="p-3 rounded-xl bg-[#DCEBE7]/40 border border-[#0E6E68]/15 text-[11px] text-[#063B39] leading-relaxed">
+              <span class="font-bold">Security Note:</span> The user will be required to authenticate with these new credentials on their next session.
+            </div>
           </div>
 
           <!-- Actions -->
-          <div class="flex items-center justify-end gap-3 pt-5 border-t border-[#DCEBE7] mt-6">
+          <div class="workora-modal-footer">
             <button
               type="button"
               (click)="onCancel()"
               [disabled]="effectiveLoading"
-              class="workora-btn-secondary px-4 py-2 text-xs">
+              class="workora-btn-secondary">
               Cancel
             </button>
             <button
               type="submit"
               [disabled]="resetForm.invalid || effectiveLoading"
-              class="workora-btn-primary px-5 py-2 text-xs disabled:opacity-50 disabled:cursor-not-allowed shadow-teal">
+              class="workora-btn-primary">
               @if (effectiveLoading) {
                 <span class="material-symbols-outlined text-sm animate-spin">progress_activity</span>
                 <span>Resetting...</span>
@@ -158,6 +159,11 @@ export class AdminResetPasswordModalComponent implements OnInit, AfterViewInit, 
   private ctx?: gsap.Context;
   resetForm!: FormGroup;
 
+  @HostListener('document:keydown.escape')
+  onEscape(): void {
+    this.onCancel();
+  }
+
   ngOnInit(): void {
     this.resetForm = this.fb.group({
       newPassword: ['', [Validators.required, Validators.minLength(8)]],
@@ -172,19 +178,7 @@ export class AdminResetPasswordModalComponent implements OnInit, AfterViewInit, 
     if (prefersReducedMotion) return;
 
     this.ctx = gsap.context(() => {
-      gsap.from('.modal-backdrop', {
-        opacity: 0,
-        duration: 0.25,
-        ease: 'power2.out'
-      });
-
-      gsap.from('.modal-box', {
-        scale: 0.95,
-        y: 12,
-        opacity: 0,
-        duration: 0.3,
-        ease: 'power3.out'
-      });
+      // Clean initialization
     }, this.elementRef.nativeElement);
   }
 

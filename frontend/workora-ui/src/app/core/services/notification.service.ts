@@ -22,43 +22,46 @@ export class NotificationService {
 
   /**
    * Displays a success toast notification message.
-   *
-   * @param message Text message to display.
-   * @param duration Optional duration in milliseconds (default 4000ms).
    */
   showSuccess(message: string, duration = 4000): void {
     this.addToast('success', message, undefined, duration);
   }
 
+  success(message: string, duration = 4000): void {
+    this.showSuccess(message, duration);
+  }
+
   /**
    * Displays an error toast notification message with optional field-level validation messages.
-   *
-   * @param message Main error header or summary.
-   * @param details List of specific validation error messages.
-   * @param duration Optional duration in milliseconds (default 5000ms).
    */
   showError(message: string, details?: string[], duration = 5000): void {
     this.addToast('error', message, details, duration);
   }
 
+  error(message: string, details?: string[], duration = 5000): void {
+    this.showError(message, details, duration);
+  }
+
   /**
    * Displays a warning toast notification message.
-   *
-   * @param message Warning detail text.
-   * @param duration Optional duration in milliseconds (default 4500ms).
    */
   showWarning(message: string, duration = 4500): void {
     this.addToast('warning', message, undefined, duration);
   }
 
+  warning(message: string, duration = 4500): void {
+    this.showWarning(message, duration);
+  }
+
   /**
    * Displays an informational toast notification message.
-   *
-   * @param message Info text.
-   * @param duration Optional duration in milliseconds (default 4000ms).
    */
   showInfo(message: string, duration = 4000): void {
     this.addToast('info', message, undefined, duration);
+  }
+
+  info(message: string, duration = 4000): void {
+    this.showInfo(message, duration);
   }
 
   /**

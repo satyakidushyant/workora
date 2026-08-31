@@ -29,7 +29,12 @@ public class GetUpcomingLeavesQueryHandler : IRequestHandler<GetUpcomingLeavesQu
     public async Task<ApiResponse<IReadOnlyList<UpcomingLeaveDto>>> Handle(GetUpcomingLeavesQuery request, CancellationToken ct)
     {
         var targetCompanyId = await _tenantResolutionService.GetCurrentCompanyIdAsync(request.CompanyId, ct);
-        var effectiveCompanyId = targetCompanyId ?? 1;
+        var effectiveCompanyId = targetCompanyId ?? 0;
+
+        if (effectiveCompanyId <= 0 && targetCompanyId.HasValue)
+        {
+            return ApiResponse<IReadOnlyList<UpcomingLeaveDto>>.Success(Array.Empty<UpcomingLeaveDto>());
+        }
 
         var leaves = await _analyticsRepository.GetUpcomingLeavesAsync(effectiveCompanyId, request.DaysAhead, ct);
 

@@ -58,6 +58,15 @@ export class WorkoraPaginationComponent {
   @Input() totalCount = 0;
   @Input() totalPages = 1;
 
+  @Input() set currentPage(v: number) {
+    this.pageNumber = v || 1;
+  }
+
+  @Input() set totalItems(v: number) {
+    this.totalCount = v || 0;
+    this.totalPages = Math.ceil((v || 0) / (this.pageSize || 10)) || 1;
+  }
+
   @Output() pageChange = new EventEmitter<number>();
 
   get startItem(): number {

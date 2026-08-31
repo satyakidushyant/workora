@@ -173,9 +173,9 @@ import { WorkoraConfirmDialogComponent } from '../../../shared/components/workor
 
       <!-- Upload Modal -->
       @if (isUploadModalOpen()) {
-        <div class="fixed inset-0 z-50 bg-[#063B39]/60 backdrop-blur-xs flex items-center justify-center p-4">
-          <div class="bg-white rounded-3xl p-6 sm:p-8 w-full max-w-md border border-[#DCEBE7] shadow-2xl space-y-6 animate-in fade-in zoom-in-95 duration-150">
-            <div class="flex items-center justify-between border-b border-[#DCEBE7] pb-4">
+        <div class="workora-modal-overlay" (click)="isUploadModalOpen.set(false)">
+          <div class="workora-modal-card max-w-md" (click)="$event.stopPropagation()">
+            <div class="workora-modal-header">
               <div class="flex items-center gap-3">
                 <div class="w-10 h-10 rounded-xl bg-[#3FA79B]/15 text-[#0E6E68] flex items-center justify-center font-bold">
                   <span class="material-symbols-outlined">upload_file</span>
@@ -185,50 +185,52 @@ import { WorkoraConfirmDialogComponent } from '../../../shared/components/workor
                   <p class="text-xs text-slate-500">Add official record or compliance attachment.</p>
                 </div>
               </div>
-              <button (click)="isUploadModalOpen.set(false)" class="text-slate-400 hover:text-slate-600 border-none bg-transparent cursor-pointer">
-                <span class="material-symbols-outlined">close</span>
+              <button (click)="isUploadModalOpen.set(false)" class="text-slate-400 hover:text-slate-600 rounded-lg p-1.5 transition-colors border-none bg-transparent cursor-pointer">
+                <span class="material-symbols-outlined text-xl">close</span>
               </button>
             </div>
 
-            <form [formGroup]="uploadForm" (ngSubmit)="onSaveDocument()" class="space-y-4">
-              <div>
-                <label class="block text-xs font-bold text-[#063B39] mb-1">Document Title <span class="text-rose-500">*</span></label>
-                <input 
-                  type="text" 
-                  formControlName="title" 
-                  placeholder="e.g. Employee Handbook 2026"
-                  class="w-full px-3.5 py-2.5 bg-[#F4F8F7] text-xs text-[#063B39] rounded-xl border border-[#DCEBE7] focus:border-[#0E6E68] outline-none font-medium transition-all"
-                />
+            <form [formGroup]="uploadForm" (ngSubmit)="onSaveDocument()" class="flex flex-col flex-1 overflow-hidden">
+              <div class="workora-modal-body space-y-4">
+                <div>
+                  <label class="workora-label">Document Title <span class="text-rose-500">*</span></label>
+                  <input 
+                    type="text" 
+                    formControlName="title" 
+                    placeholder="e.g. Employee Handbook 2026"
+                    class="workora-input !py-2.5"
+                  />
+                </div>
+
+                <div>
+                  <label class="workora-label">Category <span class="text-rose-500">*</span></label>
+                  <select 
+                    formControlName="category"
+                    class="workora-select">
+                    <option value="Policy">Policy</option>
+                    <option value="Contract">Contract</option>
+                    <option value="Identification">Identification</option>
+                    <option value="TaxForm">Tax Form</option>
+                    <option value="Certification">Certification</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label class="workora-label">File Storage URL / Cloudinary Link <span class="text-rose-500">*</span></label>
+                  <input 
+                    type="url" 
+                    formControlName="filePath" 
+                    placeholder="https://res.cloudinary.com/..."
+                    class="workora-input !py-2.5"
+                  />
+                </div>
               </div>
 
-              <div>
-                <label class="block text-xs font-bold text-[#063B39] mb-1">Category <span class="text-rose-500">*</span></label>
-                <select 
-                  formControlName="category"
-                  class="w-full px-3.5 py-2.5 bg-[#F4F8F7] text-xs text-[#063B39] rounded-xl border border-[#DCEBE7] focus:border-[#0E6E68] outline-none font-medium transition-all">
-                  <option value="Policy">Policy</option>
-                  <option value="Contract">Contract</option>
-                  <option value="Identification">Identification</option>
-                  <option value="TaxForm">Tax Form</option>
-                  <option value="Certification">Certification</option>
-                </select>
-              </div>
-
-              <div>
-                <label class="block text-xs font-bold text-[#063B39] mb-1">File Storage URL / Cloudinary Link <span class="text-rose-500">*</span></label>
-                <input 
-                  type="url" 
-                  formControlName="filePath" 
-                  placeholder="https://res.cloudinary.com/..."
-                  class="w-full px-3.5 py-2.5 bg-[#F4F8F7] text-xs text-[#063B39] rounded-xl border border-[#DCEBE7] focus:border-[#0E6E68] outline-none font-medium transition-all"
-                />
-              </div>
-
-              <div class="flex items-center justify-end gap-3 pt-4 border-t border-[#DCEBE7]">
-                <button type="button" (click)="isUploadModalOpen.set(false)" class="px-4 py-2 text-xs font-bold text-slate-600 hover:bg-slate-100 rounded-xl transition-colors cursor-pointer border-none bg-transparent">
+              <div class="workora-modal-footer">
+                <button type="button" (click)="isUploadModalOpen.set(false)" class="workora-btn-secondary">
                   Cancel
                 </button>
-                <button type="submit" [disabled]="uploadForm.invalid || isSubmitting()" class="inline-flex items-center gap-2 px-5 py-2 rounded-xl bg-[#0E6E68] hover:bg-[#063B39] text-white text-xs font-bold shadow-xs cursor-pointer border-none">
+                <button type="submit" [disabled]="uploadForm.invalid || isSubmitting()" class="workora-btn-primary">
                   Save Document
                 </button>
               </div>

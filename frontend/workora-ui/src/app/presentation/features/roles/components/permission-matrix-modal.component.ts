@@ -1,4 +1,4 @@
-import { Component, Input, Output, EventEmitter, OnInit, signal, computed, ChangeDetectionStrategy } from '@angular/core';
+import { Component, Input, Output, EventEmitter, OnInit, signal, computed, ChangeDetectionStrategy, HostListener } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RoleDetail, ModulePermissions, Permission } from '../../../../domain/models/role-permission.model';
@@ -13,8 +13,8 @@ import { RoleDetail, ModulePermissions, Permission } from '../../../../domain/mo
   imports: [CommonModule, FormsModule],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    <div class="fixed inset-0 z-50 bg-[#063B39]/60 backdrop-blur-xs flex items-center justify-center p-3 sm:p-6">
-      <div class="bg-white rounded-3xl w-full max-w-4xl max-h-[90vh] border border-[#DCEBE7] shadow-2xl flex flex-col overflow-hidden animate-in fade-in zoom-in-95 duration-150">
+    <div class="workora-modal-overlay" (click)="closeModal.emit()">
+      <div class="workora-modal-card max-w-4xl max-h-[90vh] flex flex-col" (click)="$event.stopPropagation()">
         
         <!-- Header -->
         <div class="p-5 sm:p-6 border-b border-[#DCEBE7] flex items-center justify-between gap-4 bg-[#F4F8F7]/50 shrink-0">
@@ -184,6 +184,11 @@ export class PermissionMatrixModalComponent implements OnInit {
 
   readonly selectedPermissionIds = signal<Set<number>>(new Set());
   searchFilter = '';
+
+  @HostListener('document:keydown.escape')
+  onEscape(): void {
+    this.closeModal.emit();
+  }
 
   ngOnInit(): void {
     if (this.roleDetail?.permissions) {

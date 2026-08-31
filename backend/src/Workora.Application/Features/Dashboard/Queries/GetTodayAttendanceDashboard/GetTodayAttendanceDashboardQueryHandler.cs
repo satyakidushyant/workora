@@ -29,7 +29,12 @@ public class GetTodayAttendanceDashboardQueryHandler : IRequestHandler<GetTodayA
     public async Task<ApiResponse<TodayAttendanceDashboardDto>> Handle(GetTodayAttendanceDashboardQuery request, CancellationToken ct)
     {
         var targetCompanyId = await _tenantResolutionService.GetCurrentCompanyIdAsync(request.CompanyId, ct);
-        var effectiveCompanyId = targetCompanyId ?? 1;
+        var effectiveCompanyId = targetCompanyId ?? 0;
+
+        if (effectiveCompanyId <= 0 && targetCompanyId.HasValue)
+        {
+            return ApiResponse<TodayAttendanceDashboardDto>.Success(new TodayAttendanceDashboardDto(0, 0, 0, 0));
+        }
 
         var metrics = await _analyticsRepository.GetTodayAttendanceMetricsAsync(effectiveCompanyId, ct);
         var dto = new TodayAttendanceDashboardDto(

@@ -1,4 +1,4 @@
-import { Component, OnInit, inject, signal, ChangeDetectionStrategy } from '@angular/core';
+import { Component, OnInit, inject, signal, ChangeDetectionStrategy, HostListener } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { finalize } from 'rxjs/operators';
@@ -7,6 +7,7 @@ import { TenantOrganization, SubscriptionPlan, SuperAdminMetrics } from '../../.
 import { NotificationService } from '../../../../core/services/notification.service';
 import { WorkoraSkeletonComponent } from '../../../shared/components/workora-skeleton.component';
 import { WorkoraEmptyStateComponent } from '../../../shared/components/workora-empty-state.component';
+import { WorkoraSelectComponent, WorkoraSelectOption } from '../../../shared/components/workora-select.component';
 
 @Component({
   selector: 'app-superadmin-page',
@@ -16,7 +17,8 @@ import { WorkoraEmptyStateComponent } from '../../../shared/components/workora-e
     FormsModule,
     ReactiveFormsModule,
     WorkoraSkeletonComponent,
-    WorkoraEmptyStateComponent
+    WorkoraEmptyStateComponent,
+    WorkoraSelectComponent
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
@@ -40,7 +42,7 @@ import { WorkoraEmptyStateComponent } from '../../../shared/components/workora-e
 
         <button 
           type="button" 
-          (click)="isRegisterModalOpen.set(true)"
+          (click)="openRegisterModal()"
           class="inline-flex items-center gap-2 px-5 py-2.5 bg-[#0E6E68] hover:bg-[#063B39] text-white text-xs font-bold rounded-xl transition-all shadow-md hover:shadow-lg cursor-pointer border-none">
           <span class="material-symbols-outlined text-base">domain_add</span>
           <span>Register Tenant Organization</span>
@@ -158,61 +160,76 @@ import { WorkoraEmptyStateComponent } from '../../../shared/components/workora-e
 
       <!-- Register Org Modal -->
       @if (isRegisterModalOpen()) {
-        <div class="fixed inset-0 z-50 bg-[#063B39]/60 backdrop-blur-xs flex items-center justify-center p-4">
-          <div class="bg-white rounded-3xl p-6 sm:p-8 w-full max-w-lg border border-[#DCEBE7] shadow-2xl space-y-6 animate-in fade-in zoom-in-95 duration-150">
-            <div class="flex items-center justify-between border-b border-[#DCEBE7] pb-4">
-              <div>
-                <h3 class="text-base font-extrabold text-[#063B39] font-heading">Register Tenant Organization</h3>
-                <p class="text-xs text-slate-500">Provision a new enterprise tenant company profile</p>
+        <div class="workora-modal-overlay" (click)="isRegisterModalOpen.set(false)">
+          <div class="workora-modal-card max-w-lg" (click)="$event.stopPropagation()">
+            <div class="workora-modal-header">
+              <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-xl bg-purple-50 text-purple-700 flex items-center justify-center font-bold">
+                  <span class="material-symbols-outlined">domain_add</span>
+                </div>
+                <div>
+                  <h3 class="text-base font-extrabold text-[#063B39] font-heading">Register Tenant Organization</h3>
+                  <p class="text-xs text-slate-500">Provision a new enterprise tenant company profile</p>
+                </div>
               </div>
-              <button type="button" (click)="isRegisterModalOpen.set(false)" class="text-slate-400 hover:text-slate-600 border-none bg-transparent cursor-pointer">
-                <span class="material-symbols-outlined">close</span>
+              <button 
+                type="button" 
+                (click)="isRegisterModalOpen.set(false)" 
+                class="text-slate-400 hover:text-slate-600 rounded-lg p-1.5 transition-colors border-none bg-transparent cursor-pointer">
+                <span class="material-symbols-outlined text-xl">close</span>
               </button>
             </div>
 
-            <form [formGroup]="orgForm" (ngSubmit)="onSaveOrg()" class="space-y-4">
-              <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div class="sm:col-span-2">
-                  <label class="block text-xs font-bold text-[#063B39] mb-1">Company Name *</label>
-                  <input type="text" formControlName="name" placeholder="e.g. JadeQuest Consulting Pvt Ltd" class="w-full px-3.5 py-2.5 bg-[#F4F8F7] text-xs rounded-xl border border-[#DCEBE7] outline-none focus:border-[#0E6E68]" />
-                </div>
+            <form [formGroup]="orgForm" (ngSubmit)="onSaveOrg()" class="flex flex-col flex-1 overflow-hidden">
+              <div class="workora-modal-body space-y-4">
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div class="sm:col-span-2">
+                    <label class="workora-label">Company Legal Name <span class="text-rose-500">*</span></label>
+                    <input type="text" formControlName="name" placeholder="e.g. Acme Technologies India Pvt Ltd" class="workora-input !py-2.5" />
+                  </div>
 
-                <div>
-                  <label class="block text-xs font-bold text-[#063B39] mb-1">Company Code *</label>
-                  <input type="text" formControlName="code" placeholder="e.g. JADEQUEST" class="w-full px-3.5 py-2.5 bg-[#F4F8F7] text-xs rounded-xl border border-[#DCEBE7] outline-none uppercase focus:border-[#0E6E68]" />
-                </div>
+                  <div>
+                    <label class="workora-label">Company Code / Subdomain <span class="text-rose-500">*</span></label>
+                    <input type="text" formControlName="code" placeholder="e.g. ACMETECH" class="workora-input !py-2.5 uppercase font-mono" />
+                  </div>
 
-                <div>
-                  <label class="block text-xs font-bold text-[#063B39] mb-1">Base Currency</label>
-                  <select formControlName="currency" class="w-full px-3.5 py-2.5 bg-[#F4F8F7] text-xs rounded-xl border border-[#DCEBE7] outline-none">
-                    <option value="USD">USD ($)</option>
-                    <option value="EUR">EUR (€)</option>
-                    <option value="GBP">GBP (£)</option>
-                    <option value="INR">INR (₹)</option>
-                    <option value="AED">AED (د.إ)</option>
-                  </select>
-                </div>
+                  <div>
+                    <label class="workora-label">Base Currency <span class="text-rose-500">*</span></label>
+                    <app-workora-select
+                      formControlName="currency"
+                      [options]="currencyOptions"
+                      placeholder="Select Currency"
+                      icon="payments"
+                    ></app-workora-select>
+                  </div>
 
-                <div>
-                  <label class="block text-xs font-bold text-[#063B39] mb-1">Corporate Email</label>
-                  <input type="email" formControlName="email" placeholder="admin@company.com" class="w-full px-3.5 py-2.5 bg-[#F4F8F7] text-xs rounded-xl border border-[#DCEBE7] outline-none" />
-                </div>
+                  <div>
+                    <label class="workora-label">Primary Admin Email</label>
+                    <input type="email" formControlName="email" placeholder="admin@company.com" class="workora-input !py-2.5" />
+                  </div>
 
-                <div>
-                  <label class="block text-xs font-bold text-[#063B39] mb-1">Phone Number</label>
-                  <input type="tel" formControlName="phone" placeholder="+1 (555) 000-0000" class="w-full px-3.5 py-2.5 bg-[#F4F8F7] text-xs rounded-xl border border-[#DCEBE7] outline-none" />
-                </div>
+                  <div>
+                    <label class="workora-label">Phone Number</label>
+                    <input type="tel" formControlName="phone" placeholder="+91 98765 43210" class="workora-input !py-2.5" />
+                  </div>
 
-                <div class="sm:col-span-2">
-                  <label class="block text-xs font-bold text-[#063B39] mb-1">Website</label>
-                  <input type="url" formControlName="website" placeholder="https://company.com" class="w-full px-3.5 py-2.5 bg-[#F4F8F7] text-xs rounded-xl border border-[#DCEBE7] outline-none" />
+                  <div class="sm:col-span-2">
+                    <label class="workora-label">Corporate Website</label>
+                    <input type="url" formControlName="website" placeholder="https://company.com" class="workora-input !py-2.5" />
+                  </div>
                 </div>
               </div>
 
-              <div class="flex items-center justify-end gap-3 pt-4 border-t border-[#DCEBE7]">
-                <button type="button" (click)="isRegisterModalOpen.set(false)" class="px-4 py-2 text-xs font-bold text-slate-600 hover:bg-slate-50 rounded-xl border-none bg-transparent cursor-pointer">Cancel</button>
-                <button type="submit" [disabled]="orgForm.invalid || isSubmitting()" class="px-5 py-2.5 rounded-xl bg-[#0E6E68] hover:bg-[#063B39] disabled:opacity-50 text-white text-xs font-bold border-none cursor-pointer shadow-sm transition-all">
-                  {{ isSubmitting() ? 'Provisioning...' : 'Provision Organization' }}
+              <div class="workora-modal-footer">
+                <button type="button" (click)="isRegisterModalOpen.set(false)" class="workora-btn-secondary">Cancel</button>
+                <button type="submit" [disabled]="orgForm.invalid || isSubmitting()" class="workora-btn-primary">
+                  @if (isSubmitting()) {
+                    <span class="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
+                    <span>Provisioning...</span>
+                  } @else {
+                    <span class="material-symbols-outlined text-base">domain_add</span>
+                    <span>Provision Organization</span>
+                  }
                 </button>
               </div>
             </form>
@@ -235,17 +252,38 @@ export class SuperAdminPageComponent implements OnInit {
   readonly isSubmitting = signal<boolean>(false);
   readonly isRegisterModalOpen = signal<boolean>(false);
 
+  readonly currencyOptions: WorkoraSelectOption<string>[] = [
+    { value: 'INR', label: 'INR (₹)', sublabel: 'Indian Rupee', icon: 'currency_rupee', badge: 'INR', badgeClass: 'bg-emerald-50 text-emerald-700 border-emerald-200' },
+    { value: 'USD', label: 'USD ($)', sublabel: 'US Dollar', icon: 'attach_money', badge: 'USD', badgeClass: 'bg-blue-50 text-blue-700 border-blue-200' },
+    { value: 'EUR', label: 'EUR (€)', sublabel: 'Euro', icon: 'euro', badge: 'EUR', badgeClass: 'bg-purple-50 text-purple-700 border-purple-200' },
+    { value: 'GBP', label: 'GBP (£)', sublabel: 'British Pound', icon: 'currency_pound', badge: 'GBP', badgeClass: 'bg-amber-50 text-amber-700 border-amber-200' },
+    { value: 'AED', label: 'AED (د.إ)', sublabel: 'UAE Dirham', icon: 'payments', badge: 'AED', badgeClass: 'bg-teal-50 text-teal-700 border-teal-200' },
+    { value: 'SGD', label: 'SGD (S$)', sublabel: 'Singapore Dollar', icon: 'payments', badge: 'SGD', badgeClass: 'bg-slate-100 text-slate-700 border-slate-200' }
+  ];
+
   readonly orgForm: FormGroup = this.fb.group({
     name: ['', [Validators.required]],
     code: ['', [Validators.required, Validators.minLength(2), Validators.maxLength(20)]],
-    currency: ['USD', [Validators.required]],
+    currency: ['INR', [Validators.required]],
     email: ['', [Validators.email]],
     phone: [''],
     website: ['']
   });
 
+  @HostListener('document:keydown.escape')
+  onEscape(): void {
+    if (this.isRegisterModalOpen()) {
+      this.isRegisterModalOpen.set(false);
+    }
+  }
+
   ngOnInit(): void {
     this.loadData();
+  }
+
+  openRegisterModal(): void {
+    this.orgForm.reset({ currency: 'INR' });
+    this.isRegisterModalOpen.set(true);
   }
 
   loadData(): void {
@@ -277,7 +315,7 @@ export class SuperAdminPageComponent implements OnInit {
     this.superAdminRepo.registerOrganization({
       name: formVal.name,
       code: formVal.code,
-      currency: formVal.currency || 'USD',
+      currency: formVal.currency || 'INR',
       email: formVal.email || undefined,
       phone: formVal.phone || undefined,
       website: formVal.website || undefined
@@ -286,7 +324,7 @@ export class SuperAdminPageComponent implements OnInit {
     .subscribe({
       next: () => {
         this.isRegisterModalOpen.set(false);
-        this.orgForm.reset({ currency: 'USD' });
+        this.orgForm.reset({ currency: 'INR' });
         this.notificationService.showSuccess('Tenant organization provisioned successfully.');
         this.loadData();
       },

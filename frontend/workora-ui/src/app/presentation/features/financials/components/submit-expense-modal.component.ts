@@ -1,20 +1,21 @@
-import { Component, Input, Output, EventEmitter, inject, OnInit, ChangeDetectionStrategy } from '@angular/core';
+import { Component, Input, Output, EventEmitter, inject, OnInit, ChangeDetectionStrategy, HostListener, computed, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { SubmitExpenseParams } from '../../../../domain/models/expense.model';
 import { Employee } from '../../../../domain/models/employee.model';
+import { WorkoraSelectComponent, WorkoraSelectOption } from '../../../shared/components/workora-select.component';
 
 @Component({
   selector: 'app-submit-expense-modal',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule],
+  imports: [CommonModule, ReactiveFormsModule, WorkoraSelectComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    <div class="fixed inset-0 z-50 bg-[#063B39]/60 backdrop-blur-xs flex items-center justify-center p-4">
-      <div class="bg-white rounded-3xl p-6 sm:p-8 w-full max-w-md border border-[#DCEBE7] shadow-2xl space-y-6 animate-in fade-in zoom-in-95 duration-150">
+    <div class="workora-modal-overlay" (click)="closeModal.emit()">
+      <div class="workora-modal-card max-w-lg" (click)="$event.stopPropagation()">
         
         <!-- Header -->
-        <div class="flex items-center justify-between border-b border-[#DCEBE7] pb-4">
+        <div class="workora-modal-header">
           <div class="flex items-center gap-3">
             <div class="w-10 h-10 rounded-xl bg-[#3FA79B]/15 text-[#0E6E68] flex items-center justify-center font-bold">
               <span class="material-symbols-outlined">receipt</span>
@@ -29,102 +30,101 @@ import { Employee } from '../../../../domain/models/employee.model';
           <button 
             type="button" 
             (click)="closeModal.emit()"
-            class="text-slate-400 hover:text-slate-600 rounded-lg p-1 transition-colors border-none bg-transparent cursor-pointer">
+            class="text-slate-400 hover:text-slate-600 rounded-lg p-1.5 transition-colors border-none bg-transparent cursor-pointer">
             <span class="material-symbols-outlined text-xl">close</span>
           </button>
         </div>
 
         <!-- Form -->
-        <form [formGroup]="form" (ngSubmit)="onSubmit()" class="space-y-4">
-          <div>
-            <label class="block text-xs font-bold text-[#063B39] mb-1">Employee <span class="text-rose-500">*</span></label>
-            <select 
-              formControlName="employeeId"
-              class="w-full px-3.5 py-2.5 bg-[#F4F8F7] text-xs text-[#063B39] rounded-xl border border-[#DCEBE7] focus:border-[#0E6E68] outline-none font-medium transition-all">
-              @for (emp of employees; track emp.id) {
-                <option [ngValue]="emp.id">{{ emp.fullName }} ({{ emp.employeeCode }})</option>
-              }
-            </select>
-          </div>
-
-          <div class="grid grid-cols-2 gap-4">
+        <form [formGroup]="form" (ngSubmit)="onSubmit()" class="flex flex-col flex-1 overflow-hidden">
+          <div class="workora-modal-body space-y-4">
             <div>
-              <label class="block text-xs font-bold text-[#063B39] mb-1">Category <span class="text-rose-500">*</span></label>
-              <select 
-                formControlName="category"
-                class="w-full px-3.5 py-2.5 bg-[#F4F8F7] text-xs text-[#063B39] rounded-xl border border-[#DCEBE7] focus:border-[#0E6E68] outline-none font-medium transition-all">
-                <option value="Travel">Travel &amp; Flights</option>
-                <option value="Meals">Meals &amp; Entertainment</option>
-                <option value="Accommodation">Hotel / Accommodation</option>
-                <option value="Internet">Internet / Phone Bill</option>
-                <option value="OfficeSupplies">Office Supplies &amp; Software</option>
-                <option value="Other">Other</option>
-              </select>
+              <label class="workora-label">Employee <span class="text-rose-500">*</span></label>
+              <app-workora-select
+                formControlName="employeeId"
+                [options]="employeeOptions()"
+                [searchable]="true"
+                searchPlaceholder="Search employee name or code..."
+                placeholder="Choose employee"
+                icon="badge"
+              ></app-workora-select>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label class="workora-label">Category <span class="text-rose-500">*</span></label>
+                <app-workora-select
+                  formControlName="category"
+                  [options]="categoryOptions"
+                  placeholder="Choose category"
+                  icon="category"
+                ></app-workora-select>
+              </div>
+
+              <div>
+                <label class="workora-label">Claim Amount ($) <span class="text-rose-500">*</span></label>
+                <input 
+                  type="number" 
+                  formControlName="amount" 
+                  placeholder="e.g. 120.50"
+                  class="workora-input !py-2.5"
+                />
+              </div>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label class="workora-label">Expense Date <span class="text-rose-500">*</span></label>
+                <input 
+                  type="date" 
+                  formControlName="expenseDate" 
+                  class="workora-input !py-2.5"
+                />
+              </div>
+
+              <div>
+                <label class="workora-label">Merchant / Vendor</label>
+                <input 
+                  type="text" 
+                  formControlName="merchantName" 
+                  placeholder="e.g. Uber / Delta / Hilton"
+                  class="workora-input !py-2.5"
+                />
+              </div>
             </div>
 
             <div>
-              <label class="block text-xs font-bold text-[#063B39] mb-1">Claim Amount ($) <span class="text-rose-500">*</span></label>
-              <input 
-                type="number" 
-                formControlName="amount" 
-                placeholder="e.g. 120.50"
-                class="w-full px-3.5 py-2.5 bg-[#F4F8F7] text-xs text-[#063B39] rounded-xl border border-[#DCEBE7] focus:border-[#0E6E68] outline-none font-medium transition-all"
-              />
-            </div>
-          </div>
-
-          <div class="grid grid-cols-2 gap-4">
-            <div>
-              <label class="block text-xs font-bold text-[#063B39] mb-1">Expense Date <span class="text-rose-500">*</span></label>
-              <input 
-                type="date" 
-                formControlName="expenseDate" 
-                class="w-full px-3.5 py-2.5 bg-[#F4F8F7] text-xs text-[#063B39] rounded-xl border border-[#DCEBE7] focus:border-[#0E6E68] outline-none font-medium transition-all"
-              />
-            </div>
-
-            <div>
-              <label class="block text-xs font-bold text-[#063B39] mb-1">Merchant / Vendor</label>
+              <label class="workora-label">Receipt / Bill URL / Cloud Link <span class="text-rose-500">*</span></label>
               <input 
                 type="text" 
-                formControlName="merchantName" 
-                placeholder="e.g. Uber / Delta / Hilton"
-                class="w-full px-3.5 py-2.5 bg-[#F4F8F7] text-xs text-[#063B39] rounded-xl border border-[#DCEBE7] focus:border-[#0E6E68] outline-none font-medium transition-all"
+                formControlName="receiptUrl" 
+                placeholder="https://storage.workora.com/receipts/bill-01.pdf"
+                class="workora-input !py-2.5"
               />
+            </div>
+
+            <div>
+              <label class="workora-label">Business Justification <span class="text-rose-500">*</span></label>
+              <textarea 
+                formControlName="description" 
+                rows="2" 
+                placeholder="e.g. Client dinner with ACME partner delegation..."
+                class="workora-input !rounded-2xl !py-2.5 resize-none"
+              ></textarea>
             </div>
           </div>
 
-          <div>
-            <label class="block text-xs font-bold text-[#063B39] mb-1">Receipt / Bill URL / Cloud Link <span class="text-rose-500">*</span></label>
-            <input 
-              type="text" 
-              formControlName="receiptUrl" 
-              placeholder="https://storage.workora.com/receipts/bill-01.pdf"
-              class="w-full px-3.5 py-2.5 bg-[#F4F8F7] text-xs text-[#063B39] rounded-xl border border-[#DCEBE7] focus:border-[#0E6E68] outline-none font-medium transition-all"
-            />
-          </div>
-
-          <div>
-            <label class="block text-xs font-bold text-[#063B39] mb-1">Business Justification <span class="text-rose-500">*</span></label>
-            <textarea 
-              formControlName="description" 
-              rows="2" 
-              placeholder="e.g. Client dinner with ACME partner delegation..."
-              class="w-full px-3.5 py-2.5 bg-[#F4F8F7] text-xs text-[#063B39] rounded-xl border border-[#DCEBE7] focus:border-[#0E6E68] outline-none font-medium transition-all resize-none"
-            ></textarea>
-          </div>
-
-          <div class="flex items-center justify-end gap-3 pt-4 border-t border-[#DCEBE7]">
+          <div class="workora-modal-footer">
             <button 
               type="button" 
               (click)="closeModal.emit()"
-              class="px-4 py-2 text-xs font-bold text-slate-600 hover:bg-slate-100 rounded-xl transition-colors cursor-pointer border-none bg-transparent">
+              class="workora-btn-secondary">
               Cancel
             </button>
             <button 
               type="submit" 
               [disabled]="form.invalid || isSubmitting"
-              class="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-[#0E6E68] hover:bg-[#063B39] text-white text-xs font-bold shadow-md hover:shadow-lg disabled:opacity-50 transition-all cursor-pointer border-none">
+              class="workora-btn-primary">
               @if (isSubmitting) {
                 <span class="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
                 <span>Submitting...</span>
@@ -141,13 +141,39 @@ import { Employee } from '../../../../domain/models/employee.model';
   `
 })
 export class SubmitExpenseModalComponent implements OnInit {
-  @Input() employees: Employee[] = [];
+  private readonly _employees = signal<Employee[]>([]);
+
+  @Input() set employees(val: Employee[]) {
+    this._employees.set(val || []);
+    if (val && val.length > 0 && !this.form.get('employeeId')?.value) {
+      this.form.patchValue({ employeeId: val[0].id });
+    }
+  }
+
   @Input() isSubmitting = false;
 
   @Output() closeModal = new EventEmitter<void>();
   @Output() submitExpense = new EventEmitter<SubmitExpenseParams>();
 
   private readonly fb = inject(FormBuilder);
+
+  readonly categoryOptions: WorkoraSelectOption<string>[] = [
+    { value: 'Travel', label: 'Travel & Flights', icon: 'flight', badge: 'Travel', badgeClass: 'bg-blue-50 text-blue-700 border-blue-200' },
+    { value: 'Meals', label: 'Meals & Dining', icon: 'restaurant', badge: 'Meals', badgeClass: 'bg-amber-50 text-amber-700 border-amber-200' },
+    { value: 'Accommodation', label: 'Hotel & Stays', icon: 'hotel', badge: 'Stay', badgeClass: 'bg-purple-50 text-purple-700 border-purple-200' },
+    { value: 'Internet', label: 'Internet / Telecom', icon: 'wifi', badge: 'Telecom', badgeClass: 'bg-emerald-50 text-emerald-700 border-emerald-200' },
+    { value: 'OfficeSupplies', label: 'Office & Tech', icon: 'devices', badge: 'Supplies', badgeClass: 'bg-teal-50 text-teal-700 border-teal-200' },
+    { value: 'Other', label: 'Miscellaneous', icon: 'more_horiz', badge: 'Other', badgeClass: 'bg-slate-100 text-slate-700 border-slate-200' }
+  ];
+
+  readonly employeeOptions = computed<WorkoraSelectOption<number>[]>(() => {
+    return this._employees().map(emp => ({
+      value: emp.id,
+      label: emp.fullName,
+      sublabel: `${emp.employeeCode} • ${emp.designationTitle || emp.departmentName || 'Employee'}`,
+      icon: 'person'
+    }));
+  });
 
   readonly form: FormGroup = this.fb.group({
     employeeId: [null, [Validators.required]],
@@ -159,9 +185,15 @@ export class SubmitExpenseModalComponent implements OnInit {
     description: ['', [Validators.required, Validators.minLength(5)]]
   });
 
+  @HostListener('document:keydown.escape')
+  onEscape(): void {
+    this.closeModal.emit();
+  }
+
   ngOnInit(): void {
-    if (this.employees.length > 0) {
-      this.form.patchValue({ employeeId: this.employees[0].id });
+    const emps = this._employees();
+    if (emps.length > 0 && !this.form.get('employeeId')?.value) {
+      this.form.patchValue({ employeeId: emps[0].id });
     }
   }
 

@@ -1,4 +1,4 @@
-import { Component, Output, EventEmitter, inject, signal, ChangeDetectionStrategy } from '@angular/core';
+import { Component, Output, EventEmitter, inject, signal, ChangeDetectionStrategy, HostListener } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { finalize } from 'rxjs/operators';
@@ -18,11 +18,11 @@ interface ChatMessage {
   imports: [CommonModule, FormsModule],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    <div class="fixed inset-0 z-50 bg-[#063B39]/60 backdrop-blur-xs flex items-center justify-center p-4">
-      <div class="bg-white rounded-3xl w-full max-w-xl border border-[#DCEBE7] shadow-2xl overflow-hidden flex flex-col h-[600px] animate-in fade-in zoom-in-95 duration-150">
+    <div class="workora-modal-overlay" (click)="closeModal.emit()">
+      <div class="workora-modal-card max-w-xl h-[600px] flex flex-col" (click)="$event.stopPropagation()">
         
         <!-- Header -->
-        <div class="p-5 border-b border-[#DCEBE7] bg-[#F4F8F7] flex items-center justify-between">
+        <div class="workora-modal-header">
           <div class="flex items-center gap-3">
             <div class="w-10 h-10 rounded-2xl bg-gradient-to-tr from-[#0E6E68] to-[#3FA79B] text-white flex items-center justify-center font-bold shadow-sm">
               <span class="material-symbols-outlined text-2xl">smart_toy</span>
@@ -37,13 +37,13 @@ interface ChatMessage {
           <button 
             type="button" 
             (click)="closeModal.emit()"
-            class="text-slate-400 hover:text-slate-600 rounded-lg p-1 transition-colors border-none bg-transparent cursor-pointer">
+            class="text-slate-400 hover:text-slate-600 rounded-lg p-1.5 transition-colors border-none bg-transparent cursor-pointer">
             <span class="material-symbols-outlined text-xl">close</span>
           </button>
         </div>
 
         <!-- Chat Message Stream -->
-        <div class="flex-1 p-5 overflow-y-auto space-y-4">
+        <div class="flex-1 p-5 overflow-y-auto space-y-4 custom-scrollbar">
           @for (msg of messages(); track $index) {
             <div 
               [ngClass]="msg.sender === 'user' ? 'justify-end' : 'justify-start'"
@@ -90,19 +90,19 @@ interface ChatMessage {
         </div>
 
         <!-- Input Box -->
-        <div class="p-4 border-t border-[#DCEBE7] bg-white">
+        <div class="p-4 border-t border-[#DCEBE7] bg-white shrink-0">
           <form (ngSubmit)="onSendInput()" class="flex items-center gap-2">
             <input 
               type="text" 
               [(ngModel)]="userInput" 
               name="prompt"
               placeholder="Ask anything (e.g. 'What is my remaining sick leave balance?')..."
-              class="flex-1 px-4 py-2.5 bg-[#F4F8F7] text-xs text-[#063B39] rounded-xl border border-[#DCEBE7] focus:border-[#0E6E68] outline-none font-medium transition-all"
+              class="workora-input flex-1 !py-2.5"
             />
             <button 
               type="submit" 
               [disabled]="!userInput.trim() || isThinking()"
-              class="p-2.5 rounded-xl bg-[#0E6E68] hover:bg-[#063B39] text-white transition-all disabled:opacity-50 cursor-pointer border-none flex items-center justify-center">
+              class="workora-btn-primary !p-2.5 !rounded-xl !min-w-[42px] flex items-center justify-center">
               <span class="material-symbols-outlined text-lg">send</span>
             </button>
           </form>
@@ -127,6 +127,11 @@ export class AiAssistantModalComponent {
       time: new Date()
     }
   ]);
+
+  @HostListener('document:keydown.escape')
+  onEscape(): void {
+    this.closeModal.emit();
+  }
 
   onSendInput(): void {
     if (!this.userInput.trim()) return;

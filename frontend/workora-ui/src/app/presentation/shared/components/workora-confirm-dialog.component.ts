@@ -1,4 +1,4 @@
-import { Component, Input, Output, EventEmitter, ElementRef, AfterViewInit, OnDestroy, inject, PLATFORM_ID } from '@angular/core';
+import { Component, Input, Output, EventEmitter, ElementRef, AfterViewInit, OnDestroy, inject, PLATFORM_ID, HostListener } from '@angular/core';
 import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { gsap } from 'gsap';
 
@@ -14,9 +14,9 @@ import { gsap } from 'gsap';
     @if (isOpen) {
       <div 
         (click)="onBackdropClick($event)"
-        class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#063B39]/50 backdrop-blur-xs dialog-backdrop animate-in fade-in duration-200"
+        class="workora-modal-overlay dialog-backdrop"
       >
-        <div class="relative w-full max-w-md bg-white border border-[#DCEBE7] rounded-3xl p-6 sm:p-7 shadow-2xl overflow-hidden dialog-card">
+        <div class="workora-modal-card max-w-md p-6 sm:p-7 space-y-6" (click)="$event.stopPropagation()">
           
           <!-- Top Icon & Header -->
           <div class="flex items-start gap-4">
@@ -42,12 +42,12 @@ import { gsap } from 'gsap';
           </div>
 
           <!-- Actions Footer -->
-          <div class="flex items-center justify-end gap-3 mt-6 pt-4 border-t border-[#DCEBE7]">
+          <div class="flex items-center justify-end gap-3 pt-4 border-t border-[#DCEBE7]">
             <button 
               type="button" 
               (click)="cancel.emit()" 
               [disabled]="isLoading"
-              class="workora-btn-secondary text-xs px-4 py-2"
+              class="workora-btn-secondary"
             >
               {{ cancelText }}
             </button>
@@ -56,7 +56,6 @@ import { gsap } from 'gsap';
               (click)="confirm.emit()" 
               [disabled]="isLoading"
               [ngClass]="variant === 'danger' ? 'workora-btn-danger' : 'workora-btn-primary'"
-              class="text-xs px-5 py-2"
             >
               @if (isLoading) {
                 <span class="material-symbols-outlined text-base animate-spin">progress_activity</span>
@@ -87,6 +86,13 @@ export class WorkoraConfirmDialogComponent implements AfterViewInit, OnDestroy {
 
   @Output() confirm = new EventEmitter<void>();
   @Output() cancel = new EventEmitter<void>();
+
+  @HostListener('document:keydown.escape')
+  onEscape(): void {
+    if (this.isOpen && !this.isLoading) {
+      this.cancel.emit();
+    }
+  }
 
   get iconName(): string {
     if (this.variant === 'danger') return 'warning';

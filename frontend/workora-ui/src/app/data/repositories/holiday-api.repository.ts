@@ -111,7 +111,8 @@ export class HolidayApiRepository implements IHolidayRepository {
   }
 
   updateWeeklyOffPolicy(policy: WeeklyOffPolicy): Observable<WeeklyOffPolicy> {
-    return this.http.put<ApiResponse<WeeklyOffPolicyDto>>(`${environment.apiUrl}/weekly-offs`, policy).pipe(
+    const payload = HolidayMapper.toWeeklyOffRequestDto(policy);
+    return this.http.put<ApiResponse<WeeklyOffPolicyDto>>(`${environment.apiUrl}/weekly-offs`, payload).pipe(
       map(response => {
         if (!response.isSuccess || !response.data) {
           throw new Error(response.message || 'Failed to update weekly off policy.');

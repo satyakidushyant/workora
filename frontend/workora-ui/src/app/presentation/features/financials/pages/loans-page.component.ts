@@ -150,16 +150,16 @@ import { ApplyLoanModalComponent } from '../components/apply-loan-modal.componen
 
       <!-- Schedule Modal -->
       @if (selectedLoanForSchedule()) {
-        <div class="fixed inset-0 z-50 bg-[#063B39]/60 backdrop-blur-xs flex items-center justify-center p-4">
-          <div class="bg-white rounded-3xl p-6 sm:p-8 w-full max-w-lg border border-[#DCEBE7] shadow-2xl space-y-4 animate-in fade-in zoom-in-95 duration-150">
-            <div class="flex items-center justify-between border-b border-[#DCEBE7] pb-3">
+        <div class="workora-modal-overlay" (click)="selectedLoanForSchedule.set(null)">
+          <div class="workora-modal-card max-w-lg" (click)="$event.stopPropagation()">
+            <div class="workora-modal-header">
               <h3 class="text-sm font-extrabold text-[#063B39]">Monthly EMI Amortization Schedule</h3>
-              <button (click)="selectedLoanForSchedule.set(null)" class="text-slate-400 hover:text-slate-600 border-none bg-transparent cursor-pointer">
-                <span class="material-symbols-outlined">close</span>
+              <button (click)="selectedLoanForSchedule.set(null)" class="text-slate-400 hover:text-slate-600 rounded-lg p-1.5 transition-colors border-none bg-transparent cursor-pointer">
+                <span class="material-symbols-outlined text-xl">close</span>
               </button>
             </div>
 
-            <div class="max-h-64 overflow-y-auto space-y-2 text-xs">
+            <div class="workora-modal-body max-h-64 overflow-y-auto space-y-2 text-xs custom-scrollbar">
               @for (item of schedule(); track item.id) {
                 <div class="p-3 bg-[#F4F8F7] rounded-xl border border-[#DCEBE7] flex items-center justify-between">
                   <div>
@@ -174,6 +174,12 @@ import { ApplyLoanModalComponent } from '../components/apply-loan-modal.componen
                   </div>
                 </div>
               }
+            </div>
+
+            <div class="workora-modal-footer">
+              <button type="button" (click)="selectedLoanForSchedule.set(null)" class="workora-btn-secondary">
+                Close
+              </button>
             </div>
           </div>
         </div>

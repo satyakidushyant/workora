@@ -1,4 +1,4 @@
-import { Component, Input, Output, EventEmitter, inject, OnChanges, SimpleChanges, ChangeDetectionStrategy } from '@angular/core';
+import { Component, Input, Output, EventEmitter, inject, OnChanges, SimpleChanges, ChangeDetectionStrategy, HostListener } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Department, CreateDepartmentParams, UpdateDepartmentParams } from '../../../../domain/models/organization.model';
@@ -12,11 +12,11 @@ import { Department, CreateDepartmentParams, UpdateDepartmentParams } from '../.
   imports: [CommonModule, ReactiveFormsModule],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    <div class="fixed inset-0 z-50 bg-[#063B39]/60 backdrop-blur-xs flex items-center justify-center p-4">
-      <div class="bg-white rounded-3xl p-6 sm:p-8 w-full max-w-lg border border-[#DCEBE7] shadow-2xl space-y-6 animate-in fade-in zoom-in-95 duration-150">
+    <div class="workora-modal-overlay" (click)="closeModal.emit()">
+      <div class="workora-modal-card max-w-lg" (click)="$event.stopPropagation()">
         
         <!-- Modal Header -->
-        <div class="flex items-center justify-between border-b border-[#DCEBE7] pb-4">
+        <div class="workora-modal-header">
           <div class="flex items-center gap-3">
             <div class="w-10 h-10 rounded-xl bg-[#3FA79B]/15 text-[#0E6E68] flex items-center justify-center font-bold">
               <span class="material-symbols-outlined">corporate_fare</span>
@@ -31,69 +31,71 @@ import { Department, CreateDepartmentParams, UpdateDepartmentParams } from '../.
           <button 
             type="button" 
             (click)="closeModal.emit()"
-            class="text-slate-400 hover:text-slate-600 rounded-lg p-1 transition-colors border-none bg-transparent cursor-pointer">
+            class="text-slate-400 hover:text-slate-600 rounded-lg p-1.5 transition-colors border-none bg-transparent cursor-pointer">
             <span class="material-symbols-outlined text-xl">close</span>
           </button>
         </div>
 
         <!-- Form Body -->
-        <form [formGroup]="form" (ngSubmit)="onSubmit()" class="space-y-4">
-          <!-- Department Code & Name -->
-          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div>
-              <label class="block text-xs font-bold text-[#063B39] mb-1">Code <span class="text-rose-500">*</span></label>
-              <input 
-                type="text" 
-                formControlName="code" 
-                placeholder="e.g. ENG, HR, MKT"
-                class="w-full px-3.5 py-2.5 bg-[#F4F8F7] focus:bg-white text-xs text-[#063B39] rounded-xl border border-[#DCEBE7] focus:border-[#0E6E68] outline-none font-medium uppercase tracking-wider transition-all"
-              />
-              @if (form.get('code')?.invalid && form.get('code')?.touched) {
-                <p class="text-[11px] text-rose-500 font-semibold mt-1">Code is required (max 20 chars).</p>
-              }
-            </div>
-
-            <div>
-              <label class="block text-xs font-bold text-[#063B39] mb-1">Department Name <span class="text-rose-500">*</span></label>
-              <input 
-                type="text" 
-                formControlName="name" 
-                placeholder="e.g. Software Engineering"
-                class="w-full px-3.5 py-2.5 bg-[#F4F8F7] focus:bg-white text-xs text-[#063B39] rounded-xl border border-[#DCEBE7] focus:border-[#0E6E68] outline-none font-medium transition-all"
-              />
-              @if (form.get('name')?.invalid && form.get('name')?.touched) {
-                <p class="text-[11px] text-rose-500 font-semibold mt-1">Name is required.</p>
-              }
-            </div>
-          </div>
-
-          <!-- Parent Department Hierarchy -->
-          <div>
-            <label class="block text-xs font-bold text-[#063B39] mb-1">Parent Department (Optional)</label>
-            <select 
-              formControlName="parentDepartmentId"
-              class="w-full px-3.5 py-2.5 bg-[#F4F8F7] focus:bg-white text-xs text-[#063B39] rounded-xl border border-[#DCEBE7] focus:border-[#0E6E68] outline-none font-medium transition-all">
-              <option [ngValue]="null">-- None (Root Department) --</option>
-              @for (dept of availableDepartments; track dept.id) {
-                @if (!department || dept.id !== department.id) {
-                  <option [ngValue]="dept.id">{{ dept.name }} ({{ dept.code }})</option>
+        <form [formGroup]="form" (ngSubmit)="onSubmit()" class="flex flex-col flex-1 overflow-hidden">
+          <div class="workora-modal-body space-y-4">
+            <!-- Department Code & Name -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label class="workora-label">Code <span class="text-rose-500">*</span></label>
+                <input 
+                  type="text" 
+                  formControlName="code" 
+                  placeholder="e.g. ENG, HR, MKT"
+                  class="workora-input !py-2.5 uppercase font-mono tracking-wider"
+                />
+                @if (form.get('code')?.invalid && form.get('code')?.touched) {
+                  <p class="text-[11px] text-rose-500 font-semibold mt-1">Code is required (max 20 chars).</p>
                 }
-              }
-            </select>
+              </div>
+
+              <div>
+                <label class="workora-label">Department Name <span class="text-rose-500">*</span></label>
+                <input 
+                  type="text" 
+                  formControlName="name" 
+                  placeholder="e.g. Software Engineering"
+                  class="workora-input !py-2.5"
+                />
+                @if (form.get('name')?.invalid && form.get('name')?.touched) {
+                  <p class="text-[11px] text-rose-500 font-semibold mt-1">Name is required.</p>
+                }
+              </div>
+            </div>
+
+            <!-- Parent Department Hierarchy -->
+            <div>
+              <label class="workora-label">Parent Department (Optional)</label>
+              <select 
+                formControlName="parentDepartmentId"
+                class="workora-select">
+                <option [ngValue]="null">-- None (Root Department) --</option>
+                @for (dept of availableDepartments; track dept.id) {
+                  @if (!department || dept.id !== department.id) {
+                    <option [ngValue]="dept.id">{{ dept.name }} ({{ dept.code }})</option>
+                  }
+                }
+              </select>
+            </div>
           </div>
 
           <!-- Modal Action Buttons -->
-          <div class="flex items-center justify-end gap-3 pt-4 border-t border-[#DCEBE7]">
+          <div class="workora-modal-footer">
             <button 
               type="button" 
               (click)="closeModal.emit()"
-              class="px-4 py-2.5 text-xs font-bold text-slate-600 hover:bg-slate-100 rounded-xl transition-colors cursor-pointer border-none bg-transparent">
+              class="workora-btn-secondary">
               Cancel
             </button>
             <button 
               type="submit" 
               [disabled]="form.invalid || isSubmitting"
-              class="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-[#0E6E68] hover:bg-[#063B39] text-white text-xs font-bold shadow-md hover:shadow-lg disabled:opacity-50 transition-all cursor-pointer border-none">
+              class="workora-btn-primary">
               @if (isSubmitting) {
                 <span class="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
                 <span>Saving...</span>
@@ -128,6 +130,11 @@ export class DepartmentFormModalComponent implements OnChanges {
     name: ['', [Validators.required, Validators.maxLength(150)]],
     parentDepartmentId: [null]
   });
+
+  @HostListener('document:keydown.escape')
+  onEscape(): void {
+    this.closeModal.emit();
+  }
 
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['department'] && this.department) {

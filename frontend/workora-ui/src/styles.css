@@ -497,40 +497,75 @@ input.workora-input-error:focus {
   box-shadow: 0 0 0 3.5px rgba(239, 68, 68, 0.18) !important;
 }
 
+select,
 select.workora-select,
-.workora-select {
-  background-color: #F2F8F6 !important;
-  border: 1.5px solid rgba(14, 110, 104, 0.32) !important;
-  border-radius: 9999px !important;
-  color: var(--workora-text) !important;
-  padding: 0.625rem 2.5rem 0.625rem 1.25rem !important;
+.workora-select,
+.workora-input select {
+  background-color: #F4F8F7 !important;
+  border: 1.5px solid rgba(14, 110, 104, 0.28) !important;
+  border-radius: 14px !important;
+  color: #063B39 !important;
+  padding: 0.625rem 2.5rem 0.625rem 1rem !important;
   font-size: 0.8125rem !important;
-  font-weight: 500 !important;
+  font-weight: 600 !important;
+  font-family: inherit !important;
   line-height: 1.25rem !important;
   transition: all var(--workora-transition-base) !important;
-  width: 100% !important;
+  width: 100%;
   cursor: pointer !important;
   appearance: none !important;
   -webkit-appearance: none !important;
-  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%230E6E68' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.75' d='M6 8l4 4 4-4'/%3e%3c/svg%3e") !important;
-  background-position: right 1rem center !important;
+  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke-width='2.2' stroke='%230E6E68'%3e%3cpath stroke-linecap='round' stroke-linejoin='round' d='M19.5 8.25l-7.5 7.5-7.5-7.5' /%3e%3c/svg%3e") !important;
+  background-position: right 0.875rem center !important;
   background-repeat: no-repeat !important;
-  background-size: 1.25em 1.25em !important;
+  background-size: 1.125rem 1.125rem !important;
   box-shadow: 0 1px 3px rgba(6, 59, 57, 0.04) !important;
+  outline: none !important;
 }
 
+select:hover,
 select.workora-select:hover,
 .workora-select:hover {
   border-color: #0E6E68 !important;
   background-color: #EBF5F2 !important;
 }
 
+select:focus,
 select.workora-select:focus,
 .workora-select:focus {
   background-color: #FFFFFF !important;
   border-color: #0E6E68 !important;
   outline: none !important;
-  box-shadow: 0 0 0 3.5px rgba(14, 110, 104, 0.20), 0 2px 8px rgba(14, 110, 104, 0.08) !important;
+  box-shadow: 0 0 0 3.5px rgba(14, 110, 104, 0.18), 0 2px 8px rgba(14, 110, 104, 0.08) !important;
+}
+
+select:disabled,
+select.workora-select:disabled,
+.workora-select:disabled {
+  opacity: 0.6 !important;
+  cursor: not-allowed !important;
+  background-color: #ECEFEF !important;
+}
+
+select option,
+select.workora-select option,
+.workora-select option {
+  background-color: #FFFFFF !important;
+  color: #163331 !important;
+  font-weight: 500 !important;
+  font-size: 0.8125rem !important;
+  padding: 0.625rem 1rem !important;
+}
+
+.workora-select-error,
+select.workora-select-error {
+  border-color: var(--workora-error) !important;
+  background-color: #FEF2F2 !important;
+}
+
+.workora-select-error:focus,
+select.workora-select-error:focus {
+  box-shadow: 0 0 0 3.5px rgba(239, 68, 68, 0.18) !important;
 }
 
 .workora-checkbox {
@@ -820,19 +855,188 @@ select.workora-select:focus,
   border-radius: 4px;
 }
 
-/* Responsive Modal Scrollable Body & Viewport Containment */
+/* ==========================================================================
+   Modal & Dialog System (Viewport containment, high z-index, animations)
+   ========================================================================== */
+
+@keyframes modalOverlayFadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes modalCardPopIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95) translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+@keyframes dropdownSlideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-6px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.workora-modal-overlay {
+  position: fixed !important;
+  inset: 0 !important;
+  z-index: 9999 !important;
+  display: flex !important;
+  justify-content: center !important;
+  align-items: flex-start !important;
+  padding: 2.5rem 1rem !important;
+  background-color: rgba(6, 59, 57, 0.65) !important;
+  backdrop-filter: blur(8px) !important;
+  -webkit-backdrop-filter: blur(8px) !important;
+  overflow-y: auto !important;
+  overflow-x: hidden !important;
+  animation: modalOverlayFadeIn 0.2s cubic-bezier(0.16, 1, 0.3, 1) forwards !important;
+}
+
+.workora-modal-card {
+  margin: auto !important;
+  position: relative !important;
+  width: 100% !important;
+  background-color: #ffffff !important;
+  border: 1px solid var(--workora-border) !important;
+  border-radius: 1.5rem !important;
+  box-shadow: 0 25px 50px -12px rgba(6, 59, 57, 0.30), 0 0 0 1px rgba(6, 59, 57, 0.05) !important;
+  display: flex !important;
+  flex-direction: column !important;
+  max-height: calc(100vh - 4rem) !important;
+  max-height: calc(100dvh - 4rem) !important;
+  overflow: hidden !important;
+  animation: modalCardPopIn 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards !important;
+}
+
 .workora-modal-container {
-  max-height: calc(100vh - 2rem);
-  max-height: calc(100dvh - 2rem);
-  display: flex;
-  flex-direction: column;
+  max-height: calc(100vh - 4rem) !important;
+  max-height: calc(100dvh - 4rem) !important;
+  display: flex !important;
+  flex-direction: column !important;
+}
+
+.workora-modal-header {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  padding: 1.25rem 1.75rem !important;
+  border-bottom: 1px solid var(--workora-border) !important;
+  background-color: #ffffff !important;
+  flex-shrink: 0 !important;
 }
 
 .workora-modal-body {
-  overflow-y: auto;
-  -webkit-overflow-scrolling: touch;
-  max-height: calc(100vh - 10rem);
-  max-height: calc(100dvh - 10rem);
+  padding: 1.5rem 1.75rem !important;
+  overflow-y: auto !important;
+  -webkit-overflow-scrolling: touch !important;
+  flex: 1 1 auto !important;
+}
+
+.workora-modal-body::-webkit-scrollbar,
+.custom-scrollbar::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+.workora-modal-body::-webkit-scrollbar-track,
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: #F4F8F7;
+  border-radius: 9999px;
+}
+
+.workora-modal-body::-webkit-scrollbar-thumb,
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: #DCEBE7;
+  border-radius: 9999px;
+}
+
+.workora-modal-body::-webkit-scrollbar-thumb:hover,
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: #0E6E68;
+}
+
+.workora-modal-footer {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: flex-end !important;
+  gap: 0.75rem !important;
+  padding: 1.125rem 1.75rem !important;
+  border-top: 1px solid var(--workora-border) !important;
+  background-color: #FAFCFB !important;
+  flex-shrink: 0 !important;
+}
+
+/* ==========================================================================
+   Dropdown Menus & Popovers
+   ========================================================================== */
+
+.workora-dropdown-menu {
+  position: absolute;
+  background-color: #ffffff;
+  border: 1px solid var(--workora-border);
+  border-radius: var(--workora-radius-lg);
+  box-shadow: 0 16px 36px -4px rgba(6, 59, 57, 0.16), 0 4px 12px rgba(6, 59, 57, 0.08);
+  padding: 0.5rem;
+  z-index: 50;
+  animation: dropdownSlideDown 0.18s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.workora-dropdown-item {
+  display: flex;
+  align-items: center;
+  gap: 0.625rem;
+  width: 100%;
+  padding: 0.5rem 0.75rem;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--workora-text);
+  border-radius: var(--workora-radius-md);
+  transition: all var(--workora-transition-fast);
+  cursor: pointer;
+  border: none;
+  background: transparent;
+  text-align: left;
+}
+
+.workora-dropdown-item:hover {
+  background-color: var(--workora-light-subtle);
+  color: var(--workora-primary-dark);
+}
+
+.workora-dropdown-item-danger {
+  display: flex;
+  align-items: center;
+  gap: 0.625rem;
+  width: 100%;
+  padding: 0.5rem 0.75rem;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--workora-error);
+  border-radius: var(--workora-radius-md);
+  transition: all var(--workora-transition-fast);
+  cursor: pointer;
+  border: none;
+  background: transparent;
+  text-align: left;
+}
+
+.workora-dropdown-item-danger:hover {
+  background-color: #FEF2F2;
+  color: #DC2626;
 }
 
 /* Responsive Fluid Typography */

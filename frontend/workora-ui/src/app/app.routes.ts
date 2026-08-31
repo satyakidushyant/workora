@@ -40,7 +40,31 @@ export const routes: Routes = [
         path: 'organization',
         loadComponent: () => import('./presentation/features/organization/pages/organization-page.component').then(m => m.OrganizationPageComponent),
         canActivate: [rbacGuard],
-        data: { requiredPermissions: ['company.view', 'companies.view', 'branches.view', 'departments.view', 'designations.view'] }
+        data: { requiredPermissions: ['company.view', 'companies.view', 'superadmin.access'] }
+      },
+      {
+        path: 'organization/:id',
+        loadComponent: () => import('./presentation/features/organization/pages/organization-detail-page.component').then(m => m.OrganizationDetailPageComponent),
+        canActivate: [rbacGuard],
+        data: { requiredPermissions: ['company.view', 'companies.view', 'superadmin.access'] }
+      },
+      {
+        path: 'branches',
+        loadComponent: () => import('./presentation/features/organization/pages/branches-page.component').then(m => m.BranchesPageComponent),
+        canActivate: [rbacGuard],
+        data: { requiredPermissions: ['branches.view', 'company.view', 'companies.view', 'superadmin.access'] }
+      },
+      {
+        path: 'departments',
+        loadComponent: () => import('./presentation/features/organization/pages/departments-page.component').then(m => m.DepartmentsPageComponent),
+        canActivate: [rbacGuard],
+        data: { requiredPermissions: ['departments.view', 'company.view', 'companies.view', 'superadmin.access'] }
+      },
+      {
+        path: 'designations',
+        loadComponent: () => import('./presentation/features/organization/pages/designations-page.component').then(m => m.DesignationsPageComponent),
+        canActivate: [rbacGuard],
+        data: { requiredPermissions: ['designations.view', 'company.view', 'companies.view', 'superadmin.access'] }
       },
       {
         path: 'roles',

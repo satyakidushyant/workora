@@ -29,7 +29,12 @@ public class GetHeadcountByDepartmentQueryHandler : IRequestHandler<GetHeadcount
     public async Task<ApiResponse<IReadOnlyList<DepartmentHeadcountDto>>> Handle(GetHeadcountByDepartmentQuery request, CancellationToken ct)
     {
         var targetCompanyId = await _tenantResolutionService.GetCurrentCompanyIdAsync(request.CompanyId, ct);
-        var effectiveCompanyId = targetCompanyId ?? 1;
+        var effectiveCompanyId = targetCompanyId ?? 0;
+
+        if (effectiveCompanyId <= 0 && targetCompanyId.HasValue)
+        {
+            return ApiResponse<IReadOnlyList<DepartmentHeadcountDto>>.Success(Array.Empty<DepartmentHeadcountDto>());
+        }
 
         var dict = await _analyticsRepository.GetHeadcountByDepartmentAsync(effectiveCompanyId, ct);
         var list = dict.Select(kv => new DepartmentHeadcountDto(kv.Key, kv.Value)).ToList();

@@ -2,7 +2,7 @@ import { OrganizationDto, SubscriptionPlanDto, SuperAdminMetricsDto } from '../d
 import { TenantOrganization, SubscriptionPlan, SuperAdminMetrics } from '../../domain/models/superadmin.model';
 
 export class SuperAdminMapper {
-  static fromOrgDto(dto: OrganizationDto): TenantOrganization {
+  static fromOrgDto(dto: any): TenantOrganization {
     return {
       id: dto.id,
       name: dto.name,
@@ -13,8 +13,15 @@ export class SuperAdminMapper {
       phone: dto.phone,
       website: dto.website,
       logoUrl: dto.logoUrl,
-      currency: dto.currency,
-      isActive: dto.isActive,
+      address: dto.address,
+      fiscalYearStartMonth: dto.fiscalYearStartMonth || 4,
+      branchCount: dto.branchCount || 0,
+      employeeCount: dto.employeeCount || 0,
+      subscriptionPlan: dto.subscriptionPlan || 'Growth',
+      industry: dto.industry || 'Information Technology',
+      primaryContactName: dto.primaryContactName || (dto.name ? `${dto.name} Admin` : 'Admin'),
+      currency: dto.currency || 'INR',
+      isActive: dto.isActive !== undefined ? dto.isActive : true,
       createdAt: dto.createdAt
     };
   }

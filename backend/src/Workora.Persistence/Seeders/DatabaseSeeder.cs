@@ -281,33 +281,29 @@ public class DatabaseSeeder
     }
 
     /// <summary>
-    /// Seeds the root SuperAdmin user account(s) (admin@workora.com and superadmin@workora.com) with SuperAdmin role.
+    /// Seeds the single root SuperAdmin user account (admin@workora.com) with the SuperAdmin role.
     /// </summary>
     private async Task SeedSuperAdminUsersAsync()
     {
         var passwordHash = _passwordHasher.HashPassword(DefaultPassword);
         var superAdminRole = await _context.Roles.FirstAsync(r => r.Name == "SuperAdmin");
 
-        var superAdminEmails = new[] { "admin@workora.com", "superadmin@workora.com" };
-
-        foreach (var emailStr in superAdminEmails)
+        var superAdminEmailStr = "admin@workora.com";
+        var email = EmailAddress.Create(superAdminEmailStr);
+        var user = await _context.Users.FirstOrDefaultAsync(u => u.Email == email);
+        if (user == null)
         {
-            var email = EmailAddress.Create(emailStr);
-            var user = await _context.Users.FirstOrDefaultAsync(u => u.Email == email);
-            if (user == null)
-            {
-                _logger.LogInformation("Seeding Root Admin user account: {Email}...", emailStr);
-                user = User.Create(email, "Super", "Admin", passwordHash);
-                await _context.Users.AddAsync(user);
-                await _context.SaveChangesAsync();
-            }
+            _logger.LogInformation("Seeding Root Admin user account: {Email}...", superAdminEmailStr);
+            user = User.Create(email, "Super", "Admin", passwordHash);
+            await _context.Users.AddAsync(user);
+            await _context.SaveChangesAsync();
+        }
 
-            var hasRole = await _context.UserRoles.AnyAsync(ur => ur.UserId == user.Id && ur.RoleId == superAdminRole.Id);
-            if (!hasRole)
-            {
-                await _context.UserRoles.AddAsync(UserRole.Create(user.Id, superAdminRole.Id));
-                await _context.SaveChangesAsync();
-            }
+        var hasRole = await _context.UserRoles.AnyAsync(ur => ur.UserId == user.Id && ur.RoleId == superAdminRole.Id);
+        if (!hasRole)
+        {
+            await _context.UserRoles.AddAsync(UserRole.Create(user.Id, superAdminRole.Id));
+            await _context.SaveChangesAsync();
         }
     }
 }

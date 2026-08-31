@@ -7,6 +7,7 @@ import { Holiday, WeeklyOffPolicy, SaveHolidayParams } from '../../../../domain/
 import { NotificationService } from '../../../../core/services/notification.service';
 import { WorkoraSkeletonComponent } from '../../../shared/components/workora-skeleton.component';
 import { WorkoraEmptyStateComponent } from '../../../shared/components/workora-empty-state.component';
+import { AuthService } from '../../../../core/services/auth.service';
 
 @Component({
   selector: 'app-holidays-page',
@@ -100,39 +101,42 @@ import { WorkoraEmptyStateComponent } from '../../../shared/components/workora-e
           </div>
         </div>
 
-        <!-- Weekly-Off Schedule Card -->
+        <!-- Weekly Off Policy Panel -->
         <div class="space-y-4">
           <div class="bg-white rounded-3xl p-6 border border-[#DCEBE7] shadow-xs space-y-4">
             <div class="border-b border-[#DCEBE7] pb-3">
-              <h3 class="text-sm font-extrabold text-[#063B39]">Weekly Off Schedule</h3>
-              <p class="text-xs text-slate-500">Corporate non-working weekend configuration.</p>
+              <h3 class="text-sm font-extrabold text-[#063B39]">Weekly Off Policy</h3>
+              <p class="text-[11px] text-slate-500">Configure standard weekend off schedule.</p>
             </div>
 
-            <div class="space-y-2 text-xs">
-              <label class="flex items-center justify-between p-2.5 rounded-xl hover:bg-[#F4F8F7] transition-colors cursor-pointer">
-                <span class="font-bold text-[#063B39]">Saturday</span>
-                <input type="checkbox" [(ngModel)]="weeklyOff.saturdayOff" class="rounded text-[#0E6E68]" />
+            <div class="space-y-2.5">
+              <label class="flex items-center gap-3 p-2.5 bg-[#F4F8F7] rounded-xl cursor-pointer hover:bg-[#DCEBE7]/40 transition-colors">
+                <input type="checkbox" [(ngModel)]="weeklyOff.sundayOff" class="w-4 h-4 text-[#0E6E68] rounded border-[#DCEBE7]" />
+                <span class="text-xs font-bold text-[#063B39]">Sunday (Standard Off)</span>
               </label>
 
-              <label class="flex items-center justify-between p-2.5 rounded-xl hover:bg-[#F4F8F7] transition-colors cursor-pointer">
-                <span class="font-bold text-[#063B39]">Sunday</span>
-                <input type="checkbox" [(ngModel)]="weeklyOff.sundayOff" class="rounded text-[#0E6E68]" />
+              <label class="flex items-center gap-3 p-2.5 bg-[#F4F8F7] rounded-xl cursor-pointer hover:bg-[#DCEBE7]/40 transition-colors">
+                <input type="checkbox" [(ngModel)]="weeklyOff.saturdayOff" class="w-4 h-4 text-[#0E6E68] rounded border-[#DCEBE7]" />
+                <span class="text-xs font-bold text-[#063B39]">Saturday (All Saturdays Off)</span>
               </label>
 
-              <label class="flex items-center justify-between p-2.5 rounded-xl hover:bg-[#F4F8F7] transition-colors cursor-pointer">
-                <span class="font-bold text-[#063B39]">Alternate Saturdays Off</span>
-                <input type="checkbox" [(ngModel)]="weeklyOff.alternateSaturdayOff" class="rounded text-[#0E6E68]" />
+              <label class="flex items-center gap-3 p-2.5 bg-[#F4F8F7] rounded-xl cursor-pointer hover:bg-[#DCEBE7]/40 transition-colors">
+                <input type="checkbox" [(ngModel)]="weeklyOff.alternateSaturdayOff" class="w-4 h-4 text-[#0E6E68] rounded border-[#DCEBE7]" />
+                <span class="text-xs font-bold text-[#063B39]">Alternate Saturday Off (2nd &amp; 4th)</span>
+              </label>
+
+              <label class="flex items-center gap-3 p-2.5 bg-[#F4F8F7] rounded-xl cursor-pointer hover:bg-[#DCEBE7]/40 transition-colors">
+                <input type="checkbox" [(ngModel)]="weeklyOff.fridayOff" class="w-4 h-4 text-[#0E6E68] rounded border-[#DCEBE7]" />
+                <span class="text-xs font-bold text-[#063B39]">Friday Off</span>
               </label>
             </div>
 
-            <div class="pt-3 border-t border-[#DCEBE7]">
-              <button 
-                type="button" 
-                (click)="onSaveWeeklyOff()"
-                class="w-full py-2.5 rounded-xl bg-[#0E6E68] hover:bg-[#063B39] text-white text-xs font-bold transition-all shadow-xs cursor-pointer border-none">
-                Save Weekend Policy
-              </button>
-            </div>
+            <button 
+              type="button" 
+              (click)="onSaveWeeklyOff()"
+              class="w-full py-2.5 bg-[#0E6E68] hover:bg-[#063B39] text-white text-xs font-bold rounded-xl transition-all shadow-md cursor-pointer border-none">
+              Save Policy
+            </button>
           </div>
         </div>
 
@@ -140,54 +144,56 @@ import { WorkoraEmptyStateComponent } from '../../../shared/components/workora-e
 
       <!-- Add Holiday Modal -->
       @if (isAddModalOpen()) {
-        <div class="fixed inset-0 z-50 bg-[#063B39]/60 backdrop-blur-xs flex items-center justify-center p-4">
-          <div class="bg-white rounded-3xl p-6 sm:p-8 w-full max-w-md border border-[#DCEBE7] shadow-2xl space-y-6 animate-in fade-in zoom-in-95 duration-150">
-            <div class="flex items-center justify-between border-b border-[#DCEBE7] pb-4">
+        <div class="workora-modal-overlay" (click)="isAddModalOpen.set(false)">
+          <div class="workora-modal-card max-w-md" (click)="$event.stopPropagation()">
+            <div class="workora-modal-header">
               <div class="flex items-center gap-3">
-                <div class="w-10 h-10 rounded-xl bg-[#3FA79B]/15 text-[#0E6E68] flex items-center justify-center font-bold">
-                  <span class="material-symbols-outlined">event</span>
+                <div class="w-9 h-9 rounded-xl bg-[#0E6E68]/10 text-[#0E6E68] flex items-center justify-center">
+                  <span class="material-symbols-outlined text-lg">event_note</span>
                 </div>
                 <div>
                   <h3 class="text-base font-extrabold text-[#063B39] font-heading">Add Annual Holiday</h3>
                   <p class="text-xs text-slate-500">Record public or optional festival date.</p>
                 </div>
               </div>
-              <button (click)="isAddModalOpen.set(false)" class="text-slate-400 hover:text-slate-600 border-none bg-transparent cursor-pointer">
-                <span class="material-symbols-outlined">close</span>
+              <button (click)="isAddModalOpen.set(false)" class="text-slate-400 hover:text-slate-600 rounded-lg p-1.5 transition-colors border-none bg-transparent cursor-pointer">
+                <span class="material-symbols-outlined text-xl">close</span>
               </button>
             </div>
 
-            <form [formGroup]="holidayForm" (ngSubmit)="onSaveHoliday()" class="space-y-4">
-              <div>
-                <label class="block text-xs font-bold text-[#063B39] mb-1">Holiday Name <span class="text-rose-500">*</span></label>
-                <input type="text" formControlName="name" placeholder="e.g. New Year's Day" class="w-full px-3.5 py-2.5 bg-[#F4F8F7] text-xs text-[#063B39] rounded-xl border border-[#DCEBE7] focus:border-[#0E6E68] outline-none font-medium transition-all" />
-              </div>
-
-              <div class="grid grid-cols-2 gap-4">
+            <form [formGroup]="holidayForm" (ngSubmit)="onSaveHoliday()" class="flex flex-col flex-1 overflow-hidden">
+              <div class="workora-modal-body space-y-4">
                 <div>
-                  <label class="block text-xs font-bold text-[#063B39] mb-1">Date <span class="text-rose-500">*</span></label>
-                  <input type="date" formControlName="date" class="w-full px-3.5 py-2.5 bg-[#F4F8F7] text-xs text-[#063B39] rounded-xl border border-[#DCEBE7] focus:border-[#0E6E68] outline-none font-medium transition-all" />
+                  <label class="workora-label">Holiday Name <span class="text-rose-500">*</span></label>
+                  <input type="text" formControlName="name" placeholder="e.g. New Year's Day" class="workora-input !py-2.5" />
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div>
+                    <label class="workora-label">Date <span class="text-rose-500">*</span></label>
+                    <input type="date" formControlName="date" class="workora-input !py-2.5" />
+                  </div>
+
+                  <div>
+                    <label class="workora-label">Type <span class="text-rose-500">*</span></label>
+                    <select formControlName="type" class="workora-select">
+                      <option value="Mandatory">Public / Mandatory</option>
+                      <option value="Optional">Optional / Restricted</option>
+                    </select>
+                  </div>
                 </div>
 
                 <div>
-                  <label class="block text-xs font-bold text-[#063B39] mb-1">Type <span class="text-rose-500">*</span></label>
-                  <select formControlName="type" class="w-full px-3.5 py-2.5 bg-[#F4F8F7] text-xs text-[#063B39] rounded-xl border border-[#DCEBE7] focus:border-[#0E6E68] outline-none font-medium transition-all">
-                    <option value="Mandatory">Public / Mandatory</option>
-                    <option value="Optional">Optional / Restricted</option>
-                  </select>
+                  <label class="workora-label">Description</label>
+                  <input type="text" formControlName="description" placeholder="Optional notes" class="workora-input !py-2.5" />
                 </div>
               </div>
 
-              <div>
-                <label class="block text-xs font-bold text-[#063B39] mb-1">Description</label>
-                <input type="text" formControlName="description" placeholder="Optional notes" class="w-full px-3.5 py-2.5 bg-[#F4F8F7] text-xs text-[#063B39] rounded-xl border border-[#DCEBE7] focus:border-[#0E6E68] outline-none font-medium transition-all" />
-              </div>
-
-              <div class="flex items-center justify-end gap-3 pt-4 border-t border-[#DCEBE7]">
-                <button type="button" (click)="isAddModalOpen.set(false)" class="px-4 py-2 text-xs font-bold text-slate-600 hover:bg-slate-100 rounded-xl transition-colors cursor-pointer border-none bg-transparent">
+              <div class="workora-modal-footer">
+                <button type="button" (click)="isAddModalOpen.set(false)" class="workora-btn-secondary">
                   Cancel
                 </button>
-                <button type="submit" [disabled]="holidayForm.invalid || isSubmitting()" class="inline-flex items-center gap-2 px-5 py-2 rounded-xl bg-[#0E6E68] hover:bg-[#063B39] text-white text-xs font-bold shadow-xs cursor-pointer border-none">
+                <button type="submit" [disabled]="holidayForm.invalid || isSubmitting()" class="workora-btn-primary">
                   Save Holiday
                 </button>
               </div>
@@ -202,6 +208,7 @@ import { WorkoraEmptyStateComponent } from '../../../shared/components/workora-e
 export class HolidaysPageComponent implements OnInit {
   private readonly holidayRepo = inject(HolidayApiRepository);
   private readonly notificationService = inject(NotificationService);
+  private readonly authService = inject(AuthService);
   private readonly fb = inject(FormBuilder);
 
   readonly currentYear = new Date().getFullYear();
@@ -229,14 +236,19 @@ export class HolidaysPageComponent implements OnInit {
     description: ['']
   });
 
+  private get effectiveCompanyId(): number {
+    return this.authService.currentUser()?.companyId || 1;
+  }
+
   ngOnInit(): void {
+    this.weeklyOff.companyId = this.effectiveCompanyId;
     this.loadHolidays();
     this.loadWeeklyOff();
   }
 
   loadHolidays(): void {
     this.isLoading.set(true);
-    this.holidayRepo.getHolidays(this.currentYear)
+    this.holidayRepo.getHolidays(this.currentYear, undefined, this.effectiveCompanyId)
       .pipe(finalize(() => this.isLoading.set(false)))
       .subscribe({
         next: h => this.holidays.set(h),
@@ -245,8 +257,8 @@ export class HolidaysPageComponent implements OnInit {
   }
 
   loadWeeklyOff(): void {
-    this.holidayRepo.getWeeklyOffPolicy(1).subscribe({
-      next: pol => this.weeklyOff = { ...pol },
+    this.holidayRepo.getWeeklyOffPolicy(this.effectiveCompanyId).subscribe({
+      next: pol => this.weeklyOff = { ...pol, companyId: this.effectiveCompanyId },
       error: () => {}
     });
   }
@@ -265,7 +277,7 @@ export class HolidaysPageComponent implements OnInit {
 
     this.isSubmitting.set(true);
     this.holidayRepo.createHoliday({
-      companyId: 1,
+      companyId: this.effectiveCompanyId,
       name: v.name,
       date: v.date,
       type: v.type,
@@ -293,6 +305,7 @@ export class HolidaysPageComponent implements OnInit {
   }
 
   onSaveWeeklyOff(): void {
+    this.weeklyOff.companyId = this.effectiveCompanyId;
     this.holidayRepo.updateWeeklyOffPolicy(this.weeklyOff).subscribe({
       next: () => this.notificationService.showSuccess('Weekend policy saved.'),
       error: err => this.notificationService.showError(err.message || 'Failed to save weekend policy.')

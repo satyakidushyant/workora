@@ -71,7 +71,7 @@ export class SuperAdminApiRepository implements ISuperAdminRepository {
       phone: params.phone || null,
       website: params.website || null,
       fiscalYearStartMonth: params.fiscalYearStartMonth || 1,
-      currency: params.currency || 'USD',
+      currency: (params.currency || 'INR').trim().toUpperCase(),
       address: params.address || null
     };
 

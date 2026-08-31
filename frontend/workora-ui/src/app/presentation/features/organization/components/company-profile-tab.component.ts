@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Company, UpdateCompanyProfileParams } from '../../../../domain/models/organization.model';
 import { NotificationService } from '../../../../core/services/notification.service';
+import { WorkoraSelectComponent, WorkoraSelectOption } from '../../../shared/components/workora-select.component';
 
 /**
  * Presentational component for managing company identity, branding, and fiscal parameters.
@@ -10,7 +11,7 @@ import { NotificationService } from '../../../../core/services/notification.serv
 @Component({
   selector: 'app-company-profile-tab',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule],
+  imports: [CommonModule, ReactiveFormsModule, WorkoraSelectComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="space-y-6">
@@ -44,7 +45,7 @@ import { NotificationService } from '../../../../core/services/notification.serv
                 }
               </div>
               <p class="text-xs text-slate-500 mt-1 font-medium">
-                Established {{ company?.createdAt | date:'mediumDate' }} • Currency: <span class="font-bold text-[#0E6E68]">{{ company?.currency || 'USD' }}</span>
+                Established {{ company?.createdAt | date:'mediumDate' }} • Currency: <span class="font-bold text-[#0E6E68]">{{ company?.currency || 'INR' }}</span>
               </p>
             </div>
           </div>
@@ -76,7 +77,7 @@ import { NotificationService } from '../../../../core/services/notification.serv
             <input 
               type="text" 
               formControlName="name" 
-              placeholder="e.g. Workora Global Inc."
+              placeholder="e.g. Acme Technologies India Pvt Ltd"
               class="w-full px-3.5 py-2.5 bg-[#F4F8F7] focus:bg-white text-xs text-[#063B39] rounded-xl border border-[#DCEBE7] focus:border-[#0E6E68] focus:ring-2 focus:ring-[#0E6E68]/15 outline-none font-medium transition-all"
             />
             @if (form.get('name')?.invalid && form.get('name')?.touched) {
@@ -90,7 +91,7 @@ import { NotificationService } from '../../../../core/services/notification.serv
             <input 
               type="text" 
               formControlName="registrationNumber" 
-              placeholder="e.g. U72200MH2023PTC123456"
+              placeholder="e.g. U72200KA2023PTC123456"
               class="w-full px-3.5 py-2.5 bg-[#F4F8F7] focus:bg-white text-xs text-[#063B39] rounded-xl border border-[#DCEBE7] focus:border-[#0E6E68] focus:ring-2 focus:ring-[#0E6E68]/15 outline-none font-medium transition-all"
             />
           </div>
@@ -101,7 +102,7 @@ import { NotificationService } from '../../../../core/services/notification.serv
             <input 
               type="text" 
               formControlName="taxId" 
-              placeholder="e.g. 27AAAAA0000A1Z5"
+              placeholder="e.g. 29AAAAA0000A1Z5"
               class="w-full px-3.5 py-2.5 bg-[#F4F8F7] focus:bg-white text-xs text-[#063B39] rounded-xl border border-[#DCEBE7] focus:border-[#0E6E68] focus:ring-2 focus:ring-[#0E6E68]/15 outline-none font-medium transition-all"
             />
           </div>
@@ -112,7 +113,7 @@ import { NotificationService } from '../../../../core/services/notification.serv
             <input 
               type="email" 
               formControlName="email" 
-              placeholder="e.g. contact@workora.io"
+              placeholder="e.g. contact@company.in"
               class="w-full px-3.5 py-2.5 bg-[#F4F8F7] focus:bg-white text-xs text-[#063B39] rounded-xl border border-[#DCEBE7] focus:border-[#0E6E68] focus:ring-2 focus:ring-[#0E6E68]/15 outline-none font-medium transition-all"
             />
           </div>
@@ -123,7 +124,7 @@ import { NotificationService } from '../../../../core/services/notification.serv
             <input 
               type="tel" 
               formControlName="phone" 
-              placeholder="e.g. +1 (555) 019-2834"
+              placeholder="e.g. +91 80 1234 5678"
               class="w-full px-3.5 py-2.5 bg-[#F4F8F7] focus:bg-white text-xs text-[#063B39] rounded-xl border border-[#DCEBE7] focus:border-[#0E6E68] focus:ring-2 focus:ring-[#0E6E68]/15 outline-none font-medium transition-all"
             />
           </div>
@@ -134,7 +135,7 @@ import { NotificationService } from '../../../../core/services/notification.serv
             <input 
               type="url" 
               formControlName="website" 
-              placeholder="e.g. https://workora.io"
+              placeholder="e.g. https://company.in"
               class="w-full px-3.5 py-2.5 bg-[#F4F8F7] focus:bg-white text-xs text-[#063B39] rounded-xl border border-[#DCEBE7] focus:border-[#0E6E68] focus:ring-2 focus:ring-[#0E6E68]/15 outline-none font-medium transition-all"
             />
           </div>
@@ -142,29 +143,23 @@ import { NotificationService } from '../../../../core/services/notification.serv
           <!-- Currency -->
           <div>
             <label class="block text-xs font-bold text-[#063B39] mb-1.5">Default Currency <span class="text-rose-500">*</span></label>
-            <select 
-              formControlName="currency" 
-              class="w-full px-3.5 py-2.5 bg-[#F4F8F7] focus:bg-white text-xs text-[#063B39] rounded-xl border border-[#DCEBE7] focus:border-[#0E6E68] focus:ring-2 focus:ring-[#0E6E68]/15 outline-none font-medium transition-all">
-              <option value="USD">USD - US Dollar ($)</option>
-              <option value="INR">INR - Indian Rupee (₹)</option>
-              <option value="EUR">EUR - Euro (€)</option>
-              <option value="GBP">GBP - British Pound (£)</option>
-              <option value="AED">AED - UAE Dirham (د.إ)</option>
-              <option value="SGD">SGD - Singapore Dollar (S$)</option>
-            </select>
+            <app-workora-select
+              formControlName="currency"
+              [options]="currencyOptions"
+              placeholder="Choose Currency"
+              icon="payments"
+            ></app-workora-select>
           </div>
 
           <!-- Fiscal Year Start Month -->
           <div>
             <label class="block text-xs font-bold text-[#063B39] mb-1.5">Fiscal Year Start Month <span class="text-rose-500">*</span></label>
-            <select 
-              formControlName="fiscalYearStartMonth" 
-              class="w-full px-3.5 py-2.5 bg-[#F4F8F7] focus:bg-white text-xs text-[#063B39] rounded-xl border border-[#DCEBE7] focus:border-[#0E6E68] focus:ring-2 focus:ring-[#0E6E68]/15 outline-none font-medium transition-all">
-              <option [value]="1">January</option>
-              <option [value]="4">April (Common in India/UK)</option>
-              <option [value]="7">July</option>
-              <option [value]="10">October</option>
-            </select>
+            <app-workora-select
+              formControlName="fiscalYearStartMonth"
+              [options]="fiscalYearOptions"
+              placeholder="Choose Fiscal Start Month"
+              icon="calendar_month"
+            ></app-workora-select>
           </div>
 
           <!-- Head Office Address -->
@@ -173,7 +168,7 @@ import { NotificationService } from '../../../../core/services/notification.serv
             <textarea 
               formControlName="address" 
               rows="3" 
-              placeholder="e.g. 100 Enterprise Way, Suite 400, San Francisco, CA 94107"
+              placeholder="e.g. Brigade Gateway, Malleshwaram, Bengaluru, Karnataka 560055"
               class="w-full px-3.5 py-2.5 bg-[#F4F8F7] focus:bg-white text-xs text-[#063B39] rounded-xl border border-[#DCEBE7] focus:border-[#0E6E68] focus:ring-2 focus:ring-[#0E6E68]/15 outline-none font-medium transition-all resize-none"
             ></textarea>
           </div>
@@ -197,38 +192,40 @@ import { NotificationService } from '../../../../core/services/notification.serv
 
       <!-- Logo Update Modal -->
       @if (isLogoModalOpen()) {
-        <div class="fixed inset-0 z-50 bg-[#063B39]/60 backdrop-blur-xs flex items-center justify-center p-4">
-          <div class="bg-white rounded-3xl p-6 w-full max-w-md border border-[#DCEBE7] shadow-2xl space-y-5 animate-in fade-in zoom-in-95 duration-150">
-            <div class="flex items-center justify-between">
+        <div class="workora-modal-overlay" (click)="isLogoModalOpen.set(false)">
+          <div class="workora-modal-card max-w-md" (click)="$event.stopPropagation()">
+            <div class="workora-modal-header">
               <h3 class="text-base font-extrabold text-[#063B39]">Update Company Logo</h3>
-              <button (click)="isLogoModalOpen.set(false)" class="text-slate-400 hover:text-slate-600 border-none bg-transparent cursor-pointer">
-                <span class="material-symbols-outlined">close</span>
+              <button (click)="isLogoModalOpen.set(false)" class="text-slate-400 hover:text-slate-600 rounded-lg p-1.5 transition-colors border-none bg-transparent cursor-pointer">
+                <span class="material-symbols-outlined text-xl">close</span>
               </button>
             </div>
 
-            <div>
-              <label class="block text-xs font-bold text-[#063B39] mb-1.5">Direct Image URL</label>
-              <input 
-                type="url" 
-                #logoInput
-                [value]="company?.logoUrl || ''"
-                placeholder="https://res.cloudinary.com/..."
-                class="w-full px-3.5 py-2.5 bg-[#F4F8F7] focus:bg-white text-xs text-[#063B39] rounded-xl border border-[#DCEBE7] focus:border-[#0E6E68] outline-none font-medium transition-all"
-              />
-              <p class="text-[11px] text-slate-400 mt-1">Provide a HTTPS image URL hosted on CDN or Cloudinary.</p>
+            <div class="workora-modal-body space-y-4">
+              <div>
+                <label class="workora-label">Direct Image URL</label>
+                <input 
+                  type="url" 
+                  #logoInput
+                  [value]="company?.logoUrl || ''"
+                  placeholder="https://res.cloudinary.com/..."
+                  class="workora-input !py-2.5"
+                />
+                <p class="text-[11px] text-slate-400 mt-1">Provide a HTTPS image URL hosted on CDN or Cloudinary.</p>
+              </div>
             </div>
 
-            <div class="flex items-center justify-end gap-3 pt-2">
+            <div class="workora-modal-footer">
               <button 
                 type="button" 
                 (click)="isLogoModalOpen.set(false)"
-                class="px-4 py-2 text-xs font-bold text-slate-600 hover:bg-slate-100 rounded-xl transition-colors cursor-pointer border-none bg-transparent">
+                class="workora-btn-secondary">
                 Cancel
               </button>
               <button 
                 type="button" 
                 (click)="onSaveLogo(logoInput.value)"
-                class="px-5 py-2 text-xs font-bold text-white bg-[#0E6E68] hover:bg-[#063B39] rounded-xl transition-colors shadow-xs cursor-pointer border-none">
+                class="workora-btn-primary">
                 Update Logo
               </button>
             </div>
@@ -247,6 +244,22 @@ export class CompanyProfileTabComponent implements OnChanges {
   private readonly fb = inject(FormBuilder);
   readonly isLogoModalOpen = signal<boolean>(false);
 
+  readonly currencyOptions: WorkoraSelectOption<string>[] = [
+    { value: 'INR', label: 'INR (₹)', sublabel: 'Indian Rupee', icon: 'currency_rupee', badge: 'INR', badgeClass: 'bg-emerald-50 text-emerald-700 border-emerald-200' },
+    { value: 'USD', label: 'USD ($)', sublabel: 'US Dollar', icon: 'attach_money', badge: 'USD', badgeClass: 'bg-blue-50 text-blue-700 border-blue-200' },
+    { value: 'EUR', label: 'EUR (€)', sublabel: 'Euro', icon: 'euro', badge: 'EUR', badgeClass: 'bg-purple-50 text-purple-700 border-purple-200' },
+    { value: 'GBP', label: 'GBP (£)', sublabel: 'British Pound', icon: 'currency_pound', badge: 'GBP', badgeClass: 'bg-amber-50 text-amber-700 border-amber-200' },
+    { value: 'AED', label: 'AED (د.إ)', sublabel: 'UAE Dirham', icon: 'payments', badge: 'AED', badgeClass: 'bg-teal-50 text-teal-700 border-teal-200' },
+    { value: 'SGD', label: 'SGD (S$)', sublabel: 'Singapore Dollar', icon: 'payments', badge: 'SGD', badgeClass: 'bg-slate-100 text-slate-700 border-slate-200' }
+  ];
+
+  readonly fiscalYearOptions: WorkoraSelectOption<number>[] = [
+    { value: 4, label: 'April', sublabel: 'Standard India / UK Financial Year', icon: 'calendar_month', badge: 'India', badgeClass: 'bg-emerald-50 text-emerald-700 border-emerald-200' },
+    { value: 1, label: 'January', sublabel: 'Calendar Year (Jan - Dec)', icon: 'calendar_month', badge: 'US/Global', badgeClass: 'bg-blue-50 text-blue-700 border-blue-200' },
+    { value: 7, label: 'July', sublabel: 'Australia / Q3 Financial Year', icon: 'calendar_month' },
+    { value: 10, label: 'October', sublabel: 'Q4 Financial Year', icon: 'calendar_month' }
+  ];
+
   readonly form: FormGroup = this.fb.group({
     name: ['', [Validators.required, Validators.maxLength(150)]],
     registrationNumber: [''],
@@ -254,8 +267,8 @@ export class CompanyProfileTabComponent implements OnChanges {
     email: ['', [Validators.email]],
     phone: [''],
     website: [''],
-    fiscalYearStartMonth: [1, [Validators.required]],
-    currency: ['USD', [Validators.required]],
+    fiscalYearStartMonth: [4, [Validators.required]],
+    currency: ['INR', [Validators.required]],
     address: ['']
   });
 
@@ -268,8 +281,8 @@ export class CompanyProfileTabComponent implements OnChanges {
         email: this.company.email || '',
         phone: this.company.phone || '',
         website: this.company.website || '',
-        fiscalYearStartMonth: this.company.fiscalYearStartMonth || 1,
-        currency: this.company.currency || 'USD',
+        fiscalYearStartMonth: this.company.fiscalYearStartMonth || 4,
+        currency: this.company.currency || 'INR',
         address: this.company.address || ''
       });
     }

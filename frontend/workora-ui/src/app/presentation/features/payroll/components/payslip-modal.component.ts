@@ -1,4 +1,4 @@
-import { Component, Input, Output, EventEmitter, ChangeDetectionStrategy } from '@angular/core';
+import { Component, Input, Output, EventEmitter, ChangeDetectionStrategy, HostListener } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Payslip } from '../../../../domain/models/payroll.model';
 
@@ -8,11 +8,11 @@ import { Payslip } from '../../../../domain/models/payroll.model';
   imports: [CommonModule],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    <div class="fixed inset-0 z-50 bg-[#063B39]/60 backdrop-blur-xs flex items-center justify-center p-4 overflow-y-auto">
-      <div class="bg-white rounded-3xl p-6 sm:p-8 w-full max-w-2xl border border-[#DCEBE7] shadow-2xl space-y-6 my-8 animate-in fade-in zoom-in-95 duration-150">
+    <div class="workora-modal-overlay" (click)="closeModal.emit()">
+      <div class="workora-modal-card max-w-2xl" (click)="$event.stopPropagation()">
         
         <!-- Header & Action Bar -->
-        <div class="flex items-center justify-between border-b border-[#DCEBE7] pb-4">
+        <div class="workora-modal-header">
           <div class="flex items-center gap-3">
             <div class="w-10 h-10 rounded-xl bg-[#3FA79B]/15 text-[#0E6E68] flex items-center justify-center font-bold">
               <span class="material-symbols-outlined">receipt_long</span>
@@ -35,7 +35,7 @@ import { Payslip } from '../../../../domain/models/payroll.model';
             <button 
               type="button" 
               (click)="closeModal.emit()"
-              class="text-slate-400 hover:text-slate-600 rounded-lg p-1 transition-colors border-none bg-transparent cursor-pointer">
+              class="text-slate-400 hover:text-slate-600 rounded-lg p-1.5 transition-colors border-none bg-transparent cursor-pointer">
               <span class="material-symbols-outlined text-xl">close</span>
             </button>
           </div>
@@ -43,7 +43,7 @@ import { Payslip } from '../../../../domain/models/payroll.model';
 
         @if (payslip) {
           <!-- Payslip Document View -->
-          <div id="printable-payslip" class="space-y-6 text-xs text-[#063B39]">
+          <div class="workora-modal-body space-y-6 text-xs text-[#063B39]">
             
             <!-- Company & Employee Details -->
             <div class="p-5 bg-gradient-to-tr from-[#063B39] to-[#0E6E68] text-white rounded-3xl flex flex-col sm:flex-row justify-between gap-4">
@@ -130,6 +130,11 @@ export class PayslipModalComponent {
   @Input() payslip: Payslip | null = null;
 
   @Output() closeModal = new EventEmitter<void>();
+
+  @HostListener('document:keydown.escape')
+  onEscape(): void {
+    this.closeModal.emit();
+  }
 
   earningsItems() {
     return (this.payslip?.items || []).filter(i => i.type === 'Earning');
