@@ -41,7 +41,7 @@ import { LeaveType, SaveLeaveTypeParams } from '../../../../domain/models/leave.
               <input 
                 type="text" 
                 formControlName="name" 
-                placeholder="e.g. Paid Time Off (PTO)"
+                placeholder="Policy Name"
                 class="workora-input !py-2.5"
               />
             </div>
@@ -52,7 +52,7 @@ import { LeaveType, SaveLeaveTypeParams } from '../../../../domain/models/leave.
                 <input 
                   type="text" 
                   formControlName="code" 
-                  placeholder="e.g. PTO / SICK"
+                  placeholder="Leave Code"
                   class="workora-input !py-2.5 uppercase font-mono"
                 />
               </div>
@@ -85,7 +85,7 @@ import { LeaveType, SaveLeaveTypeParams } from '../../../../domain/models/leave.
               <textarea 
                 formControlName="description" 
                 rows="2" 
-                placeholder="e.g. 18 days credited at year start, max 5 carryforward..."
+                placeholder="Guidelines, carryforward rules, and accrual details"
                 class="workora-input !rounded-2xl !py-2.5 resize-none"
               ></textarea>
             </div>

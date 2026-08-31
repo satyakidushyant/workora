@@ -44,7 +44,7 @@ import { Role, CreateRoleParams, UpdateRoleParams } from '../../../../domain/mod
               <input 
                 type="text" 
                 formControlName="name" 
-                placeholder="e.g. Finance Auditor, HR Recruiter"
+                placeholder="Role Name"
                 class="workora-input !py-2.5"
               />
               @if (form.get('name')?.invalid && form.get('name')?.touched) {

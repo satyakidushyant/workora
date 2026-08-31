@@ -46,7 +46,7 @@ import { Department, CreateDepartmentParams, UpdateDepartmentParams } from '../.
                 <input 
                   type="text" 
                   formControlName="code" 
-                  placeholder="e.g. ENG, HR, MKT"
+                  placeholder="Department Code"
                   class="workora-input !py-2.5 uppercase font-mono tracking-wider"
                 />
                 @if (form.get('code')?.invalid && form.get('code')?.touched) {
@@ -59,7 +59,7 @@ import { Department, CreateDepartmentParams, UpdateDepartmentParams } from '../.
                 <input 
                   type="text" 
                   formControlName="name" 
-                  placeholder="e.g. Software Engineering"
+                  placeholder="Department Name"
                   class="workora-input !py-2.5"
                 />
                 @if (form.get('name')?.invalid && form.get('name')?.touched) {

@@ -151,13 +151,13 @@ export interface TopMenubarTab {
     AiAssistantModalComponent
   ],
   template: `
-    <div class="font-sans text-[#163331] bg-[#F4F8F7] min-h-screen relative overflow-x-hidden antialiased selection:bg-[#DCEBE7] selection:text-[#063B39] flex">
+    <div class="font-sans text-[#102A2A] bg-[#F6FAF9] min-h-screen antialiased selection:bg-[#DDF7F2] selection:text-[#075E58] flex">
       
       <!-- Mobile Sidebar Backdrop Overlay -->
       @if (isMobileMenuOpen()) {
         <div 
           (click)="closeMobileMenu()" 
-          class="fixed inset-0 bg-[#063B39]/60 backdrop-blur-xs z-40 lg:hidden transition-opacity"
+          class="fixed inset-0 bg-[#075E58]/60 backdrop-blur-xs z-40 lg:hidden transition-opacity"
           aria-hidden="true"
         ></div>
       }
@@ -168,7 +168,7 @@ export interface TopMenubarTab {
           'translate-x-0 shadow-2xl': isMobileMenuOpen(),
           '-translate-x-full lg:translate-x-0': !isMobileMenuOpen()
         }"
-        class="h-screen w-64 fixed left-0 top-0 bg-[#063B39] text-white border-r border-[#063B39]/80 shadow-2xl flex flex-col py-4 z-50 transition-transform duration-300 ease-in-out sidebar-shell"
+        class="h-screen w-64 fixed left-0 top-0 bg-[#075E58] text-white border-r border-[#075E58]/90 shadow-2xl flex flex-col py-4 z-50 transition-transform duration-300 ease-in-out sidebar-shell"
       >
         
         <!-- Brand Header with Workora Logo -->
@@ -177,11 +177,11 @@ export interface TopMenubarTab {
             <img 
               alt="Workora Logo" 
               src="/workoraLogo.png" 
-              class="h-10 w-auto object-contain transition-transform duration-300 group-hover:scale-105 filter drop-shadow-[0_4px_12px_rgba(63,167,155,0.45)] shrink-0"
+              class="h-10 w-auto object-contain transition-transform duration-300 group-hover:scale-105 filter drop-shadow-[0_4px_12px_rgba(100,216,200,0.35)] shrink-0"
             />
             <div>
-              <h2 class="text-xl font-extrabold text-white tracking-tight font-heading leading-none">Workora</h2>
-              <p class="text-[10px] font-bold text-[#3FA79B] uppercase tracking-wider mt-1">Workforce Hub</p>
+              <span class="text-2xl font-black text-white !text-white tracking-tight font-['Plus_Jakarta_Sans',sans-serif] block leading-none drop-shadow-sm">Workora</span>
+              <span class="text-[9.5px] font-extrabold text-[#64D8C8] uppercase tracking-[0.18em] block mt-1.5 opacity-90">WORKFORCE CLOUD</span>
             </div>
           </div>
 
@@ -197,13 +197,13 @@ export interface TopMenubarTab {
 
         <!-- Role Badge Display in Sidebar -->
         <div class="px-3 mb-3">
-          <div class="px-3 py-1.5 rounded-xl bg-white/5 border border-white/10 flex items-center justify-between gap-2">
+          <div class="px-3 py-1.5 rounded-xl bg-white/10 border border-white/15 flex items-center justify-between gap-2">
             <div class="flex items-center gap-1.5 min-w-0">
               <span class="w-2 h-2 rounded-full" [ngClass]="roleIndicatorDotClass()"></span>
-              <span class="text-[11px] font-extrabold text-white/90 truncate uppercase tracking-wider">{{ primaryRole() }}</span>
+              <span class="text-[11px] font-extrabold text-white/95 truncate uppercase tracking-wider">{{ primaryRole() }}</span>
             </div>
-            <span class="text-[9px] font-bold px-1.5 py-0.5 rounded bg-white/10 text-[#3FA79B] border border-[#3FA79B]/30 uppercase">
-              {{ currentUser()?.companyCode || 'CORP' }}
+            <span class="text-[9px] font-bold px-1.5 py-0.5 rounded bg-white/15 text-[#64D8C8] border border-[#64D8C8]/30 uppercase">
+              {{ currentUser()?.companyCode || 'WORKORA' }}
             </span>
           </div>
         </div>
@@ -211,17 +211,17 @@ export interface TopMenubarTab {
         <!-- Sidebar Quick Search Filter -->
         <div class="px-3 mb-2">
           <div class="relative flex items-center">
-            <span class="material-symbols-outlined absolute left-2.5 text-white/40 text-base pointer-events-none">filter_list</span>
+            <span class="material-symbols-outlined absolute left-2.5 text-white/50 text-base pointer-events-none">filter_list</span>
             <input 
               type="text"
               [(ngModel)]="sidebarSearchQuery"
               placeholder="Filter menu..."
-              class="w-full bg-white/5 hover:bg-white/10 focus:bg-white/15 text-xs text-white placeholder-white/40 pl-8 pr-7 py-1.5 rounded-xl border border-white/10 focus:border-[#3FA79B] focus:ring-1 focus:ring-[#3FA79B]/40 outline-none transition-all"
+              class="w-full bg-white/10 hover:bg-white/15 focus:bg-white/20 text-xs text-white placeholder-white/50 pl-8 pr-7 py-1.5 rounded-xl border border-white/15 focus:border-[#64D8C8] focus:ring-1 focus:ring-[#64D8C8]/40 outline-none transition-all"
             />
             @if (sidebarSearchQuery()) {
               <button 
                 (click)="sidebarSearchQuery.set('')"
-                class="absolute right-2 text-white/40 hover:text-white border-none bg-transparent cursor-pointer p-0 flex items-center"
+                class="absolute right-2 text-white/50 hover:text-white border-none bg-transparent cursor-pointer p-0 flex items-center"
               >
                 <span class="material-symbols-outlined text-sm">close</span>
               </button>
@@ -239,18 +239,18 @@ export interface TopMenubarTab {
               <button
                 type="button"
                 (click)="toggleSectionCollapse(section.id)"
-                class="w-full flex items-center justify-between px-2.5 py-1 text-[10px] font-extrabold uppercase tracking-wider text-[#3FA79B]/80 hover:text-white rounded-lg transition-colors border-none bg-transparent cursor-pointer group"
+                class="w-full flex items-center justify-between px-2.5 py-1 text-[10px] font-extrabold uppercase tracking-wider text-[#64D8C8] hover:text-white rounded-lg transition-colors border-none bg-transparent cursor-pointer group"
               >
                 <div class="flex items-center gap-1.5">
                   @if (section.icon) {
-                    <span class="material-symbols-outlined text-xs" [ngClass]="section.id === 'platform' ? 'text-amber-400' : 'text-[#3FA79B]'">
+                    <span class="material-symbols-outlined text-xs" [ngClass]="section.id === 'platform' ? 'text-amber-300' : 'text-[#64D8C8]'">
                       {{ section.icon }}
                     </span>
                   }
-                  <span [ngClass]="section.id === 'platform' ? 'text-amber-400 font-bold' : ''">{{ section.title }}</span>
+                  <span [ngClass]="section.id === 'platform' ? 'text-amber-300 font-bold' : ''">{{ section.title }}</span>
                 </div>
                 <span 
-                  class="material-symbols-outlined text-xs text-white/40 group-hover:text-white transition-transform duration-200"
+                  class="material-symbols-outlined text-xs text-white/50 group-hover:text-white transition-transform duration-200"
                   [ngClass]="{ '-rotate-90': isSectionCollapsed(section.id) }"
                 >
                   expand_more
@@ -264,14 +264,14 @@ export interface TopMenubarTab {
                     <a
                       [routerLink]="item.route"
                       (click)="closeMobileMenu()"
-                      [routerLinkActive]="section.id === 'platform' ? 'bg-[#0E6E68] text-white font-bold shadow-md border-l-4 border-amber-400' : 'bg-[#0E6E68] text-white font-bold shadow-md border-l-4 border-[#3FA79B]'"
+                      [routerLinkActive]="'bg-[#0E9F8E] text-white font-bold shadow-xs border-l-4 border-[#64D8C8]'"
                       [routerLinkActiveOptions]="{ exact: item.exact || false }"
-                      class="text-white/80 hover:bg-[#3FA79B]/15 hover:text-white flex items-center justify-between px-3 py-2 rounded-xl cursor-pointer transition-all text-xs font-semibold group nav-item"
+                      class="text-[#C7E5E1] hover:bg-[#0E9F8E]/25 hover:text-white flex items-center justify-between px-3 py-2 rounded-xl cursor-pointer transition-all text-xs font-semibold group nav-item"
                     >
                       <div class="flex items-center min-w-0">
                         <span 
                           class="material-symbols-outlined mr-2.5 text-base transition-all group-hover:scale-105 shrink-0"
-                          [ngClass]="section.id === 'platform' ? 'text-amber-400 group-hover:text-white' : 'text-[#3FA79B] group-hover:text-white'"
+                          [ngClass]="section.id === 'platform' ? 'text-amber-300 group-hover:text-white' : 'text-[#64D8C8] group-hover:text-white'"
                         >
                           {{ item.icon }}
                         </span>
@@ -279,7 +279,7 @@ export interface TopMenubarTab {
                       </div>
 
                       @if (item.badge) {
-                        <span [ngClass]="item.badgeColor || 'bg-[#3FA79B]/20 text-[#3FA79B] border border-[#3FA79B]/30'" class="text-[9px] font-extrabold px-1.5 py-0.2 rounded shrink-0 uppercase tracking-wider ml-1">
+                        <span [ngClass]="item.badgeColor || 'bg-[#64D8C8]/20 text-[#64D8C8] border border-[#64D8C8]/30'" class="text-[9px] font-extrabold px-1.5 py-0.2 rounded shrink-0 uppercase tracking-wider ml-1">
                           {{ item.badge }}
                         </span>
                       }
@@ -301,15 +301,15 @@ export interface TopMenubarTab {
         </nav>
 
         <!-- User Profile & Action Footer -->
-        <div class="px-3 mt-auto space-y-2 pt-3 border-t border-white/10 sidebar-footer">
+        <div class="px-3 mt-auto space-y-2 pt-3 border-t border-white/15 sidebar-footer">
           
-          <div class="flex items-center gap-3 px-3 py-2 rounded-2xl bg-white/5 border border-white/10 hover:border-[#3FA79B]/40 transition-colors">
-            <div class="w-8 h-8 rounded-full bg-gradient-to-tr from-[#0E6E68] to-[#3FA79B] text-white flex items-center justify-center font-bold text-xs shrink-0 shadow-xs border border-white/20">
+          <div class="flex items-center gap-3 px-3 py-2 rounded-2xl bg-white/10 border border-white/15 hover:border-[#64D8C8]/40 transition-colors">
+            <div class="w-8 h-8 rounded-full bg-gradient-to-tr from-[#087F73] to-[#19C6A3] text-white flex items-center justify-center font-bold text-xs shrink-0 shadow-2xs border border-white/20">
               {{ getInitials(currentUser()?.firstName, currentUser()?.lastName) }}
             </div>
             <div class="overflow-hidden flex-1">
               <p class="text-xs font-bold text-white truncate leading-none">{{ currentUser()?.firstName || 'Workora' }} {{ currentUser()?.lastName || 'User' }}</p>
-              <p class="text-[10px] text-[#3FA79B] font-semibold mt-0.5 truncate uppercase tracking-wider">{{ primaryRole() }}</p>
+              <p class="text-[10px] text-[#64D8C8] font-semibold mt-0.5 truncate uppercase tracking-wider">{{ primaryRole() }}</p>
             </div>
           </div>
 
@@ -317,14 +317,14 @@ export interface TopMenubarTab {
             <a 
               routerLink="/" 
               (click)="closeMobileMenu()"
-              class="py-1.5 px-2 text-[11px] font-semibold text-white/70 hover:text-white hover:bg-white/10 rounded-xl transition-colors flex items-center justify-center gap-1.5">
-              <span class="material-symbols-outlined text-sm text-[#3FA79B]">home</span>
+              class="py-1.5 px-2 text-[11px] font-semibold text-white/80 hover:text-white hover:bg-white/15 rounded-xl transition-colors flex items-center justify-center gap-1.5">
+              <span class="material-symbols-outlined text-sm text-[#64D8C8]">home</span>
               <span>Home</span>
             </a>
 
             <button 
               (click)="onLogout()" 
-              class="py-1.5 px-2 text-[11px] font-bold text-rose-300 hover:bg-rose-900/40 hover:text-rose-200 rounded-xl transition-all flex items-center justify-center gap-1.5 border-none bg-transparent cursor-pointer">
+              class="py-1.5 px-2 text-[11px] font-bold text-rose-200 hover:bg-rose-900/50 hover:text-white rounded-xl transition-all flex items-center justify-center gap-1.5 border-none bg-transparent cursor-pointer">
               <span class="material-symbols-outlined text-sm">logout</span>
               <span>Sign Out</span>
             </button>
@@ -337,7 +337,7 @@ export interface TopMenubarTab {
       <div class="flex-1 lg:ml-64 min-h-screen flex flex-col w-full min-w-0">
         
         <!-- Top Menubar Header (Role Context, Quick Tabs, Search & User Menu) -->
-        <header class="sticky top-0 z-30 bg-white/95 backdrop-blur-md border-b border-[#DCEBE7] h-14 sm:h-16 flex items-center px-3 xs:px-4 sm:px-6 lg:px-8 shadow-xs dashboard-topbar">
+        <header class="sticky top-0 z-30 bg-white/95 backdrop-blur-md border-b border-[#DDE9E6] h-14 sm:h-16 flex items-center px-3 xs:px-4 sm:px-6 lg:px-8 shadow-2xs dashboard-topbar">
           <div class="flex justify-between items-center w-full max-w-7xl 2xl:max-w-8xl mx-auto gap-2">
             
             <div class="flex items-center gap-2 sm:gap-4 md:gap-6 min-w-0">
@@ -345,7 +345,7 @@ export interface TopMenubarTab {
               <!-- Mobile Hamburger Toggle -->
               <button 
                 (click)="toggleMobileMenu()" 
-                class="lg:hidden p-1.5 xs:p-2 rounded-xl text-[#063B39] hover:bg-[#DCEBE7]/50 border border-[#DCEBE7] transition-colors border-none bg-transparent cursor-pointer shrink-0"
+                class="lg:hidden p-1.5 xs:p-2 rounded-xl text-[#075E58] hover:bg-[#DDF7F2]/60 border border-[#DDE9E6] transition-colors border-none bg-transparent cursor-pointer shrink-0"
                 aria-label="Toggle navigation menu"
               >
                 <span class="material-symbols-outlined text-xl sm:text-2xl flex items-center justify-center">menu</span>
@@ -353,22 +353,31 @@ export interface TopMenubarTab {
 
               <!-- Mobile Brand Logo in Topbar -->
               <div class="flex items-center gap-2 lg:hidden cursor-pointer" routerLink="/dashboard">
-                <img src="/workoraLogo.png" alt="Workora" class="h-7 w-auto object-contain drop-shadow-xs" />
-                <span class="font-extrabold text-[#063B39] text-base font-heading">Workora</span>
+                <img src="/workoraLogo.png" alt="Workora" class="h-7 w-auto object-contain drop-shadow-2xs" />
+                <span class="font-extrabold text-[#075E58] text-base font-heading">Workora</span>
               </div>
 
               <!-- Topbar Tenant Context Badge -->
               @if (currentUser()?.companyName) {
-                <div class="hidden sm:flex items-center gap-1.5 px-3 py-1 bg-[#DCEBE7]/50 border border-[#DCEBE7] rounded-xl text-xs shrink-0">
-                  <span class="material-symbols-outlined text-[#0E6E68] text-base">domain</span>
-                  <span class="font-extrabold text-[#063B39]">{{ currentUser()?.companyCode || 'CORP' }}</span>
+                <div class="hidden sm:flex items-center gap-1.5 px-3 py-1 bg-[#DDF7F2]/60 border border-[#DDE9E6] rounded-xl text-xs shrink-0">
+                  <span class="material-symbols-outlined text-[#087F73] text-base">domain</span>
+                  <span class="font-extrabold text-[#075E58]">{{ currentUser()?.companyCode || 'WORKORA' }}</span>
                   <span class="text-slate-400">•</span>
                   <span class="text-slate-600 font-semibold truncate max-w-[130px] md:max-w-[180px]">{{ currentUser()?.companyName }}</span>
                 </div>
               } @else if (authService.hasRole('SuperAdmin')) {
-                <div class="hidden sm:flex items-center gap-1.5 px-3 py-1 bg-amber-50 border border-amber-200 rounded-xl text-xs text-amber-800 font-bold shrink-0">
-                  <span class="material-symbols-outlined text-amber-600 text-base">admin_panel_settings</span>
-                  <span>Platform Owner (Global)</span>
+                <div class="hidden sm:flex items-center gap-1.5 px-3 py-1 bg-[#DDF7F2] border border-[#087F73]/30 rounded-xl text-xs text-[#075E58] font-bold shrink-0">
+                  <span class="material-symbols-outlined text-[#087F73] text-base">shield_person</span>
+                  <span class="font-extrabold text-[#087F73]">WORKORA</span>
+                  <span class="text-slate-400">•</span>
+                  <span>Workora Platform Root</span>
+                </div>
+              } @else {
+                <div class="hidden sm:flex items-center gap-1.5 px-3 py-1 bg-[#DDF7F2]/60 border border-[#DDE9E6] rounded-xl text-xs shrink-0">
+                  <span class="material-symbols-outlined text-[#087F73] text-base">domain</span>
+                  <span class="font-extrabold text-[#075E58]">WORKORA</span>
+                  <span class="text-slate-400">•</span>
+                  <span class="text-slate-600 font-semibold">Workora Enterprise</span>
                 </div>
               }
 
@@ -377,12 +386,12 @@ export interface TopMenubarTab {
                 @for (tab of topMenubarTabs(); track tab.route) {
                   <a 
                     [routerLink]="tab.route" 
-                    routerLinkActive="bg-[#0E6E68]/10 text-[#0E6E68] font-bold border-[#0E6E68]"
+                    routerLinkActive="bg-[#087F73]/10 text-[#087F73] font-bold border-[#087F73]"
                     [routerLinkActiveOptions]="{ exact: tab.exact || false }"
-                    class="px-2.5 py-1 rounded-lg hover:text-[#0E6E68] hover:bg-[#DCEBE7]/40 transition-all cursor-pointer flex items-center gap-1 shrink-0 border border-transparent"
+                    class="px-2.5 py-1 rounded-lg hover:text-[#087F73] hover:bg-[#DDF7F2]/40 transition-all cursor-pointer flex items-center gap-1 shrink-0 border border-transparent"
                   >
                     @if (tab.icon) {
-                      <span class="material-symbols-outlined text-sm text-[#0E6E68]">{{ tab.icon }}</span>
+                      <span class="material-symbols-outlined text-sm text-[#087F73]">{{ tab.icon }}</span>
                     }
                     <span>{{ tab.label }}</span>
                   </a>
@@ -396,14 +405,14 @@ export interface TopMenubarTab {
               <!-- Quick Search Input Trigger -->
               <div class="relative hidden lg:block">
                 <div class="relative flex items-center">
-                  <span class="material-symbols-outlined absolute left-3.5 text-[#0E6E68]/70 pointer-events-none text-lg">search</span>
+                  <span class="material-symbols-outlined absolute left-3.5 text-[#087F73]/70 pointer-events-none text-lg">search</span>
                   <input 
-                    class="w-48 md:w-56 lg:w-64 bg-[#F4F8F7] hover:bg-white focus:bg-white text-xs text-[#063B39] placeholder-slate-400 font-medium pl-10 pr-12 py-2 rounded-full border border-[#DCEBE7] focus:border-[#0E6E68] focus:ring-2 focus:ring-[#0E6E68]/15 outline-none transition-all shadow-2xs" 
+                    class="w-48 md:w-56 lg:w-64 bg-[#F6FAF9] hover:bg-white focus:bg-white text-xs text-[#102A2A] placeholder-slate-400 font-medium pl-10 pr-12 py-2 rounded-full border border-[#DDE9E6] focus:border-[#087F73] focus:ring-2 focus:ring-[#087F73]/15 outline-none transition-all shadow-2xs" 
                     placeholder="Search workforce..." 
                     type="text"
                   />
                   <div class="absolute right-2.5 flex items-center pointer-events-none">
-                    <kbd class="hidden md:inline-flex items-center gap-0.5 px-1.5 py-0.5 text-[9px] font-bold text-slate-400 bg-white border border-[#DCEBE7] rounded-md shadow-2xs">
+                    <kbd class="hidden md:inline-flex items-center gap-0.5 px-1.5 py-0.5 text-[9px] font-bold text-slate-400 bg-white border border-[#DDE9E6] rounded-md shadow-2xs">
                       ⌘K
                     </kbd>
                   </div>
@@ -414,7 +423,7 @@ export interface TopMenubarTab {
               <button 
                 type="button"
                 (click)="isAiModalOpen.set(true)"
-                class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-gradient-to-tr from-[#0E6E68] to-[#3FA79B] text-white text-xs font-bold shadow-xs hover:shadow-md transition-all cursor-pointer border-none"
+                class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-gradient-to-tr from-[#087F73] to-[#0E9F8E] text-white text-xs font-bold shadow-2xs hover:shadow-sm transition-all cursor-pointer border-none"
                 title="Open Workora AI Copilot"
               >
                 <span class="material-symbols-outlined text-sm">smart_toy</span>
@@ -424,29 +433,29 @@ export interface TopMenubarTab {
               <!-- Notifications Bell -->
               <button 
                 (click)="onNotificationClick()"
-                class="hover:bg-[#DCEBE7]/50 rounded-xl p-1.5 xs:p-2 transition-all text-[#063B39] relative cursor-pointer border-none bg-transparent" 
+                class="hover:bg-[#DDF7F2]/60 rounded-xl p-1.5 xs:p-2 transition-all text-[#075E58] relative cursor-pointer border-none bg-transparent" 
                 aria-label="Notifications"
               >
                 <span class="material-symbols-outlined text-xl">notifications</span>
                 @if (unreadNotificationsCount() > 0) {
-                  <span class="absolute top-1.5 right-1.5 w-2.5 h-2.5 bg-rose-500 rounded-full ring-2 ring-white"></span>
+                  <span class="absolute top-1.5 right-1.5 w-2.5 h-2.5 bg-[#D64545] rounded-full ring-2 ring-white"></span>
                 }
               </button>
 
-              <div class="h-5 w-px bg-[#DCEBE7] mx-0.5 hidden sm:block"></div>
+              <div class="h-5 w-px bg-[#DDE9E6] mx-0.5 hidden sm:block"></div>
               
               <!-- User Profile & Role Badge Dropdown Trigger -->
               <div class="relative">
                 <button 
                   (click)="toggleProfileMenu($event)"
-                  class="flex items-center gap-2 p-1 rounded-xl hover:bg-[#DCEBE7]/40 transition-colors border-none bg-transparent cursor-pointer"
+                  class="flex items-center gap-2 p-1 rounded-xl hover:bg-[#DDF7F2]/40 transition-colors border-none bg-transparent cursor-pointer"
                   aria-label="User profile menu"
                 >
-                  <div class="w-7 h-7 xs:w-8 xs:h-8 rounded-full bg-gradient-to-tr from-[#0E6E68] to-[#3FA79B] text-white flex items-center justify-center font-bold text-xs shadow-xs hover:scale-105 transition-transform shrink-0">
+                  <div class="w-7 h-7 xs:w-8 xs:h-8 rounded-full bg-gradient-to-tr from-[#087F73] to-[#19C6A3] text-white flex items-center justify-center font-bold text-xs shadow-2xs hover:scale-105 transition-transform shrink-0">
                     {{ getInitials(currentUser()?.firstName, currentUser()?.lastName) }}
                   </div>
                   <div class="hidden lg:block text-left">
-                    <p class="text-xs font-bold text-[#063B39] leading-none">{{ currentUser()?.firstName || 'User' }}</p>
+                    <p class="text-xs font-bold text-[#102A2A] leading-none">{{ currentUser()?.firstName || 'User' }}</p>
                     <span [ngClass]="roleBadgeClasses()" class="inline-block text-[9px] font-extrabold px-1.5 py-0.2 rounded border mt-0.5 uppercase tracking-wide">
                       {{ primaryRole() }}
                     </span>
@@ -457,13 +466,13 @@ export interface TopMenubarTab {
                 @if (isProfileMenuOpen()) {
                   <div 
                     (click)="$event.stopPropagation()"
-                    class="workora-dropdown-menu right-0 top-full mt-2 w-64 shadow-xl p-2 z-50"
+                    class="workora-dropdown-menu right-0 top-full mt-2 w-64 shadow-xl p-2 z-[9999]"
                   >
-                    <div class="px-3 py-2 border-b border-[#DCEBE7] mb-1">
-                      <p class="text-xs font-bold text-[#063B39]">{{ currentUser()?.firstName }} {{ currentUser()?.lastName }}</p>
-                      <p class="text-[10px] text-slate-500 truncate">{{ currentUser()?.email }}</p>
+                    <div class="px-3 py-2 border-b border-[#DDE9E6] mb-1">
+                      <p class="text-xs font-bold text-[#102A2A]">{{ currentUser()?.firstName }} {{ currentUser()?.lastName }}</p>
+                      <p class="text-[10px] text-[#718686] truncate">{{ currentUser()?.email }}</p>
                       @if (currentUser()?.employeeCode) {
-                        <p class="text-[10px] text-[#0E6E68] font-bold mt-0.5">Emp Code: {{ currentUser()?.employeeCode }}</p>
+                        <p class="text-[10px] text-[#087F73] font-bold mt-0.5">Emp Code: {{ currentUser()?.employeeCode }}</p>
                       }
                       @if (currentUser()?.departmentName) {
                         <p class="text-[10px] text-slate-400 font-medium">{{ currentUser()?.departmentName }} • {{ currentUser()?.designationTitle }}</p>
@@ -475,7 +484,7 @@ export interface TopMenubarTab {
                       (click)="isProfileMenuOpen.set(false)"
                       class="workora-dropdown-item"
                     >
-                      <span class="material-symbols-outlined text-base text-[#0E6E68]">lock_reset</span>
+                      <span class="material-symbols-outlined text-base text-[#087F73]">lock_reset</span>
                       <span>Account Security</span>
                     </a>
 
@@ -485,12 +494,12 @@ export interface TopMenubarTab {
                         (click)="isProfileMenuOpen.set(false)"
                         class="workora-dropdown-item"
                       >
-                        <span class="material-symbols-outlined text-base text-[#0E6E68]">manage_accounts</span>
+                        <span class="material-symbols-outlined text-base text-[#087F73]">manage_accounts</span>
                         <span>User Accounts</span>
                       </a>
                     }
 
-                    <div class="h-px bg-[#DCEBE7] my-1"></div>
+                    <div class="h-px bg-[#DDE9E6] my-1"></div>
 
                     <button 
                       (click)="onLogout()" 
@@ -578,20 +587,20 @@ export class DashboardLayoutComponent implements OnInit, AfterViewInit, OnDestro
         {
           label: 'Platform Overview',
           route: '/dashboard',
-          icon: 'dashboard',
+          icon: 'space_dashboard',
           exact: true,
           requiredRoles: ['SuperAdmin']
         },
         {
           label: 'Organizations',
           route: '/organization',
-          icon: 'domain',
+          icon: 'corporate_fare',
           requiredRoles: ['SuperAdmin']
         },
         {
           label: 'Subscription Plans',
           route: '/superadmin',
-          icon: 'stars',
+          icon: 'loyalty',
           requiredRoles: ['SuperAdmin']
         },
         {
@@ -603,7 +612,7 @@ export class DashboardLayoutComponent implements OnInit, AfterViewInit, OnDestro
         {
           label: 'System Audit Logs',
           route: '/audit-logs',
-          icon: 'verified_user',
+          icon: 'fact_check',
           requiredRoles: ['SuperAdmin']
         }
       ]
@@ -669,20 +678,20 @@ export class DashboardLayoutComponent implements OnInit, AfterViewInit, OnDestro
           label: 'Attendance & Punches',
           selfLabel: 'My Attendance Clock',
           route: '/attendance',
-          icon: 'schedule',
+          icon: 'punch_clock',
           requiredPermissions: ['attendance.self', 'attendance.view', 'attendance.manage']
         },
         {
           label: 'Leave & Time Off',
           selfLabel: 'My Leave Requests',
           route: '/leave',
-          icon: 'beach_access',
+          icon: 'flight_takeoff',
           requiredPermissions: ['leave.view', 'leave.self', 'leave.apply']
         },
         {
           label: 'Holiday Calendar',
           route: '/holidays',
-          icon: 'celebration',
+          icon: 'calendar_month',
           requiredPermissions: ['holidays.view']
         },
         {
@@ -710,7 +719,7 @@ export class DashboardLayoutComponent implements OnInit, AfterViewInit, OnDestro
         {
           label: 'My Payslips',
           route: '/my-payslips',
-          icon: 'request_quote',
+          icon: 'receipt_long',
           requiredPermissions: ['payroll.self']
         },
         {
@@ -724,7 +733,7 @@ export class DashboardLayoutComponent implements OnInit, AfterViewInit, OnDestro
           label: 'Expense Claims',
           selfLabel: 'My Expense Claims',
           route: '/expenses',
-          icon: 'receipt',
+          icon: 'request_quote',
           requiredPermissions: ['expenses.view', 'expenses.submit']
         }
       ]
@@ -744,14 +753,14 @@ export class DashboardLayoutComponent implements OnInit, AfterViewInit, OnDestro
         {
           label: 'Candidate Funnel',
           route: '/candidates',
-          icon: 'view_kanban',
+          icon: 'how_to_reg',
           requiredPermissions: ['recruitment.view', 'recruitment.manage']
         },
         {
           label: 'Performance & OKRs',
           selfLabel: 'My Performance & Goals',
           route: '/performance',
-          icon: 'stars',
+          icon: 'insights',
           requiredPermissions: ['performance.view', 'performance.self']
         },
         {
@@ -773,7 +782,7 @@ export class DashboardLayoutComponent implements OnInit, AfterViewInit, OnDestro
           label: 'Task Management',
           selfLabel: 'My Assigned Tasks',
           route: '/tasks',
-          icon: 'checklist',
+          icon: 'task_alt',
           requiredPermissions: ['tasks.view', 'tasks.create']
         },
         {
@@ -786,7 +795,7 @@ export class DashboardLayoutComponent implements OnInit, AfterViewInit, OnDestro
         {
           label: 'Field GPS Tracking',
           route: '/field-tracking',
-          icon: 'location_on',
+          icon: 'near_me',
           requiredPermissions: ['field.view']
         },
         {
@@ -824,7 +833,7 @@ export class DashboardLayoutComponent implements OnInit, AfterViewInit, OnDestro
         {
           label: 'System Settings',
           route: '/settings',
-          icon: 'tune',
+          icon: 'settings',
           requiredPermissions: ['settings.view', 'settings.manage']
         },
         {
@@ -838,12 +847,12 @@ export class DashboardLayoutComponent implements OnInit, AfterViewInit, OnDestro
     {
       id: 'account',
       title: 'My Account',
-      icon: 'account_circle',
+      icon: 'person',
       items: [
         {
           label: 'Account Security',
           route: '/change-password',
-          icon: 'shield'
+          icon: 'lock_reset'
         }
       ]
     }
@@ -1056,7 +1065,8 @@ export class DashboardLayoutComponent implements OnInit, AfterViewInit, OnDestro
         y: -10,
         opacity: 0,
         duration: 0.4,
-        ease: 'power2.out'
+        ease: 'power2.out',
+        clearProps: 'transform'
       });
     }, this.elementRef.nativeElement);
   }

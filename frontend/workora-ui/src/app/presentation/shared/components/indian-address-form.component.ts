@@ -45,7 +45,7 @@ export const INDIAN_STATES_AND_UTS = [
           <input
             type="text"
             formControlName="addressLine1"
-            placeholder="e.g. 402, Signature Tower, SG Highway"
+            placeholder="Premises / Flat / Building / Street Address"
             class="workora-input !py-2.5 text-xs"
             [class.border-rose-300]="isInvalid('addressLine1')"
           />
@@ -60,7 +60,7 @@ export const INDIAN_STATES_AND_UTS = [
           <input
             type="text"
             formControlName="addressLine2"
-            placeholder="e.g. Near Iscon Cross Road, Bodakdev"
+            placeholder="Locality / Landmark"
             class="workora-input !py-2.5 text-xs"
           />
         </div>
@@ -74,7 +74,7 @@ export const INDIAN_STATES_AND_UTS = [
             formControlName="state"
             [options]="stateOptions"
             [searchable]="true"
-            searchPlaceholder="Search Indian State..."
+            searchPlaceholder="Search State..."
             placeholder="Select State / UT"
             icon="map"
             [hasError]="isInvalid('state')"
@@ -90,7 +90,7 @@ export const INDIAN_STATES_AND_UTS = [
           <input
             type="text"
             formControlName="city"
-            placeholder="e.g. Ahmedabad"
+            placeholder="City / Town"
             class="workora-input !py-2.5 text-xs"
             [class.border-rose-300]="isInvalid('city')"
           />
@@ -105,7 +105,7 @@ export const INDIAN_STATES_AND_UTS = [
           <input
             type="text"
             formControlName="district"
-            placeholder="e.g. Ahmedabad"
+            placeholder="District"
             class="workora-input !py-2.5 text-xs"
           />
         </div>
@@ -118,7 +118,7 @@ export const INDIAN_STATES_AND_UTS = [
           <input
             type="text"
             formControlName="pincode"
-            placeholder="e.g. 380054"
+            placeholder="6-digit Pincode"
             maxlength="6"
             class="workora-input !py-2.5 text-xs font-mono"
             [class.border-rose-300]="isInvalid('pincode')"

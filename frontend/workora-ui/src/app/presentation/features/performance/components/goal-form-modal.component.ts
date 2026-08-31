@@ -53,7 +53,7 @@ import { Employee } from '../../../../domain/models/employee.model';
               <input 
                 type="text" 
                 formControlName="title" 
-                placeholder="e.g. Increase API latency throughput by 30%"
+                placeholder="Goal / Objective Title"
                 class="workora-input !py-2.5"
               />
             </div>

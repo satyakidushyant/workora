@@ -36,14 +36,14 @@ import { IndianAddressFormComponent } from '../../../shared/components/indian-ad
       <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <div class="flex items-center gap-2.5">
-            <span class="p-2.5 rounded-2xl bg-[#3FA79B]/15 text-[#0E6E68]">
+            <span class="p-2.5 rounded-2xl bg-[#DDF7F2] text-[#087F73]">
               <span class="material-symbols-outlined text-2xl">location_city</span>
             </span>
             <div>
-              <h1 class="text-2xl sm:text-3xl font-extrabold text-[#063B39] tracking-tight font-heading">
-                Branch Management
+              <h1 class="text-2xl sm:text-3xl font-extrabold text-[#102A2A] tracking-tight font-heading">
+                Branches
               </h1>
-              <p class="text-xs sm:text-sm text-slate-500 mt-0.5 font-medium">
+              <p class="text-xs sm:text-sm text-[#718686] mt-0.5 font-medium">
                 Manage physical corporate offices, facilities, and regional work sites.
               </p>
             </div>
@@ -53,9 +53,9 @@ import { IndianAddressFormComponent } from '../../../shared/components/indian-ad
         <button 
           type="button" 
           (click)="openCreateModal()"
-          class="workora-btn-primary text-xs shadow-md">
+          class="workora-btn-primary text-xs shadow-sm">
           <span class="material-symbols-outlined text-base">add_location_alt</span>
-          <span>Add Branch</span>
+          <span>+ Add Branch</span>
         </button>
       </div>
 
@@ -69,8 +69,8 @@ import { IndianAddressFormComponent } from '../../../shared/components/indian-ad
               type="text" 
               [(ngModel)]="searchTerm" 
               (ngModelChange)="onSearch()"
-              placeholder="Search by branch name or code..."
-              class="w-full pl-10 pr-4 py-2.5 bg-[#F4F8F7] text-xs text-[#063B39] rounded-xl border border-[#DCEBE7] focus:border-[#0E6E68] outline-none font-medium transition-all"
+              placeholder="Search branches..." 
+              class="w-full pl-10 pr-4 py-2.5 bg-[#F6FAF9] text-xs text-[#102A2A] rounded-xl border border-[#DDE9E6] focus:border-[#087F73] focus:bg-white outline-none font-medium transition-all"
             />
           </div>
 
@@ -120,14 +120,14 @@ import { IndianAddressFormComponent } from '../../../shared/components/indian-ad
           <div class="p-8">
             <app-workora-empty-state
               icon="location_off"
-              title="No Branches Found"
-              description="No branch offices match your current filter. Create a branch office to organize your physical workspace.">
+              title="No branches yet"
+              description="Create a branch office to organize your physical workspace.">
               <button 
                 type="button" 
                 (click)="openCreateModal()"
                 class="workora-btn-primary text-xs mt-2">
                 <span class="material-symbols-outlined text-base">add_location_alt</span>
-                <span>Add Branch</span>
+                <span>+ Add Branch</span>
               </button>
             </app-workora-empty-state>
           </div>
@@ -135,7 +135,7 @@ import { IndianAddressFormComponent } from '../../../shared/components/indian-ad
           <div class="overflow-x-auto">
             <table class="w-full text-left border-collapse text-xs">
               <thead>
-                <tr class="bg-[#F4F8F7] border-b border-[#DCEBE7] text-[11px] font-extrabold uppercase tracking-wider text-[#063B39]">
+                <tr class="bg-[#F6FAF9] border-b border-[#DDE9E6] text-[11px] font-extrabold uppercase tracking-wider text-[#102A2A]">
                   <th class="py-3.5 px-5">Branch Name</th>
                   <th class="py-3.5 px-4">Code</th>
                   <th class="py-3.5 px-4">Organization</th>
@@ -260,7 +260,7 @@ import { IndianAddressFormComponent } from '../../../shared/components/indian-ad
                   <input 
                     type="text" 
                     formControlName="name" 
-                    placeholder="e.g. Ahmedabad Head Office"
+                    placeholder="Branch Name"
                     class="workora-input !py-2.5"
                   />
                   @if (isInvalid('name')) {
@@ -273,7 +273,7 @@ import { IndianAddressFormComponent } from '../../../shared/components/indian-ad
                   <input 
                     type="text" 
                     formControlName="code" 
-                    placeholder="e.g. AHM-HQ"
+                    placeholder="Branch Code"
                     class="workora-input !py-2.5 uppercase font-mono"
                   />
                   @if (isInvalid('code')) {
@@ -286,7 +286,7 @@ import { IndianAddressFormComponent } from '../../../shared/components/indian-ad
                   <input 
                     type="text" 
                     formControlName="location" 
-                    placeholder="e.g. Bodakdev, SG Highway"
+                    placeholder="Location / City Area"
                     class="workora-input !py-2.5"
                   />
                 </div>

@@ -176,12 +176,12 @@ import { WorkoraSelectComponent, WorkoraSelectOption } from '../../../shared/com
               <div class="workora-modal-body space-y-4">
                 <div>
                   <label class="workora-label">Shift Name <span class="text-rose-500">*</span></label>
-                  <input type="text" formControlName="name" placeholder="e.g. Standard General Shift" class="workora-input !py-2.5" />
+                  <input type="text" formControlName="name" placeholder="Shift Name" class="workora-input !py-2.5" />
                 </div>
 
                 <div>
                   <label class="workora-label">Code <span class="text-rose-500">*</span></label>
-                  <input type="text" formControlName="code" placeholder="e.g. GS-01" class="workora-input !py-2.5 uppercase font-mono" />
+                  <input type="text" formControlName="code" placeholder="Shift Code" class="workora-input !py-2.5 uppercase font-mono" />
                 </div>
 
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">

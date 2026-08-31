@@ -50,7 +50,7 @@ import { Employee, TerminateEmployeeParams } from '../../../../domain/models/emp
               <textarea 
                 formControlName="reason" 
                 rows="3" 
-                placeholder="e.g. Resignation, Contract concluded, Mutual separation..."
+                placeholder="Reason / Exit Notes"
                 class="workora-input !rounded-2xl !py-2.5 resize-none"
               ></textarea>
             </div>

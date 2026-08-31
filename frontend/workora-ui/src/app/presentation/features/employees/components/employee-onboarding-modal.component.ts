@@ -26,16 +26,16 @@ import { IndianAddressFormComponent } from '../../../shared/components/indian-ad
       <div class="workora-modal-card max-w-3xl max-h-[92vh] flex flex-col" (click)="$event.stopPropagation()">
         
         <!-- Header -->
-        <div class="p-5 sm:p-6 border-b border-[#DCEBE7] flex items-center justify-between bg-[#F4F8F7]/80 shrink-0">
+        <div class="p-5 sm:p-6 border-b border-[#DDE9E6] flex items-center justify-between bg-[#F6FAF9] shrink-0">
           <div class="flex items-center gap-3.5">
-            <div class="w-11 h-11 rounded-2xl bg-gradient-to-tr from-[#063B39] to-[#0E6E68] text-white flex items-center justify-center font-extrabold shadow-sm">
+            <div class="w-11 h-11 rounded-2xl bg-gradient-to-tr from-[#075E58] to-[#087F73] text-white flex items-center justify-center font-extrabold shadow-sm">
               <span class="material-symbols-outlined text-2xl">person_add</span>
             </div>
             <div>
-              <h3 class="text-base sm:text-lg font-extrabold text-[#063B39] font-heading">
+              <h3 class="text-base sm:text-lg font-extrabold text-[#102A2A] font-heading">
                 Onboard New Team Member
               </h3>
-              <p class="text-xs text-slate-500">
+              <p class="text-xs text-[#718686]">
                 Step {{ currentStep() }} of 4: {{ getStepTitle(currentStep()) }}
               </p>
             </div>
@@ -50,13 +50,13 @@ import { IndianAddressFormComponent } from '../../../shared/components/indian-ad
         </div>
 
         <!-- Stepper Progress Bar -->
-        <div class="px-6 py-3 bg-white border-b border-[#DCEBE7] grid grid-cols-4 gap-2 shrink-0">
+        <div class="px-6 py-3 bg-white border-b border-[#DDE9E6] grid grid-cols-4 gap-2 shrink-0">
           @for (step of [1, 2, 3, 4]; track step) {
             <div class="flex items-center gap-2">
               <div 
                 [ngClass]="{
-                  'bg-[#0E6E68] text-white': currentStep() === step,
-                  'bg-emerald-100 text-emerald-800': currentStep() > step,
+                  'bg-[#087F73] text-white': currentStep() === step,
+                  'bg-[#DDF7F2] text-[#075E58]': currentStep() > step,
                   'bg-slate-100 text-slate-400': currentStep() < step
                 }"
                 class="w-6 h-6 rounded-full flex items-center justify-center text-xs font-extrabold transition-all shrink-0">
@@ -67,7 +67,7 @@ import { IndianAddressFormComponent } from '../../../shared/components/indian-ad
                 }
               </div>
               <span class="text-[11px] font-bold truncate hidden sm:inline"
-                [ngClass]="currentStep() >= step ? 'text-[#063B39]' : 'text-slate-400'">
+                [ngClass]="currentStep() >= step ? 'text-[#102A2A]' : 'text-[#718686]'">
                 {{ getStepTitle(step) }}
               </span>
             </div>
@@ -82,7 +82,7 @@ import { IndianAddressFormComponent } from '../../../shared/components/indian-ad
           <!-- ======================================================== -->
           @if (currentStep() === 1) {
             <div class="space-y-4 animate-in fade-in duration-150">
-              <h4 class="text-xs font-extrabold uppercase tracking-wider text-[#0E6E68]">
+              <h4 class="text-xs font-extrabold uppercase tracking-wider text-[#087F73]">
                 1. Personal Details &amp; Identity
               </h4>
 
@@ -92,7 +92,7 @@ import { IndianAddressFormComponent } from '../../../shared/components/indian-ad
                   <input 
                     type="text" 
                     formControlName="firstName" 
-                    placeholder="e.g. Ramesh"
+                    placeholder="First Name"
                     class="workora-input !py-2.5"
                   />
                   @if (isInvalid('firstName')) {
@@ -105,7 +105,7 @@ import { IndianAddressFormComponent } from '../../../shared/components/indian-ad
                   <input 
                     type="text" 
                     formControlName="lastName" 
-                    placeholder="e.g. Sharma"
+                    placeholder="Last Name"
                     class="workora-input !py-2.5"
                   />
                   @if (isInvalid('lastName')) {
@@ -118,7 +118,7 @@ import { IndianAddressFormComponent } from '../../../shared/components/indian-ad
                   <input 
                     type="email" 
                     formControlName="email" 
-                    placeholder="e.g. ramesh.sharma@company.in"
+                    placeholder="Work Email Address"
                     class="workora-input !py-2.5"
                   />
                   @if (isInvalid('email')) {
@@ -131,7 +131,7 @@ import { IndianAddressFormComponent } from '../../../shared/components/indian-ad
                   <input 
                     type="tel" 
                     formControlName="phone" 
-                    placeholder="e.g. +91 98765 43210"
+                    placeholder="Mobile Phone Number"
                     class="workora-input !py-2.5 font-mono"
                   />
                 </div>
@@ -141,7 +141,7 @@ import { IndianAddressFormComponent } from '../../../shared/components/indian-ad
                   <input 
                     type="text" 
                     formControlName="nationalId" 
-                    placeholder="e.g. ABCDE1234F"
+                    placeholder="10-digit PAN Number"
                     maxlength="10"
                     class="workora-input !py-2.5 uppercase font-mono"
                   />
@@ -298,7 +298,7 @@ import { IndianAddressFormComponent } from '../../../shared/components/indian-ad
                   <input 
                     type="text" 
                     formControlName="bankName" 
-                    placeholder="e.g. HDFC Bank / ICICI Bank / SBI"
+                    placeholder="Bank Name"
                     class="workora-input !py-2.5"
                   />
                 </div>
@@ -308,7 +308,7 @@ import { IndianAddressFormComponent } from '../../../shared/components/indian-ad
                   <input 
                     type="text" 
                     formControlName="accountHolderName" 
-                    placeholder="Name as per Bank Passbook"
+                    placeholder="Account Holder Name"
                     class="workora-input !py-2.5"
                   />
                 </div>
@@ -318,7 +318,7 @@ import { IndianAddressFormComponent } from '../../../shared/components/indian-ad
                   <input 
                     type="text" 
                     formControlName="accountNumber" 
-                    placeholder="e.g. 50100123456789"
+                    placeholder="Bank Account Number"
                     class="workora-input !py-2.5 font-mono"
                   />
                 </div>
@@ -328,7 +328,7 @@ import { IndianAddressFormComponent } from '../../../shared/components/indian-ad
                   <input 
                     type="text" 
                     formControlName="bankIfsc" 
-                    placeholder="e.g. HDFC0001234"
+                    placeholder="Bank IFSC Code"
                     maxlength="11"
                     class="workora-input !py-2.5 uppercase font-mono"
                   />
@@ -339,7 +339,7 @@ import { IndianAddressFormComponent } from '../../../shared/components/indian-ad
                   <input 
                     type="text" 
                     formControlName="uanNumber" 
-                    placeholder="e.g. 101234567890 (12 digits)"
+                    placeholder="UAN Number (12 digits)"
                     maxlength="12"
                     class="workora-input !py-2.5 font-mono"
                   />
@@ -350,7 +350,7 @@ import { IndianAddressFormComponent } from '../../../shared/components/indian-ad
                   <input 
                     type="text" 
                     formControlName="esicNumber" 
-                    placeholder="e.g. 31001234560000001 (17 digits)"
+                    placeholder="ESIC IP Number (17 digits)"
                     maxlength="17"
                     class="workora-input !py-2.5 font-mono"
                   />
@@ -374,7 +374,7 @@ import { IndianAddressFormComponent } from '../../../shared/components/indian-ad
                   <input 
                     type="text" 
                     formControlName="contactName" 
-                    placeholder="e.g. Priya Sharma"
+                    placeholder="Emergency Contact Name"
                     class="workora-input !py-2.5"
                   />
                 </div>
@@ -384,7 +384,7 @@ import { IndianAddressFormComponent } from '../../../shared/components/indian-ad
                   <input 
                     type="text" 
                     formControlName="contactRelationship" 
-                    placeholder="e.g. Spouse / Parent / Sibling"
+                    placeholder="Relationship"
                     class="workora-input !py-2.5"
                   />
                 </div>
@@ -394,7 +394,7 @@ import { IndianAddressFormComponent } from '../../../shared/components/indian-ad
                   <input 
                     type="tel" 
                     formControlName="contactPhone" 
-                    placeholder="e.g. +91 98765 12345"
+                    placeholder="Emergency Phone Number"
                     class="workora-input !py-2.5 font-mono"
                   />
                 </div>

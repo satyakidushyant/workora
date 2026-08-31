@@ -86,7 +86,7 @@ import { WorkoraSelectComponent, WorkoraSelectOption } from '../../../shared/com
               <textarea 
                 formControlName="notes" 
                 rows="3" 
-                placeholder="e.g. Promotion to Senior Lead, relocated to NY branch..."
+                placeholder="Transfer Transition Notes"
                 class="workora-input !rounded-2xl !py-2.5 resize-none"
               ></textarea>
             </div>

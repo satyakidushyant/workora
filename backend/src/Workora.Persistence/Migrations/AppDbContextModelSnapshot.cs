@@ -1453,6 +1453,87 @@ namespace Workora.Persistence.Migrations
                     b.ToTable("employee_employment_history", (string)null);
                 });
 
+            modelBuilder.Entity("Workora.Domain.Entities.EmployeeOnboarding", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasColumnName("id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("ChecklistId")
+                        .HasColumnType("integer")
+                        .HasColumnName("checklist_id");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<Guid?>("CreatedBy")
+                        .HasColumnType("uuid")
+                        .HasColumnName("created_by");
+
+                    b.Property<DateTimeOffset?>("DeletedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("deleted_at");
+
+                    b.Property<Guid?>("DeletedBy")
+                        .HasColumnType("uuid")
+                        .HasColumnName("deleted_by");
+
+                    b.Property<int>("EmployeeId")
+                        .HasColumnType("integer")
+                        .HasColumnName("employee_id");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("boolean")
+                        .HasColumnName("is_active");
+
+                    b.Property<bool>("IsCompleted")
+                        .HasColumnType("boolean")
+                        .HasColumnName("is_completed");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("boolean")
+                        .HasColumnName("is_deleted");
+
+                    b.Property<DateTimeOffset?>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at");
+
+                    b.Property<Guid?>("UpdatedBy")
+                        .HasColumnType("uuid")
+                        .HasColumnName("updated_by");
+
+                    b.Property<Guid>("Uuid")
+                        .HasColumnType("uuid")
+                        .HasColumnName("uuid");
+
+                    b.Property<DateTimeOffset?>("VerifiedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("verified_at");
+
+                    b.Property<int?>("VerifiedByEmployeeId")
+                        .HasColumnType("integer")
+                        .HasColumnName("verified_by_employee_id");
+
+                    b.HasKey("Id")
+                        .HasName("pk_employee_onboardings");
+
+                    b.HasIndex("ChecklistId")
+                        .HasDatabaseName("ix_employee_onboardings_checklist_id");
+
+                    b.HasIndex("VerifiedByEmployeeId")
+                        .HasDatabaseName("ix_employee_onboardings_verified_by_employee_id");
+
+                    b.HasIndex("EmployeeId", "ChecklistId")
+                        .IsUnique()
+                        .HasDatabaseName("ix_employee_onboardings_employee_id_checklist_id");
+
+                    b.ToTable("employee_onboardings", (string)null);
+                });
+
             modelBuilder.Entity("Workora.Domain.Entities.EmployeeSalaryAssignment", b =>
                 {
                     b.Property<int>("Id")
@@ -1863,6 +1944,79 @@ namespace Workora.Persistence.Migrations
                         .HasDatabaseName("ix_field_visits_employee_id");
 
                     b.ToTable("field_visits", (string)null);
+                });
+
+            modelBuilder.Entity("Workora.Domain.Entities.FinancialYear", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasColumnName("id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<Guid?>("CreatedBy")
+                        .HasColumnType("uuid")
+                        .HasColumnName("created_by");
+
+                    b.Property<DateTimeOffset?>("DeletedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("deleted_at");
+
+                    b.Property<Guid?>("DeletedBy")
+                        .HasColumnType("uuid")
+                        .HasColumnName("deleted_by");
+
+                    b.Property<DateOnly>("EndDate")
+                        .HasColumnType("date")
+                        .HasColumnName("end_date");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("boolean")
+                        .HasColumnName("is_active");
+
+                    b.Property<bool>("IsClosed")
+                        .HasColumnType("boolean")
+                        .HasColumnName("is_closed");
+
+                    b.Property<bool>("IsCurrent")
+                        .HasColumnType("boolean")
+                        .HasColumnName("is_current");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("boolean")
+                        .HasColumnName("is_deleted");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)")
+                        .HasColumnName("name");
+
+                    b.Property<DateOnly>("StartDate")
+                        .HasColumnType("date")
+                        .HasColumnName("start_date");
+
+                    b.Property<DateTimeOffset?>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at");
+
+                    b.Property<Guid?>("UpdatedBy")
+                        .HasColumnType("uuid")
+                        .HasColumnName("updated_by");
+
+                    b.Property<Guid>("Uuid")
+                        .HasColumnType("uuid")
+                        .HasColumnName("uuid");
+
+                    b.HasKey("Id")
+                        .HasName("pk_financial_years");
+
+                    b.ToTable("financial_years", (string)null);
                 });
 
             modelBuilder.Entity("Workora.Domain.Entities.Goal", b =>
@@ -3123,6 +3277,167 @@ namespace Workora.Persistence.Migrations
                         .HasDatabaseName("ix_notifications_user_id_is_read");
 
                     b.ToTable("notifications", (string)null);
+                });
+
+            modelBuilder.Entity("Workora.Domain.Entities.OnboardingChecklist", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasColumnName("id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("AssignedRole")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)")
+                        .HasColumnName("assigned_role");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<Guid?>("CreatedBy")
+                        .HasColumnType("uuid")
+                        .HasColumnName("created_by");
+
+                    b.Property<DateTimeOffset?>("DeletedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("deleted_at");
+
+                    b.Property<Guid?>("DeletedBy")
+                        .HasColumnType("uuid")
+                        .HasColumnName("deleted_by");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("boolean")
+                        .HasColumnName("is_active");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("boolean")
+                        .HasColumnName("is_deleted");
+
+                    b.Property<bool>("IsMandatory")
+                        .HasColumnType("boolean")
+                        .HasColumnName("is_mandatory");
+
+                    b.Property<string>("TaskName")
+                        .IsRequired()
+                        .HasMaxLength(150)
+                        .HasColumnType("character varying(150)")
+                        .HasColumnName("task_name");
+
+                    b.Property<DateTimeOffset?>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at");
+
+                    b.Property<Guid?>("UpdatedBy")
+                        .HasColumnType("uuid")
+                        .HasColumnName("updated_by");
+
+                    b.Property<Guid>("Uuid")
+                        .HasColumnType("uuid")
+                        .HasColumnName("uuid");
+
+                    b.HasKey("Id")
+                        .HasName("pk_onboarding_checklists");
+
+                    b.ToTable("onboarding_checklists", (string)null);
+                });
+
+            modelBuilder.Entity("Workora.Domain.Entities.OvertimeRequest", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasColumnName("id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<Guid?>("CreatedBy")
+                        .HasColumnType("uuid")
+                        .HasColumnName("created_by");
+
+                    b.Property<DateTimeOffset?>("DeletedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("deleted_at");
+
+                    b.Property<Guid?>("DeletedBy")
+                        .HasColumnType("uuid")
+                        .HasColumnName("deleted_by");
+
+                    b.Property<int>("EmployeeId")
+                        .HasColumnType("integer")
+                        .HasColumnName("employee_id");
+
+                    b.Property<TimeOnly>("EndTime")
+                        .HasColumnType("time without time zone")
+                        .HasColumnName("end_time");
+
+                    b.Property<decimal>("HoursRequested")
+                        .HasColumnType("decimal(5,2)")
+                        .HasColumnName("hours_requested");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("boolean")
+                        .HasColumnName("is_active");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("boolean")
+                        .HasColumnName("is_deleted");
+
+                    b.Property<DateOnly>("OvertimeDate")
+                        .HasColumnType("date")
+                        .HasColumnName("overtime_date");
+
+                    b.Property<int?>("PayrollRunId")
+                        .HasColumnType("integer")
+                        .HasColumnName("payroll_run_id");
+
+                    b.Property<string>("Reason")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)")
+                        .HasColumnName("reason");
+
+                    b.Property<TimeOnly>("StartTime")
+                        .HasColumnType("time without time zone")
+                        .HasColumnName("start_time");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("integer")
+                        .HasColumnName("status");
+
+                    b.Property<DateTimeOffset?>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at");
+
+                    b.Property<Guid?>("UpdatedBy")
+                        .HasColumnType("uuid")
+                        .HasColumnName("updated_by");
+
+                    b.Property<Guid>("Uuid")
+                        .HasColumnType("uuid")
+                        .HasColumnName("uuid");
+
+                    b.HasKey("Id")
+                        .HasName("pk_overtime_requests");
+
+                    b.HasIndex("OvertimeDate")
+                        .HasDatabaseName("ix_overtime_requests_overtime_date");
+
+                    b.HasIndex("Status")
+                        .HasDatabaseName("ix_overtime_requests_status");
+
+                    b.HasIndex("EmployeeId", "OvertimeDate")
+                        .HasDatabaseName("ix_overtime_requests_employee_id_overtime_date");
+
+                    b.ToTable("overtime_requests", (string)null);
                 });
 
             modelBuilder.Entity("Workora.Domain.Entities.PasswordResetToken", b =>
@@ -4719,6 +5034,35 @@ namespace Workora.Persistence.Migrations
                     b.Navigation("Employee");
                 });
 
+            modelBuilder.Entity("Workora.Domain.Entities.EmployeeOnboarding", b =>
+                {
+                    b.HasOne("Workora.Domain.Entities.OnboardingChecklist", "Checklist")
+                        .WithMany()
+                        .HasForeignKey("ChecklistId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_employee_onboardings_onboarding_checklists_checklist_id");
+
+                    b.HasOne("Workora.Domain.Entities.Employee", "Employee")
+                        .WithMany()
+                        .HasForeignKey("EmployeeId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_employee_onboardings_employees_employee_id");
+
+                    b.HasOne("Workora.Domain.Entities.Employee", "VerifiedByEmployee")
+                        .WithMany()
+                        .HasForeignKey("VerifiedByEmployeeId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .HasConstraintName("fk_employee_onboardings_employees_verified_by_employee_id");
+
+                    b.Navigation("Checklist");
+
+                    b.Navigation("Employee");
+
+                    b.Navigation("VerifiedByEmployee");
+                });
+
             modelBuilder.Entity("Workora.Domain.Entities.EmployeeSalaryAssignment", b =>
                 {
                     b.HasOne("Workora.Domain.Entities.Employee", "Employee")
@@ -4994,6 +5338,18 @@ namespace Workora.Persistence.Migrations
                         .HasConstraintName("fk_notifications_users_user_id");
 
                     b.Navigation("User");
+                });
+
+            modelBuilder.Entity("Workora.Domain.Entities.OvertimeRequest", b =>
+                {
+                    b.HasOne("Workora.Domain.Entities.Employee", "Employee")
+                        .WithMany()
+                        .HasForeignKey("EmployeeId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_overtime_requests_employees_employee_id");
+
+                    b.Navigation("Employee");
                 });
 
             modelBuilder.Entity("Workora.Domain.Entities.PasswordResetToken", b =>

@@ -61,7 +61,7 @@ import { Designation, Department, CreateDesignationParams, UpdateDesignationPara
               <input 
                 type="text" 
                 formControlName="title" 
-                placeholder="e.g. Senior Software Engineer"
+                placeholder="Job Title"
                 class="workora-input !py-2.5"
               />
               @if (form.get('title')?.invalid && form.get('title')?.touched) {
@@ -87,7 +87,7 @@ import { Designation, Department, CreateDesignationParams, UpdateDesignationPara
                 <input 
                   type="text" 
                   formControlName="grade" 
-                  placeholder="e.g. L4, E3, M2"
+                  placeholder="Salary Grade"
                   class="workora-input !py-2.5 uppercase"
                 />
               </div>

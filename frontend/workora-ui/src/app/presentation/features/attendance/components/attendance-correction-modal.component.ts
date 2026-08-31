@@ -61,7 +61,7 @@ import { AttendanceRecord, RequestCorrectionParams } from '../../../../domain/mo
               <textarea 
                 formControlName="reason" 
                 rows="3" 
-                placeholder="e.g. Biometric scanner offline, forgot to punch checkout after client meeting..."
+                placeholder="Reason for Missed / Incorrect Punch"
                 class="workora-input !rounded-2xl !py-2.5 resize-none"
               ></textarea>
             </div>

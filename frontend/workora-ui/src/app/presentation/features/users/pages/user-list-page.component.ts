@@ -36,7 +36,7 @@ import { NotificationService } from '../../../../core/services/notification.serv
     WorkoraConfirmDialogComponent
   ],
   template: `
-    <div class="p-3.5 xs:p-5 sm:p-6 lg:p-8 space-y-4 sm:space-y-6 max-w-7xl 2xl:max-w-8xl 3xl:max-w-9xl mx-auto w-full relative z-10">
+    <div class="p-3.5 xs:p-5 sm:p-6 lg:p-8 space-y-4 sm:space-y-6 max-w-7xl 2xl:max-w-8xl 3xl:max-w-9xl mx-auto w-full">
       
       <!-- Top Navigation / Breadcrumb -->
       <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4 user-header">
@@ -424,13 +424,13 @@ export class UserListPageComponent implements OnInit, AfterViewInit, OnDestroy {
 
     this.ctx = gsap.context(() => {
       const el = this.elementRef.nativeElement;
-      const tl = gsap.timeline({ defaults: { ease: 'power2.out', duration: 0.3 } });
+      const tl = gsap.timeline({ defaults: { ease: 'power2.out', duration: 0.3, clearProps: 'transform' } });
 
       if (el.querySelector('.user-header')) {
-        tl.from('.user-header', { opacity: 0, y: -10 });
+        tl.from('.user-header', { opacity: 0, y: -10, clearProps: 'transform' });
       }
       if (el.querySelector('.user-stats-grid')) {
-        tl.from('.user-stats-grid .workora-card', { opacity: 0, y: 12, stagger: 0.08 }, '-=0.15');
+        tl.from('.user-stats-grid .workora-card', { opacity: 0, y: 12, stagger: 0.08, clearProps: 'transform' }, '-=0.15');
       }
     }, this.elementRef.nativeElement);
   }

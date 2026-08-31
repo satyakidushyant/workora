@@ -44,7 +44,7 @@ import { Role, CloneRoleParams } from '../../../../domain/models/role-permission
               <input 
                 type="text" 
                 formControlName="newName" 
-                placeholder="e.g. {{ role?.name }} (Copy)"
+                placeholder="New Cloned Role Name"
                 class="workora-input !py-2.5"
               />
               @if (form.get('newName')?.invalid && form.get('newName')?.touched) {

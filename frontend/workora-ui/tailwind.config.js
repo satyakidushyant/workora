@@ -17,24 +17,31 @@ module.exports = {
     },
     extend: {
       colors: {
-        // Core Workora Brand Palette
-        "workora-dark": "#063B39",
-        "workora-primary": "#0E6E68",
-        "workora-accent": "#3FA79B",
-        "workora-light": "#DCEBE7",
-        "workora-surface": "#F4F8F7",
-        "workora-text": "#163331",
-        "workora-muted": "#6B7F7C",
+        // Workora Brand Tokens
+        "workora-deep-teal": "#075E58",
+        "workora-dark": "#075E58",
+        "workora-primary": "#087F73",
+        "workora-teal": "#0E9F8E",
+        "workora-emerald": "#19C6A3",
+        "workora-aqua": "#64D8C8",
+        "workora-mint": "#DDF7F2",
+        "workora-bg": "#F6FAF9",
+        "workora-surface": "#FFFFFF",
+        "workora-border": "#DDE9E6",
+        "workora-heading": "#102A2A",
+        "workora-body": "#405656",
+        "workora-muted": "#718686",
 
-        // Semantic mappings
-        "primary": "#0E6E68",
-        "primary-dark": "#063B39",
-        "accent": "#3FA79B",
-        "light-surface": "#DCEBE7",
-        "success": "#10B981",
-        "warning": "#F59E0B",
-        "error": "#EF4444",
-        "info": "#0E6E68"
+        // Semantic Tokens
+        "brand": "#087F73",
+        "primary": "#087F73",
+        "primary-dark": "#075E58",
+        "accent": "#0E9F8E",
+        "light-surface": "#DDF7F2",
+        "success": "#16A085",
+        "warning": "#E9A23B",
+        "error": "#D64545",
+        "info": "#168AAD"
       },
       borderRadius: {
         "sm": "8px",
@@ -46,15 +53,18 @@ module.exports = {
         "full": "9999px"
       },
       boxShadow: {
-        "sm": "0 2px 8px rgba(6, 59, 57, 0.04)",
-        "md": "0 8px 24px -4px rgba(6, 59, 57, 0.08)",
-        "lg": "0 16px 36px -6px rgba(6, 59, 57, 0.12)",
-        "xl": "0 24px 48px -12px rgba(6, 59, 57, 0.16)",
-        "teal": "0 10px 30px -5px rgba(14, 110, 104, 0.25)"
+        "2xs": "0 1px 2px rgba(7, 94, 88, 0.04)",
+        "xs": "0 1px 3px rgba(7, 94, 88, 0.06)",
+        "sm": "0 2px 8px rgba(7, 94, 88, 0.05)",
+        "md": "0 8px 24px -4px rgba(7, 94, 88, 0.08)",
+        "lg": "0 16px 36px -6px rgba(7, 94, 88, 0.12)",
+        "xl": "0 24px 48px -12px rgba(7, 94, 88, 0.16)",
+        "teal": "0 10px 30px -5px rgba(8, 127, 115, 0.25)"
       },
       fontFamily: {
         "sans": ["Plus Jakarta Sans", "Inter", "-apple-system", "BlinkMacSystemFont", "sans-serif"],
-        "heading": ["Plus Jakarta Sans", "Manrope", "sans-serif"],
+        "heading": ["Plus Jakarta Sans", "sans-serif"],
+        "button": ["Plus Jakarta Sans", "sans-serif"],
         "mono": ["ui-monospace", "SFMono-Regular", "Menlo", "Monaco", "Consolas", "monospace"]
       },
       maxWidth: {
@@ -66,3 +76,4 @@ module.exports = {
   },
   plugins: [],
 }
+

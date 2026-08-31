@@ -80,7 +80,7 @@ import { WorkoraSelectComponent, WorkoraSelectOption } from '../../../shared/com
               <textarea 
                 formControlName="reason" 
                 rows="3" 
-                placeholder="e.g. Annual family vacation, personal medical appointment..."
+                placeholder="Reason / Handover Note"
                 class="workora-input !rounded-2xl !py-2.5 resize-none"
               ></textarea>
             </div>

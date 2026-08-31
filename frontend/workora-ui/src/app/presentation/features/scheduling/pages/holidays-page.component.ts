@@ -165,7 +165,7 @@ import { AuthService } from '../../../../core/services/auth.service';
               <div class="workora-modal-body space-y-4">
                 <div>
                   <label class="workora-label">Holiday Name <span class="text-rose-500">*</span></label>
-                  <input type="text" formControlName="name" placeholder="e.g. New Year's Day" class="workora-input !py-2.5" />
+                  <input type="text" formControlName="name" placeholder="Holiday Name" class="workora-input !py-2.5" />
                 </div>
 
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">

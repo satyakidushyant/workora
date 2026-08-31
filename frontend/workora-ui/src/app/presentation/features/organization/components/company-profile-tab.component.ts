@@ -36,7 +36,7 @@ import { WorkoraSelectComponent, WorkoraSelectOption } from '../../../shared/com
               <div class="flex items-center gap-3">
                 <h2 class="text-2xl font-extrabold text-[#063B39] tracking-tight font-heading">{{ company?.name || 'Workora Enterprise' }}</h2>
                 <span class="px-2.5 py-0.5 rounded-full text-xs font-bold bg-[#3FA79B]/15 text-[#0E6E68] border border-[#3FA79B]/30">
-                  {{ company?.code || 'CORP' }}
+                  {{ company?.code || 'WORKORA' }}
                 </span>
                 @if (company?.isActive) {
                   <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
@@ -71,13 +71,13 @@ import { WorkoraSelectComponent, WorkoraSelectOption } from '../../../shared/com
         </div>
 
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-          <!-- Company Name -->
+          <!-- Legal Name -->
           <div>
             <label class="block text-xs font-bold text-[#063B39] mb-1.5">Company Legal Name <span class="text-rose-500">*</span></label>
             <input 
               type="text" 
               formControlName="name" 
-              placeholder="e.g. Acme Technologies India Pvt Ltd"
+              placeholder="Company Legal Name"
               class="w-full px-3.5 py-2.5 bg-[#F4F8F7] focus:bg-white text-xs text-[#063B39] rounded-xl border border-[#DCEBE7] focus:border-[#0E6E68] focus:ring-2 focus:ring-[#0E6E68]/15 outline-none font-medium transition-all"
             />
             @if (form.get('name')?.invalid && form.get('name')?.touched) {
@@ -91,7 +91,7 @@ import { WorkoraSelectComponent, WorkoraSelectOption } from '../../../shared/com
             <input 
               type="text" 
               formControlName="registrationNumber" 
-              placeholder="e.g. U72200KA2023PTC123456"
+              placeholder="Registration / CIN Number"
               class="w-full px-3.5 py-2.5 bg-[#F4F8F7] focus:bg-white text-xs text-[#063B39] rounded-xl border border-[#DCEBE7] focus:border-[#0E6E68] focus:ring-2 focus:ring-[#0E6E68]/15 outline-none font-medium transition-all"
             />
           </div>
@@ -102,7 +102,7 @@ import { WorkoraSelectComponent, WorkoraSelectOption } from '../../../shared/com
             <input 
               type="text" 
               formControlName="taxId" 
-              placeholder="e.g. 29AAAAA0000A1Z5"
+              placeholder="Tax Identification / GSTIN"
               class="w-full px-3.5 py-2.5 bg-[#F4F8F7] focus:bg-white text-xs text-[#063B39] rounded-xl border border-[#DCEBE7] focus:border-[#0E6E68] focus:ring-2 focus:ring-[#0E6E68]/15 outline-none font-medium transition-all"
             />
           </div>
@@ -113,7 +113,7 @@ import { WorkoraSelectComponent, WorkoraSelectOption } from '../../../shared/com
             <input 
               type="email" 
               formControlName="email" 
-              placeholder="e.g. contact@company.in"
+              placeholder="Corporate Email"
               class="w-full px-3.5 py-2.5 bg-[#F4F8F7] focus:bg-white text-xs text-[#063B39] rounded-xl border border-[#DCEBE7] focus:border-[#0E6E68] focus:ring-2 focus:ring-[#0E6E68]/15 outline-none font-medium transition-all"
             />
           </div>
@@ -124,7 +124,7 @@ import { WorkoraSelectComponent, WorkoraSelectOption } from '../../../shared/com
             <input 
               type="tel" 
               formControlName="phone" 
-              placeholder="e.g. +91 80 1234 5678"
+              placeholder="Contact Phone"
               class="w-full px-3.5 py-2.5 bg-[#F4F8F7] focus:bg-white text-xs text-[#063B39] rounded-xl border border-[#DCEBE7] focus:border-[#0E6E68] focus:ring-2 focus:ring-[#0E6E68]/15 outline-none font-medium transition-all"
             />
           </div>
@@ -135,7 +135,7 @@ import { WorkoraSelectComponent, WorkoraSelectOption } from '../../../shared/com
             <input 
               type="url" 
               formControlName="website" 
-              placeholder="e.g. https://company.in"
+              placeholder="Website URL"
               class="w-full px-3.5 py-2.5 bg-[#F4F8F7] focus:bg-white text-xs text-[#063B39] rounded-xl border border-[#DCEBE7] focus:border-[#0E6E68] focus:ring-2 focus:ring-[#0E6E68]/15 outline-none font-medium transition-all"
             />
           </div>
@@ -146,7 +146,7 @@ import { WorkoraSelectComponent, WorkoraSelectOption } from '../../../shared/com
             <app-workora-select
               formControlName="currency"
               [options]="currencyOptions"
-              placeholder="Choose Currency"
+              placeholder="Select Currency"
               icon="payments"
             ></app-workora-select>
           </div>
@@ -168,7 +168,7 @@ import { WorkoraSelectComponent, WorkoraSelectOption } from '../../../shared/com
             <textarea 
               formControlName="address" 
               rows="3" 
-              placeholder="e.g. Brigade Gateway, Malleshwaram, Bengaluru, Karnataka 560055"
+              placeholder="Registered Headquarters Address"
               class="w-full px-3.5 py-2.5 bg-[#F4F8F7] focus:bg-white text-xs text-[#063B39] rounded-xl border border-[#DCEBE7] focus:border-[#0E6E68] focus:ring-2 focus:ring-[#0E6E68]/15 outline-none font-medium transition-all resize-none"
             ></textarea>
           </div>

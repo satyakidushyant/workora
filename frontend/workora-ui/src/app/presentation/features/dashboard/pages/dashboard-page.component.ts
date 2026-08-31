@@ -45,16 +45,16 @@ import { WorkoraEmptyStateComponent } from '../../../shared/components/workora-e
       <!-- Welcome Header -->
       <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 dash-header">
         <div class="space-y-1">
-          <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#DCEBE7] text-[11px] text-[#0E6E68] font-bold">
-            <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+          <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#DDF7F2] text-[11px] text-[#087F73] font-bold">
+            <span class="w-2 h-2 rounded-full bg-[#16A085] animate-pulse"></span>
             <span>Live Workspace Sync</span>
             <span>•</span>
-            <span class="text-[#063B39] font-semibold">{{ currentDate }}</span>
+            <span class="text-[#102A2A] font-semibold">{{ currentDate }}</span>
           </div>
-          <h1 class="text-xl xs:text-2xl sm:text-3xl font-extrabold text-[#063B39] tracking-tight font-heading">
+          <h1 class="text-xl xs:text-2xl sm:text-3xl font-extrabold text-[#102A2A] tracking-tight font-heading">
             Good {{ greetingTime }}, {{ currentUser()?.firstName || 'there' }} 👋
           </h1>
-          <p class="text-xs sm:text-sm text-slate-600">
+          <p class="text-xs sm:text-sm text-[#718686]">
             @if (authService.hasRole('SuperAdmin')) {
               Platform Oversight &amp; Multi-Tenant Operations Center.
             } @else if (authService.hasRole('HRAdmin')) {
@@ -72,21 +72,21 @@ import { WorkoraEmptyStateComponent } from '../../../shared/components/workora-e
         <!-- Header Action Buttons (Role-Tailored) -->
         <div class="flex items-center gap-2.5 w-full sm:w-auto">
           @if (authService.hasRole('SuperAdmin')) {
-            <a routerLink="/superadmin" class="workora-btn-primary text-xs px-4 sm:px-5 py-2 sm:py-2.5 shadow-md flex items-center justify-center gap-1.5 flex-1 sm:flex-initial">
+            <a routerLink="/organization" class="workora-btn-primary text-xs px-4 sm:px-5 py-2 sm:py-2.5 shadow-sm flex items-center justify-center gap-1.5 flex-1 sm:flex-initial">
               <span class="material-symbols-outlined text-base">domain_add</span>
-              <span>Manage Tenants</span>
+              <span>+ Create Organization</span>
             </a>
           } @else if (authService.hasRole('HRAdmin')) {
             <button (click)="onExportSummary()" class="workora-btn-secondary text-xs px-3.5 sm:px-4 py-2 sm:py-2.5 flex items-center justify-center gap-1.5 flex-1 sm:flex-initial">
               <span class="material-symbols-outlined text-base">download</span>
               <span>Export Summary</span>
             </button>
-            <a routerLink="/employees" class="workora-btn-primary text-xs px-4 sm:px-5 py-2 sm:py-2.5 shadow-md flex items-center justify-center gap-1.5 flex-1 sm:flex-initial">
+            <a routerLink="/employees" class="workora-btn-primary text-xs px-4 sm:px-5 py-2 sm:py-2.5 shadow-sm flex items-center justify-center gap-1.5 flex-1 sm:flex-initial">
               <span class="material-symbols-outlined text-base">person_add</span>
-              <span>Add Employee</span>
+              <span>+ Onboard Employee</span>
             </a>
           } @else if (authService.hasRole('FinanceManager')) {
-            <a routerLink="/payroll" class="workora-btn-primary text-xs px-4 sm:px-5 py-2 sm:py-2.5 shadow-md flex items-center justify-center gap-1.5 flex-1 sm:flex-initial">
+            <a routerLink="/payroll" class="workora-btn-primary text-xs px-4 sm:px-5 py-2 sm:py-2.5 shadow-sm flex items-center justify-center gap-1.5 flex-1 sm:flex-initial">
               <span class="material-symbols-outlined text-base">payments</span>
               <span>Run Payroll</span>
             </a>
@@ -95,12 +95,12 @@ import { WorkoraEmptyStateComponent } from '../../../shared/components/workora-e
               <span class="material-symbols-outlined text-base">fact_check</span>
               <span>Review Leaves</span>
             </a>
-            <a routerLink="/tasks" class="workora-btn-primary text-xs px-4 sm:px-5 py-2 sm:py-2.5 shadow-md flex items-center justify-center gap-1.5 flex-1 sm:flex-initial">
+            <a routerLink="/tasks" class="workora-btn-primary text-xs px-4 sm:px-5 py-2 sm:py-2.5 shadow-sm flex items-center justify-center gap-1.5 flex-1 sm:flex-initial">
               <span class="material-symbols-outlined text-base">add_task</span>
               <span>Assign Task</span>
             </a>
           } @else {
-            <a routerLink="/leave" class="workora-btn-primary text-xs px-4 sm:px-5 py-2 sm:py-2.5 shadow-md flex items-center justify-center gap-1.5 flex-1 sm:flex-initial">
+            <a routerLink="/leave" class="workora-btn-primary text-xs px-4 sm:px-5 py-2 sm:py-2.5 shadow-sm flex items-center justify-center gap-1.5 flex-1 sm:flex-initial">
               <span class="material-symbols-outlined text-base">beach_access</span>
               <span>Apply for Leave</span>
             </a>
@@ -120,120 +120,144 @@ import { WorkoraEmptyStateComponent } from '../../../shared/components/workora-e
         <!-- VIEW 1: SUPERADMIN PLATFORM DASHBOARD                                    -->
         <!-- ========================================================================= -->
         @if (authService.hasRole('SuperAdmin')) {
-          <!-- Focus Alerts for SuperAdmin -->
-          <div class="grid grid-cols-1 md:grid-cols-3 gap-3 sm:gap-4 dash-focus-grid">
-            <div class="bg-white p-4 rounded-2xl border border-amber-200/80 shadow-xs flex items-center justify-between gap-3">
-              <div class="flex items-center gap-3">
-                <div class="w-10 h-10 rounded-xl bg-amber-50 text-amber-700 flex items-center justify-center shrink-0">
-                  <span class="material-symbols-outlined text-xl">corporate_fare</span>
+          
+          @if (organizations().length === 0) {
+            <!-- Intentional Initial Zero-State for Clean Database -->
+            <div class="workora-card p-8 sm:p-12 text-center space-y-4 bg-gradient-to-b from-white to-[#F6FAF9] border border-[#DDE9E6]">
+              <div class="w-16 h-16 rounded-3xl bg-[#DDF7F2] text-[#087F73] flex items-center justify-center mx-auto shadow-2xs">
+                <span class="material-symbols-outlined text-3xl">add_business</span>
+              </div>
+              <div class="space-y-1">
+                <h3 class="text-xl font-extrabold text-[#102A2A] font-heading">
+                  Welcome to Workora Platform Console
+                </h3>
+                <p class="text-xs sm:text-sm text-[#718686] max-w-lg mx-auto">
+                  No customer organizations exist in the system yet. Register your first customer tenant organization to provision branches and onboard workforce members.
+                </p>
+              </div>
+              <div class="pt-2">
+                <a routerLink="/organization" class="workora-btn-primary text-xs shadow-sm">
+                  <span class="material-symbols-outlined text-base">add_business</span>
+                  <span>+ Create First Organization</span>
+                </a>
+              </div>
+            </div>
+          } @else {
+            <!-- Focus Alerts for SuperAdmin -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-3 sm:gap-4 dash-focus-grid">
+              <div class="bg-white p-4 rounded-2xl border border-amber-200/80 shadow-xs flex items-center justify-between gap-3">
+                <div class="flex items-center gap-3">
+                  <div class="w-10 h-10 rounded-xl bg-amber-50 text-amber-700 flex items-center justify-center shrink-0">
+                    <span class="material-symbols-outlined text-xl">corporate_fare</span>
+                  </div>
+                  <div>
+                    <h4 class="text-xs font-bold text-[#102A2A]">{{ organizations().length }} Tenant Organizations</h4>
+                    <p class="text-[11px] text-[#718686]">Live SaaS Provisioning</p>
+                  </div>
                 </div>
+                <a routerLink="/organization" class="px-3 py-1.5 bg-[#087F73] hover:bg-[#075E58] text-white text-[11px] font-bold rounded-lg transition-colors cursor-pointer shrink-0">
+                  Manage
+                </a>
+              </div>
+
+              <div class="bg-white p-4 rounded-2xl border border-emerald-200/80 shadow-xs flex items-center justify-between gap-3">
+                <div class="flex items-center gap-3">
+                  <div class="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-700 flex items-center justify-center shrink-0">
+                    <span class="material-symbols-outlined text-xl">verified_user</span>
+                  </div>
+                  <div>
+                    <h4 class="text-xs font-bold text-[#102A2A]">Audit &amp; Security Health</h4>
+                    <p class="text-[11px] text-emerald-700 font-semibold">Active Monitoring</p>
+                  </div>
+                </div>
+                <a routerLink="/audit-logs" class="px-2.5 py-1 bg-emerald-50 text-emerald-700 text-[10px] font-bold rounded-full border border-emerald-200 shrink-0">
+                  Audit Logs
+                </a>
+              </div>
+
+              <div class="bg-white p-4 rounded-2xl border border-[#DDE9E6] shadow-xs flex items-center justify-between gap-3">
+                <div class="flex items-center gap-3">
+                  <div class="w-10 h-10 rounded-xl bg-[#DDF7F2] text-[#087F73] flex items-center justify-center shrink-0">
+                    <span class="material-symbols-outlined text-xl">subscriptions</span>
+                  </div>
+                  <div>
+                    <h4 class="text-xs font-bold text-[#102A2A]">SaaS Subscription Plans</h4>
+                    <p class="text-[11px] text-[#718686]">Tier Management</p>
+                  </div>
+                </div>
+                <a routerLink="/superadmin" class="px-3 py-1.5 bg-[#DDF7F2] hover:bg-[#087F73] hover:text-white text-[#075E58] text-[11px] font-bold rounded-lg transition-colors cursor-pointer shrink-0">
+                  Configure
+                </a>
+              </div>
+            </div>
+
+            <!-- SuperAdmin Stats Grid -->
+            <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-5 dash-stats-grid">
+              <div class="workora-card p-4 sm:p-5 rounded-2xl bg-white border border-[#DDE9E6] shadow-xs stat-card flex flex-col justify-between">
                 <div>
-                  <h4 class="text-xs font-bold text-[#063B39]">{{ organizations().length }} Tenant Organizations</h4>
-                  <p class="text-[11px] text-slate-500">Live SaaS Provisioning</p>
+                  <div class="flex justify-between items-start mb-2 sm:mb-3">
+                    <div class="w-9 h-9 rounded-xl bg-[#DDF7F2] text-[#087F73] flex items-center justify-center shrink-0">
+                      <span class="material-symbols-outlined text-lg">domain</span>
+                    </div>
+                    <span class="workora-badge-success text-[10px] sm:text-xs">Active</span>
+                  </div>
+                  <p class="text-[10px] sm:text-xs font-bold text-[#718686] uppercase tracking-wider">Tenant Organizations</p>
+                  <h3 class="text-xl sm:text-2xl font-extrabold text-[#102A2A] mt-0.5 font-heading">
+                    {{ metrics()?.totalOrganizations ?? organizations().length }} Orgs
+                  </h3>
                 </div>
+                <p class="text-[10px] sm:text-[11px] text-[#718686] mt-2">Active Multi-Tenancy</p>
               </div>
-              <a routerLink="/superadmin" class="px-3 py-1.5 bg-[#0E6E68] hover:bg-[#063B39] text-white text-[11px] font-bold rounded-lg transition-colors cursor-pointer shrink-0">
-                Manage
-              </a>
-            </div>
 
-            <div class="bg-white p-4 rounded-2xl border border-emerald-200/80 shadow-xs flex items-center justify-between gap-3">
-              <div class="flex items-center gap-3">
-                <div class="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-700 flex items-center justify-center shrink-0">
-                  <span class="material-symbols-outlined text-xl">verified_user</span>
-                </div>
+              <div class="workora-card p-4 sm:p-5 rounded-2xl bg-white border border-[#DDE9E6] shadow-xs stat-card flex flex-col justify-between">
                 <div>
-                  <h4 class="text-xs font-bold text-[#063B39]">Audit &amp; Security Health</h4>
-                  <p class="text-[11px] text-emerald-700 font-semibold">Active Monitoring</p>
+                  <div class="flex justify-between items-start mb-2 sm:mb-3">
+                    <div class="w-9 h-9 rounded-xl bg-[#DDF7F2] text-[#0E9F8E] flex items-center justify-center shrink-0">
+                      <span class="material-symbols-outlined text-lg">badge</span>
+                    </div>
+                    <span class="workora-badge-teal text-[10px] sm:text-xs">Global</span>
+                  </div>
+                  <p class="text-[10px] sm:text-xs font-bold text-[#718686] uppercase tracking-wider">Total System Users</p>
+                  <h3 class="text-xl sm:text-2xl font-extrabold text-[#102A2A] mt-0.5 font-heading">
+                    {{ metrics()?.totalSystemUsers ?? '-' }} Users
+                  </h3>
                 </div>
+                <p class="text-[10px] sm:text-[11px] text-[#718686] mt-2">Platform-wide accounts</p>
               </div>
-              <a routerLink="/audit-logs" class="px-2.5 py-1 bg-emerald-50 text-emerald-700 text-[10px] font-bold rounded-full border border-emerald-200 shrink-0">
-                Audit Logs
-              </a>
-            </div>
 
-            <div class="bg-white p-4 rounded-2xl border border-[#DCEBE7] shadow-xs flex items-center justify-between gap-3">
-              <div class="flex items-center gap-3">
-                <div class="w-10 h-10 rounded-xl bg-[#DCEBE7] text-[#0E6E68] flex items-center justify-center shrink-0">
-                  <span class="material-symbols-outlined text-xl">subscriptions</span>
-                </div>
+              <div class="workora-card p-4 sm:p-5 rounded-2xl bg-white border border-[#DDE9E6] shadow-xs stat-card flex flex-col justify-between">
                 <div>
-                  <h4 class="text-xs font-bold text-[#063B39]">SaaS Subscription Plans</h4>
-                  <p class="text-[11px] text-slate-500">Tier Management</p>
-                </div>
-              </div>
-              <a routerLink="/superadmin" class="px-3 py-1.5 bg-[#DCEBE7] hover:bg-[#0E6E68] hover:text-white text-[#063B39] text-[11px] font-bold rounded-lg transition-colors cursor-pointer shrink-0">
-                Configure
-              </a>
-            </div>
-          </div>
-
-          <!-- SuperAdmin Stats Grid -->
-          <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-5 dash-stats-grid">
-            <div class="workora-card p-4 sm:p-5 rounded-2xl bg-white border border-[#DCEBE7] shadow-xs stat-card flex flex-col justify-between">
-              <div>
-                <div class="flex justify-between items-start mb-2 sm:mb-3">
-                  <div class="w-9 h-9 rounded-xl bg-[#DCEBE7] text-[#0E6E68] flex items-center justify-center shrink-0">
-                    <span class="material-symbols-outlined text-lg">domain</span>
+                  <div class="flex justify-between items-start mb-2 sm:mb-3">
+                    <div class="w-9 h-9 rounded-xl bg-[#DDF7F2] text-[#087F73] flex items-center justify-center shrink-0">
+                      <span class="material-symbols-outlined text-lg">groups</span>
+                    </div>
+                    <span class="text-[#087F73] text-[10px] sm:text-xs font-bold bg-[#DDF7F2] px-2 py-0.5 rounded-full">Workforce</span>
                   </div>
-                  <span class="workora-badge-success text-[10px] sm:text-xs">Active</span>
+                  <p class="text-[10px] sm:text-xs font-bold text-[#718686] uppercase tracking-wider">Managed Employees</p>
+                  <h3 class="text-xl sm:text-2xl font-extrabold text-[#102A2A] mt-0.5 font-heading">
+                    {{ metrics()?.totalEmployees ?? '-' }} Staff
+                  </h3>
                 </div>
-                <p class="text-[10px] sm:text-xs font-bold text-slate-500 uppercase tracking-wider">Tenant Organizations</p>
-                <h3 class="text-xl sm:text-2xl font-extrabold text-[#063B39] mt-0.5 font-heading">
-                  {{ metrics()?.totalOrganizations ?? organizations().length }} Orgs
-                </h3>
+                <p class="text-[10px] sm:text-[11px] text-[#16A085] font-semibold mt-2">All Tenant Workforce</p>
               </div>
-              <p class="text-[10px] sm:text-[11px] text-slate-500 mt-2">Active Multi-Tenancy</p>
-            </div>
 
-            <div class="workora-card p-4 sm:p-5 rounded-2xl bg-white border border-[#DCEBE7] shadow-xs stat-card flex flex-col justify-between">
-              <div>
-                <div class="flex justify-between items-start mb-2 sm:mb-3">
-                  <div class="w-9 h-9 rounded-xl bg-[#DCEBE7] text-[#3FA79B] flex items-center justify-center shrink-0">
-                    <span class="material-symbols-outlined text-lg">badge</span>
+              <div class="workora-card p-4 sm:p-5 rounded-2xl bg-white border border-[#DDE9E6] shadow-xs stat-card flex flex-col justify-between">
+                <div>
+                  <div class="flex justify-between items-start mb-2 sm:mb-3">
+                    <div class="w-9 h-9 rounded-xl bg-emerald-50 text-[#16A085] flex items-center justify-center shrink-0">
+                      <span class="material-symbols-outlined text-lg">admin_panel_settings</span>
+                    </div>
+                    <span class="workora-badge-success text-[10px] sm:text-xs">Security</span>
                   </div>
-                  <span class="workora-badge-teal text-[10px] sm:text-xs">Global</span>
+                  <p class="text-[10px] sm:text-xs font-bold text-[#718686] uppercase tracking-wider">Active Organizations</p>
+                  <h3 class="text-xl sm:text-2xl font-extrabold text-[#102A2A] mt-0.5 font-heading">
+                    {{ metrics()?.activeOrganizations ?? '-' }} Active
+                  </h3>
                 </div>
-                <p class="text-[10px] sm:text-xs font-bold text-slate-500 uppercase tracking-wider">Total System Users</p>
-                <h3 class="text-xl sm:text-2xl font-extrabold text-[#063B39] mt-0.5 font-heading">
-                  {{ metrics()?.totalSystemUsers ?? '-' }} Users
-                </h3>
+                <p class="text-[10px] sm:text-[11px] text-[#718686] mt-2">Operational tenants</p>
               </div>
-              <p class="text-[10px] sm:text-[11px] text-slate-500 mt-2">Platform-wide accounts</p>
             </div>
-
-            <div class="workora-card p-4 sm:p-5 rounded-2xl bg-white border border-[#DCEBE7] shadow-xs stat-card flex flex-col justify-between">
-              <div>
-                <div class="flex justify-between items-start mb-2 sm:mb-3">
-                  <div class="w-9 h-9 rounded-xl bg-[#DCEBE7] text-[#0E6E68] flex items-center justify-center shrink-0">
-                    <span class="material-symbols-outlined text-lg">groups</span>
-                  </div>
-                  <span class="text-[#0E6E68] text-[10px] sm:text-xs font-bold bg-[#DCEBE7]/50 px-2 py-0.5 rounded-full">Workforce</span>
-                </div>
-                <p class="text-[10px] sm:text-xs font-bold text-slate-500 uppercase tracking-wider">Managed Employees</p>
-                <h3 class="text-xl sm:text-2xl font-extrabold text-[#063B39] mt-0.5 font-heading">
-                  {{ metrics()?.totalEmployees ?? '-' }} Staff
-                </h3>
-              </div>
-              <p class="text-[10px] sm:text-[11px] text-emerald-600 font-semibold mt-2">All Tenant Workforce</p>
-            </div>
-
-            <div class="workora-card p-4 sm:p-5 rounded-2xl bg-white border border-[#DCEBE7] shadow-xs stat-card flex flex-col justify-between">
-              <div>
-                <div class="flex justify-between items-start mb-2 sm:mb-3">
-                  <div class="w-9 h-9 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0">
-                    <span class="material-symbols-outlined text-lg">admin_panel_settings</span>
-                  </div>
-                  <span class="workora-badge-success text-[10px] sm:text-xs">Security</span>
-                </div>
-                <p class="text-[10px] sm:text-xs font-bold text-slate-500 uppercase tracking-wider">Active Organizations</p>
-                <h3 class="text-xl sm:text-2xl font-extrabold text-[#063B39] mt-0.5 font-heading">
-                  {{ metrics()?.activeOrganizations ?? '-' }} Active
-                </h3>
-              </div>
-              <p class="text-[10px] sm:text-[11px] text-slate-500 mt-2">Operational tenants</p>
-            </div>
-          </div>
+          }
         }
 
         <!-- ========================================================================= -->

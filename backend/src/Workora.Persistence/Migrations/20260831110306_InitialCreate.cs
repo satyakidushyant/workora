@@ -98,6 +98,32 @@ namespace Workora.Persistence.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "financial_years",
+                columns: table => new
+                {
+                    id = table.Column<int>(type: "integer", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    name = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: false),
+                    start_date = table.Column<DateOnly>(type: "date", nullable: false),
+                    end_date = table.Column<DateOnly>(type: "date", nullable: false),
+                    is_current = table.Column<bool>(type: "boolean", nullable: false),
+                    is_closed = table.Column<bool>(type: "boolean", nullable: false),
+                    uuid = table.Column<Guid>(type: "uuid", nullable: false),
+                    is_active = table.Column<bool>(type: "boolean", nullable: false),
+                    created_at = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
+                    created_by = table.Column<Guid>(type: "uuid", nullable: true),
+                    updated_at = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: true),
+                    updated_by = table.Column<Guid>(type: "uuid", nullable: true),
+                    is_deleted = table.Column<bool>(type: "boolean", nullable: false),
+                    deleted_at = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: true),
+                    deleted_by = table.Column<Guid>(type: "uuid", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("pk_financial_years", x => x.id);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "leave_types",
                 columns: table => new
                 {
@@ -143,6 +169,30 @@ namespace Workora.Persistence.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("pk_login_audit_logs", x => x.id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "onboarding_checklists",
+                columns: table => new
+                {
+                    id = table.Column<int>(type: "integer", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    task_name = table.Column<string>(type: "character varying(150)", maxLength: 150, nullable: false),
+                    assigned_role = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: false),
+                    is_mandatory = table.Column<bool>(type: "boolean", nullable: false),
+                    uuid = table.Column<Guid>(type: "uuid", nullable: false),
+                    is_active = table.Column<bool>(type: "boolean", nullable: false),
+                    created_at = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
+                    created_by = table.Column<Guid>(type: "uuid", nullable: true),
+                    updated_at = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: true),
+                    updated_by = table.Column<Guid>(type: "uuid", nullable: true),
+                    is_deleted = table.Column<bool>(type: "boolean", nullable: false),
+                    deleted_at = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: true),
+                    deleted_by = table.Column<Guid>(type: "uuid", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("pk_onboarding_checklists", x => x.id);
                 });
 
             migrationBuilder.CreateTable(
@@ -1089,6 +1139,50 @@ namespace Workora.Persistence.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "employee_onboardings",
+                columns: table => new
+                {
+                    id = table.Column<int>(type: "integer", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    employee_id = table.Column<int>(type: "integer", nullable: false),
+                    checklist_id = table.Column<int>(type: "integer", nullable: false),
+                    is_completed = table.Column<bool>(type: "boolean", nullable: false),
+                    verified_by_employee_id = table.Column<int>(type: "integer", nullable: true),
+                    verified_at = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: true),
+                    uuid = table.Column<Guid>(type: "uuid", nullable: false),
+                    is_active = table.Column<bool>(type: "boolean", nullable: false),
+                    created_at = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
+                    created_by = table.Column<Guid>(type: "uuid", nullable: true),
+                    updated_at = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: true),
+                    updated_by = table.Column<Guid>(type: "uuid", nullable: true),
+                    is_deleted = table.Column<bool>(type: "boolean", nullable: false),
+                    deleted_at = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: true),
+                    deleted_by = table.Column<Guid>(type: "uuid", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("pk_employee_onboardings", x => x.id);
+                    table.ForeignKey(
+                        name: "fk_employee_onboardings_employees_employee_id",
+                        column: x => x.employee_id,
+                        principalTable: "employees",
+                        principalColumn: "id",
+                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "fk_employee_onboardings_employees_verified_by_employee_id",
+                        column: x => x.verified_by_employee_id,
+                        principalTable: "employees",
+                        principalColumn: "id",
+                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "fk_employee_onboardings_onboarding_checklists_checklist_id",
+                        column: x => x.checklist_id,
+                        principalTable: "onboarding_checklists",
+                        principalColumn: "id",
+                        onDelete: ReferentialAction.Restrict);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "employee_salary_assignments",
                 columns: table => new
                 {
@@ -1453,6 +1547,41 @@ namespace Workora.Persistence.Migrations
                     table.PrimaryKey("pk_loan_records", x => x.id);
                     table.ForeignKey(
                         name: "fk_loan_records_employees_employee_id",
+                        column: x => x.employee_id,
+                        principalTable: "employees",
+                        principalColumn: "id",
+                        onDelete: ReferentialAction.Restrict);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "overtime_requests",
+                columns: table => new
+                {
+                    id = table.Column<int>(type: "integer", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    employee_id = table.Column<int>(type: "integer", nullable: false),
+                    overtime_date = table.Column<DateOnly>(type: "date", nullable: false),
+                    start_time = table.Column<TimeOnly>(type: "time without time zone", nullable: false),
+                    end_time = table.Column<TimeOnly>(type: "time without time zone", nullable: false),
+                    hours_requested = table.Column<decimal>(type: "numeric(5,2)", nullable: false),
+                    reason = table.Column<string>(type: "character varying(500)", maxLength: 500, nullable: false),
+                    status = table.Column<int>(type: "integer", nullable: false),
+                    payroll_run_id = table.Column<int>(type: "integer", nullable: true),
+                    uuid = table.Column<Guid>(type: "uuid", nullable: false),
+                    is_active = table.Column<bool>(type: "boolean", nullable: false),
+                    created_at = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
+                    created_by = table.Column<Guid>(type: "uuid", nullable: true),
+                    updated_at = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: true),
+                    updated_by = table.Column<Guid>(type: "uuid", nullable: true),
+                    is_deleted = table.Column<bool>(type: "boolean", nullable: false),
+                    deleted_at = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: true),
+                    deleted_by = table.Column<Guid>(type: "uuid", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("pk_overtime_requests", x => x.id);
+                    table.ForeignKey(
+                        name: "fk_overtime_requests_employees_employee_id",
                         column: x => x.employee_id,
                         principalTable: "employees",
                         principalColumn: "id",
@@ -1942,6 +2071,22 @@ namespace Workora.Persistence.Migrations
                 column: "employee_id");
 
             migrationBuilder.CreateIndex(
+                name: "ix_employee_onboardings_checklist_id",
+                table: "employee_onboardings",
+                column: "checklist_id");
+
+            migrationBuilder.CreateIndex(
+                name: "ix_employee_onboardings_employee_id_checklist_id",
+                table: "employee_onboardings",
+                columns: new[] { "employee_id", "checklist_id" },
+                unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "ix_employee_onboardings_verified_by_employee_id",
+                table: "employee_onboardings",
+                column: "verified_by_employee_id");
+
+            migrationBuilder.CreateIndex(
                 name: "ix_employee_salary_assignments_employee_id",
                 table: "employee_salary_assignments",
                 column: "employee_id");
@@ -2129,6 +2274,21 @@ namespace Workora.Persistence.Migrations
                 columns: new[] { "user_id", "is_read" });
 
             migrationBuilder.CreateIndex(
+                name: "ix_overtime_requests_employee_id_overtime_date",
+                table: "overtime_requests",
+                columns: new[] { "employee_id", "overtime_date" });
+
+            migrationBuilder.CreateIndex(
+                name: "ix_overtime_requests_overtime_date",
+                table: "overtime_requests",
+                column: "overtime_date");
+
+            migrationBuilder.CreateIndex(
+                name: "ix_overtime_requests_status",
+                table: "overtime_requests",
+                column: "status");
+
+            migrationBuilder.CreateIndex(
                 name: "ix_password_reset_tokens_token_hash",
                 table: "password_reset_tokens",
                 column: "token_hash",
@@ -2277,6 +2437,9 @@ namespace Workora.Persistence.Migrations
                 name: "employee_employment_history");
 
             migrationBuilder.DropTable(
+                name: "employee_onboardings");
+
+            migrationBuilder.DropTable(
                 name: "employee_salary_assignments");
 
             migrationBuilder.DropTable(
@@ -2290,6 +2453,9 @@ namespace Workora.Persistence.Migrations
 
             migrationBuilder.DropTable(
                 name: "field_visits");
+
+            migrationBuilder.DropTable(
+                name: "financial_years");
 
             migrationBuilder.DropTable(
                 name: "goals");
@@ -2320,6 +2486,9 @@ namespace Workora.Persistence.Migrations
 
             migrationBuilder.DropTable(
                 name: "notifications");
+
+            migrationBuilder.DropTable(
+                name: "overtime_requests");
 
             migrationBuilder.DropTable(
                 name: "password_reset_tokens");
@@ -2359,6 +2528,9 @@ namespace Workora.Persistence.Migrations
 
             migrationBuilder.DropTable(
                 name: "attendance_records");
+
+            migrationBuilder.DropTable(
+                name: "onboarding_checklists");
 
             migrationBuilder.DropTable(
                 name: "helpdesk_tickets");

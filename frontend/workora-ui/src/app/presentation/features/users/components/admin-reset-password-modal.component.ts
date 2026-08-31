@@ -165,6 +165,9 @@ export class AdminResetPasswordModalComponent implements OnInit, AfterViewInit, 
   }
 
   ngOnInit(): void {
+    if (isPlatformBrowser(this.platformId)) {
+      document.body.appendChild(this.elementRef.nativeElement);
+    }
     this.resetForm = this.fb.group({
       newPassword: ['', [Validators.required, Validators.minLength(8)]],
       confirmPassword: ['', [Validators.required]]
@@ -184,6 +187,9 @@ export class AdminResetPasswordModalComponent implements OnInit, AfterViewInit, 
 
   ngOnDestroy(): void {
     this.ctx?.revert();
+    if (isPlatformBrowser(this.platformId) && this.elementRef.nativeElement.parentElement === document.body) {
+      document.body.removeChild(this.elementRef.nativeElement);
+    }
   }
 
   private passwordMatchValidator(group: FormGroup) {

@@ -43,7 +43,7 @@ import { WorkoraSelectComponent, WorkoraSelectOption } from '../../../shared/com
               <input 
                 type="text" 
                 formControlName="title" 
-                placeholder="e.g. Prepare Q3 audit documentation"
+                placeholder="Task Title"
                 class="workora-input !py-2.5"
               />
             </div>

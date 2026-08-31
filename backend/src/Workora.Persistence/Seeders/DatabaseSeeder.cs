@@ -8,27 +8,35 @@ using Workora.Domain.ValueObjects;
 namespace Workora.Persistence.Seeders;
 
 /// <summary>
-/// Seeds initial foundational database records including system permissions, tiered system roles,
-/// SaaS subscription plans, and root platform administrator accounts.
+/// Seeds foundational Workora platform data.
+///
+/// This seeder is safe to run multiple times.
+/// It creates missing system data and synchronizes
+/// system role permission mappings.
 /// </summary>
-public class DatabaseSeeder
+public sealed class DatabaseSeeder
 {
     private readonly AppDbContext _context;
     private readonly IPasswordHasher _passwordHasher;
     private readonly ILogger<DatabaseSeeder> _logger;
 
-    /// <summary>
-    /// Default password configured for initial platform root administrator accounts.
-    /// </summary>
+    /*
+     * IMPORTANT:
+     * For production, move this password to:
+     *
+     * Environment Variable:
+     * WORKORA_SUPERADMIN_PASSWORD
+     *
+     * Do not keep production passwords in source code.
+     */
     private const string DefaultPassword = "Admin@123";
 
-    /// <summary>
-    /// Initializes a new instance of the <see cref="DatabaseSeeder"/> class.
-    /// </summary>
-    /// <param name="context">The database context instance.</param>
-    /// <param name="passwordHasher">The cryptographic password hasher service.</param>
-    /// <param name="logger">The structured logging service.</param>
-    public DatabaseSeeder(AppDbContext context, IPasswordHasher passwordHasher, ILogger<DatabaseSeeder> logger)
+    private const string SuperAdminEmail = "admin@workora.com";
+
+    public DatabaseSeeder(
+        AppDbContext context,
+        IPasswordHasher passwordHasher,
+        ILogger<DatabaseSeeder> logger)
     {
         _context = context;
         _passwordHasher = passwordHasher;
@@ -36,274 +44,801 @@ public class DatabaseSeeder
     }
 
     /// <summary>
-    /// Seeds the database with essential platform definitions and root administrator accounts.
+    /// Executes all database seeding operations.
     /// </summary>
-    /// <returns>A asynchronous task representing the seeding operation.</returns>
     public async Task SeedAsync()
     {
+        _logger.LogInformation(
+            "Starting Workora database seeding process...");
+
+        var canConnect = await _context.Database.CanConnectAsync();
+
+        if (!canConnect)
+        {
+            _logger.LogWarning(
+                "Database connection failed. Seeding skipped.");
+
+            return;
+        }
+
+        await using var transaction =
+            await _context.Database.BeginTransactionAsync();
+
         try
         {
-            if (await _context.Database.CanConnectAsync())
-            {
-                _logger.LogInformation("Starting database seeding process (Root Admin & System Definitions)...");
+            // =========================================================
+            // 1. SYSTEM PERMISSIONS
+            // =========================================================
+            await SeedPermissionsAsync();
 
-                // 1. Seed Permissions Catalog
-                await SeedPermissionsAsync();
+            // Permissions must be saved before role mappings.
+            await _context.SaveChangesAsync();
 
-                // 2. Seed System Roles with appropriate Permission Mappings
-                await SeedRolesAsync();
+            // =========================================================
+            // 2. SYSTEM ROLES
+            // =========================================================
+            await SeedRolesAsync();
 
-                // 3. Seed Subscription Plans (SuperAdmin SaaS module)
-                await SeedSubscriptionPlansAsync();
+            await _context.SaveChangesAsync();
 
-                // 4. Seed Root SuperAdmin User Accounts
-                await SeedSuperAdminUsersAsync();
+            // =========================================================
+            // 3. SUBSCRIPTION PLANS
+            // =========================================================
+            await SeedSubscriptionPlansAsync();
 
-                _logger.LogInformation("Database seeding completed successfully. Only Root Admin and system roles/permissions are provisioned.");
-            }
+            await _context.SaveChangesAsync();
+
+            // =========================================================
+            // 4. ROOT SUPER ADMIN
+            // =========================================================
+            await SeedSuperAdminUsersAsync();
+
+            await _context.SaveChangesAsync();
+
+            // =========================================================
+            // COMMIT
+            // =========================================================
+            await transaction.CommitAsync();
+
+            _logger.LogInformation(
+                "Workora database seeding completed successfully.");
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "An error occurred while seeding the database.");
+            await transaction.RollbackAsync();
+
+            _logger.LogError(
+                ex,
+                "Database seeding failed. Transaction rolled back.");
+
             throw;
         }
     }
 
+    #region Permissions
+
     /// <summary>
-    /// Synchronizes the compiled permission catalog into the database.
+    /// Synchronizes the system permission catalog into the database.
+    /// Only missing permissions are added.
     /// </summary>
     private async Task SeedPermissionsAsync()
     {
-        var existingCodes = await _context.Permissions.Select(p => p.Code.ToLower()).ToListAsync();
-        var newPermissions = PermissionCatalog.SystemPermissions
-            .Where(p => !existingCodes.Contains(p.Code.ToLowerInvariant()))
-            .Select(p => Permission.Create(p.Code, p.Name, p.Module, p.Description))
-            .ToList();
+        _logger.LogInformation(
+            "Checking system permissions...");
 
-        if (newPermissions.Any())
+        var existingCodes = await _context.Permissions
+            .Select(p => p.Code)
+            .ToListAsync();
+
+        var existingCodeSet =
+            existingCodes.ToHashSet(
+                StringComparer.OrdinalIgnoreCase);
+
+        var permissionsToAdd =
+            PermissionCatalog.SystemPermissions
+                .Where(permission =>
+                    !existingCodeSet.Contains(permission.Code))
+                .Select(permission =>
+                    Permission.Create(
+                        permission.Code,
+                        permission.Name,
+                        permission.Module,
+                        permission.Description))
+                .ToList();
+
+        if (!permissionsToAdd.Any())
         {
-            _logger.LogInformation("Seeding {Count} system permissions...", newPermissions.Count);
-            await _context.Permissions.AddRangeAsync(newPermissions);
-            await _context.SaveChangesAsync();
+            _logger.LogInformation(
+                "All system permissions already exist.");
+
+            return;
         }
+
+        await _context.Permissions.AddRangeAsync(
+            permissionsToAdd);
+
+        _logger.LogInformation(
+            "{Count} new permissions added.",
+            permissionsToAdd.Count);
     }
 
+    #endregion
+
+    #region Roles
+
     /// <summary>
-    /// Seeds core tiered system roles (SuperAdmin, HRAdmin, FinanceManager, Manager, Employee) and maps permissions.
+    /// Seeds and synchronizes all Workora system roles.
     /// </summary>
     private async Task SeedRolesAsync()
     {
-        var allPermissions = await _context.Permissions.ToListAsync();
-        var permissionMap = allPermissions.ToDictionary(p => p.Code, p => p.Id, StringComparer.OrdinalIgnoreCase);
+        _logger.LogInformation(
+            "Starting system role seeding...");
 
-        // 1. SuperAdmin Role (Unrestricted platform access)
-        await UpsertRoleWithPermissionsAsync(
-            roleName: "SuperAdmin",
-            description: "Full platform owner with unrestricted access across all tenant organizations and system settings.",
-            assignedPermissionCodes: permissionMap.Keys,
-            permissionMap: permissionMap);
+        var allPermissions =
+            await _context.Permissions
+                .AsNoTracking()
+                .ToListAsync();
 
-        // 2. HRAdmin Role
-        var hrAdminPermissions = permissionMap.Keys.Where(code =>
-            code.StartsWith("auth.") ||
-            code.StartsWith("users.") ||
-            code.StartsWith("company.") || code.StartsWith("companies.") ||
-            code.StartsWith("branches.") ||
-            code.StartsWith("departments.") ||
-            code.StartsWith("designations.") ||
-            code.StartsWith("employees.") ||
-            code.StartsWith("shifts.") ||
-            code.StartsWith("holidays.") ||
-            code.StartsWith("attendance.") ||
-            code.StartsWith("leave.") ||
-            code.StartsWith("recruitment.") ||
-            code.StartsWith("onboarding.") ||
-            code.StartsWith("performance.") ||
-            code.StartsWith("training.") ||
-            code.StartsWith("assets.") ||
-            code.StartsWith("helpdesk.") ||
-            code.StartsWith("documents.") ||
-            code.StartsWith("policies.") ||
-            code.StartsWith("reports.") ||
-            code.StartsWith("dashboard.") ||
-            code.StartsWith("settings.view")).ToList();
+        var permissionMap =
+            allPermissions.ToDictionary(
+                permission => permission.Code,
+                permission => permission.Id,
+                StringComparer.OrdinalIgnoreCase);
 
-        await UpsertRoleWithPermissionsAsync(
-            roleName: "HRAdmin",
-            description: "Tenant human resources administrator managing workforce lifecycle, time, leaves, and policies.",
-            assignedPermissionCodes: hrAdminPermissions,
-            permissionMap: permissionMap);
+        var roleDefinitions =
+            GetRoleDefinitions(permissionMap);
 
-        // 3. FinanceManager Role
-        var financePermissions = permissionMap.Keys.Where(code =>
-            code.StartsWith("auth.") ||
-            code.StartsWith("company.view") ||
-            code.StartsWith("branches.view") ||
-            code.StartsWith("departments.view") ||
-            code.StartsWith("designations.view") ||
-            code.StartsWith("employees.view") ||
-            code.StartsWith("salary.") ||
-            code.StartsWith("payroll.") ||
-            code.StartsWith("compliance.") ||
-            code.StartsWith("loans.") ||
-            code.StartsWith("expenses.") ||
-            code.StartsWith("reports.") ||
-            code.StartsWith("dashboard.")).ToList();
+        foreach (var roleDefinition in roleDefinitions)
+        {
+            await UpsertRoleWithPermissionsAsync(
+                roleDefinition.Name,
+                roleDefinition.Description,
+                roleDefinition.PermissionCodes,
+                permissionMap);
+        }
 
-        await UpsertRoleWithPermissionsAsync(
-            roleName: "FinanceManager",
-            description: "Tenant finance and payroll officer managing compensation, statutory compliance, loans, and batch runs.",
-            assignedPermissionCodes: financePermissions,
-            permissionMap: permissionMap);
-
-        // 4. Manager Role
-        var managerPermissions = permissionMap.Keys.Where(code =>
-            code.StartsWith("auth.") ||
-            code.StartsWith("company.view") ||
-            code.StartsWith("employees.view") ||
-            code.StartsWith("departments.view") ||
-            code.StartsWith("designations.view") ||
-            code.StartsWith("branches.view") ||
-            code.StartsWith("shifts.view") ||
-            code.StartsWith("holidays.view") ||
-            code == "attendance.view" || code == "attendance.approve" || code == "attendance.self" ||
-            code == "leave.view" || code == "leave.approve" || code == "leave.apply" || code == "leave.self" ||
-            code == "expenses.view" || code == "expenses.approve" || code == "expenses.submit" ||
-            code.StartsWith("tasks.") ||
-            code.StartsWith("performance.") ||
-            code == "helpdesk.view" || code == "helpdesk.create" ||
-            code.StartsWith("documents.view") ||
-            code.StartsWith("policies.view") ||
-            code == "reports.view" ||
-            code == "dashboard.view" ||
-            code == "payroll.self" ||
-            code == "loans.apply" || code == "loans.view" ||
-            code == "employees.self").ToList();
-
-        await UpsertRoleWithPermissionsAsync(
-            roleName: "Manager",
-            description: "People manager with team approval authority over attendance, leave, expenses, and performance reviews.",
-            assignedPermissionCodes: managerPermissions,
-            permissionMap: permissionMap);
-
-        // 5. Employee Role (Level 3 ESS)
-        var employeePermissions = permissionMap.Keys.Where(code =>
-            code.StartsWith("auth.") ||
-            code == "employees.self" ||
-            code == "employees.view" ||
-            code == "departments.view" ||
-            code == "designations.view" ||
-            code == "branches.view" ||
-            code == "company.view" ||
-            code == "shifts.view" ||
-            code == "holidays.view" ||
-            code == "training.view" ||
-            code == "attendance.self" || code == "attendance.view" ||
-            code == "leave.self" || code == "leave.apply" ||
-            code == "payroll.self" ||
-            code == "performance.self" ||
-            code == "expenses.submit" || code == "expenses.view" ||
-            code == "loans.apply" || code == "loans.view" ||
-            code == "tasks.view" ||
-            code == "helpdesk.create" || code == "helpdesk.view" ||
-            code == "documents.view" ||
-            code == "policies.view" ||
-            code == "dashboard.view").ToList();
-
-        await UpsertRoleWithPermissionsAsync(
-            roleName: "Employee",
-            description: "Standard employee self-service role for clock-in, leave application, payslip access, and requests.",
-            assignedPermissionCodes: employeePermissions,
-            permissionMap: permissionMap);
+        _logger.LogInformation(
+            "System role seeding completed.");
     }
 
     /// <summary>
-    /// Upserts a system role and ensures all specified permission mappings exist.
+    /// Defines all Workora platform system roles.
     /// </summary>
-    /// <param name="roleName">The name of the role.</param>
-    /// <param name="description">The description of the role.</param>
-    /// <param name="assignedPermissionCodes">The collection of permission codes mapped to this role.</param>
-    /// <param name="permissionMap">The dictionary mapping permission code to permission database ID.</param>
+    private List<RoleSeedDefinition> GetRoleDefinitions(
+        Dictionary<string, int> permissionMap)
+    {
+        // =============================================================
+        // SUPER ADMIN
+        // =============================================================
+
+        var superAdminPermissions =
+            permissionMap.Keys.ToList();
+
+
+        // =============================================================
+        // HR ADMIN
+        // =============================================================
+
+        var hrAdminPermissions =
+            permissionMap.Keys
+                .Where(code =>
+                    // Authentication
+                    code.StartsWith("auth.") ||
+
+                    // Users
+                    code.StartsWith("users.") ||
+
+                    // Company Management
+                    code.StartsWith("company.") ||
+                    code.StartsWith("companies.") ||
+
+                    // Organization
+                    code.StartsWith("branches.") ||
+                    code.StartsWith("departments.") ||
+                    code.StartsWith("designations.") ||
+
+                    // Employees
+                    code.StartsWith("employees.") ||
+
+                    // Attendance
+                    code.StartsWith("attendance.") ||
+
+                    // Leave
+                    code.StartsWith("leave.") ||
+
+                    // Shift
+                    code.StartsWith("shifts.") ||
+
+                    // Holidays
+                    code.StartsWith("holidays.") ||
+
+                    // Recruitment
+                    code.StartsWith("recruitment.") ||
+
+                    // Onboarding
+                    code.StartsWith("onboarding.") ||
+
+                    // Performance
+                    code.StartsWith("performance.") ||
+
+                    // Training
+                    code.StartsWith("training.") ||
+
+                    // Assets
+                    code.StartsWith("assets.") ||
+
+                    // Helpdesk
+                    code.StartsWith("helpdesk.") ||
+
+                    // Documents
+                    code.StartsWith("documents.") ||
+
+                    // Policies
+                    code.StartsWith("policies.") ||
+
+                    // Reports
+                    code.StartsWith("reports.") ||
+
+                    // Dashboard
+                    code.StartsWith("dashboard.") ||
+
+                    // Settings View Only
+                    code == "settings.view")
+                .ToList();
+
+
+        // =============================================================
+        // FINANCE MANAGER
+        // =============================================================
+
+        var financePermissions =
+            permissionMap.Keys
+                .Where(code =>
+                    // Authentication
+                    code.StartsWith("auth.") ||
+
+                    // Company Read Access
+                    code == "company.view" ||
+                    code == "companies.view" ||
+
+                    // Organization Read Access
+                    code == "branches.view" ||
+                    code == "departments.view" ||
+                    code == "designations.view" ||
+
+                    // Employee Read Access
+                    code == "employees.view" ||
+
+                    // Salary
+                    code.StartsWith("salary.") ||
+
+                    // Payroll
+                    code.StartsWith("payroll.") ||
+
+                    // Compliance
+                    code.StartsWith("compliance.") ||
+
+                    // Loans
+                    code.StartsWith("loans.") ||
+
+                    // Expenses
+                    code.StartsWith("expenses.") ||
+
+                    // Reports
+                    code.StartsWith("reports.") ||
+
+                    // Dashboard
+                    code.StartsWith("dashboard."))
+                .ToList();
+
+
+        // =============================================================
+        // MANAGER
+        // =============================================================
+
+        var managerPermissions =
+            permissionMap.Keys
+                .Where(code =>
+                    // Authentication
+                    code.StartsWith("auth.") ||
+
+                    // Company
+                    code == "company.view" ||
+                    code == "companies.view" ||
+
+                    // Employee
+                    code == "employees.view" ||
+                    code == "employees.self" ||
+
+                    // Organization
+                    code == "departments.view" ||
+                    code == "designations.view" ||
+                    code == "branches.view" ||
+
+                    // Shift
+                    code == "shifts.view" ||
+
+                    // Holiday
+                    code == "holidays.view" ||
+
+                    // Attendance
+                    code == "attendance.view" ||
+                    code == "attendance.self" ||
+                    code == "attendance.approve" ||
+
+                    // Leave
+                    code == "leave.view" ||
+                    code == "leave.self" ||
+                    code == "leave.apply" ||
+                    code == "leave.approve" ||
+
+                    // Expenses
+                    code == "expenses.view" ||
+                    code == "expenses.submit" ||
+                    code == "expenses.approve" ||
+
+                    // Tasks
+                    code.StartsWith("tasks.") ||
+
+                    // Performance
+                    code.StartsWith("performance.") ||
+
+                    // Helpdesk
+                    code == "helpdesk.view" ||
+                    code == "helpdesk.create" ||
+
+                    // Documents
+                    code == "documents.view" ||
+
+                    // Policies
+                    code == "policies.view" ||
+
+                    // Reports
+                    code == "reports.view" ||
+
+                    // Dashboard
+                    code == "dashboard.view" ||
+
+                    // Payroll Self
+                    code == "payroll.self" ||
+
+                    // Loans
+                    code == "loans.view" ||
+                    code == "loans.apply")
+                .ToList();
+
+
+        // =============================================================
+        // EMPLOYEE
+        // =============================================================
+
+        var employeePermissions =
+            permissionMap.Keys
+                .Where(code =>
+                    // Authentication
+                    code.StartsWith("auth.") ||
+
+                    // Employee
+                    code == "employees.self" ||
+                    code == "employees.view" ||
+
+                    // Organization
+                    code == "departments.view" ||
+                    code == "designations.view" ||
+                    code == "branches.view" ||
+
+                    // Company
+                    code == "company.view" ||
+                    code == "companies.view" ||
+
+                    // Shift
+                    code == "shifts.view" ||
+
+                    // Holidays
+                    code == "holidays.view" ||
+
+                    // Training
+                    code == "training.view" ||
+
+                    // Attendance
+                    code == "attendance.self" ||
+                    code == "attendance.view" ||
+
+                    // Leave
+                    code == "leave.self" ||
+                    code == "leave.apply" ||
+
+                    // Payroll
+                    code == "payroll.self" ||
+
+                    // Performance
+                    code == "performance.self" ||
+
+                    // Expenses
+                    code == "expenses.submit" ||
+                    code == "expenses.view" ||
+
+                    // Loans
+                    code == "loans.apply" ||
+                    code == "loans.view" ||
+
+                    // Tasks
+                    code == "tasks.view" ||
+
+                    // Helpdesk
+                    code == "helpdesk.create" ||
+                    code == "helpdesk.view" ||
+
+                    // Documents
+                    code == "documents.view" ||
+
+                    // Policies
+                    code == "policies.view" ||
+
+                    // Dashboard
+                    code == "dashboard.view")
+                .ToList();
+
+
+        return new List<RoleSeedDefinition>
+        {
+            new(
+                "SuperAdmin",
+                "Full platform owner with unrestricted access across all tenants, subscriptions, organizations, and system settings.",
+                superAdminPermissions),
+
+            new(
+                "HRAdmin",
+                "Human resource administrator responsible for workforce lifecycle, employees, attendance, leave, recruitment, and policies.",
+                hrAdminPermissions),
+
+            new(
+                "FinanceManager",
+                "Finance and payroll administrator responsible for compensation, payroll, statutory compliance, loans, and expenses.",
+                financePermissions),
+
+            new(
+                "Manager",
+                "People manager with team management and approval authority.",
+                managerPermissions),
+
+            new(
+                "Employee",
+                "Standard employee self-service role.",
+                employeePermissions)
+        };
+    }
+
+    #endregion
+
+    #region Role Permission Synchronization
+
+    /// <summary>
+    /// Creates or updates a system role and synchronizes
+    /// its permission mappings.
+    /// </summary>
     private async Task UpsertRoleWithPermissionsAsync(
         string roleName,
         string description,
         IEnumerable<string> assignedPermissionCodes,
         Dictionary<string, int> permissionMap)
     {
-        var role = await _context.Roles
-            .Include(r => r.RolePermissions)
-            .FirstOrDefaultAsync(r => r.Name == roleName);
+        var role =
+            await _context.Roles
+                .Include(r => r.RolePermissions)
+                .FirstOrDefaultAsync(
+                    r => r.Name == roleName);
+
+        // =============================================================
+        // CREATE ROLE
+        // =============================================================
 
         if (role == null)
         {
-            _logger.LogInformation("Seeding role: {RoleName}...", roleName);
-            role = Role.Create(roleName, description, isSystemRole: true);
+            _logger.LogInformation(
+                "Creating system role: {RoleName}",
+                roleName);
+
+            role = Role.Create(
+                roleName,
+                description,
+                isSystemRole: true);
+
             await _context.Roles.AddAsync(role);
+
+            // Save required to generate Role ID
             await _context.SaveChangesAsync();
+
+            // Reload role with permissions
+            role =
+                await _context.Roles
+                    .Include(r => r.RolePermissions)
+                    .FirstAsync(
+                        r => r.Id == role.Id);
         }
 
-        var existingPermissionIds = await _context.RolePermissions
-            .Where(rp => rp.RoleId == role.Id)
-            .Select(rp => rp.PermissionId)
-            .ToListAsync();
+        // =============================================================
+        // DESIRED PERMISSIONS
+        // =============================================================
 
-        var missingRolePermissions = assignedPermissionCodes
-            .Where(code => permissionMap.ContainsKey(code))
-            .Select(code => permissionMap[code])
-            .Where(pId => !existingPermissionIds.Contains(pId))
-            .Select(pId => RolePermission.Create(role.Id, pId))
-            .ToList();
+        var desiredPermissionIds =
+            assignedPermissionCodes
+                .Where(permissionMap.ContainsKey)
+                .Select(code => permissionMap[code])
+                .Distinct()
+                .ToHashSet();
 
-        if (missingRolePermissions.Any())
+        // =============================================================
+        // EXISTING PERMISSIONS
+        // =============================================================
+
+        var existingPermissionIds =
+            role.RolePermissions
+                .Select(rolePermission =>
+                    rolePermission.PermissionId)
+                .ToHashSet();
+
+        // =============================================================
+        // ADD MISSING PERMISSIONS
+        // =============================================================
+
+        var permissionsToAdd =
+            desiredPermissionIds
+                .Where(permissionId =>
+                    !existingPermissionIds.Contains(
+                        permissionId))
+                .Select(permissionId =>
+                    RolePermission.Create(
+                        role.Id,
+                        permissionId))
+                .ToList();
+
+        if (permissionsToAdd.Any())
         {
-            await _context.RolePermissions.AddRangeAsync(missingRolePermissions);
-            await _context.SaveChangesAsync();
+            await _context.RolePermissions
+                .AddRangeAsync(permissionsToAdd);
         }
+
+        // =============================================================
+        // REMOVE OUTDATED PERMISSIONS
+        // =============================================================
+
+        var permissionsToRemove =
+            role.RolePermissions
+                .Where(rolePermission =>
+                    !desiredPermissionIds.Contains(
+                        rolePermission.PermissionId))
+                .ToList();
+
+        if (permissionsToRemove.Any())
+        {
+            _context.RolePermissions
+                .RemoveRange(permissionsToRemove);
+        }
+
+        _logger.LogInformation(
+            "Role {RoleName} synchronized. Added: {Added}, Removed: {Removed}",
+            roleName,
+            permissionsToAdd.Count,
+            permissionsToRemove.Count);
     }
 
+    #endregion
+
+    #region Subscription Plans
+
     /// <summary>
-    /// Seeds SuperAdmin subscription plans for multi-tenant subscription tiers.
+    /// Seeds Workora SaaS subscription plans.
     /// </summary>
     private async Task SeedSubscriptionPlansAsync()
     {
-        if (!await _context.SubscriptionPlans.AnyAsync())
-        {
-            var plans = new List<SubscriptionPlan>
-            {
-                SubscriptionPlan.Create("Starter", "Ideal for emerging startups with up to 25 team members.", 49.00m, 25, SubscriptionBillingCycle.Monthly),
-                SubscriptionPlan.Create("Growth", "Engineered for scaling enterprises with up to 250 employees.", 199.00m, 250, SubscriptionBillingCycle.Monthly),
-                SubscriptionPlan.Create("Enterprise", "Unlimited workforce scalability, dedicated SLA, and full compliance features.", 499.00m, 10000, SubscriptionBillingCycle.Monthly)
-            };
+        _logger.LogInformation(
+            "Checking subscription plans...");
 
-            await _context.SubscriptionPlans.AddRangeAsync(plans);
-            await _context.SaveChangesAsync();
+        var subscriptionPlans =
+            GetSubscriptionPlanDefinitions();
+
+        foreach (var planDefinition in subscriptionPlans)
+        {
+            var existingPlan =
+                await _context.SubscriptionPlans
+                    .FirstOrDefaultAsync(
+                        plan =>
+                            plan.Name == planDefinition.Name);
+
+            if (existingPlan != null)
+            {
+                _logger.LogInformation(
+                    "Subscription plan already exists: {PlanName}",
+                    planDefinition.Name);
+
+                continue;
+            }
+
+            var plan =
+                SubscriptionPlan.Create(
+                    planDefinition.Name,
+                    planDefinition.Description,
+                    planDefinition.Price,
+                    planDefinition.EmployeeLimit,
+                    planDefinition.BillingCycle);
+
+            await _context.SubscriptionPlans
+                .AddAsync(plan);
+
+            _logger.LogInformation(
+                "Created subscription plan: {PlanName}",
+                planDefinition.Name);
         }
     }
 
     /// <summary>
-    /// Seeds the single root SuperAdmin user account (admin@workora.com) with the SuperAdmin role.
+    /// Defines Workora SaaS subscription plans.
+    /// </summary>
+    private static List<SubscriptionPlanSeedDefinition>
+        GetSubscriptionPlanDefinitions()
+    {
+        return new List<SubscriptionPlanSeedDefinition>
+        {
+            new(
+                Name: "Starter",
+                Description:
+                "Ideal for emerging startups and small teams with up to 25 employees.",
+                Price: 49.00m,
+                EmployeeLimit: 25,
+                BillingCycle:
+                SubscriptionBillingCycle.Monthly),
+
+            new(
+                Name: "Growth",
+                Description:
+                "Designed for growing organizations with up to 250 employees.",
+                Price: 199.00m,
+                EmployeeLimit: 250,
+                BillingCycle:
+                SubscriptionBillingCycle.Monthly),
+
+            new(
+                Name: "Enterprise",
+                Description:
+                "Enterprise-grade HRMS with high employee capacity, advanced features, and dedicated support.",
+                Price: 499.00m,
+                EmployeeLimit: 10000,
+                BillingCycle:
+                SubscriptionBillingCycle.Monthly)
+        };
+    }
+
+    #endregion
+
+    #region Super Admin
+
+    /// <summary>
+    /// Seeds the root Workora platform administrator.
     /// </summary>
     private async Task SeedSuperAdminUsersAsync()
     {
-        var passwordHash = _passwordHasher.HashPassword(DefaultPassword);
-        var superAdminRole = await _context.Roles.FirstAsync(r => r.Name == "SuperAdmin");
+        _logger.LogInformation(
+            "Checking Root SuperAdmin account...");
 
-        var superAdminEmailStr = "admin@workora.com";
-        var email = EmailAddress.Create(superAdminEmailStr);
-        var user = await _context.Users.FirstOrDefaultAsync(u => u.Email == email);
+        // =============================================================
+        // GET SUPER ADMIN ROLE
+        // =============================================================
+
+        var superAdminRole =
+            await _context.Roles
+                .FirstOrDefaultAsync(
+                    role =>
+                        role.Name == "SuperAdmin");
+
+        if (superAdminRole == null)
+        {
+            throw new InvalidOperationException(
+                "SuperAdmin role was not found. Role seeding failed.");
+        }
+
+        // =============================================================
+        // CREATE EMAIL VALUE OBJECT
+        // =============================================================
+
+        var email =
+            EmailAddress.Create(
+                SuperAdminEmail);
+
+        // =============================================================
+        // FIND USER
+        // =============================================================
+
+        var user =
+            await _context.Users
+                .FirstOrDefaultAsync(
+                    existingUser =>
+                        existingUser.Email == email);
+
+        // =============================================================
+        // CREATE USER
+        // =============================================================
+
         if (user == null)
         {
-            _logger.LogInformation("Seeding Root Admin user account: {Email}...", superAdminEmailStr);
-            user = User.Create(email, "Super", "Admin", passwordHash);
-            await _context.Users.AddAsync(user);
+            var password =
+                Environment.GetEnvironmentVariable(
+                    "WORKORA_SUPERADMIN_PASSWORD")
+                ?? DefaultPassword;
+
+            var passwordHash =
+                _passwordHasher
+                    .HashPassword(password);
+
+            user =
+                User.Create(
+                    email,
+                    "Super",
+                    "Admin",
+                    passwordHash);
+
+            await _context.Users
+                .AddAsync(user);
+
             await _context.SaveChangesAsync();
+
+            _logger.LogInformation(
+                "Root SuperAdmin created successfully: {Email}",
+                SuperAdminEmail);
+        }
+        else
+        {
+            _logger.LogInformation(
+                "Root SuperAdmin already exists: {Email}",
+                SuperAdminEmail);
         }
 
-        var hasRole = await _context.UserRoles.AnyAsync(ur => ur.UserId == user.Id && ur.RoleId == superAdminRole.Id);
+        // =============================================================
+        // ASSIGN SUPER ADMIN ROLE
+        // =============================================================
+
+        var hasRole =
+            await _context.UserRoles
+                .AnyAsync(userRole =>
+                    userRole.UserId == user.Id &&
+                    userRole.RoleId == superAdminRole.Id);
+
         if (!hasRole)
         {
-            await _context.UserRoles.AddAsync(UserRole.Create(user.Id, superAdminRole.Id));
-            await _context.SaveChangesAsync();
+            await _context.UserRoles
+                .AddAsync(
+                    UserRole.Create(
+                        user.Id,
+                        superAdminRole.Id));
+
+            _logger.LogInformation(
+                "SuperAdmin role assigned to {Email}",
+                SuperAdminEmail);
         }
     }
+
+    #endregion
+
+    #region Seed Models
+
+    /// <summary>
+    /// Internal system role definition.
+    /// </summary>
+    private sealed record RoleSeedDefinition(
+        string Name,
+        string Description,
+        IEnumerable<string> PermissionCodes);
+
+
+    /// <summary>
+    /// Internal subscription plan definition.
+    /// </summary>
+    private sealed record SubscriptionPlanSeedDefinition(
+        string Name,
+        string Description,
+        decimal Price,
+        int EmployeeLimit,
+        SubscriptionBillingCycle BillingCycle);
+
+    #endregion
 }

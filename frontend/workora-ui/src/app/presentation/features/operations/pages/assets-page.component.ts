@@ -211,12 +211,12 @@ import { WorkoraEmptyStateComponent } from '../../../shared/components/workora-e
               <div class="workora-modal-body space-y-4">
                 <div>
                   <label class="workora-label">Asset Name <span class="text-rose-500">*</span></label>
-                  <input type="text" formControlName="name" placeholder="e.g. MacBook Pro 16 M3 Max" class="workora-input !py-2.5" />
+                  <input type="text" formControlName="name" placeholder="Asset Name" class="workora-input !py-2.5" />
                 </div>
 
                 <div>
                   <label class="workora-label">Asset Tag Code <span class="text-rose-500">*</span></label>
-                  <input type="text" formControlName="assetTag" placeholder="e.g. AST-2026-0042" class="workora-input !py-2.5 uppercase font-mono" />
+                  <input type="text" formControlName="assetTag" placeholder="Asset Tag Code" class="workora-input !py-2.5 uppercase font-mono" />
                 </div>
 
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -233,7 +233,7 @@ import { WorkoraEmptyStateComponent } from '../../../shared/components/workora-e
 
                   <div>
                     <label class="workora-label">Serial Number</label>
-                    <input type="text" formControlName="serialNumber" placeholder="e.g. C02G90..." class="workora-input !py-2.5" />
+                    <input type="text" formControlName="serialNumber" placeholder="Serial Number" class="workora-input !py-2.5" />
                   </div>
                 </div>
               </div>
@@ -243,7 +243,7 @@ import { WorkoraEmptyStateComponent } from '../../../shared/components/workora-e
                   Cancel
                 </button>
                 <button type="submit" [disabled]="createForm.invalid || isSubmitting()" class="workora-btn-primary">
-                  Register
+                  Save Asset
                 </button>
               </div>
             </form>
@@ -321,7 +321,7 @@ import { WorkoraEmptyStateComponent } from '../../../shared/components/workora-e
                 <input 
                   type="text" 
                   [(ngModel)]="returnCondition" 
-                  placeholder="e.g. Good condition, normal wear, formatted"
+                  placeholder="Return condition & notes"
                   class="workora-input !py-2.5"
                 />
               </div>

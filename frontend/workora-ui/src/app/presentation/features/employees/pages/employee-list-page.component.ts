@@ -53,14 +53,14 @@ type ViewMode = 'grid' | 'table';
       <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
           <div class="flex items-center gap-2.5">
-            <span class="p-2 rounded-xl bg-[#3FA79B]/15 text-[#0E6E68]">
+            <span class="p-2 rounded-xl bg-[#DDF7F2] text-[#087F73]">
               <span class="material-symbols-outlined text-2xl">badge</span>
             </span>
-            <h1 class="text-2xl sm:text-3xl font-extrabold text-[#063B39] tracking-tight font-heading">
-              People &amp; Workforce Directory
+            <h1 class="text-2xl sm:text-3xl font-extrabold text-[#102A2A] tracking-tight font-heading">
+              Employees
             </h1>
           </div>
-          <p class="text-xs sm:text-sm text-slate-500 mt-1 font-medium">
+          <p class="text-xs sm:text-sm text-[#718686] mt-1 font-medium">
             Manage employee lifecycle, 360-degree dossiers, departmental transfers, and onboarding.
           </p>
         </div>
@@ -70,8 +70,8 @@ type ViewMode = 'grid' | 'table';
             <button 
               type="button" 
               (click)="onExport()"
-              class="inline-flex items-center gap-2 px-4 py-2.5 bg-white hover:bg-slate-50 text-slate-700 text-xs font-bold rounded-xl border border-[#DCEBE7] transition-all shadow-2xs cursor-pointer">
-              <span class="material-symbols-outlined text-base text-[#0E6E68]">download</span>
+              class="workora-btn-secondary text-xs">
+              <span class="material-symbols-outlined text-base text-[#087F73]">download</span>
               <span>Export CSV</span>
             </button>
           }
@@ -80,16 +80,16 @@ type ViewMode = 'grid' | 'table';
             <button 
               type="button" 
               (click)="openOnboardingModal()"
-              class="inline-flex items-center gap-2 px-5 py-2.5 bg-[#0E6E68] hover:bg-[#063B39] text-white text-xs font-bold rounded-xl transition-all shadow-md hover:shadow-lg cursor-pointer border-none">
+              class="workora-btn-primary text-xs shadow-sm">
               <span class="material-symbols-outlined text-base">person_add</span>
-              <span>Onboard Employee</span>
+              <span>+ Onboard Employee</span>
             </button>
           }
         </div>
       </div>
 
       <!-- Controls & Filter Toolbar -->
-      <div class="bg-white p-4 rounded-3xl border border-[#DCEBE7] shadow-xs space-y-3">
+      <div class="bg-white p-4 rounded-3xl border border-[#DDE9E6] shadow-xs space-y-3">
         <div class="flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-3">
           
           <!-- Search Input -->
@@ -100,7 +100,7 @@ type ViewMode = 'grid' | 'table';
               [(ngModel)]="searchTerm" 
               (ngModelChange)="onSearch()"
               placeholder="Search by name, email, or employee code..."
-              class="w-full pl-9 pr-4 py-2 bg-[#F4F8F7] text-xs text-[#063B39] rounded-xl border border-[#DCEBE7] focus:border-[#0E6E68] outline-none font-medium transition-all"
+              class="w-full pl-9 pr-4 py-2 bg-[#F6FAF9] text-xs text-[#102A2A] rounded-xl border border-[#DDE9E6] focus:border-[#087F73] focus:bg-white outline-none font-medium transition-all"
             />
           </div>
 

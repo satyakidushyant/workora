@@ -36,13 +36,13 @@ type DetailTab = 'overview' | 'branches' | 'employees' | 'subscription' | 'setti
     <div class="p-4 sm:p-6 lg:p-8 max-w-7xl 2xl:max-w-8xl mx-auto space-y-6">
       
       <!-- Back Navigation & Breadcrumb -->
-      <div class="flex items-center gap-2 text-xs font-semibold text-slate-500">
-        <a routerLink="/organization" class="hover:text-[#0E6E68] transition-colors flex items-center gap-1 text-decoration-none">
+      <div class="flex items-center gap-2 text-xs font-semibold text-[#718686]">
+        <a routerLink="/organization" class="hover:text-[#087F73] transition-colors flex items-center gap-1 text-decoration-none">
           <span class="material-symbols-outlined text-sm">arrow_back</span>
           <span>Organizations</span>
         </a>
         <span>/</span>
-        <span class="text-[#063B39] font-bold">{{ organization()?.name || 'Organization Details' }}</span>
+        <span class="text-[#102A2A] font-bold">{{ organization()?.name || 'Organization Details' }}</span>
       </div>
 
       @if (isLoading()) {
@@ -62,33 +62,33 @@ type DetailTab = 'overview' | 'branches' | 'employees' | 'subscription' | 'setti
       } @else {
         
         <!-- Organization Header Hero Banner -->
-        <div class="workora-card p-6 sm:p-8 relative overflow-hidden bg-gradient-to-r from-white via-white to-[#F4F8F7]">
+        <div class="workora-card p-6 sm:p-8 relative overflow-hidden bg-gradient-to-r from-white via-white to-[#F6FAF9]">
           <div class="flex flex-col md:flex-row md:items-center justify-between gap-6 relative z-10">
             
             <div class="flex items-start sm:items-center gap-4 sm:gap-5">
-              <div class="w-16 h-16 sm:w-20 sm:h-20 rounded-3xl bg-gradient-to-tr from-[#063B39] to-[#0E6E68] text-white flex items-center justify-center font-black text-2xl shadow-md shrink-0">
+              <div class="w-16 h-16 sm:w-20 sm:h-20 rounded-3xl bg-gradient-to-tr from-[#075E58] to-[#087F73] text-white flex items-center justify-center font-black text-2xl shadow-sm shrink-0">
                 {{ organization()!.code ? organization()!.code.substring(0, 2).toUpperCase() : 'OR' }}
               </div>
 
               <div class="space-y-1">
                 <div class="flex flex-wrap items-center gap-2.5">
-                  <h1 class="text-xl sm:text-2xl lg:text-3xl font-extrabold text-[#063B39] tracking-tight font-heading">
+                  <h1 class="text-xl sm:text-2xl lg:text-3xl font-extrabold text-[#102A2A] tracking-tight font-heading">
                     {{ organization()!.name }}
                   </h1>
                   <span 
-                    [ngClass]="organization()!.isActive ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : 'bg-rose-50 text-rose-700 border-rose-200'"
+                    [ngClass]="organization()!.isActive ? 'bg-[#E8F8F5] text-[#16A085] border-[#16A085]/30' : 'bg-[#FDF0F0] text-[#D64545] border-[#D64545]/30'"
                     class="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold border inline-flex items-center gap-1">
-                    <span class="w-1.5 h-1.5 rounded-full" [ngClass]="organization()!.isActive ? 'bg-emerald-500' : 'bg-rose-500'"></span>
+                    <span class="w-1.5 h-1.5 rounded-full" [ngClass]="organization()!.isActive ? 'bg-[#16A085]' : 'bg-[#D64545]'"></span>
                     <span>{{ organization()!.isActive ? 'Active Enterprise' : 'Suspended' }}</span>
                   </span>
                 </div>
 
-                <div class="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-slate-500 font-medium">
-                  <span class="font-mono font-bold text-[#0E6E68]">Code: {{ organization()!.code }}</span>
+                <div class="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-[#718686] font-medium">
+                  <span class="font-mono font-bold text-[#087F73]">Code: {{ organization()!.code }}</span>
                   <span>•</span>
                   <span>{{ organization()!.industry || 'Information Technology' }}</span>
                   <span>•</span>
-                  <span class="text-slate-600 font-mono">{{ organization()!.email || 'No email' }}</span>
+                  <span class="text-[#405656] font-mono">{{ organization()!.email || 'No email' }}</span>
                 </div>
               </div>
             </div>
@@ -98,20 +98,20 @@ type DetailTab = 'overview' | 'branches' | 'employees' | 'subscription' | 'setti
               <button 
                 type="button" 
                 (click)="openAddBranchModal()"
-                class="workora-btn-primary text-xs shadow-md">
+                class="workora-btn-primary text-xs shadow-sm">
                 <span class="material-symbols-outlined text-base">add_location_alt</span>
-                <span>Add Branch</span>
+                <span>+ Add Branch</span>
               </button>
             </div>
           </div>
         </div>
 
         <!-- Navigation Tabs Switcher -->
-        <div class="flex items-center p-1.5 bg-white border border-[#DCEBE7] rounded-2xl shadow-2xs overflow-x-auto">
+        <div class="flex items-center p-1.5 bg-white border border-[#DDE9E6] rounded-2xl shadow-2xs overflow-x-auto">
           <button 
             type="button" 
             (click)="activeTab.set('overview')"
-            [ngClass]="activeTab() === 'overview' ? 'bg-[#0E6E68] text-white shadow-xs' : 'text-slate-600 hover:text-[#063B39]'"
+            [ngClass]="activeTab() === 'overview' ? 'bg-[#087F73] text-white shadow-2xs' : 'text-[#718686] hover:text-[#102A2A]'"
             class="flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold transition-all cursor-pointer border-none bg-transparent whitespace-nowrap">
             <span class="material-symbols-outlined text-base">dashboard</span>
             <span>Overview</span>
@@ -120,11 +120,11 @@ type DetailTab = 'overview' | 'branches' | 'employees' | 'subscription' | 'setti
           <button 
             type="button" 
             (click)="activeTab.set('branches')"
-            [ngClass]="activeTab() === 'branches' ? 'bg-[#0E6E68] text-white shadow-xs' : 'text-slate-600 hover:text-[#063B39]'"
+            [ngClass]="activeTab() === 'branches' ? 'bg-[#087F73] text-white shadow-2xs' : 'text-[#718686] hover:text-[#102A2A]'"
             class="flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold transition-all cursor-pointer border-none bg-transparent whitespace-nowrap">
             <span class="material-symbols-outlined text-base">location_city</span>
             <span>Branches</span>
-            <span [ngClass]="activeTab() === 'branches' ? 'bg-white/20 text-white' : 'bg-slate-100 text-slate-600'" class="px-2 py-0.5 rounded-md text-[10px] font-extrabold">
+            <span [ngClass]="activeTab() === 'branches' ? 'bg-white/20 text-white' : 'bg-[#DDF7F2] text-[#075E58]'" class="px-2 py-0.5 rounded-md text-[10px] font-extrabold">
               {{ branches().length }}
             </span>
           </button>
@@ -132,7 +132,7 @@ type DetailTab = 'overview' | 'branches' | 'employees' | 'subscription' | 'setti
           <button 
             type="button" 
             (click)="activeTab.set('employees')"
-            [ngClass]="activeTab() === 'employees' ? 'bg-[#0E6E68] text-white shadow-xs' : 'text-slate-600 hover:text-[#063B39]'"
+            [ngClass]="activeTab() === 'employees' ? 'bg-[#087F73] text-white shadow-2xs' : 'text-[#718686] hover:text-[#102A2A]'"
             class="flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold transition-all cursor-pointer border-none bg-transparent whitespace-nowrap">
             <span class="material-symbols-outlined text-base">badge</span>
             <span>Employees</span>
@@ -144,7 +144,7 @@ type DetailTab = 'overview' | 'branches' | 'employees' | 'subscription' | 'setti
           <button 
             type="button" 
             (click)="activeTab.set('subscription')"
-            [ngClass]="activeTab() === 'subscription' ? 'bg-[#0E6E68] text-white shadow-xs' : 'text-slate-600 hover:text-[#063B39]'"
+            [ngClass]="activeTab() === 'subscription' ? 'bg-[#087F73] text-white shadow-2xs' : 'text-[#718686] hover:text-[#102A2A]'"
             class="flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold transition-all cursor-pointer border-none bg-transparent whitespace-nowrap">
             <span class="material-symbols-outlined text-base">stars</span>
             <span>Subscription</span>
@@ -153,7 +153,7 @@ type DetailTab = 'overview' | 'branches' | 'employees' | 'subscription' | 'setti
           <button 
             type="button" 
             (click)="activeTab.set('settings')"
-            [ngClass]="activeTab() === 'settings' ? 'bg-[#0E6E68] text-white shadow-xs' : 'text-slate-600 hover:text-[#063B39]'"
+            [ngClass]="activeTab() === 'settings' ? 'bg-[#087F73] text-white shadow-2xs' : 'text-[#718686] hover:text-[#102A2A]'"
             class="flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold transition-all cursor-pointer border-none bg-transparent whitespace-nowrap">
             <span class="material-symbols-outlined text-base">tune</span>
             <span>Settings</span>
@@ -616,7 +616,7 @@ type DetailTab = 'overview' | 'branches' | 'employees' | 'subscription' | 'setti
                   <input 
                     type="text" 
                     formControlName="name" 
-                    placeholder="e.g. Surat Development Centre"
+                    placeholder="Branch Name"
                     class="workora-input !py-2.5"
                   />
                   @if (isBranchInvalid('name')) {
@@ -629,7 +629,7 @@ type DetailTab = 'overview' | 'branches' | 'employees' | 'subscription' | 'setti
                   <input 
                     type="text" 
                     formControlName="code" 
-                    placeholder="e.g. SURAT"
+                    placeholder="Branch Code"
                     class="workora-input !py-2.5 uppercase font-mono"
                   />
                   @if (isBranchInvalid('code')) {
@@ -642,7 +642,7 @@ type DetailTab = 'overview' | 'branches' | 'employees' | 'subscription' | 'setti
                   <input 
                     type="text" 
                     formControlName="location" 
-                    placeholder="e.g. Ring Road, Surat"
+                    placeholder="Location / City Area"
                     class="workora-input !py-2.5"
                   />
                 </div>

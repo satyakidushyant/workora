@@ -8,45 +8,47 @@
    ========================================================================== */
 
 :root {
-  /* Core Brand Colors */
-  --workora-primary-dark: #063B39;
-  --workora-primary: #0E6E68;
-  --workora-primary-hover: #0b5853;
-  --workora-primary-active: #08433f;
-  --workora-accent: #3FA79B;
-  --workora-light: #DCEBE7;
-  --workora-light-subtle: #EDF5F3;
+  /* Core Workora Brand Palette Tokens */
+  --workora-primary-dark: #075E58;
+  --workora-primary: #087F73;
+  --workora-primary-hover: #075E58;
+  --workora-primary-active: #054843;
+  --workora-accent: #0E9F8E;
+  --workora-emerald: #19C6A3;
+  --workora-aqua: #64D8C8;
+  --workora-light: #DDF7F2;
+  --workora-light-subtle: #F0FAF8;
 
   /* Neutral & Surface Colors */
   --workora-white: #ffffff;
-  --workora-surface: #F4F8F7;
-  --workora-surface-alt: #EBF3F1;
+  --workora-surface: #F6FAF9;
+  --workora-surface-alt: #EDF5F3;
   --workora-surface-elevated: #ffffff;
-  --workora-surface-muted: #F8FAFA;
+  --workora-surface-muted: #F6FAF9;
 
   /* Typography & Content Colors */
-  --workora-text: #163331;
-  --workora-text-secondary: #334D4A;
-  --workora-muted: #6B7F7C;
-  --workora-muted-light: #8E9F9D;
-  --workora-border: rgba(6, 59, 57, 0.12);
-  --workora-border-strong: rgba(6, 59, 57, 0.22);
-  --workora-border-focus: #0E6E68;
-  --workora-focus-ring: rgba(14, 110, 104, 0.20);
+  --workora-text: #102A2A;
+  --workora-text-secondary: #405656;
+  --workora-muted: #718686;
+  --workora-muted-light: #9BB0AF;
+  --workora-border: #DDE9E6;
+  --workora-border-strong: #C4D9D5;
+  --workora-border-focus: #087F73;
+  --workora-focus-ring: rgba(8, 127, 115, 0.20);
 
-  /* Status Tokens */
-  --workora-success: #10B981;
-  --workora-success-bg: #ECFDF5;
-  --workora-success-text: #065F46;
-  --workora-warning: #F59E0B;
-  --workora-warning-bg: #FFFBEB;
-  --workora-warning-text: #92400E;
-  --workora-error: #EF4444;
-  --workora-error-bg: #FEF2F2;
-  --workora-error-text: #991B1B;
-  --workora-info: #0284C7;
-  --workora-info-bg: #F0F9FF;
-  --workora-info-text: #075985;
+  /* Semantic Status Tokens */
+  --workora-success: #16A085;
+  --workora-success-bg: #E8F8F5;
+  --workora-success-text: #0E6E5A;
+  --workora-warning: #E9A23B;
+  --workora-warning-bg: #FDF6EC;
+  --workora-warning-text: #966115;
+  --workora-error: #D64545;
+  --workora-error-bg: #FDF0F0;
+  --workora-error-text: #8E2323;
+  --workora-info: #168AAD;
+  --workora-info-bg: #EEF7FA;
+  --workora-info-text: #0E5E77;
 
   /* Spacing Scale (8px baseline) */
   --workora-space-1: 4px;
@@ -69,12 +71,12 @@
   --workora-radius-full: 9999px;
 
   /* Shadows */
-  --workora-shadow-xs: 0 1px 3px rgba(6, 59, 57, 0.04), 0 1px 2px rgba(6, 59, 57, 0.02);
-  --workora-shadow-sm: 0 4px 12px rgba(6, 59, 57, 0.06);
-  --workora-shadow-md: 0 10px 25px -4px rgba(6, 59, 57, 0.08), 0 4px 8px -2px rgba(6, 59, 57, 0.04);
-  --workora-shadow-lg: 0 20px 40px -8px rgba(6, 59, 57, 0.12);
-  --workora-shadow-teal: 0 8px 24px -4px rgba(14, 110, 104, 0.28);
-  --workora-shadow-inner: inset 0 2px 4px 0 rgba(6, 59, 57, 0.04);
+  --workora-shadow-xs: 0 1px 3px rgba(7, 94, 88, 0.04), 0 1px 2px rgba(7, 94, 88, 0.02);
+  --workora-shadow-sm: 0 4px 12px rgba(7, 94, 88, 0.06);
+  --workora-shadow-md: 0 10px 25px -4px rgba(7, 94, 88, 0.08), 0 4px 8px -2px rgba(7, 94, 88, 0.04);
+  --workora-shadow-lg: 0 20px 40px -8px rgba(7, 94, 88, 0.12);
+  --workora-shadow-teal: 0 8px 24px -4px rgba(8, 127, 115, 0.28);
+  --workora-shadow-inner: inset 0 2px 4px 0 rgba(7, 94, 88, 0.04);
 
   /* Transitions */
   --workora-transition-fast: 150ms cubic-bezier(0.4, 0, 0.2, 1);
@@ -97,7 +99,7 @@ html {
 
 body {
   background-color: var(--workora-surface);
-  color: var(--workora-text);
+  color: var(--workora-text-secondary);
   font-family: 'Plus Jakarta Sans', 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   overflow-x: hidden;
   -webkit-font-smoothing: antialiased;
@@ -105,9 +107,10 @@ body {
 }
 
 h1, h2, h3, h4, h5, h6, .font-heading {
-  font-family: 'Plus Jakarta Sans', 'Manrope', 'Inter', sans-serif;
+  font-family: 'Plus Jakarta Sans', sans-serif;
   letter-spacing: -0.02em;
-  color: var(--workora-primary-dark);
+  color: var(--workora-text);
+  font-weight: 700;
 }
 
 /* Custom Scrollbar */
@@ -201,13 +204,14 @@ h1, h2, h3, h4, h5, h6, .font-heading {
    ========================================================================== */
 
 .workora-btn-primary {
-  background: linear-gradient(135deg, #0E6E68 0%, #063B39 100%);
+  background-color: var(--workora-primary);
   color: var(--workora-white);
-  font-weight: 700;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-weight: 600;
   font-size: 0.8125rem;
   line-height: 1.25rem;
   border-radius: var(--workora-radius-md);
-  box-shadow: 0 4px 14px rgba(14, 110, 104, 0.28);
+  box-shadow: 0 2px 8px rgba(8, 127, 115, 0.20);
   transition: all var(--workora-transition-base);
   display: inline-flex;
   align-items: center;
@@ -222,12 +226,13 @@ h1, h2, h3, h4, h5, h6, .font-heading {
 }
 
 .workora-btn-primary:hover:not(:disabled) {
-  background: linear-gradient(135deg, #107c75 0%, #053331 100%);
+  background-color: var(--workora-primary-hover);
   transform: translateY(-1px);
-  box-shadow: 0 8px 22px rgba(14, 110, 104, 0.38);
+  box-shadow: 0 4px 14px rgba(8, 127, 115, 0.28);
 }
 
 .workora-btn-primary:active:not(:disabled) {
+  background-color: var(--workora-primary-active);
   transform: translateY(0) scale(0.98);
 }
 
@@ -239,10 +244,11 @@ h1, h2, h3, h4, h5, h6, .font-heading {
 }
 
 .workora-btn-secondary {
-  background-color: #FAFCFB;
-  color: var(--workora-primary-dark);
+  background-color: #FFFFFF;
+  color: var(--workora-text);
   border: 1.5px solid var(--workora-border);
-  font-weight: 700;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-weight: 600;
   font-size: 0.8125rem;
   line-height: 1.25rem;
   border-radius: var(--workora-radius-md);
@@ -258,11 +264,11 @@ h1, h2, h3, h4, h5, h6, .font-heading {
 }
 
 .workora-btn-secondary:hover:not(:disabled) {
-  background-color: #FFFFFF;
+  background-color: var(--workora-surface);
   border-color: var(--workora-primary);
   color: var(--workora-primary);
   transform: translateY(-1px);
-  box-shadow: 0 4px 14px rgba(6, 59, 57, 0.08);
+  box-shadow: 0 4px 12px rgba(7, 94, 88, 0.08);
 }
 
 .workora-btn-secondary:active:not(:disabled) {
@@ -278,7 +284,8 @@ h1, h2, h3, h4, h5, h6, .font-heading {
   background-color: transparent;
   color: var(--workora-primary);
   border: 1.5px solid var(--workora-primary);
-  font-weight: 700;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-weight: 600;
   font-size: 0.8125rem;
   border-radius: var(--workora-radius-md);
   transition: all var(--workora-transition-base);
@@ -300,6 +307,7 @@ h1, h2, h3, h4, h5, h6, .font-heading {
   background-color: transparent;
   color: var(--workora-muted);
   border: 1.5px solid transparent;
+  font-family: 'Plus Jakarta Sans', sans-serif;
   font-weight: 600;
   font-size: 0.8125rem;
   border-radius: var(--workora-radius-md);
@@ -318,12 +326,13 @@ h1, h2, h3, h4, h5, h6, .font-heading {
 }
 
 .workora-btn-danger {
-  background-color: #EF4444;
+  background-color: var(--workora-error);
   color: #ffffff;
-  font-weight: 700;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-weight: 600;
   font-size: 0.8125rem;
   border-radius: var(--workora-radius-md);
-  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.25);
+  box-shadow: 0 2px 8px rgba(214, 69, 69, 0.25);
   transition: all var(--workora-transition-base);
   display: inline-flex;
   align-items: center;
@@ -335,9 +344,9 @@ h1, h2, h3, h4, h5, h6, .font-heading {
 }
 
 .workora-btn-danger:hover:not(:disabled) {
-  background-color: #DC2626;
+  background-color: #BF3636;
   transform: translateY(-1px);
-  box-shadow: 0 6px 18px rgba(239, 68, 68, 0.35);
+  box-shadow: 0 4px 14px rgba(214, 69, 69, 0.35);
 }
 
 .workora-btn-danger:active:not(:disabled) {
@@ -648,12 +657,12 @@ select.workora-select-error:focus {
 
 .workora-badge-teal {
   background-color: var(--workora-light);
-  color: var(--workora-primary);
-  border: 1px solid rgba(14, 110, 104, 0.2);
+  color: var(--workora-primary-dark);
+  border: 1px solid rgba(8, 127, 115, 0.25);
   border-radius: var(--workora-radius-full);
   padding: 0.2rem 0.65rem;
   font-size: 0.75rem;
-  font-weight: 700;
+  font-weight: 600;
   display: inline-flex;
   align-items: center;
   gap: 0.25rem;
@@ -663,11 +672,11 @@ select.workora-select-error:focus {
 .workora-badge-success {
   background-color: var(--workora-success-bg);
   color: var(--workora-success-text);
-  border: 1px solid rgba(16, 185, 129, 0.25);
+  border: 1px solid rgba(22, 160, 133, 0.3);
   border-radius: var(--workora-radius-full);
   padding: 0.2rem 0.65rem;
   font-size: 0.75rem;
-  font-weight: 700;
+  font-weight: 600;
   display: inline-flex;
   align-items: center;
   gap: 0.25rem;
@@ -677,11 +686,11 @@ select.workora-select-error:focus {
 .workora-badge-danger {
   background-color: var(--workora-error-bg);
   color: var(--workora-error-text);
-  border: 1px solid rgba(239, 68, 68, 0.25);
+  border: 1px solid rgba(214, 69, 69, 0.3);
   border-radius: var(--workora-radius-full);
   padding: 0.2rem 0.65rem;
   font-size: 0.75rem;
-  font-weight: 700;
+  font-weight: 600;
   display: inline-flex;
   align-items: center;
   gap: 0.25rem;
@@ -691,11 +700,11 @@ select.workora-select-error:focus {
 .workora-badge-warning {
   background-color: var(--workora-warning-bg);
   color: var(--workora-warning-text);
-  border: 1px solid rgba(245, 158, 11, 0.25);
+  border: 1px solid rgba(233, 162, 59, 0.3);
   border-radius: var(--workora-radius-full);
   padding: 0.2rem 0.65rem;
   font-size: 0.75rem;
-  font-weight: 700;
+  font-weight: 600;
   display: inline-flex;
   align-items: center;
   gap: 0.25rem;
@@ -705,11 +714,11 @@ select.workora-select-error:focus {
 .workora-badge-info {
   background-color: var(--workora-info-bg);
   color: var(--workora-info-text);
-  border: 1px solid rgba(2, 132, 199, 0.25);
+  border: 1px solid rgba(22, 138, 173, 0.3);
   border-radius: var(--workora-radius-full);
   padding: 0.2rem 0.65rem;
   font-size: 0.75rem;
-  font-weight: 700;
+  font-weight: 600;
   display: inline-flex;
   align-items: center;
   gap: 0.25rem;
@@ -717,13 +726,13 @@ select.workora-select-error:focus {
 }
 
 .workora-badge-neutral {
-  background-color: #F1F5F9;
-  color: #475569;
-  border: 1px solid #E2E8F0;
+  background-color: #F6FAF9;
+  color: var(--workora-muted);
+  border: 1px solid var(--workora-border);
   border-radius: var(--workora-radius-full);
   padding: 0.2rem 0.65rem;
   font-size: 0.75rem;
-  font-weight: 700;
+  font-weight: 600;
   display: inline-flex;
   align-items: center;
   gap: 0.25rem;
@@ -890,17 +899,41 @@ select.workora-select-error:focus {
   }
 }
 
+/* Global Modal Backdrop Layering (Covers topbar and sidebar completely on all pages) */
+body:has(.workora-modal-overlay) {
+  overflow: hidden !important;
+}
+
+body:has(.workora-modal-overlay) main {
+  position: relative !important;
+  z-index: 2147483640 !important;
+}
+
+body:has(.workora-modal-overlay) .dashboard-topbar,
+body:has(.workora-modal-overlay) header {
+  visibility: hidden !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+}
+
 .workora-modal-overlay {
   position: fixed !important;
   inset: 0 !important;
-  z-index: 9999 !important;
+  top: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  bottom: 0 !important;
+  width: 100vw !important;
+  height: 100vh !important;
+  height: 100dvh !important;
+  z-index: 2147483647 !important;
   display: flex !important;
   justify-content: center !important;
-  align-items: flex-start !important;
-  padding: 2.5rem 1rem !important;
-  background-color: rgba(6, 59, 57, 0.65) !important;
-  backdrop-filter: blur(8px) !important;
-  -webkit-backdrop-filter: blur(8px) !important;
+  align-items: center !important;
+  padding: 1.5rem !important;
+  background-color: rgba(7, 94, 88, 0.75) !important;
+  backdrop-filter: blur(12px) !important;
+  -webkit-backdrop-filter: blur(12px) !important;
   overflow-y: auto !important;
   overflow-x: hidden !important;
   animation: modalOverlayFadeIn 0.2s cubic-bezier(0.16, 1, 0.3, 1) forwards !important;
@@ -913,11 +946,11 @@ select.workora-select-error:focus {
   background-color: #ffffff !important;
   border: 1px solid var(--workora-border) !important;
   border-radius: 1.5rem !important;
-  box-shadow: 0 25px 50px -12px rgba(6, 59, 57, 0.30), 0 0 0 1px rgba(6, 59, 57, 0.05) !important;
+  box-shadow: 0 25px 50px -12px rgba(7, 94, 88, 0.35), 0 0 0 1px rgba(7, 94, 88, 0.08) !important;
   display: flex !important;
   flex-direction: column !important;
-  max-height: calc(100vh - 4rem) !important;
-  max-height: calc(100dvh - 4rem) !important;
+  max-height: calc(100vh - 3rem) !important;
+  max-height: calc(100dvh - 3rem) !important;
   overflow: hidden !important;
   animation: modalCardPopIn 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards !important;
 }

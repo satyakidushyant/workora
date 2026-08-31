@@ -54,15 +54,15 @@ const INDUSTRY_OPTIONS = [
       <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <div class="flex items-center gap-2.5">
-            <span class="p-2.5 rounded-2xl bg-[#3FA79B]/15 text-[#0E6E68]">
+            <span class="p-2.5 rounded-2xl bg-[#DDF7F2] text-[#087F73]">
               <span class="material-symbols-outlined text-2xl">domain</span>
             </span>
             <div>
-              <h1 class="text-2xl sm:text-3xl font-extrabold text-[#063B39] tracking-tight font-heading">
-                Organizations &amp; Companies
+              <h1 class="text-2xl sm:text-3xl font-extrabold text-[#102A2A] tracking-tight font-heading">
+                Organizations
               </h1>
-              <p class="text-xs sm:text-sm text-slate-500 mt-0.5 font-medium">
-                Enterprise tenant workspaces, corporate entities, branch hierarchy, and subscription oversight.
+              <p class="text-xs sm:text-sm text-[#718686] mt-0.5 font-medium">
+                Manage organizations and their Workora workspace.
               </p>
             </div>
           </div>
@@ -72,37 +72,37 @@ const INDUSTRY_OPTIONS = [
           <button 
             type="button" 
             (click)="openCreateModal()"
-            class="workora-btn-primary text-xs shadow-md">
+            class="workora-btn-primary text-xs shadow-sm">
             <span class="material-symbols-outlined text-base">add_business</span>
-            <span>Register Organization</span>
+            <span>+ Create Organization</span>
           </button>
         </div>
       </div>
 
       <!-- Quick Platform Health Cards (Real Database Driven) -->
       <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <div class="workora-card p-5 space-y-1.5 border-l-4 border-l-[#0E6E68]">
-          <span class="text-[11px] font-bold uppercase tracking-wider text-slate-400">Total Organizations</span>
-          <p class="text-3xl font-extrabold text-[#063B39] font-heading">{{ totalCount() }}</p>
-          <p class="text-[11px] text-slate-500 font-medium">Customer enterprise accounts</p>
+        <div class="workora-card p-5 space-y-1.5 border-l-4 border-l-[#087F73]">
+          <span class="text-[11px] font-bold uppercase tracking-wider text-[#718686]">Total Organizations</span>
+          <p class="text-3xl font-extrabold text-[#102A2A] font-heading">{{ totalCount() }}</p>
+          <p class="text-[11px] text-[#718686] font-medium">Customer enterprise workspaces</p>
         </div>
 
-        <div class="workora-card p-5 space-y-1.5 border-l-4 border-l-emerald-500">
-          <span class="text-[11px] font-bold uppercase tracking-wider text-slate-400">Active Workspaces</span>
-          <p class="text-3xl font-extrabold text-emerald-700 font-heading">{{ activeCount() }}</p>
-          <p class="text-[11px] text-emerald-600 font-bold">Operational organizations</p>
+        <div class="workora-card p-5 space-y-1.5 border-l-4 border-l-[#16A085]">
+          <span class="text-[11px] font-bold uppercase tracking-wider text-[#718686]">Active Workspaces</span>
+          <p class="text-3xl font-extrabold text-[#16A085] font-heading">{{ activeCount() }}</p>
+          <p class="text-[11px] text-[#16A085] font-semibold">Operational tenants</p>
         </div>
 
-        <div class="workora-card p-5 space-y-1.5 border-l-4 border-l-[#3FA79B]">
-          <span class="text-[11px] font-bold uppercase tracking-wider text-slate-400">Total Branches</span>
-          <p class="text-3xl font-extrabold text-[#0E6E68] font-heading">{{ totalBranchesCount() }}</p>
-          <p class="text-[11px] text-slate-500 font-medium">Headquarters &amp; regional offices</p>
+        <div class="workora-card p-5 space-y-1.5 border-l-4 border-l-[#0E9F8E]">
+          <span class="text-[11px] font-bold uppercase tracking-wider text-[#718686]">Total Branches</span>
+          <p class="text-3xl font-extrabold text-[#087F73] font-heading">{{ totalBranchesCount() }}</p>
+          <p class="text-[11px] text-[#718686] font-medium">Headquarters &amp; regional offices</p>
         </div>
 
-        <div class="workora-card p-5 space-y-1.5 border-l-4 border-l-purple-500">
-          <span class="text-[11px] font-bold uppercase tracking-wider text-slate-400">Managed Personnel</span>
-          <p class="text-3xl font-extrabold text-purple-700 font-heading">{{ totalEmployeesCount() }}</p>
-          <p class="text-[11px] text-slate-500 font-medium">Total active employees</p>
+        <div class="workora-card p-5 space-y-1.5 border-l-4 border-l-[#168AAD]">
+          <span class="text-[11px] font-bold uppercase tracking-wider text-[#718686]">Managed Personnel</span>
+          <p class="text-3xl font-extrabold text-[#168AAD] font-heading">{{ totalEmployeesCount() }}</p>
+          <p class="text-[11px] text-[#718686] font-medium">Total active employees</p>
         </div>
       </div>
 
@@ -117,8 +117,8 @@ const INDUSTRY_OPTIONS = [
               type="text" 
               [(ngModel)]="searchTerm" 
               (ngModelChange)="onSearch()"
-              placeholder="Search by company name or code..."
-              class="w-full pl-10 pr-4 py-2.5 bg-[#F4F8F7] text-xs text-[#063B39] rounded-xl border border-[#DCEBE7] focus:border-[#0E6E68] focus:bg-white outline-none font-medium transition-all"
+              placeholder="Search organizations..." 
+              class="w-full pl-10 pr-4 py-2.5 bg-[#F6FAF9] text-xs text-[#102A2A] rounded-xl border border-[#DDE9E6] focus:border-[#087F73] focus:bg-white outline-none font-medium transition-all"
             />
           </div>
 
@@ -156,14 +156,14 @@ const INDUSTRY_OPTIONS = [
           <div class="p-8">
             <app-workora-empty-state
               icon="domain_disabled"
-              title="No Organizations Found"
-              description="No enterprise organizations match your criteria. Register your first customer organization to start managing HRMS workspaces.">
+              title="No organizations yet"
+              description="Create your first organization to start managing your Workora HRMS workspace.">
               <button 
                 type="button" 
                 (click)="openCreateModal()"
                 class="workora-btn-primary text-xs mt-2">
                 <span class="material-symbols-outlined text-base">add_business</span>
-                <span>Register First Organization</span>
+                <span>+ Create Organization</span>
               </button>
             </app-workora-empty-state>
           </div>
@@ -171,7 +171,7 @@ const INDUSTRY_OPTIONS = [
           <div class="overflow-x-auto">
             <table class="w-full text-left border-collapse text-xs">
               <thead>
-                <tr class="bg-[#F4F8F7] border-b border-[#DCEBE7] text-[11px] font-extrabold uppercase tracking-wider text-[#063B39]">
+                <tr class="bg-[#F6FAF9] border-b border-[#DDE9E6] text-[11px] font-extrabold uppercase tracking-wider text-[#102A2A]">
                   <th class="py-3.5 px-5">Organization / Legal Entity</th>
                   <th class="py-3.5 px-4">Code</th>
                   <th class="py-3.5 px-4">Primary Contact</th>
@@ -376,7 +376,7 @@ const INDUSTRY_OPTIONS = [
                     <input 
                       type="text" 
                       formControlName="name" 
-                      placeholder="e.g. Bharat Dynamics Software Pvt Ltd"
+                      placeholder="Company Name"
                       class="workora-input !py-2.5"
                     />
                     @if (isInvalid('name')) {
@@ -389,7 +389,7 @@ const INDUSTRY_OPTIONS = [
                     <input 
                       type="text" 
                       formControlName="code" 
-                      placeholder="e.g. BHARATDYN"
+                      placeholder="Organization Code"
                       class="workora-input !py-2.5 uppercase font-mono"
                     />
                     @if (isInvalid('code')) {
@@ -413,7 +413,7 @@ const INDUSTRY_OPTIONS = [
                     <input 
                       type="text" 
                       formControlName="registrationNumber" 
-                      placeholder="e.g. U72200GJ2022PTC123456"
+                      placeholder="CIN / Registration Number"
                       class="workora-input !py-2.5 uppercase font-mono"
                     />
                   </div>
@@ -423,7 +423,7 @@ const INDUSTRY_OPTIONS = [
                     <input 
                       type="text" 
                       formControlName="taxId" 
-                      placeholder="e.g. 24ABCDE1234F1Z5"
+                      placeholder="GSTIN / Corporate Tax ID"
                       class="workora-input !py-2.5 uppercase font-mono"
                     />
                   </div>
@@ -442,7 +442,7 @@ const INDUSTRY_OPTIONS = [
                     <input 
                       type="email" 
                       formControlName="email" 
-                      placeholder="e.g. admin@bharatdynamics.in"
+                      placeholder="Primary Admin Email"
                       class="workora-input !py-2.5"
                     />
                     @if (isInvalid('email')) {
@@ -455,7 +455,7 @@ const INDUSTRY_OPTIONS = [
                     <input 
                       type="tel" 
                       formControlName="phone" 
-                      placeholder="e.g. +91 98765 43210"
+                      placeholder="Primary Phone Number"
                       class="workora-input !py-2.5"
                     />
                   </div>
@@ -465,7 +465,7 @@ const INDUSTRY_OPTIONS = [
                     <input 
                       type="url" 
                       formControlName="website" 
-                      placeholder="e.g. https://bharatdynamics.in"
+                      placeholder="Website URL"
                       class="workora-input !py-2.5"
                     />
                   </div>

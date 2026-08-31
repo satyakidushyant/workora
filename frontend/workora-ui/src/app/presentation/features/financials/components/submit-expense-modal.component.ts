@@ -66,7 +66,7 @@ import { WorkoraSelectComponent, WorkoraSelectOption } from '../../../shared/com
                 <input 
                   type="number" 
                   formControlName="amount" 
-                  placeholder="e.g. 120.50"
+                  placeholder="Claim Amount"
                   class="workora-input !py-2.5"
                 />
               </div>
@@ -87,7 +87,7 @@ import { WorkoraSelectComponent, WorkoraSelectOption } from '../../../shared/com
                 <input 
                   type="text" 
                   formControlName="merchantName" 
-                  placeholder="e.g. Uber / Delta / Hilton"
+                  placeholder="Merchant / Vendor Name"
                   class="workora-input !py-2.5"
                 />
               </div>
@@ -98,7 +98,7 @@ import { WorkoraSelectComponent, WorkoraSelectOption } from '../../../shared/com
               <input 
                 type="text" 
                 formControlName="receiptUrl" 
-                placeholder="https://storage.workora.com/receipts/bill-01.pdf"
+                placeholder="Receipt / Bill Document URL"
                 class="workora-input !py-2.5"
               />
             </div>
@@ -108,7 +108,7 @@ import { WorkoraSelectComponent, WorkoraSelectOption } from '../../../shared/com
               <textarea 
                 formControlName="description" 
                 rows="2" 
-                placeholder="e.g. Client dinner with ACME partner delegation..."
+                placeholder="Business Justification & Purpose"
                 class="workora-input !rounded-2xl !py-2.5 resize-none"
               ></textarea>
             </div>

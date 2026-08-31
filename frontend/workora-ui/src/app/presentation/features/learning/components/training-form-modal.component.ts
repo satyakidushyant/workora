@@ -41,7 +41,7 @@ import { CreateTrainingProgramParams } from '../../../../domain/models/training.
               <input 
                 type="text" 
                 formControlName="title" 
-                placeholder="e.g. Advanced Cloud Architecture & Kubernetes"
+                placeholder="Course Title"
                 class="workora-input !py-2.5"
               />
             </div>
@@ -52,7 +52,7 @@ import { CreateTrainingProgramParams } from '../../../../domain/models/training.
                 <input 
                   type="text" 
                   formControlName="trainerName" 
-                  placeholder="e.g. Dr. Jane Doe"
+                  placeholder="Trainer Name"
                   class="workora-input !py-2.5"
                 />
               </div>

@@ -41,7 +41,7 @@ import { Candidate, CreateJobOfferParams } from '../../../../domain/models/recru
               <input 
                 type="number" 
                 formControlName="offeredSalary" 
-                placeholder="e.g. 95000"
+                placeholder="Offered Annual Base Salary"
                 class="workora-input !py-2.5"
               />
             </div>
@@ -71,7 +71,7 @@ import { Candidate, CreateJobOfferParams } from '../../../../domain/models/recru
               <textarea 
                 formControlName="notes" 
                 rows="3" 
-                placeholder="e.g. $5,000 sign-on bonus contingent on 1-year tenure, equity grants..."
+                placeholder="Special clauses, sign-on bonus notes, or equity terms..."
                 class="workora-input !rounded-2xl !py-2.5 resize-none"
               ></textarea>
             </div>

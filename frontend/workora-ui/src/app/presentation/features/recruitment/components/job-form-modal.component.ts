@@ -42,7 +42,7 @@ import { Department } from '../../../../domain/models/organization.model';
               <input 
                 type="text" 
                 formControlName="title" 
-                placeholder="e.g. Senior Full-Stack Engineer"
+                placeholder="Job Title"
                 class="workora-input !py-2.5"
               />
             </div>
@@ -79,7 +79,7 @@ import { Department } from '../../../../domain/models/organization.model';
                 <input 
                   type="text" 
                   formControlName="location" 
-                  placeholder="e.g. San Francisco, CA / Remote"
+                  placeholder="Location / Office"
                   class="workora-input !py-2.5"
                 />
               </div>

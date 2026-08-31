@@ -66,7 +66,7 @@ import { Employee } from '../../../../domain/models/employee.model';
               <input 
                 type="number" 
                 formControlName="baseSalary" 
-                placeholder="e.g. 75000"
+                placeholder="Base Salary Amount"
                 class="workora-input !py-2.5"
               />
             </div>

@@ -215,7 +215,7 @@ import { WorkoraSelectComponent, WorkoraSelectOption } from '../../../shared/com
                 <input 
                   type="text" 
                   formControlName="name" 
-                  placeholder="e.g. Human Resources &amp; People Operations"
+                  placeholder="Department Name"
                   class="workora-input !py-2.5"
                 />
                 @if (isInvalid('name')) {
@@ -228,7 +228,7 @@ import { WorkoraSelectComponent, WorkoraSelectOption } from '../../../shared/com
                 <input 
                   type="text" 
                   formControlName="code" 
-                  placeholder="e.g. HR-OPS"
+                  placeholder="Department Code"
                   class="workora-input !py-2.5 uppercase font-mono"
                 />
                 @if (isInvalid('code')) {

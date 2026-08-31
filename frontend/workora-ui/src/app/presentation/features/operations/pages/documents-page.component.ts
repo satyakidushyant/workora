@@ -197,7 +197,7 @@ import { WorkoraConfirmDialogComponent } from '../../../shared/components/workor
                   <input 
                     type="text" 
                     formControlName="title" 
-                    placeholder="e.g. Employee Handbook 2026"
+                    placeholder="Document Title"
                     class="workora-input !py-2.5"
                   />
                 </div>

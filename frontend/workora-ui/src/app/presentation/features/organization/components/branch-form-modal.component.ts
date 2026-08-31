@@ -18,14 +18,14 @@ import { Branch, CreateBranchParams, UpdateBranchParams } from '../../../../doma
         <!-- Modal Header -->
         <div class="workora-modal-header">
           <div class="flex items-center gap-3">
-            <div class="w-10 h-10 rounded-xl bg-[#3FA79B]/15 text-[#0E6E68] flex items-center justify-center font-bold">
+            <div class="w-10 h-10 rounded-xl bg-[#DDF7F2] text-[#087F73] flex items-center justify-center font-bold">
               <span class="material-symbols-outlined">location_city</span>
             </div>
             <div>
-              <h3 class="text-base font-extrabold text-[#063B39] font-heading">
+              <h3 class="text-base font-extrabold text-[#102A2A] font-heading">
                 {{ isEditMode ? 'Update Branch Location' : 'Add New Branch Office' }}
               </h3>
-              <p class="text-xs text-slate-500">Configure physical branch, location timezone, and address.</p>
+              <p class="text-xs text-[#718686]">Configure physical branch, location timezone, and address.</p>
             </div>
           </div>
           <button 
@@ -46,7 +46,7 @@ import { Branch, CreateBranchParams, UpdateBranchParams } from '../../../../doma
                 <input 
                   type="text" 
                   formControlName="code" 
-                  placeholder="e.g. SF-HQ, NY-01"
+                  placeholder="Branch Code"
                   class="workora-input !py-2.5 uppercase font-mono tracking-wider"
                 />
                 @if (form.get('code')?.invalid && form.get('code')?.touched) {
@@ -59,7 +59,7 @@ import { Branch, CreateBranchParams, UpdateBranchParams } from '../../../../doma
                 <input 
                   type="text" 
                   formControlName="name" 
-                  placeholder="e.g. San Francisco Tech Hub"
+                  placeholder="Branch Name"
                   class="workora-input !py-2.5"
                 />
                 @if (form.get('name')?.invalid && form.get('name')?.touched) {
@@ -75,7 +75,7 @@ import { Branch, CreateBranchParams, UpdateBranchParams } from '../../../../doma
                 <input 
                   type="text" 
                   formControlName="location" 
-                  placeholder="e.g. San Francisco, CA"
+                  placeholder="City / Region"
                   class="workora-input !py-2.5"
                 />
               </div>
@@ -85,9 +85,9 @@ import { Branch, CreateBranchParams, UpdateBranchParams } from '../../../../doma
                 <select 
                   formControlName="timezone"
                   class="workora-select">
+                  <option value="Asia/Kolkata">Asia/Kolkata (IST +05:30) [Default]</option>
                   <option value="America/Los_Angeles">America/Los_Angeles (PST/PDT)</option>
                   <option value="America/New_York">America/New_York (EST/EDT)</option>
-                  <option value="Asia/Kolkata">Asia/Kolkata (IST)</option>
                   <option value="Europe/London">Europe/London (GMT/BST)</option>
                   <option value="Asia/Dubai">Asia/Dubai (GST)</option>
                   <option value="Asia/Singapore">Asia/Singapore (SGT)</option>
@@ -102,20 +102,20 @@ import { Branch, CreateBranchParams, UpdateBranchParams } from '../../../../doma
               <input 
                 type="text" 
                 formControlName="address" 
-                placeholder="e.g. 500 Market St, Floor 12"
+                placeholder="Street Address"
                 class="workora-input !py-2.5"
               />
             </div>
 
             <!-- Is Head Office Checkbox -->
-            <div class="flex items-center gap-3 p-3 bg-[#F4F8F7] rounded-2xl border border-[#DCEBE7]">
+            <div class="flex items-center gap-3 p-3 bg-[#F6FAF9] rounded-2xl border border-[#DDE9E6]">
               <input 
                 type="checkbox" 
                 id="isHeadOfficeCheckbox"
                 formControlName="isHeadOffice" 
                 class="workora-checkbox"
               />
-              <label for="isHeadOfficeCheckbox" class="text-xs font-bold text-[#063B39] cursor-pointer">
+              <label for="isHeadOfficeCheckbox" class="text-xs font-bold text-[#102A2A] cursor-pointer">
                 Designate as Primary Headquarters Office
               </label>
             </div>
@@ -166,7 +166,7 @@ export class BranchFormModalComponent implements OnChanges {
     name: ['', [Validators.required, Validators.maxLength(150)]],
     location: ['', [Validators.required, Validators.maxLength(100)]],
     address: [''],
-    timezone: ['America/Los_Angeles', [Validators.required]],
+    timezone: ['Asia/Kolkata', [Validators.required]],
     isHeadOffice: [false]
   });
 
@@ -182,7 +182,7 @@ export class BranchFormModalComponent implements OnChanges {
         name: this.branch.name,
         location: this.branch.location,
         address: this.branch.address || '',
-        timezone: this.branch.timezone || 'America/Los_Angeles',
+        timezone: this.branch.timezone || 'Asia/Kolkata',
         isHeadOffice: this.branch.isHeadOffice || false
       });
     }

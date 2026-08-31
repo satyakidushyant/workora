@@ -94,38 +94,6 @@ public class RegisterOrganizationCommandHandler : IRequestHandler<RegisterOrgani
         await _departmentRepository.AddAsync(defaultDept, cancellationToken);
         await _unitOfWork.SaveChangesAsync(cancellationToken);
 
-        // Auto-provision or link the Organization Administrator user account
-        if (!string.IsNullOrWhiteSpace(request.Email))
-        {
-            var adminEmail = EmailAddress.Create(request.Email.Trim().ToLowerInvariant());
-            var existingUser = await _userRepository.GetByEmailAsync(adminEmail, cancellationToken);
-            var hrAdminRole = await _roleRepository.GetByNameAsync("HRAdmin", cancellationToken);
-
-            if (existingUser == null)
-            {
-                var defaultPasswordHash = _passwordHasher.HashPassword("Admin@123");
-                var adminUser = User.Create(
-                    adminEmail,
-                    request.Name + " Admin",
-                    "Officer",
-                    defaultPasswordHash);
-
-                await _userRepository.AddAsync(adminUser, cancellationToken);
-                await _unitOfWork.SaveChangesAsync(cancellationToken);
-
-                if (hrAdminRole != null)
-                {
-                    await _userRepository.AssignUserRolesAsync(adminUser.Id, new[] { hrAdminRole.Id }, cancellationToken);
-                }
-            }
-            else if (hrAdminRole != null && !existingUser.UserRoles.Any(r => r.RoleId == hrAdminRole.Id))
-            {
-                var existingRoleIds = existingUser.UserRoles.Select(r => r.RoleId).ToList();
-                existingRoleIds.Add(hrAdminRole.Id);
-                await _userRepository.AssignUserRolesAsync(existingUser.Id, existingRoleIds, cancellationToken);
-            }
-        }
-
         var dto = new OrganizationDto
         {
             Id = company.Id,

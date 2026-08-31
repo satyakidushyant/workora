@@ -41,7 +41,7 @@ import { SalaryStructure, Payhead, SaveSalaryStructureParams } from '../../../..
               <input 
                 type="text" 
                 formControlName="name" 
-                placeholder="e.g. Standard Full-Time Engineering Grade A"
+                placeholder="Structure Template Name"
                 class="workora-input !py-2.5"
               />
             </div>
@@ -51,7 +51,7 @@ import { SalaryStructure, Payhead, SaveSalaryStructureParams } from '../../../..
               <input 
                 type="text" 
                 formControlName="description" 
-                placeholder="Optional notes regarding designation eligibility"
+                placeholder="Structure description and eligibility"
                 class="workora-input !py-2.5"
               />
             </div>
@@ -75,7 +75,7 @@ import { SalaryStructure, Payhead, SaveSalaryStructureParams } from '../../../..
                       <input 
                         type="text" 
                         formControlName="name" 
-                        placeholder="Name (e.g. HRA)"
+                        placeholder="Component Name"
                         class="workora-input !py-1.5 !px-2.5 !text-xs !bg-white"
                       />
                     </div>
