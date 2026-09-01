@@ -1,11 +1,13 @@
-import { Component, ElementRef, OnInit, AfterViewInit, OnDestroy, inject, signal, PLATFORM_ID } from '@angular/core';
+import { Component, ElementRef, OnInit, AfterViewInit, OnDestroy, inject, signal, computed, PLATFORM_ID } from '@angular/core';
 import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { gsap } from 'gsap';
 import { USER_REPOSITORY, IUserRepository } from '../../../../domain/repositories/i-user.repository';
 import { UserSummary, UserQueryParams, CreateUserParams, UpdateUserParams, AdminResetPasswordParams } from '../../../../domain/models/user.model';
+import { Company } from '../../../../domain/models/organization.model';
 import { PagedResponse } from '../../../../domain/models/api-response.model';
+import { OrganizationApiRepository } from '../../../../data/repositories/organization-api.repository';
 import { UserFormModalComponent } from '../components/user-form-modal.component';
 import { AdminResetPasswordModalComponent } from '../components/admin-reset-password-modal.component';
 import { AssignRoleModalComponent } from '../components/assign-role-modal.component';
@@ -13,12 +15,13 @@ import { WorkoraEmptyStateComponent } from '../../../shared/components/workora-e
 import { WorkoraSkeletonComponent } from '../../../shared/components/workora-skeleton.component';
 import { WorkoraPaginationComponent } from '../../../shared/components/workora-pagination.component';
 import { WorkoraConfirmDialogComponent } from '../../../shared/components/workora-confirm-dialog.component';
+import { WorkoraSelectComponent, WorkoraSelectOption } from '../../../shared/components/workora-select.component';
 import { NotificationService } from '../../../../core/services/notification.service';
 
 /**
- * Humanized Workora Team Directory & User Management Component.
- * Enables people managers and admins to manage team credentials,
- * directory roles, and permissions with empathetic UI cues and fast search.
+ * Enterprise Workora Team Directory & User Management Console.
+ * Enables platform administrators and tenant managers to manage user credentials,
+ * tenant organization allocations, directory security roles, and permissions with rich UI cues.
  */
 @Component({
   selector: 'app-user-list-page',
@@ -33,186 +36,322 @@ import { NotificationService } from '../../../../core/services/notification.serv
     WorkoraEmptyStateComponent,
     WorkoraSkeletonComponent,
     WorkoraPaginationComponent,
-    WorkoraConfirmDialogComponent
+    WorkoraConfirmDialogComponent,
+    WorkoraSelectComponent
   ],
   template: `
-    <div class="p-3.5 xs:p-5 sm:p-6 lg:p-8 space-y-4 sm:space-y-6 max-w-7xl 2xl:max-w-8xl 3xl:max-w-9xl mx-auto w-full">
+    <div class="p-4 sm:p-6 lg:p-8 space-y-5 sm:space-y-6 max-w-7xl 2xl:max-w-8xl mx-auto w-full">
       
-      <!-- Top Navigation / Breadcrumb -->
-      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4 user-header">
+      <!-- Top Navigation & Header -->
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 user-header">
         <div>
-          <div class="flex items-center gap-1.5 xs:gap-2 text-[11px] xs:text-xs text-[#0E6E68] font-semibold mb-1">
+          <div class="flex items-center gap-2 text-xs text-[#087F73] font-semibold mb-1">
             <a routerLink="/dashboard" class="hover:text-[#063B39] transition-colors flex items-center gap-1">
               <span class="material-symbols-outlined text-sm">dashboard</span>
               <span>Dashboard</span>
             </a>
-            <span>/</span>
-            <span class="text-[#063B39] font-bold">Team Directory</span>
+            <span class="text-slate-400">/</span>
+            <span class="text-[#102A2A] font-bold">Team Directory</span>
           </div>
-          <h1 class="text-xl xs:text-2xl sm:text-3xl font-extrabold text-[#063B39] tracking-tight font-heading">Team Directory</h1>
-          <p class="text-xs sm:text-sm text-slate-600 mt-0.5">Manage team members, corporate roles, and login access.</p>
-        </div>
 
-        <button
-          (click)="openCreateModal()"
-          class="workora-btn-primary px-5 py-2.5 text-xs shadow-md w-full sm:w-auto flex items-center justify-center gap-2 cursor-pointer">
-          <span class="material-symbols-outlined text-base">person_add</span>
-          <span>Add Team Member</span>
-        </button>
-      </div>
-
-      <!-- Metric Cards (3 Cards) -->
-      <div class="grid grid-cols-1 xs:grid-cols-3 gap-3 sm:gap-4 user-stats-grid">
-        
-        <div class="p-4 sm:p-5 bg-white border border-[#DCEBE7] rounded-3xl shadow-xs flex items-center justify-between workora-card">
-          <div>
-            <p class="text-[11px] sm:text-xs font-bold text-slate-500 uppercase tracking-wider">Total Accounts</p>
-            <h3 class="text-xl sm:text-2xl font-extrabold text-[#063B39] mt-1 font-heading">{{ totalUsersCount() }}</h3>
-          </div>
-          <div class="p-3 bg-[#DCEBE7] text-[#0E6E68] rounded-2xl shrink-0">
-            <span class="material-symbols-outlined text-xl sm:text-2xl">groups</span>
+          <div class="flex items-center gap-3">
+            <div class="p-2.5 rounded-2xl bg-[#DDF7F2] text-[#087F73] flex items-center justify-center shrink-0 shadow-xs">
+              <span class="material-symbols-outlined text-2xl">manage_accounts</span>
+            </div>
+            <div>
+              <h1 class="text-2xl sm:text-3xl font-extrabold text-[#102A2A] tracking-tight font-heading">
+                Team Directory &amp; User Accounts
+              </h1>
+              <p class="text-xs sm:text-sm text-[#718686] mt-0.5 font-medium">
+                Manage tenant user credentials, employee profile links, security roles, and platform permissions.
+              </p>
+            </div>
           </div>
         </div>
 
-        <div class="p-4 sm:p-5 bg-white border border-[#DCEBE7] rounded-3xl shadow-xs flex items-center justify-between workora-card">
-          <div>
-            <p class="text-[11px] sm:text-xs font-bold text-slate-500 uppercase tracking-wider">Active Today</p>
-            <h3 class="text-xl sm:text-2xl font-extrabold text-emerald-600 mt-1 font-heading">{{ activeUsersCount() }}</h3>
-          </div>
-          <div class="p-3 bg-emerald-50 text-emerald-600 rounded-2xl shrink-0">
-            <span class="material-symbols-outlined text-xl sm:text-2xl">how_to_reg</span>
-          </div>
-        </div>
-
-        <div class="p-4 sm:p-5 bg-white border border-[#DCEBE7] rounded-3xl shadow-xs flex items-center justify-between workora-card">
-          <div>
-            <p class="text-[11px] sm:text-xs font-bold text-slate-500 uppercase tracking-wider">Inactive / Deactivated</p>
-            <h3 class="text-xl sm:text-2xl font-extrabold text-slate-600 mt-1 font-heading">{{ inactiveUsersCount() }}</h3>
-          </div>
-          <div class="p-3 bg-slate-100 text-slate-500 rounded-2xl shrink-0">
-            <span class="material-symbols-outlined text-xl sm:text-2xl">person_off</span>
-          </div>
+        <!-- Header Actions -->
+        <div class="flex items-center gap-3">
+          <button
+            type="button"
+            (click)="openCreateModal()"
+            class="workora-btn-primary text-xs shadow-md">
+            <span class="material-symbols-outlined text-base">person_add</span>
+            <span>+ Add Team Member</span>
+          </button>
         </div>
       </div>
 
-      <!-- Filter & Search Bar -->
-      <div class="p-3.5 sm:p-4 bg-white border border-[#DCEBE7] rounded-2xl shadow-xs flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 sm:gap-4 workora-card">
+      <!-- Quick Platform Stats Cards (4 Cards with Uniform Dimensions) -->
+      <div class="grid grid-cols-2 lg:grid-cols-4 gap-3.5 sm:gap-4 user-stats-grid">
         
-        <!-- Filter Tabs -->
-        <div class="flex items-center gap-1 bg-[#FAFCFB] border border-[#DCEBE7] p-1 rounded-xl w-full sm:w-auto">
-          <button
-            type="button"
-            (click)="setFilter(null)"
-            [ngClass]="activeFilter() === null ? 'bg-[#0E6E68] text-white shadow-xs' : 'text-[#6B7F7C] hover:text-[#063B39] bg-transparent'"
-            class="px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all border-none cursor-pointer flex-1 sm:flex-none text-center">
-            All Members
-          </button>
-          <button
-            type="button"
-            (click)="setFilter(true)"
-            [ngClass]="activeFilter() === true ? 'bg-[#0E6E68] text-white shadow-xs' : 'text-[#6B7F7C] hover:text-[#063B39] bg-transparent'"
-            class="px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all border-none cursor-pointer flex-1 sm:flex-none text-center">
-            Active
-          </button>
-          <button
-            type="button"
-            (click)="setFilter(false)"
-            [ngClass]="activeFilter() === false ? 'bg-[#0E6E68] text-white shadow-xs' : 'text-[#6B7F7C] hover:text-[#063B39] bg-transparent'"
-            class="px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all border-none cursor-pointer flex-1 sm:flex-none text-center">
-            Inactive
-          </button>
+        <!-- Total Accounts -->
+        <div class="workora-card p-4 sm:p-5 border-l-4 border-l-[#087F73] flex flex-col justify-between min-h-[116px]">
+          <div class="flex items-center justify-between">
+            <span class="text-[11px] font-bold uppercase tracking-wider text-[#718686]">Total Accounts</span>
+            <span class="w-9 h-9 rounded-xl bg-[#DDF7F2] text-[#087F73] flex items-center justify-center shrink-0">
+              <span class="material-symbols-outlined text-lg">groups</span>
+            </span>
+          </div>
+          <div>
+            <p class="text-2xl sm:text-3xl font-extrabold text-[#102A2A] font-heading leading-tight my-0.5">{{ totalUsersCount() }}</p>
+            <p class="text-[11px] text-[#718686] font-medium">Platform &amp; tenant members</p>
+          </div>
         </div>
 
-        <!-- Search Input -->
-        <div class="relative flex-1 sm:max-w-xs">
-          <input
-            type="text"
-            [(ngModel)]="searchQuery"
-            (keyup.enter)="onSearch()"
-            placeholder="Search by name or email..."
-            class="workora-input pl-9 pr-4 text-xs !py-2 w-full"
-          />
-          <span class="material-symbols-outlined text-slate-400 absolute left-2.5 top-2.5 text-base pointer-events-none">search</span>
-          @if (searchQuery) {
+        <!-- Active Users -->
+        <div class="workora-card p-4 sm:p-5 border-l-4 border-l-emerald-500 flex flex-col justify-between min-h-[116px]">
+          <div class="flex items-center justify-between">
+            <span class="text-[11px] font-bold uppercase tracking-wider text-[#718686]">Active Accounts</span>
+            <span class="w-9 h-9 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0">
+              <span class="material-symbols-outlined text-lg">verified_user</span>
+            </span>
+          </div>
+          <div>
+            <p class="text-2xl sm:text-3xl font-extrabold text-emerald-600 font-heading leading-tight my-0.5">{{ activeUsersCount() }}</p>
+            <p class="text-[11px] text-emerald-700 font-semibold flex items-center gap-1.5">
+              <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+              <span>Operational &amp; verified</span>
+            </p>
+          </div>
+        </div>
+
+        <!-- Inactive Users -->
+        <div class="workora-card p-4 sm:p-5 border-l-4 border-l-slate-400 flex flex-col justify-between min-h-[116px]">
+          <div class="flex items-center justify-between">
+            <span class="text-[11px] font-bold uppercase tracking-wider text-[#718686]">Deactivated</span>
+            <span class="w-9 h-9 rounded-xl bg-slate-100 text-slate-500 flex items-center justify-center shrink-0">
+              <span class="material-symbols-outlined text-lg">person_off</span>
+            </span>
+          </div>
+          <div>
+            <p class="text-2xl sm:text-3xl font-extrabold text-slate-700 font-heading leading-tight my-0.5">{{ inactiveUsersCount() }}</p>
+            <p class="text-[11px] text-[#718686] font-medium">Suspended or locked logins</p>
+          </div>
+        </div>
+
+        <!-- Organizations -->
+        <div class="workora-card p-4 sm:p-5 border-l-4 border-l-[#16A085] flex flex-col justify-between min-h-[116px]">
+          <div class="flex items-center justify-between">
+            <span class="text-[11px] font-bold uppercase tracking-wider text-[#718686]">Organizations</span>
+            <span class="w-9 h-9 rounded-xl bg-teal-50 text-[#16A085] flex items-center justify-center shrink-0">
+              <span class="material-symbols-outlined text-lg">corporate_fare</span>
+            </span>
+          </div>
+          <div>
+            <p class="text-2xl sm:text-3xl font-extrabold text-[#16A085] font-heading leading-tight my-0.5">{{ companies().length }}</p>
+            <p class="text-[11px] text-[#718686] font-medium">Provisioned workspaces</p>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Filter & Search Toolbar Card (All 4 Controls Have Equal Uniform Height & Proportions) -->
+      <div class="workora-card p-4 sm:p-5 space-y-3">
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 items-center">
+          
+          <!-- 1. Search Bar (Equal Height & Width) -->
+          <div class="relative w-full">
+            <span class="material-symbols-outlined absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-lg pointer-events-none">
+              search
+            </span>
+            <input
+              type="text"
+              [ngModel]="searchQuery"
+              (ngModelChange)="onSearchInputChange($event)"
+              (keydown.escape)="clearSearch()"
+              placeholder="Search by name, email or code..."
+              class="w-full h-10 pl-10 pr-9 bg-[#F6FAF9] text-xs text-[#102A2A] rounded-xl border border-[#DDE9E6] focus:border-[#087F73] focus:bg-white outline-none font-medium transition-all placeholder:text-[#718686]"
+            />
+            @if (searchQuery) {
+              <button
+                type="button"
+                (click)="clearSearch()"
+                class="absolute right-2.5 top-1/2 -translate-y-1/2 p-1 text-slate-400 hover:text-rose-500 rounded-lg hover:bg-slate-100 transition-colors border-none bg-transparent cursor-pointer flex items-center justify-center"
+                title="Clear search">
+                <span class="material-symbols-outlined text-sm">close</span>
+              </button>
+            }
+          </div>
+
+          <!-- 2. Organization Dropdown (Equal Height & Width) -->
+          <div class="w-full">
+            <app-workora-select
+              [options]="companyFilterOptions()"
+              [ngModel]="selectedCompanyFilter()"
+              (selectionChange)="onCompanyFilterChange($event)"
+              [clearable]="true"
+              placeholder="All Organizations"
+              icon="corporate_fare">
+            </app-workora-select>
+          </div>
+
+          <!-- 3. Security Role Dropdown (Equal Height & Width) -->
+          <div class="w-full">
+            <app-workora-select
+              [options]="roleFilterOptions"
+              [ngModel]="selectedRoleFilter()"
+              (selectionChange)="onRoleFilterChange($event)"
+              [clearable]="true"
+              placeholder="All Security Roles"
+              icon="shield_person">
+            </app-workora-select>
+          </div>
+
+          <!-- 4. Status Filter Tabs (Equal Height & Width) -->
+          <div class="h-10 flex items-center gap-1 bg-[#F6FAF9] border border-[#DDE9E6] p-1 rounded-xl w-full">
             <button
-              (click)="clearSearch()"
-              class="material-symbols-outlined text-slate-400 hover:text-slate-600 absolute right-2.5 top-2.5 text-base border-none bg-transparent cursor-pointer">
-              close
+              type="button"
+              (click)="setFilter(null)"
+              [ngClass]="activeFilter() === null ? 'bg-[#087F73] text-white shadow-xs font-bold' : 'text-[#718686] hover:text-[#102A2A] font-semibold bg-transparent'"
+              class="h-8 rounded-lg text-xs transition-all border-none cursor-pointer flex-1 flex items-center justify-center">
+              All
             </button>
-          }
+            <button
+              type="button"
+              (click)="setFilter(true)"
+              [ngClass]="activeFilter() === true ? 'bg-[#087F73] text-white shadow-xs font-bold' : 'text-[#718686] hover:text-[#102A2A] font-semibold bg-transparent'"
+              class="h-8 rounded-lg text-xs transition-all border-none cursor-pointer flex-1 flex items-center justify-center">
+              Active
+            </button>
+            <button
+              type="button"
+              (click)="setFilter(false)"
+              [ngClass]="activeFilter() === false ? 'bg-[#087F73] text-white shadow-xs font-bold' : 'text-[#718686] hover:text-[#102A2A] font-semibold bg-transparent'"
+              class="h-8 rounded-lg text-xs transition-all border-none cursor-pointer flex-1 flex items-center justify-center">
+              Inactive
+            </button>
+          </div>
+
         </div>
+
+        <!-- Reset Active Filters Bar (If any filter is applied) -->
+        @if (searchQuery || activeFilter() !== null || selectedCompanyFilter() !== null || selectedRoleFilter() !== null) {
+          <div class="flex items-center justify-between pt-2 border-t border-[#DDE9E6]/60 text-xs">
+            <div class="flex items-center gap-1.5 text-[#718686]">
+              <span class="material-symbols-outlined text-sm text-[#087F73]">filter_alt</span>
+              <span class="font-medium">Active filters applied</span>
+            </div>
+            <button
+              type="button"
+              (click)="resetAllFilters()"
+              class="h-8 px-3 rounded-lg text-xs font-bold text-rose-600 hover:bg-rose-50 border border-rose-200 transition-colors cursor-pointer flex items-center justify-center gap-1">
+              <span class="material-symbols-outlined text-sm">filter_alt_off</span>
+              <span>Reset All Filters</span>
+            </button>
+          </div>
+        }
       </div>
 
       <!-- Users Table Card -->
-      <div class="bg-white border border-[#DCEBE7] rounded-3xl shadow-xs overflow-hidden workora-card">
+      <div class="workora-card overflow-hidden">
         
         <!-- Loading State -->
         @if (isLoading()) {
-          <app-workora-skeleton type="table" [count]="5"></app-workora-skeleton>
+          <div class="p-6">
+            <app-workora-skeleton type="table" [count]="5"></app-workora-skeleton>
+          </div>
         }
 
         <!-- Empty State -->
-        @if (!isLoading() && users().length === 0) {
-          <app-workora-empty-state
-            icon="person_search"
-            title="No Team Members Found"
-            description="We couldn't find anyone matching your current search or filter. Try adjusting your search term or add a new team member."
-            actionLabel="Add Team Member"
-            actionIcon="person_add"
-            (actionClicked)="openCreateModal()"
-          ></app-workora-empty-state>
+        @if (!isLoading() && filteredUsers().length === 0) {
+          <div class="p-8">
+            <app-workora-empty-state
+              icon="person_search"
+              title="No Team Members Found"
+              description="We couldn't find anyone matching your current search or filters. Try clearing your filters or add a new team member."
+              actionLabel="Add Team Member"
+              actionIcon="person_add"
+              (actionClicked)="openCreateModal()"
+            ></app-workora-empty-state>
+          </div>
         }
 
         <!-- Data Table -->
-        @if (!isLoading() && users().length > 0) {
+        @if (!isLoading() && filteredUsers().length > 0) {
           <div class="workora-table-responsive">
             <table class="workora-table">
               <thead>
                 <tr>
                   <th>Team Member</th>
-                  <th>Assigned Role</th>
+                  <th>Organization &amp; Dept</th>
+                  <th>Security Role</th>
                   <th>Status</th>
-                  <th>Employee ID</th>
                   <th>Member Since</th>
                   <th class="text-right">Actions</th>
                 </tr>
               </thead>
               <tbody>
-                @for (user of users(); track user.id) {
-                  <tr>
+                @for (user of filteredUsers(); track user.id) {
+                  <tr class="hover:bg-[#F6FAF9]/80 transition-colors">
                     <!-- User Profile & Avatar -->
                     <td>
                       <div class="flex items-center gap-3">
-                        <div class="w-9 h-9 rounded-full bg-gradient-to-tr from-[#0E6E68] to-[#3FA79B] text-white flex items-center justify-center font-bold text-xs shrink-0 shadow-xs border border-white">
+                        <div class="w-10 h-10 rounded-2xl bg-gradient-to-tr from-[#075E58] to-[#087F73] text-white flex items-center justify-center font-extrabold text-xs shrink-0 shadow-xs border border-white">
                           {{ getInitials(user.firstName, user.lastName) }}
                         </div>
                         <div>
-                          <div class="font-bold text-[#063B39]">{{ user.fullName }}</div>
-                          <div class="text-[11px] text-slate-500 mt-0.5">
+                          <div class="font-extrabold text-[#102A2A] flex items-center gap-1.5">
+                            <span>{{ user.fullName }}</span>
+                            @if (user.isActive) {
+                              <span class="w-1.5 h-1.5 rounded-full bg-emerald-500" title="Active Account"></span>
+                            }
+                          </div>
+                          <div class="text-[11px] text-[#718686] font-medium flex items-center gap-1 mt-0.5">
+                            <span class="material-symbols-outlined text-[13px]">mail</span>
                             <span>{{ user.email }}</span>
                           </div>
                         </div>
                       </div>
                     </td>
 
+                    <!-- Organization & Dept Column -->
+                    <td>
+                      @if (user.companyName) {
+                        <div class="flex items-center gap-1.5 flex-wrap">
+                          <span class="material-symbols-outlined text-sm text-[#087F73]">corporate_fare</span>
+                          <span class="font-bold text-xs text-[#102A2A]">{{ user.companyName }}</span>
+                          @if (user.companyCode) {
+                            <span class="text-[9px] font-extrabold px-1.5 py-0.5 rounded-md bg-[#DDF7F2] text-[#075E58] border border-[#087F73]/20 uppercase font-mono">{{ user.companyCode }}</span>
+                          }
+                        </div>
+                        <div class="text-[11px] text-[#718686] font-medium mt-0.5 flex items-center gap-1.5">
+                          <span>{{ user.departmentName || 'General Operations' }}</span>
+                          @if (user.employeeCode) {
+                            <span>•</span>
+                            <span class="font-mono text-[10px] font-bold text-[#087F73] bg-[#EBF5F3] px-1.5 py-0.2 rounded">{{ user.employeeCode }}</span>
+                          }
+                        </div>
+                      } @else {
+                        <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-xl text-[10px] font-extrabold bg-purple-50 text-purple-700 border border-purple-200">
+                          <span class="material-symbols-outlined text-xs">admin_panel_settings</span>
+                          <span>Platform Administrator</span>
+                        </span>
+                      }
+                    </td>
+
                     <!-- Assigned Role -->
                     <td>
                       @if (user.roles && user.roles.length > 0) {
-                        @for (r of user.roles; track r) {
-                          <span 
-                            [ngClass]="{
-                              'bg-purple-50 text-purple-700 border-purple-200': r === 'SuperAdmin',
-                              'bg-emerald-50 text-emerald-700 border-emerald-200': r === 'HRAdmin',
-                              'bg-blue-50 text-blue-700 border-blue-200': r === 'FinanceManager',
-                              'bg-amber-50 text-amber-700 border-amber-200': r === 'Manager',
-                              'bg-slate-50 text-slate-700 border-slate-200': r === 'Employee'
-                            }"
-                            class="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold border mr-1 inline-block">
-                            {{ r }}
-                          </span>
-                        }
+                        <div class="flex flex-wrap gap-1">
+                          @for (r of user.roles; track r) {
+                            <span 
+                              [ngClass]="{
+                                'bg-purple-50 text-purple-700 border-purple-200': r === 'SuperAdmin',
+                                'bg-teal-50 text-teal-800 border-teal-200': r === 'HRAdmin',
+                                'bg-blue-50 text-blue-700 border-blue-200': r === 'FinanceManager',
+                                'bg-amber-50 text-amber-800 border-amber-200': r === 'Manager',
+                                'bg-slate-50 text-slate-700 border-slate-200': r === 'Employee'
+                              }"
+                              class="px-2.5 py-0.5 rounded-lg text-[10px] font-extrabold border inline-flex items-center gap-1 shadow-2xs">
+                              <span class="material-symbols-outlined text-[12px]">
+                                {{ r === 'SuperAdmin' ? 'shield_person' : r === 'HRAdmin' ? 'manage_accounts' : r === 'FinanceManager' ? 'payments' : r === 'Manager' ? 'supervisor_account' : 'person' }}
+                              </span>
+                              <span>{{ r }}</span>
+                            </span>
+                          }
+                        </div>
                       } @else {
-                        <span class="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold bg-slate-50 text-slate-600 border border-slate-200">
+                        <span class="px-2.5 py-0.5 rounded-lg text-[10px] font-extrabold bg-slate-50 text-slate-600 border border-slate-200">
                           Employee
                         </span>
                       }
@@ -221,80 +360,73 @@ import { NotificationService } from '../../../../core/services/notification.serv
                     <!-- Status Pill -->
                     <td>
                       @if (user.isActive) {
-                        <span class="workora-badge-success">
+                        <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
                           <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
                           <span>Active</span>
                         </span>
                       } @else {
-                        <span class="workora-badge-neutral">
+                        <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-slate-100 text-slate-600 border border-slate-200">
                           <span class="w-1.5 h-1.5 rounded-full bg-slate-400"></span>
                           <span>Inactive</span>
                         </span>
                       }
                     </td>
 
-                    <!-- Linked Employee -->
-                    <td>
-                      @if (user.employeeId) {
-                        <span class="inline-flex items-center gap-1 text-xs font-semibold text-[#0E6E68]">
-                          <span class="material-symbols-outlined text-sm">badge</span>
-                          <span>ID: {{ user.employeeId }}</span>
-                        </span>
-                      } @else {
-                        <span class="text-[11px] text-slate-400 italic">Direct User</span>
-                      }
-                    </td>
-
                     <!-- Created Date -->
-                    <td class="text-slate-500 text-xs">
-                      {{ user.createdAt | date:'mediumDate' }}
+                    <td class="text-[#718686] text-xs font-medium">
+                      <div class="flex items-center gap-1">
+                        <span class="material-symbols-outlined text-[13px] text-slate-400">calendar_today</span>
+                        <span>{{ user.createdAt | date:'mediumDate' }}</span>
+                      </div>
                     </td>
 
-                    <!-- Action Buttons -->
+                    <!-- Action Buttons (Uniform 32x32px Dimensions) -->
                     <td class="text-right">
                       <div class="inline-flex items-center gap-1.5 justify-end">
+                        
                         <!-- Assign Role Button -->
                         <button
                           type="button"
                           (click)="openAssignRoleModal(user)"
-                          class="workora-btn-icon !w-8 !h-8 text-[#0E6E68] hover:bg-[#DCEBE7]/50"
+                          class="w-8 h-8 rounded-xl text-[#087F73] hover:bg-[#DDF7F2] transition-colors border-none bg-transparent cursor-pointer flex items-center justify-center shrink-0"
                           title="Assign Security Role"
                           aria-label="Assign security role"
                         >
-                          <span class="material-symbols-outlined text-base">shield_person</span>
+                          <span class="material-symbols-outlined text-[17px]">shield_person</span>
                         </button>
 
                         <!-- Edit Button -->
                         <button
                           type="button"
                           (click)="openEditModal(user)"
-                          class="workora-btn-icon !w-8 !h-8"
+                          class="w-8 h-8 rounded-xl text-slate-500 hover:text-[#102A2A] hover:bg-slate-100 transition-colors border-none bg-transparent cursor-pointer flex items-center justify-center shrink-0"
                           title="Edit Profile"
                           aria-label="Edit user"
                         >
-                          <span class="material-symbols-outlined text-base">edit</span>
+                          <span class="material-symbols-outlined text-[17px]">edit</span>
                         </button>
 
                         <!-- Reset Password Button -->
                         <button
                           type="button"
                           (click)="openResetPasswordModal(user)"
-                          class="workora-btn-icon !w-8 !h-8"
+                          class="w-8 h-8 rounded-xl text-slate-500 hover:text-[#087F73] hover:bg-[#DDF7F2] transition-colors border-none bg-transparent cursor-pointer flex items-center justify-center shrink-0"
                           title="Set Password"
                           aria-label="Reset password"
                         >
-                          <span class="material-symbols-outlined text-base">key</span>
+                          <span class="material-symbols-outlined text-[17px]">key</span>
                         </button>
 
                         <!-- Toggle Status Button -->
                         <button
                           type="button"
                           (click)="toggleStatus(user)"
-                          class="workora-btn-icon !w-8 !h-8"
+                          class="w-8 h-8 rounded-xl transition-colors border-none bg-transparent cursor-pointer flex items-center justify-center shrink-0"
+                          [ngClass]="user.isActive ? 'text-amber-600 hover:bg-amber-50' : 'text-emerald-600 hover:bg-emerald-50'"
                           [title]="user.isActive ? 'Deactivate Account' : 'Activate Account'"
                           [attr.aria-label]="user.isActive ? 'Deactivate account' : 'Activate account'"
                         >
-                          <span class="material-symbols-outlined text-base" [ngClass]="user.isActive ? 'text-amber-600' : 'text-emerald-600'">
+                          <span class="material-symbols-outlined text-[17px]">
                             {{ user.isActive ? 'pause_circle' : 'play_circle' }}
                           </span>
                         </button>
@@ -303,12 +435,13 @@ import { NotificationService } from '../../../../core/services/notification.serv
                         <button
                           type="button"
                           (click)="promptDeleteUser(user)"
-                          class="workora-btn-icon workora-btn-icon-danger !w-8 !h-8"
+                          class="w-8 h-8 rounded-xl text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition-colors border-none bg-transparent cursor-pointer flex items-center justify-center shrink-0"
                           title="Remove Account"
                           aria-label="Delete user"
                         >
-                          <span class="material-symbols-outlined text-base">delete</span>
+                          <span class="material-symbols-outlined text-[17px]">delete</span>
                         </button>
+
                       </div>
                     </td>
                   </tr>
@@ -318,72 +451,96 @@ import { NotificationService } from '../../../../core/services/notification.serv
           </div>
 
           <!-- Pagination Component -->
-          <app-workora-pagination
-            [pageNumber]="pageNumber()"
-            [pageSize]="pageSize()"
-            [totalCount]="totalCount()"
-            [totalPages]="totalPages()"
-            (pageChange)="changePage($event)"
-          ></app-workora-pagination>
+          <div class="p-4 sm:p-5 border-t border-[#DDE9E6] bg-[#F6FAF9]">
+            <app-workora-pagination
+              [pageNumber]="pageNumber()"
+              [pageSize]="pageSize()"
+              [totalCount]="totalCount()"
+              [totalPages]="totalPages()"
+              (pageChange)="changePage($event)"
+            ></app-workora-pagination>
+          </div>
         }
 
       </div>
 
-    </div>
+      <!-- Modals -->
+      @if (showFormModal()) {
+        <app-user-form-modal
+          [user]="selectedUser()"
+          [isSubmitting]="isSubmittingModal()"
+          (save)="onSaveUser($event)"
+          (cancel)="showFormModal.set(false)"
+        ></app-user-form-modal>
+      }
 
-    <!-- User Create / Edit Modal -->
-    @if (showFormModal()) {
-      <app-user-form-modal
-        [user]="selectedUser()"
-        [isLoading]="isSubmittingModal()"
-        (save)="onSaveUser($event)"
-        (cancel)="showFormModal.set(false)"
-      ></app-user-form-modal>
-    }
+      @if (showAssignRoleModal() && selectedUser()) {
+        <app-assign-role-modal
+          [user]="selectedUser()!"
+          [isSubmitting]="isSubmittingModal()"
+          (assign)="onConfirmAssignRole($event)"
+          (cancel)="showAssignRoleModal.set(false)"
+        ></app-assign-role-modal>
+      }
 
-    <!-- Assign Security Role Modal -->
-    @if (showAssignRoleModal()) {
-      <app-assign-role-modal
-        [user]="selectedUser()"
-        [isSubmitting]="isSubmittingModal()"
-        (assign)="onConfirmAssignRole($event)"
-        (cancel)="showAssignRoleModal.set(false)">
-      </app-assign-role-modal>
-    }
+      @if (showResetPasswordModal() && selectedUser()) {
+        <app-admin-reset-password-modal
+          [user]="selectedUser()!"
+          [isSubmitting]="isSubmittingModal()"
+          (resetPassword)="onConfirmResetPassword($event)"
+          (cancel)="showResetPasswordModal.set(false)"
+        ></app-admin-reset-password-modal>
+      }
 
-    <!-- Admin Reset Password Modal -->
-    @if (showResetPasswordModal()) {
-      <app-admin-reset-password-modal
-        [user]="selectedUser()"
-        [isSubmitting]="isSubmittingModal()"
-        (confirm)="onConfirmResetPassword($event)"
-        (cancel)="showResetPasswordModal.set(false)"
-      ></app-admin-reset-password-modal>
-    }
-
-    <!-- Confirm Delete Dialog -->
-    @if (showDeleteConfirm()) {
+      <!-- Delete Confirmation Dialog -->
       <app-workora-confirm-dialog
         [isOpen]="showDeleteConfirm()"
-        title="Remove User Account"
+        title="Delete User Account"
         [message]="deleteConfirmMessage"
-        confirmText="Remove Account"
-        cancelText="Keep Account"
+        confirmText="Yes, Delete Account"
         variant="danger"
-        [isLoading]="isDeletingUser()"
-        (confirm)="confirmDeleteUser()"
+        (confirm)="onConfirmDeleteUser()"
         (cancel)="showDeleteConfirm.set(false)"
       ></app-workora-confirm-dialog>
-    }
+
+    </div>
   `
 })
 export class UserListPageComponent implements OnInit, AfterViewInit, OnDestroy {
-  private readonly platformId = inject(PLATFORM_ID);
   private readonly elementRef = inject(ElementRef);
+  private readonly platformId = inject(PLATFORM_ID);
   private readonly userRepo = inject<IUserRepository>(USER_REPOSITORY);
+  private readonly orgRepo = inject(OrganizationApiRepository);
   private readonly notificationService = inject(NotificationService);
 
   readonly users = signal<UserSummary[]>([]);
+  readonly companies = signal<Company[]>([]);
+  readonly selectedCompanyFilter = signal<number | null>(null);
+  readonly selectedRoleFilter = signal<string | null>(null);
+
+  readonly roleFilterOptions: WorkoraSelectOption<string>[] = [
+    { value: 'SuperAdmin', label: 'SuperAdmin', icon: 'shield_person' },
+    { value: 'HRAdmin', label: 'HRAdmin', icon: 'manage_accounts' },
+    { value: 'FinanceManager', label: 'FinanceManager', icon: 'payments' },
+    { value: 'Manager', label: 'Manager', icon: 'supervisor_account' },
+    { value: 'Employee', label: 'Employee', icon: 'person' }
+  ];
+
+  readonly companyFilterOptions = computed<WorkoraSelectOption<number>[]>(() => {
+    return this.companies().map(c => ({
+      value: c.id,
+      label: c.name,
+      sublabel: c.code,
+      icon: 'corporate_fare'
+    }));
+  });
+
+  readonly filteredUsers = computed<UserSummary[]>(() => {
+    const role = this.selectedRoleFilter();
+    if (!role) return this.users();
+    return this.users().filter(u => u.roles?.includes(role));
+  });
+
   readonly isLoading = signal<boolean>(false);
   readonly isSubmittingModal = signal<boolean>(false);
   readonly isDeletingUser = signal<boolean>(false);
@@ -412,6 +569,7 @@ export class UserListPageComponent implements OnInit, AfterViewInit, OnDestroy {
   private ctx?: gsap.Context;
 
   ngOnInit(): void {
+    this.loadCompanies();
     this.loadUsers();
     this.loadStats();
   }
@@ -439,13 +597,37 @@ export class UserListPageComponent implements OnInit, AfterViewInit, OnDestroy {
     this.ctx?.revert();
   }
 
+  loadCompanies(): void {
+    this.orgRepo.getCompaniesList().subscribe({
+      next: (list: Company[]) => this.companies.set(list || []),
+      error: () => this.companies.set([])
+    });
+  }
+
+  onCompanyFilterChange(val: any): void {
+    const companyId = val !== null && val !== undefined && typeof val === 'object' && 'value' in val 
+      ? (val.value ? Number(val.value) : null) 
+      : (val !== null && val !== undefined && !isNaN(Number(val)) ? Number(val) : null);
+    this.selectedCompanyFilter.set(companyId);
+    this.pageNumber.set(1);
+    this.loadUsers();
+  }
+
+  onRoleFilterChange(val: any): void {
+    const role = val !== null && val !== undefined && typeof val === 'object' && 'value' in val 
+      ? val.value 
+      : (val || null);
+    this.selectedRoleFilter.set(role);
+  }
+
   loadUsers(): void {
     this.isLoading.set(true);
     const params: UserQueryParams = {
       pageNumber: this.pageNumber(),
       pageSize: this.pageSize(),
       searchTerm: this.searchQuery?.trim() || undefined,
-      isActive: this.activeFilter()
+      isActive: this.activeFilter(),
+      companyId: this.selectedCompanyFilter() || undefined
     };
 
     this.userRepo.getUsers(params).subscribe({
@@ -480,6 +662,8 @@ export class UserListPageComponent implements OnInit, AfterViewInit, OnDestroy {
     });
   }
 
+  private searchDebounceTimer?: any;
+
   setFilter(filter: boolean | null): void {
     if (this.activeFilter() === filter) return;
     this.activeFilter.set(filter);
@@ -487,13 +671,40 @@ export class UserListPageComponent implements OnInit, AfterViewInit, OnDestroy {
     this.loadUsers();
   }
 
+  onSearchInputChange(value: string): void {
+    this.searchQuery = value || '';
+    if (this.searchDebounceTimer) {
+      clearTimeout(this.searchDebounceTimer);
+    }
+    if (!this.searchQuery.trim()) {
+      this.pageNumber.set(1);
+      this.loadUsers();
+      return;
+    }
+    this.searchDebounceTimer = setTimeout(() => {
+      this.pageNumber.set(1);
+      this.loadUsers();
+    }, 250);
+  }
+
   onSearch(): void {
+    if (this.searchDebounceTimer) {
+      clearTimeout(this.searchDebounceTimer);
+    }
     this.pageNumber.set(1);
     this.loadUsers();
   }
 
   clearSearch(): void {
     this.searchQuery = '';
+    this.onSearch();
+  }
+
+  resetAllFilters(): void {
+    this.searchQuery = '';
+    this.activeFilter.set(null);
+    this.selectedCompanyFilter.set(null);
+    this.selectedRoleFilter.set(null);
     this.onSearch();
   }
 
@@ -576,70 +787,48 @@ export class UserListPageComponent implements OnInit, AfterViewInit, OnDestroy {
       const createPayload = payload as CreateUserParams;
       this.userRepo.createUser(createPayload).subscribe({
         next: (newUser: UserSummary) => {
-          if (createPayload.roleId) {
-            this.userRepo.assignRoles({ userId: newUser.id, roleIds: [createPayload.roleId] }).subscribe({
-              next: () => {
-                this.isSubmittingModal.set(false);
-                this.showFormModal.set(false);
-                this.notificationService.showSuccess('New team member added with assigned role!');
-                this.loadUsers();
-                this.loadStats();
-              },
-              error: () => {
-                this.isSubmittingModal.set(false);
-                this.showFormModal.set(false);
-                this.loadUsers();
-                this.loadStats();
-              }
-            });
-          } else {
-            this.isSubmittingModal.set(false);
-            this.showFormModal.set(false);
-            this.notificationService.showSuccess('New team member added to directory!');
-            this.loadUsers();
-            this.loadStats();
-          }
+          this.isSubmittingModal.set(false);
+          this.showFormModal.set(false);
+          this.notificationService.showSuccess('New team member added with assigned role!');
+          this.loadUsers();
+          this.loadStats();
         },
         error: (err: any) => {
           this.isSubmittingModal.set(false);
-          const msg = err?.error?.message || err?.message || 'Failed to add team member.';
+          const msg = err?.error?.message || err?.message || 'Failed to create user.';
           this.notificationService.showError(msg);
         }
       });
     }
   }
 
-  onConfirmResetPassword(payload: AdminResetPasswordParams): void {
-    if (!this.selectedUser()) return;
-
+  onConfirmResetPassword(event: AdminResetPasswordParams): void {
     this.isSubmittingModal.set(true);
-    this.userRepo.adminResetPassword(payload).subscribe({
+    this.userRepo.adminResetPassword(event).subscribe({
       next: () => {
         this.isSubmittingModal.set(false);
         this.showResetPasswordModal.set(false);
-        this.notificationService.showSuccess(`Password updated for ${this.selectedUser()!.fullName}.`);
+        this.notificationService.showSuccess(`Password updated for ${this.selectedUser()?.fullName || 'user'}.`);
       },
       error: (err: any) => {
         this.isSubmittingModal.set(false);
-        const msg = err?.error?.message || err?.message || 'Failed to reset member password.';
+        const msg = err?.error?.message || err?.message || 'Failed to reset password.';
         this.notificationService.showError(msg);
       }
     });
   }
 
   toggleStatus(user: UserSummary): void {
-    const nextStatus = !user.isActive;
-    const action$ = user.isActive 
-      ? this.userRepo.deactivateUser(user.id) 
-      : this.userRepo.activateUser(user.id);
-
+    const action$ = user.isActive ? this.userRepo.deactivateUser(user.id) : this.userRepo.activateUser(user.id);
     action$.subscribe({
       next: () => {
-        this.notificationService.showSuccess(`Account ${nextStatus ? 'activated' : 'deactivated'} for ${user.fullName}.`);
+        const statusLabel = user.isActive ? 'deactivated' : 'activated';
+        this.notificationService.showSuccess(`User account ${statusLabel} successfully.`);
         this.loadUsers();
+        this.loadStats();
       },
       error: (err: any) => {
-        const msg = err?.error?.message || err?.message || 'Failed to change account status.';
+        const msg = err?.error?.message || err?.message || 'Failed to toggle account status.';
         this.notificationService.showError(msg);
       }
     });
@@ -647,34 +836,33 @@ export class UserListPageComponent implements OnInit, AfterViewInit, OnDestroy {
 
   promptDeleteUser(user: UserSummary): void {
     this.userToDelete = user;
-    this.deleteConfirmMessage = `Are you sure you want to remove ${user.fullName} (${user.email}) from the directory?`;
+    this.deleteConfirmMessage = `Are you sure you want to permanently delete user account "${user.fullName}" (${user.email})? This action cannot be undone.`;
     this.showDeleteConfirm.set(true);
   }
 
-  confirmDeleteUser(): void {
+  onConfirmDeleteUser(): void {
     if (!this.userToDelete) return;
-
     this.isDeletingUser.set(true);
     this.userRepo.deleteUser(this.userToDelete.id).subscribe({
       next: () => {
         this.isDeletingUser.set(false);
         this.showDeleteConfirm.set(false);
-        this.notificationService.showSuccess(`Removed ${this.userToDelete!.fullName} from directory.`);
+        this.notificationService.showSuccess('User account removed successfully.');
         this.userToDelete = null;
         this.loadUsers();
         this.loadStats();
       },
       error: (err: any) => {
         this.isDeletingUser.set(false);
-        const msg = err?.error?.message || err?.message || 'Failed to remove team member.';
+        const msg = err?.error?.message || err?.message || 'Failed to delete user account.';
         this.notificationService.showError(msg);
       }
     });
   }
 
   getInitials(firstName?: string, lastName?: string): string {
-    const f = firstName ? firstName.charAt(0).toUpperCase() : '';
-    const l = lastName ? lastName.charAt(0).toUpperCase() : '';
-    return f + l || 'U';
+    const f = (firstName || '').charAt(0).toUpperCase();
+    const l = (lastName || '').charAt(0).toUpperCase();
+    return `${f}${l}` || 'U';
   }
 }

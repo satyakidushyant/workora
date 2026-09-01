@@ -14,16 +14,11 @@ namespace Workora.Application.Features.SuperAdmin.Commands.RegisterOrganization;
 
 /// <summary>
 /// Handler for <see cref="RegisterOrganizationCommand"/>.
-/// Automatically provisions tenant structure (Headquarters Branch, Executive Department, and Tenant Admin account).
+/// Registers a new tenant organization cleanly without auto-provisioning dummy branches or departments.
 /// </summary>
 public class RegisterOrganizationCommandHandler : IRequestHandler<RegisterOrganizationCommand, ApiResponse<OrganizationDto>>
 {
     private readonly IGenericRepository<Company> _companyRepository;
-    private readonly IGenericRepository<Branch> _branchRepository;
-    private readonly IGenericRepository<Department> _departmentRepository;
-    private readonly IUserRepository _userRepository;
-    private readonly IRoleRepository _roleRepository;
-    private readonly IPasswordHasher _passwordHasher;
     private readonly IUnitOfWork _unitOfWork;
 
     /// <summary>
@@ -31,19 +26,9 @@ public class RegisterOrganizationCommandHandler : IRequestHandler<RegisterOrgani
     /// </summary>
     public RegisterOrganizationCommandHandler(
         IGenericRepository<Company> companyRepository,
-        IGenericRepository<Branch> branchRepository,
-        IGenericRepository<Department> departmentRepository,
-        IUserRepository userRepository,
-        IRoleRepository roleRepository,
-        IPasswordHasher passwordHasher,
         IUnitOfWork unitOfWork)
     {
         _companyRepository = companyRepository;
-        _branchRepository = branchRepository;
-        _departmentRepository = departmentRepository;
-        _userRepository = userRepository;
-        _roleRepository = roleRepository;
-        _passwordHasher = passwordHasher;
         _unitOfWork = unitOfWork;
     }
 
@@ -73,25 +58,6 @@ public class RegisterOrganizationCommandHandler : IRequestHandler<RegisterOrgani
             request.Address);
 
         await _companyRepository.AddAsync(company, cancellationToken);
-        await _unitOfWork.SaveChangesAsync(cancellationToken);
-
-        // Auto-provision default Headquarters Branch & Executive Management Department
-        var locationStr = !string.IsNullOrWhiteSpace(request.Address) ? request.Address : "Main Office";
-        var defaultBranch = Branch.Create(
-            company.Id, 
-            "Headquarters", 
-            "HQ", 
-            locationStr, 
-            request.Address, 
-            isHeadOffice: true);
-
-        var defaultDept = Department.Create(
-            company.Id, 
-            "EXEC", 
-            "Executive Management");
-
-        await _branchRepository.AddAsync(defaultBranch, cancellationToken);
-        await _departmentRepository.AddAsync(defaultDept, cancellationToken);
         await _unitOfWork.SaveChangesAsync(cancellationToken);
 
         var dto = new OrganizationDto

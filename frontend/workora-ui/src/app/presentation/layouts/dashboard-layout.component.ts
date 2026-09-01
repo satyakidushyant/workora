@@ -48,6 +48,11 @@ export interface NavItem {
   readonly requiredRoles?: string[];
 
   /**
+   * Roles that are explicitly excluded from viewing this item.
+   */
+  readonly excludedRoles?: string[];
+
+  /**
    * Optional visual badge text (e.g., 'New', 'Pro', 'Live').
    */
   readonly badge?: string;
@@ -86,6 +91,11 @@ export interface NavSection {
    * Required roles to view the entire section.
    */
   readonly requiredRoles?: string[];
+
+  /**
+   * Roles that are explicitly excluded from viewing this entire section.
+   */
+  readonly excludedRoles?: string[];
 
   /**
    * List of navigation child links in this section.
@@ -132,7 +142,7 @@ export interface TopMenubarTab {
  * Production-ready Workora Dashboard Layout Shell.
  * Provides a structured, responsive workspace navigation layout with:
  * - Dynamic 3-tier Role-Based Access Control (RBAC) sidebar
- * - Dynamic top menubar quick-tabs tailored to user roles & permissions
+ * - Dynamic top menubar quick navigation tabs integrated directly into topbar header
  * - Collapsible navigation categories & real-time keyword search filter
  * - Role badges with theme color coding (SuperAdmin, HR Admin, Finance, Manager, Employee)
  * - Organization context header with company code & tenant branding
@@ -151,7 +161,7 @@ export interface TopMenubarTab {
     AiAssistantModalComponent
   ],
   template: `
-    <div class="font-sans text-[#102A2A] bg-[#F6FAF9] min-h-screen antialiased selection:bg-[#DDF7F2] selection:text-[#075E58] flex">
+    <div class="font-sans text-[#102A2A] bg-[#F6FAF9] min-h-screen antialiased selection:bg-[#DDF7F2] selection:text-[#075E58] flex relative">
       
       <!-- Mobile Sidebar Backdrop Overlay -->
       @if (isMobileMenuOpen()) {
@@ -336,122 +346,87 @@ export interface TopMenubarTab {
       <!-- Main Content Canvas Wrapper -->
       <div class="flex-1 lg:ml-64 min-h-screen flex flex-col w-full min-w-0">
         
-        <!-- Top Menubar Header (Role Context, Quick Tabs, Search & User Menu) -->
-        <header class="sticky top-0 z-30 bg-white/95 backdrop-blur-md border-b border-[#DDE9E6] h-14 sm:h-16 flex items-center px-3 xs:px-4 sm:px-6 lg:px-8 shadow-2xs dashboard-topbar">
-          <div class="flex justify-between items-center w-full max-w-7xl 2xl:max-w-8xl mx-auto gap-2">
+        <!-- Top Menubar Header (Primary Controls & Integrated Quick Navigation) -->
+        <header class="sticky top-0 z-30 bg-white/95 backdrop-blur-md border-b border-[#DDE9E6] h-14 sm:h-16 flex items-center px-4 sm:px-6 lg:px-8 shadow-2xs dashboard-topbar">
+          <div class="flex justify-between items-center w-full max-w-7xl 2xl:max-w-8xl mx-auto gap-4">
             
-            <div class="flex items-center gap-2 sm:gap-4 md:gap-6 min-w-0">
+            <!-- Left Header Controls: Mobile Toggle & Role-Tailored Quick Navigation Tabs -->
+            <div class="flex items-center gap-3 flex-1 min-w-0">
               
               <!-- Mobile Hamburger Toggle -->
               <button 
                 (click)="toggleMobileMenu()" 
-                class="lg:hidden p-1.5 xs:p-2 rounded-xl text-[#075E58] hover:bg-[#DDF7F2]/60 border border-[#DDE9E6] transition-colors border-none bg-transparent cursor-pointer shrink-0"
+                class="lg:hidden p-2 rounded-xl text-[#075E58] hover:bg-[#DDF7F2]/60 border border-[#DDE9E6] transition-colors border-none bg-transparent cursor-pointer shrink-0"
                 aria-label="Toggle navigation menu"
               >
-                <span class="material-symbols-outlined text-xl sm:text-2xl flex items-center justify-center">menu</span>
+                <span class="material-symbols-outlined text-2xl flex items-center justify-center">menu</span>
               </button>
 
               <!-- Mobile Brand Logo in Topbar -->
-              <div class="flex items-center gap-2 lg:hidden cursor-pointer" routerLink="/dashboard">
+              <div class="flex items-center gap-2 lg:hidden cursor-pointer shrink-0" routerLink="/dashboard">
                 <img src="/workoraLogo.png" alt="Workora" class="h-7 w-auto object-contain drop-shadow-2xs" />
                 <span class="font-extrabold text-[#075E58] text-base font-heading">Workora</span>
               </div>
 
-              <!-- Topbar Tenant Context Badge -->
-              @if (currentUser()?.companyName) {
-                <div class="hidden sm:flex items-center gap-1.5 px-3 py-1 bg-[#DDF7F2]/60 border border-[#DDE9E6] rounded-xl text-xs shrink-0">
-                  <span class="material-symbols-outlined text-[#087F73] text-base">domain</span>
-                  <span class="font-extrabold text-[#075E58]">{{ currentUser()?.companyCode || 'WORKORA' }}</span>
-                  <span class="text-slate-400">•</span>
-                  <span class="text-slate-600 font-semibold truncate max-w-[130px] md:max-w-[180px]">{{ currentUser()?.companyName }}</span>
-                </div>
-              } @else if (authService.hasRole('SuperAdmin')) {
-                <div class="hidden sm:flex items-center gap-1.5 px-3 py-1 bg-[#DDF7F2] border border-[#087F73]/30 rounded-xl text-xs text-[#075E58] font-bold shrink-0">
-                  <span class="material-symbols-outlined text-[#087F73] text-base">shield_person</span>
-                  <span class="font-extrabold text-[#087F73]">WORKORA</span>
-                  <span class="text-slate-400">•</span>
-                  <span>Workora Platform Root</span>
-                </div>
-              } @else {
-                <div class="hidden sm:flex items-center gap-1.5 px-3 py-1 bg-[#DDF7F2]/60 border border-[#DDE9E6] rounded-xl text-xs shrink-0">
-                  <span class="material-symbols-outlined text-[#087F73] text-base">domain</span>
-                  <span class="font-extrabold text-[#075E58]">WORKORA</span>
-                  <span class="text-slate-400">•</span>
-                  <span class="text-slate-600 font-semibold">Workora Enterprise</span>
-                </div>
+              <!-- Role-Tailored Topbar Quick Navigation Tabs (No Ugly Scrollbar Track) -->
+              @if (topMenubarTabs().length > 0) {
+                <nav class="hidden sm:flex items-center gap-1 text-xs font-semibold text-slate-500 overflow-x-auto py-1 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
+                  @for (tab of topMenubarTabs(); track tab.route) {
+                    <a 
+                      [routerLink]="tab.route" 
+                      routerLinkActive="bg-[#087F73] text-white font-bold shadow-2xs"
+                      [routerLinkActiveOptions]="{ exact: tab.exact || false }"
+                      class="px-3 py-1.5 rounded-xl text-slate-600 hover:text-[#087F73] hover:bg-[#DDF7F2]/60 transition-all cursor-pointer flex items-center gap-1.5 shrink-0 border border-transparent text-decoration-none"
+                    >
+                      @if (tab.icon) {
+                        <span class="material-symbols-outlined text-base">{{ tab.icon }}</span>
+                      }
+                      <span>{{ tab.label }}</span>
+                    </a>
+                  }
+                </nav>
               }
 
-              <!-- Dynamic Top Navigation Menubar (Role-Tailored Quick Tabs) -->
-              <nav class="hidden md:flex items-center gap-2 text-xs font-semibold text-slate-500 overflow-x-auto py-1">
-                @for (tab of topMenubarTabs(); track tab.route) {
-                  <a 
-                    [routerLink]="tab.route" 
-                    routerLinkActive="bg-[#087F73]/10 text-[#087F73] font-bold border-[#087F73]"
-                    [routerLinkActiveOptions]="{ exact: tab.exact || false }"
-                    class="px-2.5 py-1 rounded-lg hover:text-[#087F73] hover:bg-[#DDF7F2]/40 transition-all cursor-pointer flex items-center gap-1 shrink-0 border border-transparent"
-                  >
-                    @if (tab.icon) {
-                      <span class="material-symbols-outlined text-sm text-[#087F73]">{{ tab.icon }}</span>
-                    }
-                    <span>{{ tab.label }}</span>
-                  </a>
-                }
-              </nav>
             </div>
 
-            <!-- Right Controls: Search, AI Copilot, Notifications & User Dropdown -->
-            <div class="flex items-center gap-2 sm:gap-3.5 relative shrink-0">
+            <!-- Right Header Controls: Chatbot, Notifications & User Profile -->
+            <div class="flex items-center gap-2.5 relative shrink-0">
               
-              <!-- Quick Search Input Trigger -->
-              <div class="relative hidden lg:block">
-                <div class="relative flex items-center">
-                  <span class="material-symbols-outlined absolute left-3.5 text-[#087F73]/70 pointer-events-none text-lg">search</span>
-                  <input 
-                    class="w-48 md:w-56 lg:w-64 bg-[#F6FAF9] hover:bg-white focus:bg-white text-xs text-[#102A2A] placeholder-slate-400 font-medium pl-10 pr-12 py-2 rounded-full border border-[#DDE9E6] focus:border-[#087F73] focus:ring-2 focus:ring-[#087F73]/15 outline-none transition-all shadow-2xs" 
-                    placeholder="Search workforce..." 
-                    type="text"
-                  />
-                  <div class="absolute right-2.5 flex items-center pointer-events-none">
-                    <kbd class="hidden md:inline-flex items-center gap-0.5 px-1.5 py-0.5 text-[9px] font-bold text-slate-400 bg-white border border-[#DDE9E6] rounded-md shadow-2xs">
-                      ⌘K
-                    </kbd>
-                  </div>
-                </div>
-              </div>
-
-              <!-- AI Copilot Button -->
+              <!-- Chatbot Icon Button (Matching Notifications Bell Style) -->
               <button 
                 type="button"
                 (click)="isAiModalOpen.set(true)"
-                class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-gradient-to-tr from-[#087F73] to-[#0E9F8E] text-white text-xs font-bold shadow-2xs hover:shadow-sm transition-all cursor-pointer border-none"
-                title="Open Workora AI Copilot"
+                class="hover:bg-[#DDF7F2]/60 rounded-xl p-2 transition-all text-[#075E58] relative cursor-pointer border border-transparent hover:border-[#DDE9E6] bg-transparent" 
+                aria-label="AI Chatbot Assistant"
+                title="AI Chatbot Assistant"
               >
-                <span class="material-symbols-outlined text-sm">smart_toy</span>
-                <span class="hidden sm:inline">AI Copilot</span>
+                <span class="material-symbols-outlined text-xl">smart_toy</span>
               </button>
 
               <!-- Notifications Bell -->
               <button 
                 (click)="onNotificationClick()"
-                class="hover:bg-[#DDF7F2]/60 rounded-xl p-1.5 xs:p-2 transition-all text-[#075E58] relative cursor-pointer border-none bg-transparent" 
+                class="hover:bg-[#DDF7F2]/60 rounded-xl p-2 transition-all text-[#075E58] relative cursor-pointer border border-transparent hover:border-[#DDE9E6] bg-transparent" 
                 aria-label="Notifications"
+                title="Notifications"
               >
                 <span class="material-symbols-outlined text-xl">notifications</span>
                 @if (unreadNotificationsCount() > 0) {
-                  <span class="absolute top-1.5 right-1.5 w-2.5 h-2.5 bg-[#D64545] rounded-full ring-2 ring-white"></span>
+                  <span class="absolute top-1.5 right-1.5 w-2.5 h-2.5 bg-[#D64545] rounded-full ring-2 ring-white animate-pulse"></span>
                 }
               </button>
 
-              <div class="h-5 w-px bg-[#DDE9E6] mx-0.5 hidden sm:block"></div>
+
+              <div class="h-6 w-px bg-[#DDE9E6] mx-0.5 hidden sm:block"></div>
               
               <!-- User Profile & Role Badge Dropdown Trigger -->
               <div class="relative">
                 <button 
                   (click)="toggleProfileMenu($event)"
-                  class="flex items-center gap-2 p-1 rounded-xl hover:bg-[#DDF7F2]/40 transition-colors border-none bg-transparent cursor-pointer"
+                  class="flex items-center gap-2.5 p-1 px-2 rounded-xl hover:bg-[#DDF7F2]/40 transition-colors border border-transparent hover:border-[#DDE9E6] bg-transparent cursor-pointer"
                   aria-label="User profile menu"
                 >
-                  <div class="w-7 h-7 xs:w-8 xs:h-8 rounded-full bg-gradient-to-tr from-[#087F73] to-[#19C6A3] text-white flex items-center justify-center font-bold text-xs shadow-2xs hover:scale-105 transition-transform shrink-0">
+                  <div class="w-8 h-8 rounded-full bg-gradient-to-tr from-[#087F73] to-[#19C6A3] text-white flex items-center justify-center font-bold text-xs shadow-2xs hover:scale-105 transition-transform shrink-0 border border-white/40">
                     {{ getInitials(currentUser()?.firstName, currentUser()?.lastName) }}
                   </div>
                   <div class="hidden lg:block text-left">
@@ -460,6 +435,7 @@ export interface TopMenubarTab {
                       {{ primaryRole() }}
                     </span>
                   </div>
+                  <span class="material-symbols-outlined text-slate-400 text-base hidden lg:block">expand_more</span>
                 </button>
 
                 <!-- Profile Dropdown Menu -->
@@ -517,12 +493,12 @@ export interface TopMenubarTab {
           </div>
         </header>
 
-        <!-- Routed Feature View -->
+        <!-- Routed Feature View Canvas -->
         <main class="flex-1 flex flex-col min-w-0">
           <router-outlet></router-outlet>
         </main>
 
-        <!-- AI Copilot Modal -->
+        <!-- AI Copilot Modal Window -->
         @if (isAiModalOpen()) {
           <app-ai-assistant-modal (closeModal)="isAiModalOpen.set(false)"></app-ai-assistant-modal>
         }
@@ -538,6 +514,18 @@ export class DashboardLayoutComponent implements OnInit, AfterViewInit, OnDestro
   readonly authService = inject(AuthService);
   private readonly notificationService = inject(NotificationService);
   private readonly notificationRepo = inject(NotificationApiRepository);
+
+  /**
+   * Listen for Cmd+J or Ctrl+J to toggle AI Copilot modal globally.
+   */
+  @HostListener('window:keydown', ['$event'])
+  handleGlobalShortcut(event: KeyboardEvent): void {
+    if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === 'j') {
+      event.preventDefault();
+      this.isAiModalOpen.update(open => !open);
+    }
+  }
+
 
   /**
    * Currently authenticated user profile signal from AuthService.
@@ -604,15 +592,27 @@ export class DashboardLayoutComponent implements OnInit, AfterViewInit, OnDestro
           requiredRoles: ['SuperAdmin']
         },
         {
-          label: 'Platform Users',
+          label: 'Platform Users & Access',
           route: '/users',
           icon: 'manage_accounts',
           requiredRoles: ['SuperAdmin']
         },
         {
+          label: 'Roles & RBAC',
+          route: '/roles',
+          icon: 'security',
+          requiredRoles: ['SuperAdmin']
+        },
+        {
           label: 'System Audit Logs',
           route: '/audit-logs',
-          icon: 'fact_check',
+          icon: 'shield_lock',
+          requiredRoles: ['SuperAdmin']
+        },
+        {
+          label: 'Platform Settings',
+          route: '/settings',
+          icon: 'tune',
           requiredRoles: ['SuperAdmin']
         }
       ]
@@ -621,12 +621,19 @@ export class DashboardLayoutComponent implements OnInit, AfterViewInit, OnDestro
       id: 'workforce',
       title: 'Core Workforce',
       icon: 'groups',
+      excludedRoles: ['SuperAdmin'],
       items: [
         {
           label: 'Dashboard',
           route: '/dashboard',
           icon: 'dashboard',
           exact: true
+        },
+        {
+          label: 'Organization Workspace',
+          route: '/organization',
+          icon: 'corporate_fare',
+          requiredPermissions: ['company.view', 'company.manage']
         },
         {
           label: 'People & Employees',
@@ -639,32 +646,31 @@ export class DashboardLayoutComponent implements OnInit, AfterViewInit, OnDestro
           label: 'Branches & Locations',
           route: '/branches',
           icon: 'location_city',
-          requiredPermissions: ['branches.view', 'company.view', 'superadmin.access']
+          requiredPermissions: ['branches.view', 'company.view']
         },
         {
           label: 'Departments',
           route: '/departments',
           icon: 'account_tree',
-          requiredPermissions: ['departments.view', 'company.view', 'superadmin.access']
+          requiredPermissions: ['departments.view', 'company.view']
         },
         {
           label: 'Designations',
           route: '/designations',
           icon: 'military_tech',
-          requiredPermissions: ['designations.view', 'company.view', 'superadmin.access']
-        },
-        {
-          label: 'Roles & RBAC',
-          route: '/roles',
-          icon: 'security',
-          requiredPermissions: ['roles.view'],
-          requiredRoles: ['SuperAdmin']
+          requiredPermissions: ['designations.view', 'company.view']
         },
         {
           label: 'User Accounts',
           route: '/users',
           icon: 'manage_accounts',
           requiredPermissions: ['users.view']
+        },
+        {
+          label: 'Roles & Security Tiers',
+          route: '/roles',
+          icon: 'security',
+          requiredPermissions: ['roles.view', 'roles.manage']
         }
       ]
     },
@@ -672,6 +678,7 @@ export class DashboardLayoutComponent implements OnInit, AfterViewInit, OnDestro
       id: 'time',
       title: 'Time & Attendance',
       icon: 'schedule',
+      excludedRoles: ['SuperAdmin'],
       requiredPermissions: ['attendance.view', 'attendance.self', 'leave.view', 'leave.self', 'leave.apply', 'holidays.view', 'shifts.view'],
       items: [
         {
@@ -707,6 +714,7 @@ export class DashboardLayoutComponent implements OnInit, AfterViewInit, OnDestro
       id: 'finance',
       title: 'Payroll & Finance',
       icon: 'payments',
+      excludedRoles: ['SuperAdmin'],
       requiredPermissions: ['payroll.manage', 'payroll.process', 'payroll.view', 'payroll.self', 'loans.view', 'loans.apply', 'expenses.view', 'expenses.submit'],
       items: [
         {
@@ -714,7 +722,7 @@ export class DashboardLayoutComponent implements OnInit, AfterViewInit, OnDestro
           route: '/payroll',
           icon: 'payments',
           requiredPermissions: ['payroll.manage', 'payroll.process', 'payroll.view'],
-          requiredRoles: ['SuperAdmin', 'FinanceManager']
+          requiredRoles: ['FinanceManager', 'HRAdmin']
         },
         {
           label: 'My Payslips',
@@ -742,6 +750,7 @@ export class DashboardLayoutComponent implements OnInit, AfterViewInit, OnDestro
       id: 'talent',
       title: 'Talent & Growth',
       icon: 'psychology',
+      excludedRoles: ['SuperAdmin'],
       requiredPermissions: ['recruitment.view', 'performance.view', 'performance.self', 'training.view'],
       items: [
         {
@@ -776,6 +785,7 @@ export class DashboardLayoutComponent implements OnInit, AfterViewInit, OnDestro
       id: 'operations',
       title: 'Operations & Tasks',
       icon: 'build',
+      excludedRoles: ['SuperAdmin'],
       requiredPermissions: ['tasks.view', 'helpdesk.view', 'helpdesk.create', 'field.view', 'documents.view', 'assets.view'],
       items: [
         {
@@ -816,6 +826,7 @@ export class DashboardLayoutComponent implements OnInit, AfterViewInit, OnDestro
       id: 'governance',
       title: 'Governance & Reports',
       icon: 'policy',
+      excludedRoles: ['SuperAdmin'],
       requiredPermissions: ['compliance.view', 'reports.view', 'settings.view', 'audit.view'],
       items: [
         {
@@ -878,15 +889,15 @@ export class DashboardLayoutComponent implements OnInit, AfterViewInit, OnDestro
     const role = this.primaryRole();
     switch (role) {
       case 'Super Admin':
-        return 'bg-amber-100 text-amber-800 border-amber-300';
+        return 'bg-purple-50 text-purple-700 border-purple-200';
       case 'HR Admin':
-        return 'bg-emerald-100 text-emerald-800 border-emerald-300';
+        return 'bg-teal-50 text-teal-800 border-teal-200';
       case 'Finance Manager':
-        return 'bg-teal-100 text-teal-800 border-teal-300';
+        return 'bg-blue-50 text-blue-700 border-blue-200';
       case 'Manager':
-        return 'bg-blue-100 text-blue-800 border-blue-300';
+        return 'bg-amber-50 text-amber-700 border-amber-200';
       default:
-        return 'bg-slate-100 text-slate-700 border-slate-300';
+        return 'bg-slate-50 text-slate-700 border-slate-200';
     }
   });
 
@@ -910,15 +921,16 @@ export class DashboardLayoutComponent implements OnInit, AfterViewInit, OnDestro
   });
 
   /**
-   * Computes the list of dynamic quick navigation tabs shown in the top menubar.
+   * Computes the list of dynamic quick navigation tabs shown directly in the top menubar.
    */
   readonly topMenubarTabs = computed<TopMenubarTab[]>(() => {
     const role = this.primaryRole();
-    
+
     if (role === 'Super Admin') {
       return [
         { label: 'Platform Console', route: '/superadmin', icon: 'hub' },
-        { label: 'Users', route: '/users', icon: 'manage_accounts' },
+        { label: 'Organizations', route: '/organization', icon: 'corporate_fare' },
+        { label: 'Users & Access', route: '/users', icon: 'manage_accounts' },
         { label: 'Roles & RBAC', route: '/roles', icon: 'security' },
         { label: 'Audit Logs', route: '/audit-logs', icon: 'shield_lock' },
         { label: 'System Settings', route: '/settings', icon: 'tune' }
@@ -983,6 +995,11 @@ export class DashboardLayoutComponent implements OnInit, AfterViewInit, OnDestro
 
     return this.allNavigationSections
       .map(section => {
+        // Check section-level excluded roles (e.g. hide tenant HR operations from SuperAdmin)
+        if (section.excludedRoles && this.authService.hasAnyRole(section.excludedRoles)) {
+          return null;
+        }
+
         // Check section-level access
         if (section.requiredRoles && !this.authService.hasAnyRole(section.requiredRoles)) {
           return null;
@@ -993,6 +1010,9 @@ export class DashboardLayoutComponent implements OnInit, AfterViewInit, OnDestro
 
         // Filter permitted items
         const permittedItems = section.items.filter(item => {
+          if (item.excludedRoles && this.authService.hasAnyRole(item.excludedRoles)) {
+            return false;
+          }
           if (item.requiredRoles && !this.authService.hasAnyRole(item.requiredRoles)) {
             return false;
           }
@@ -1005,9 +1025,9 @@ export class DashboardLayoutComponent implements OnInit, AfterViewInit, OnDestro
         // If search query is entered, match item label or section title
         const matchingItems = query
           ? permittedItems.filter(item => {
-              const label = this.getItemLabel(item).toLowerCase();
-              return label.includes(query) || section.title.toLowerCase().includes(query);
-            })
+            const label = this.getItemLabel(item).toLowerCase();
+            return label.includes(query) || section.title.toLowerCase().includes(query);
+          })
           : permittedItems;
 
         if (matchingItems.length === 0) {
@@ -1031,26 +1051,23 @@ export class DashboardLayoutComponent implements OnInit, AfterViewInit, OnDestro
     }
   }
 
-  @HostListener('document:keydown.control.k', ['$event'])
-  @HostListener('document:keydown.meta.k', ['$event'])
-  onSearchShortcut(event: KeyboardEvent): void {
+  @HostListener('document:keydown.control.j', ['$event'])
+  @HostListener('document:keydown.meta.j', ['$event'])
+  onAiShortcut(event: KeyboardEvent): void {
     event.preventDefault();
-    const searchInput = this.elementRef.nativeElement.querySelector('input[placeholder*="Search workforce"]');
-    if (searchInput) {
-      searchInput.focus();
-    }
+    this.isAiModalOpen.set(true);
   }
 
   ngOnInit(): void {
     if (!this.authService.currentUser() && this.authService.isAuthenticated()) {
       this.authService.loadProfile().subscribe({
-        error: () => {}
+        error: () => { }
       });
     }
 
     this.notificationRepo.getUnreadCount().subscribe({
       next: res => this.unreadNotificationsCount.set(res.unreadCount),
-      error: () => {}
+      error: () => { }
     });
   }
 
@@ -1112,8 +1129,8 @@ export class DashboardLayoutComponent implements OnInit, AfterViewInit, OnDestro
       next: p => {
         const count = p.totalCount;
         this.notificationService.showInfo(
-          count > 0 
-            ? `${count} alerts • ${p.items[0]?.title || 'Updates ready'}` 
+          count > 0
+            ? `${count} alerts • ${p.items[0]?.title || 'Updates ready'}`
             : 'All caught up! No unread notifications.'
         );
       },

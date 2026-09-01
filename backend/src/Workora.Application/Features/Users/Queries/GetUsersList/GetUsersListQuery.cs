@@ -1,20 +1,23 @@
 using MediatR;
+using Workora.Application.Common.Models;
 using Workora.Application.Features.Users.DTOs;
 using Workora.Shared.Responses;
 
 namespace Workora.Application.Features.Users.Queries.GetUsersList;
 
 /// <summary>
-/// Query to retrieve a paginated list of users.
+/// Query to retrieve a paginated list of users with dynamic pagination and filtering.
 /// </summary>
-/// <param name="PageNumber">The 1-based page number (default: 1).</param>
-/// <param name="PageSize">The page size (default: 10).</param>
-/// <param name="SearchTerm">Optional search term for filtering.</param>
-/// <param name="IsActive">Optional filter for user active status.</param>
-public record GetUsersListQuery(
-    int PageNumber = 1,
-    int PageSize = 10,
-    string? SearchTerm = null,
-    bool? IsActive = null,
-    int? CompanyId = null
-) : IRequest<ApiResponse<PagedResponse<UserDto>>>;
+public record GetUsersListQuery : PagedQueryBase, IRequest<ApiResponse<PagedResponse<UserDto>>>
+{
+    /// <summary>
+    /// Gets or init optional filter for user active status.
+    /// </summary>
+    public bool? IsActive { get; init; }
+
+    /// <summary>
+    /// Gets or init optional filter for target company ID.
+    /// </summary>
+    public int? CompanyId { get; init; }
+}
+

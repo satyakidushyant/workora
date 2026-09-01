@@ -63,3 +63,23 @@ export interface RegisterOrganizationParams {
   currency?: string;
   address?: string | null;
 }
+
+/**
+ * Parameters for updating an existing tenant organization.
+ */
+export interface UpdateOrganizationParams {
+  id: number;
+  name: string;
+  registrationNumber?: string | null;
+  taxId?: string | null;
+  email?: string | null;
+  phone?: string | null;
+  website?: string | null;
+  fiscalYearStartMonth?: number;
+  currency?: string;
+  address?: string | null;
+  industry?: string | null;
+  primaryContactName?: string | null;
+}
+
+

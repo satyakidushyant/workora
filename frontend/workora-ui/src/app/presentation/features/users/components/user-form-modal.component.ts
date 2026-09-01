@@ -4,23 +4,28 @@ import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angula
 import { gsap } from 'gsap';
 import { UserDetail, UserSummary, CreateUserParams, UpdateUserParams } from '../../../../domain/models/user.model';
 import { Role } from '../../../../domain/models/role-permission.model';
+import { Company } from '../../../../domain/models/organization.model';
+import { Employee } from '../../../../domain/models/employee.model';
 import { RolePermissionApiRepository } from '../../../../data/repositories/role-permission-api.repository';
+import { OrganizationApiRepository } from '../../../../data/repositories/organization-api.repository';
+import { EmployeeApiRepository } from '../../../../data/repositories/employee-api.repository';
 import { AuthService } from '../../../../core/services/auth.service';
+import { WorkoraSelectComponent, WorkoraSelectOption } from '../../../shared/components/workora-select.component';
 
 /**
  * Enterprise Workora User Create / Edit Modal Component.
- * Features clean in-form role card selection, reactive validation, and password toggle.
+ * Features clean Organization selector, Employee profile linking, Role cards, and reactive validation.
  */
 @Component({
   selector: 'app-user-form-modal',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule],
+  imports: [CommonModule, ReactiveFormsModule, WorkoraSelectComponent],
   template: `
     <div class="workora-modal-overlay" (click)="onCancel()">
-      <div class="workora-modal-card max-w-xl" (click)="$event.stopPropagation()">
+      <div class="workora-modal-card max-w-xl max-h-[92vh] flex flex-col" (click)="$event.stopPropagation()">
         
         <!-- Header -->
-        <div class="workora-modal-header">
+        <div class="workora-modal-header shrink-0">
           <div class="flex items-center gap-3">
             <div class="w-10 h-10 rounded-2xl bg-[#DDF7F2] text-[#087F73] flex items-center justify-center font-extrabold shadow-2xs shrink-0">
               <span class="material-symbols-outlined text-xl">{{ isEdit ? 'manage_accounts' : 'person_add' }}</span>
@@ -30,7 +35,7 @@ import { AuthService } from '../../../../core/services/auth.service';
                 {{ isEdit ? 'Edit User Profile' : 'Create User Account' }}
               </h2>
               <p class="text-xs text-[#718686]">
-                {{ isEdit ? 'Update credentials and assigned security role for this user.' : 'Onboard a new workforce member with workspace login credentials.' }}
+                {{ isEdit ? 'Update credentials and assigned security role for this user.' : 'Onboard a new workforce member with workspace login credentials and organization access.' }}
               </p>
             </div>
           </div>
@@ -45,8 +50,53 @@ import { AuthService } from '../../../../core/services/auth.service';
 
         <!-- Form -->
         <form [formGroup]="userForm" (ngSubmit)="onSubmit()" class="flex flex-col flex-1 overflow-hidden">
-          <div class="workora-modal-body space-y-4">
-            
+          <div class="workora-modal-body space-y-4 overflow-y-auto custom-scrollbar p-5 sm:p-6">
+
+            <!-- Organization / Tenant Selector (Shown on Create) -->
+            @if (!isEdit) {
+              <div class="space-y-1">
+                <label class="workora-label">
+                  Organization / Tenant <span class="text-rose-500">*</span>
+                </label>
+                <app-workora-select
+                  formControlName="companyId"
+                  [options]="companyOptions()"
+                  [searchable]="true"
+                  placeholder="Select Tenant Organization"
+                  icon="corporate_fare">
+                </app-workora-select>
+              </div>
+
+              <!-- Link to Employee Profile (Optional Searchable Dropdown) -->
+              <div class="space-y-1">
+                <div class="flex items-center justify-between">
+                  <label class="workora-label !mb-0">
+                    Link to Employee Profile <span class="text-[#718686] font-normal lowercase">(optional)</span>
+                  </label>
+                  @if (isLoadingEmployees()) {
+                    <span class="text-[10px] text-[#087F73] font-semibold flex items-center gap-1">
+                      <span class="w-2.5 h-2.5 border-2 border-[#087F73] border-t-transparent rounded-full animate-spin"></span>
+                      <span>Loading staff...</span>
+                    </span>
+                  }
+                </div>
+                <app-workora-select
+                  formControlName="employeeId"
+                  [options]="employeeOptions()"
+                  [searchable]="true"
+                  [clearable]="true"
+                  placeholder="Select existing employee to auto-fill details"
+                  icon="badge">
+                </app-workora-select>
+                @if (selectedEmployeeInfo()) {
+                  <div class="p-2 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-[11px] flex items-center gap-1.5 font-medium">
+                    <span class="material-symbols-outlined text-sm text-emerald-600">check_circle</span>
+                    <span>Linked to <strong>{{ selectedEmployeeInfo()?.name }}</strong> ({{ selectedEmployeeInfo()?.code || 'EMP' }}) • {{ selectedEmployeeInfo()?.dept || 'Staff' }}</span>
+                  </div>
+                }
+              </div>
+            }
+
             <!-- Corporate Email -->
             <div class="space-y-1">
               <label class="workora-label">
@@ -56,7 +106,7 @@ import { AuthService } from '../../../../core/services/auth.service';
                 <input
                   type="email"
                   formControlName="email"
-                  placeholder="Corporate email address"
+                  placeholder="Corporate email address (e.g. admin@company.com)"
                   class="workora-input text-xs pl-4 pr-11 !py-2.5" 
                   [ngClass]="{'workora-input-error': userForm.get('email')?.touched && userForm.get('email')?.invalid}"
                 />
@@ -190,22 +240,10 @@ import { AuthService } from '../../../../core/services/auth.service';
               </div>
             </div>
 
-            <!-- Optional Linked Employee ID -->
-            <div class="space-y-1">
-              <label class="workora-label">
-                Linked Employee ID <span class="text-[#718686] font-normal lowercase">(optional)</span>
-              </label>
-              <input
-                type="number"
-                formControlName="employeeId"
-                placeholder="Employee ID"
-                class="workora-input text-xs px-4 !py-2.5 font-mono" 
-              />
-            </div>
           </div>
 
           <!-- Actions -->
-          <div class="workora-modal-footer">
+          <div class="workora-modal-footer shrink-0">
             <button
               type="button"
               (click)="onCancel()"
@@ -237,6 +275,8 @@ export class UserFormModalComponent implements OnInit, AfterViewInit, OnDestroy 
     this.userToEdit = val;
   }
   @Input() userToEdit?: UserSummary | UserDetail | null = null;
+  @Input() presetCompanyId?: number | null = null;
+  @Input() presetCompanyName?: string | null = null;
   @Input() isLoading = false;
   @Input() isSubmitting = false;
 
@@ -251,11 +291,47 @@ export class UserFormModalComponent implements OnInit, AfterViewInit, OnDestroy 
   private readonly elementRef = inject(ElementRef);
   private readonly fb = inject(FormBuilder);
   private readonly roleRepo = inject(RolePermissionApiRepository);
+  private readonly orgRepo = inject(OrganizationApiRepository);
+  private readonly empRepo = inject(EmployeeApiRepository);
   private readonly authService = inject(AuthService);
 
   readonly showPassword = signal<boolean>(false);
   readonly rawRoles = signal<Role[]>([]);
   readonly isLoadingRoles = signal<boolean>(false);
+
+  readonly companies = signal<Company[]>([]);
+  readonly availableEmployees = signal<Employee[]>([]);
+  readonly isLoadingEmployees = signal<boolean>(false);
+
+  readonly companyOptions = computed<WorkoraSelectOption<number>[]>(() => {
+    return this.companies().map(c => ({
+      value: c.id,
+      label: c.name,
+      sublabel: c.code,
+      icon: 'corporate_fare'
+    }));
+  });
+
+  readonly employeeOptions = computed<WorkoraSelectOption<number>[]>(() => {
+    return this.availableEmployees().map(e => ({
+      value: e.id,
+      label: `${e.firstName} ${e.lastName}`,
+      sublabel: `${e.employeeCode || ''} • ${e.departmentName || 'Staff'}`,
+      icon: 'badge'
+    }));
+  });
+
+  readonly selectedEmployeeInfo = computed(() => {
+    const empId = this.userForm?.get('employeeId')?.value;
+    if (!empId) return null;
+    const emp = this.availableEmployees().find(e => e.id === Number(empId));
+    if (!emp) return null;
+    return {
+      name: `${emp.firstName} ${emp.lastName}`,
+      code: emp.employeeCode,
+      dept: emp.departmentName
+    };
+  });
 
   readonly isCurrentSuperAdmin = computed<boolean>(() => {
     return this.authService.hasRole('SuperAdmin') || 
@@ -263,10 +339,6 @@ export class UserFormModalComponent implements OnInit, AfterViewInit, OnDestroy 
            this.authService.currentUser()?.email === 'admin@workora.com';
   });
 
-  /**
-   * Sorts roles so SuperAdmin and Admin tiers appear first.
-   * SuperAdmin role is ONLY visible when the logged-in user is a SuperAdmin.
-   */
   readonly sortedRoles = computed<Role[]>(() => {
     const isSuperAdmin = this.isCurrentSuperAdmin();
     const roles = this.rawRoles();
@@ -305,18 +377,20 @@ export class UserFormModalComponent implements OnInit, AfterViewInit, OnDestroy 
   }
 
   ngOnInit(): void {
-    let defaultRoleId = 5; // Employee
+    let defaultRoleId = 2; // Default to HRAdmin for tenant setup
     if (this.userToEdit?.roles && this.userToEdit.roles.length > 0) {
       const r = this.userToEdit.roles[0].toLowerCase();
       if (r === 'superadmin') defaultRoleId = 1;
       else if (r === 'hradmin') defaultRoleId = 2;
       else if (r === 'financemanager') defaultRoleId = 3;
       else if (r === 'manager') defaultRoleId = 4;
-    } else if (this.userToEdit?.email?.startsWith('admin') || this.userToEdit?.email?.startsWith('hr')) {
-      defaultRoleId = 1; // SuperAdmin if root admin, else HRAdmin
+      else if (r === 'employee') defaultRoleId = 5;
     }
 
+    const initialCompanyId = this.presetCompanyId || this.userToEdit?.companyId || null;
+
     this.userForm = this.fb.group({
+      companyId: [initialCompanyId, this.isEdit ? [] : [Validators.required]],
       email: [this.userToEdit?.email || '', [Validators.required, Validators.email]],
       firstName: [this.userToEdit?.firstName || '', [Validators.required, Validators.maxLength(100)]],
       lastName: [this.userToEdit?.lastName || '', [Validators.required, Validators.maxLength(100)]],
@@ -327,18 +401,82 @@ export class UserFormModalComponent implements OnInit, AfterViewInit, OnDestroy 
 
     if (this.isEdit) {
       this.userForm.get('email')?.disable();
+      this.userForm.get('companyId')?.disable();
     }
+
+    // Listen to company changes to reload employee choices
+    this.userForm.get('companyId')?.valueChanges.subscribe(cid => {
+      if (cid) {
+        this.loadEmployeesForCompany(Number(cid));
+      } else {
+        this.availableEmployees.set([]);
+      }
+    });
+
+    // Listen to employee changes to auto-populate name and email if empty
+    this.userForm.get('employeeId')?.valueChanges.subscribe(empId => {
+      if (empId) {
+        const emp = this.availableEmployees().find(e => e.id === Number(empId));
+        if (emp) {
+          if (!this.userForm.get('firstName')?.value) {
+            this.userForm.get('firstName')?.setValue(emp.firstName);
+          }
+          if (!this.userForm.get('lastName')?.value) {
+            this.userForm.get('lastName')?.setValue(emp.lastName);
+          }
+          if (!this.userForm.get('email')?.value && emp.email) {
+            this.userForm.get('email')?.setValue(emp.email);
+          }
+        }
+      }
+    });
 
     if (isPlatformBrowser(this.platformId)) {
       document.body.appendChild(this.elementRef.nativeElement);
     }
 
     this.loadRoles();
+    this.loadCompanies();
+
+    if (initialCompanyId) {
+      this.loadEmployeesForCompany(Number(initialCompanyId));
+    }
   }
 
   selectRole(roleId: number): void {
     this.userForm.get('roleId')?.setValue(roleId);
     this.userForm.get('roleId')?.markAsDirty();
+  }
+
+  private loadCompanies(): void {
+    this.orgRepo.getCompaniesList().subscribe({
+      next: (list: Company[]) => {
+        this.companies.set(list || []);
+        // If only 1 company exists and nothing selected, auto-select it
+        if (!this.userForm.get('companyId')?.value && list.length === 1) {
+          this.userForm.get('companyId')?.setValue(list[0].id);
+        }
+      },
+      error: () => this.companies.set([])
+    });
+  }
+
+  private loadEmployeesForCompany(companyId: number): void {
+    if (!companyId || isNaN(companyId) || companyId <= 0) {
+      this.availableEmployees.set([]);
+      return;
+    }
+    this.isLoadingEmployees.set(true);
+    this.empRepo.getEmployees({ companyId, pageSize: 100 }).subscribe({
+      next: paged => {
+        this.isLoadingEmployees.set(false);
+        this.availableEmployees.set(paged.items || []);
+      },
+      error: () => {
+        this.isLoadingEmployees.set(false);
+        this.availableEmployees.set([]);
+      }
+    });
   }
 
   private loadRoles(): void {
@@ -349,7 +487,6 @@ export class UserFormModalComponent implements OnInit, AfterViewInit, OnDestroy 
         const roles = res.items || [];
         this.rawRoles.set(roles);
 
-        // Re-align roleId if userToEdit has role matching by name
         if (this.userToEdit?.roles && this.userToEdit.roles.length > 0) {
           const roleName = this.userToEdit.roles[0].toLowerCase();
           const match = roles.find(r => r.name.toLowerCase() === roleName);
@@ -370,121 +507,106 @@ export class UserFormModalComponent implements OnInit, AfterViewInit, OnDestroy 
       case 'hradmin': return 'admin_panel_settings';
       case 'financemanager': return 'payments';
       case 'manager': return 'supervisor_account';
-      case 'employee': return 'badge';
-      default: return 'verified_user';
+      case 'employee': return 'person';
+      default: return 'badge';
     }
   }
 
   getRoleIconBg(name: string): string {
     switch (name.toLowerCase()) {
       case 'superadmin': return 'bg-purple-100 text-purple-700';
-      case 'hradmin': return 'bg-emerald-100 text-emerald-700';
-      case 'financemanager': return 'bg-teal-100 text-teal-700';
-      case 'manager': return 'bg-blue-100 text-blue-700';
-      case 'employee': return 'bg-slate-100 text-slate-700';
-      default: return 'bg-[#DDF7F2] text-[#087F73]';
+      case 'hradmin': return 'bg-teal-100 text-teal-800';
+      case 'financemanager': return 'bg-blue-100 text-blue-700';
+      case 'manager': return 'bg-amber-100 text-amber-700';
+      default: return 'bg-slate-100 text-slate-700';
     }
   }
 
   getRoleIconColor(name: string): string {
     switch (name.toLowerCase()) {
       case 'superadmin': return 'text-purple-700';
-      case 'hradmin': return 'text-emerald-700';
-      case 'financemanager': return 'text-teal-700';
-      case 'manager': return 'text-blue-700';
-      case 'employee': return 'text-slate-600';
-      default: return 'text-[#087F73]';
+      case 'hradmin': return 'text-teal-800';
+      case 'financemanager': return 'text-blue-700';
+      case 'manager': return 'text-amber-700';
+      default: return 'text-slate-700';
     }
   }
 
   getRoleBadge(name: string): string {
     switch (name.toLowerCase()) {
-      case 'superadmin': return 'Platform Root';
+      case 'superadmin': return 'Full Access';
       case 'hradmin': return 'Tenant Admin';
-      case 'financemanager': return 'Finance';
-      case 'manager': return 'Team Lead';
-      case 'employee': return 'Member';
-      default: return 'Custom';
+      case 'financemanager': return 'Finance & Payroll';
+      case 'manager': return 'Approvals';
+      case 'employee': return 'Self Service';
+      default: return 'Custom Tier';
     }
   }
 
   getRoleBadgeClass(name: string): string {
     switch (name.toLowerCase()) {
       case 'superadmin': return 'bg-purple-50 text-purple-700 border-purple-200';
-      case 'hradmin': return 'bg-emerald-50 text-emerald-700 border-emerald-200';
-      case 'financemanager': return 'bg-teal-50 text-teal-700 border-teal-200';
-      case 'manager': return 'bg-blue-50 text-blue-700 border-blue-200';
-      case 'employee': return 'bg-slate-100 text-slate-700 border-slate-200';
-      default: return 'bg-[#DDF7F2] text-[#075E58] border-[#DDF7F2]';
+      case 'hradmin': return 'bg-teal-50 text-teal-800 border-teal-200';
+      case 'financemanager': return 'bg-blue-50 text-blue-700 border-blue-200';
+      case 'manager': return 'bg-amber-50 text-amber-700 border-amber-200';
+      default: return 'bg-slate-50 text-slate-700 border-slate-200';
     }
   }
 
   ngAfterViewInit(): void {
     if (!isPlatformBrowser(this.platformId)) return;
-
-    const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    if (prefersReducedMotion) return;
-
     this.ctx = gsap.context(() => {
-      gsap.from('.modal-backdrop', {
-        opacity: 0,
-        duration: 0.25,
-        ease: 'power2.out'
-      });
-
-      gsap.from('.modal-box', {
+      gsap.from('.workora-modal-card', {
         scale: 0.95,
-        y: 12,
         opacity: 0,
-        duration: 0.3,
-        ease: 'power3.out'
+        duration: 0.2,
+        ease: 'power2.out'
       });
     }, this.elementRef.nativeElement);
   }
 
   ngOnDestroy(): void {
     this.ctx?.revert();
-    if (isPlatformBrowser(this.platformId) && this.elementRef.nativeElement.parentElement === document.body) {
-      document.body.removeChild(this.elementRef.nativeElement);
-    }
   }
 
   onSubmit(): void {
-    if (this.userForm.invalid) {
+    if (this.userForm.invalid || this.effectiveLoading) {
       this.userForm.markAllAsTouched();
       return;
     }
 
-    const formValues = this.userForm.getRawValue();
-
-    if (this.isEdit) {
-      const updatePayload: UpdateUserParams = {
-        id: this.userToEdit!.id,
-        firstName: formValues.firstName,
-        lastName: formValues.lastName,
-        employeeId: formValues.employeeId ? Number(formValues.employeeId) : null,
-        roleId: formValues.roleId ? Number(formValues.roleId) : null
+    const val = this.userForm.getRawValue();
+    if (this.isEdit && this.userToEdit?.id) {
+      const payload: UpdateUserParams = {
+        id: this.userToEdit.id,
+        firstName: val.firstName?.trim(),
+        lastName: val.lastName?.trim(),
+        employeeId: val.employeeId ? Number(val.employeeId) : null,
+        roleId: val.roleId ? Number(val.roleId) : null
       };
-      this.save.emit(updatePayload);
+      this.save.emit(payload);
     } else {
-      const createPayload: CreateUserParams = {
-        email: formValues.email,
-        firstName: formValues.firstName,
-        lastName: formValues.lastName,
-        password: formValues.password,
-        employeeId: formValues.employeeId ? Number(formValues.employeeId) : null,
-        roleId: formValues.roleId ? Number(formValues.roleId) : null
+      const payload: CreateUserParams = {
+        email: val.email?.trim(),
+        firstName: val.firstName?.trim(),
+        lastName: val.lastName?.trim(),
+        password: val.password,
+        companyId: val.companyId ? Number(val.companyId) : null,
+        employeeId: val.employeeId ? Number(val.employeeId) : null,
+        roleId: val.roleId ? Number(val.roleId) : null
       };
-      this.save.emit(createPayload);
+      this.save.emit(payload);
     }
-  }
-
-  @HostListener('document:keydown.escape')
-  onEscape(): void {
-    this.onCancel();
   }
 
   onCancel(): void {
     this.cancel.emit();
+  }
+
+  @HostListener('document:keydown.escape', ['$event'])
+  handleEscape(event: KeyboardEvent): void {
+    if (!this.effectiveLoading) {
+      this.onCancel();
+    }
   }
 }

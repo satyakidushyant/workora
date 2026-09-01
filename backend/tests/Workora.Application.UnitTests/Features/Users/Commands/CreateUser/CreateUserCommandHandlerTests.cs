@@ -17,6 +17,8 @@ public class CreateUserCommandHandlerTests
 {
     private readonly Mock<IUserRepository> _userRepositoryMock;
     private readonly Mock<IRoleRepository> _roleRepositoryMock;
+    private readonly Mock<IEmployeeRepository> _employeeRepositoryMock;
+    private readonly Mock<ICompanyRepository> _companyRepositoryMock;
     private readonly Mock<IUnitOfWork> _unitOfWorkMock;
     private readonly Mock<IPasswordHasher> _passwordHasherMock;
     private readonly Mock<IMapper> _mapperMock;
@@ -29,6 +31,8 @@ public class CreateUserCommandHandlerTests
     {
         _userRepositoryMock = new Mock<IUserRepository>();
         _roleRepositoryMock = new Mock<IRoleRepository>();
+        _employeeRepositoryMock = new Mock<IEmployeeRepository>();
+        _companyRepositoryMock = new Mock<ICompanyRepository>();
         _unitOfWorkMock = new Mock<IUnitOfWork>();
         _passwordHasherMock = new Mock<IPasswordHasher>();
         _mapperMock = new Mock<IMapper>();
@@ -36,6 +40,8 @@ public class CreateUserCommandHandlerTests
         _handler = new CreateUserCommandHandler(
             _userRepositoryMock.Object,
             _roleRepositoryMock.Object,
+            _employeeRepositoryMock.Object,
+            _companyRepositoryMock.Object,
             _unitOfWorkMock.Object,
             _passwordHasherMock.Object,
             _mapperMock.Object);

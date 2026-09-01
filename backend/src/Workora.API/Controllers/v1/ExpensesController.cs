@@ -1,4 +1,4 @@
-﻿using MediatR;
+using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Workora.Application.Features.Expenses.Commands.ApproveExpenseClaim;
@@ -31,12 +31,13 @@ public class ExpensesController : ControllerBase
     }
 
     /// <summary>
-    /// Lists company expense claims with optional status and category filters.
+    /// Lists company expense claims with dynamic pagination and optional status/category filters.
     /// </summary>
     [HttpGet]
     [Authorize(Policy = "expenses.view")]
-    public async Task<ApiResponse<List<ExpenseClaimDto>>> GetExpenseClaims([FromQuery] ExpenseStatus? status, [FromQuery] ExpenseCategory? category)
-        => await _mediator.Send(new ListExpenseClaimsQuery(status, category));
+    public async Task<ApiResponse<PagedResponse<ExpenseClaimDto>>> GetExpenseClaims([FromQuery] ListExpenseClaimsQuery query)
+        => await _mediator.Send(query);
+
 
     /// <summary>
     /// Gets all claims submitted by the currently authenticated employee.

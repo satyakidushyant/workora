@@ -41,6 +41,31 @@ public class UserDto
     public int? EmployeeId { get; set; }
 
     /// <summary>
+    /// The unique identifier of the user's company/tenant.
+    /// </summary>
+    public int? CompanyId { get; set; }
+
+    /// <summary>
+    /// The name of the user's company/tenant.
+    /// </summary>
+    public string? CompanyName { get; set; }
+
+    /// <summary>
+    /// The code of the user's company/tenant.
+    /// </summary>
+    public string? CompanyCode { get; set; }
+
+    /// <summary>
+    /// The employee code of the linked employee, if any.
+    /// </summary>
+    public string? EmployeeCode { get; set; }
+
+    /// <summary>
+    /// The department name of the linked employee, if any.
+    /// </summary>
+    public string? DepartmentName { get; set; }
+
+    /// <summary>
     /// Indicates whether the user account is active.
     /// </summary>
     public bool IsActive { get; set; }
@@ -55,3 +80,4 @@ public class UserDto
     /// </summary>
     public List<string> Roles { get; set; } = new();
 }
+

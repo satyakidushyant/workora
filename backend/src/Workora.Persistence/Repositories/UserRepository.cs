@@ -67,6 +67,11 @@ public class UserRepository : GenericRepository<User>, IUserRepository
         if (companyId.HasValue)
         {
             var cid = companyId.Value;
+            var targetCompany = await _dbContext.Companies.FirstOrDefaultAsync(c => c.Id == cid, ct);
+            var domain = targetCompany?.Email != null && targetCompany.Email.Contains('@')
+                ? targetCompany.Email.Split('@')[1].ToLower()
+                : null;
+
             query = query.Where(u =>
                 !u.UserRoles.Any(ur => ur.Role != null && ur.Role.Name == "SuperAdmin") &&
                 (
@@ -80,6 +85,8 @@ public class UserRepository : GenericRepository<User>, IUserRepository
                          (e.Branch != null && e.Branch.CompanyId == cid))))
                     ||
                     (_dbContext.Companies.Any(c => c.Id == cid && c.Email != null && c.Email.ToLower() == EF.Property<string>(u, "Email").ToLower()))
+                    ||
+                    (domain != null && EF.Property<string>(u, "Email").ToLower().EndsWith("@" + domain))
                 )
             );
         }
@@ -112,6 +119,11 @@ public class UserRepository : GenericRepository<User>, IUserRepository
         if (companyId.HasValue)
         {
             var cid = companyId.Value;
+            var targetCompany = await _dbContext.Companies.FirstOrDefaultAsync(c => c.Id == cid, ct);
+            var domain = targetCompany?.Email != null && targetCompany.Email.Contains('@')
+                ? targetCompany.Email.Split('@')[1].ToLower()
+                : null;
+
             query = query.Where(u =>
                 !u.UserRoles.Any(ur => ur.Role != null && ur.Role.Name == "SuperAdmin") &&
                 (
@@ -125,6 +137,8 @@ public class UserRepository : GenericRepository<User>, IUserRepository
                          (e.Branch != null && e.Branch.CompanyId == cid))))
                     ||
                     (_dbContext.Companies.Any(c => c.Id == cid && c.Email != null && c.Email.ToLower() == EF.Property<string>(u, "Email").ToLower()))
+                    ||
+                    (domain != null && EF.Property<string>(u, "Email").ToLower().EndsWith("@" + domain))
                 )
             );
         }

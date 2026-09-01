@@ -408,10 +408,28 @@ export class BranchesPageComponent implements OnInit {
   }
 
   loadOrganizations(): void {
-    this.superAdminRepo.getOrganizations(1, 100).subscribe({
-      next: paged => this.organizations.set(paged.items || []),
-      error: () => this.organizations.set([])
-    });
+    if (this.authService.hasRole('SuperAdmin')) {
+      this.superAdminRepo.getOrganizations(1, 100).subscribe({
+        next: paged => this.organizations.set(paged.items || []),
+        error: () => this.organizations.set([])
+      });
+    } else {
+      this.organizationRepo.getCompaniesList().subscribe({
+        next: companies => {
+          const tenantOrgs: TenantOrganization[] = companies.map(c => ({
+            id: c.id,
+            name: c.name,
+            code: c.code,
+            industry: 'General Enterprise',
+            isActive: c.isActive ?? true,
+            currency: c.currency || 'INR',
+            createdAt: c.createdAt ? c.createdAt.toString() : new Date().toISOString()
+          }));
+          this.organizations.set(tenantOrgs);
+        },
+        error: () => this.organizations.set([])
+      });
+    }
   }
 
   loadBranches(): void {
@@ -452,7 +470,7 @@ export class BranchesPageComponent implements OnInit {
 
   openCreateModal(): void {
     const orgs = this.organizations();
-    const defaultOrgId = orgs.length > 0 ? orgs[0].id : null;
+    const defaultOrgId = this.authService.currentUser()?.companyId || (orgs.length > 0 ? orgs[0].id : null);
     
     this.editingBranchId.set(null);
     this.branchForm.reset({

@@ -19,6 +19,8 @@ public class CreateUserCommandHandler : IRequestHandler<CreateUserCommand, ApiRe
 {
     private readonly IUserRepository _userRepository;
     private readonly IRoleRepository _roleRepository;
+    private readonly IEmployeeRepository _employeeRepository;
+    private readonly ICompanyRepository _companyRepository;
     private readonly IUnitOfWork _unitOfWork;
     private readonly IPasswordHasher _passwordHasher;
     private readonly IMapper _mapper;
@@ -29,12 +31,16 @@ public class CreateUserCommandHandler : IRequestHandler<CreateUserCommand, ApiRe
     public CreateUserCommandHandler(
         IUserRepository userRepository,
         IRoleRepository roleRepository,
+        IEmployeeRepository employeeRepository,
+        ICompanyRepository companyRepository,
         IUnitOfWork unitOfWork,
         IPasswordHasher passwordHasher,
         IMapper mapper)
     {
         _userRepository = userRepository;
         _roleRepository = roleRepository;
+        _employeeRepository = employeeRepository;
+        _companyRepository = companyRepository;
         _unitOfWork = unitOfWork;
         _passwordHasher = passwordHasher;
         _mapper = mapper;
@@ -65,16 +71,60 @@ public class CreateUserCommandHandler : IRequestHandler<CreateUserCommand, ApiRe
         await _userRepository.AddAsync(user, ct);
         await _unitOfWork.SaveChangesAsync(ct);
 
-        // Assign default Employee role if role exists
-        var defaultRole = await _roleRepository.GetByNameAsync("Employee", ct);
-        if (defaultRole != null)
+        // Assign explicit role if requested, otherwise default to Employee role
+        if (request.RoleId.HasValue && request.RoleId.Value > 0)
         {
-            await _userRepository.AssignUserRolesAsync(user.Id, new[] { defaultRole.Id }, ct);
+            await _userRepository.AssignUserRolesAsync(user.Id, new[] { request.RoleId.Value }, ct);
             await _unitOfWork.SaveChangesAsync(ct);
+        }
+        else
+        {
+            var defaultRole = await _roleRepository.GetByNameAsync("Employee", ct);
+            if (defaultRole != null)
+            {
+                await _userRepository.AssignUserRolesAsync(user.Id, new[] { defaultRole.Id }, ct);
+                await _unitOfWork.SaveChangesAsync(ct);
+            }
+        }
+
+        // Link Employee back to this User if an Employee was specified
+        if (request.EmployeeId.HasValue && request.EmployeeId.Value > 0)
+        {
+            var emp = await _employeeRepository.GetByIdAsync(request.EmployeeId.Value, ct);
+            if (emp != null && emp.UserId != user.Id)
+            {
+                emp.LinkUser(user.Id);
+                await _unitOfWork.SaveChangesAsync(ct);
+            }
         }
 
         var freshUser = await _userRepository.GetByIdAsync(user.Id, ct) ?? user;
         var dto = _mapper.Map<UserDto>(freshUser);
+
+        // Enrich DTO with company metadata
+        if (request.EmployeeId.HasValue)
+        {
+            var emp = await _employeeRepository.GetWithFullDetailsAsync(request.EmployeeId.Value, ct);
+            if (emp != null)
+            {
+                dto.EmployeeId = emp.Id;
+                dto.EmployeeCode = emp.EmployeeCode;
+                dto.DepartmentName = emp.Department?.Name;
+                var cid = emp.Department?.CompanyId ?? emp.Branch?.CompanyId;
+                if (cid.HasValue)
+                {
+                    var comp = await _companyRepository.GetByIdAsync(cid.Value, ct);
+                    if (comp != null)
+                    {
+                        dto.CompanyId = comp.Id;
+                        dto.CompanyName = comp.Name;
+                        dto.CompanyCode = comp.Code;
+                    }
+                }
+            }
+        }
+
         return ApiResponse<UserDto>.Success(dto);
     }
 }
+

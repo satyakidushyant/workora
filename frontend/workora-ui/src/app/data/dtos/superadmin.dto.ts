@@ -44,3 +44,16 @@ export interface RegisterOrganizationRequestDto {
   currency?: string;
   address?: string | null;
 }
+
+export interface UpdateOrganizationRequestDto {
+  name: string;
+  registrationNumber?: string | null;
+  taxId?: string | null;
+  email?: string | null;
+  phone?: string | null;
+  website?: string | null;
+  fiscalYearStartMonth?: number;
+  currency?: string;
+  address?: string | null;
+}
+

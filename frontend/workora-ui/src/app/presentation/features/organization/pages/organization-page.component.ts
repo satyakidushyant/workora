@@ -4,7 +4,9 @@ import { FormsModule, FormBuilder, FormGroup, ReactiveFormsModule, Validators } 
 import { Router, RouterLink } from '@angular/router';
 import { finalize } from 'rxjs/operators';
 import { SuperAdminApiRepository } from '../../../../data/repositories/superadmin-api.repository';
+import { OrganizationApiRepository } from '../../../../data/repositories/organization-api.repository';
 import { TenantOrganization, SubscriptionPlan, SuperAdminMetrics } from '../../../../domain/models/superadmin.model';
+import { Company } from '../../../../domain/models/organization.model';
 import { NotificationService } from '../../../../core/services/notification.service';
 import { AuthService } from '../../../../core/services/auth.service';
 import { WorkoraSkeletonComponent } from '../../../shared/components/workora-skeleton.component';
@@ -48,102 +50,167 @@ const INDUSTRY_OPTIONS = [
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    <div class="p-4 sm:p-6 lg:p-8 max-w-7xl 2xl:max-w-8xl mx-auto space-y-6">
+    <div class="p-4 sm:p-6 lg:p-8 max-w-7xl 2xl:max-w-8xl mx-auto space-y-5 sm:space-y-6 w-full">
       
-      <!-- Page Header -->
+      <!-- Top Navigation & Header Section -->
       <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
+          <div class="flex items-center gap-1.5 text-xs text-[#718686] font-medium mb-1">
+            <a routerLink="/dashboard" class="hover:text-[#087F73] transition-colors flex items-center gap-1 text-slate-500 font-semibold no-underline">
+              <span class="material-symbols-outlined text-sm">dashboard</span>
+              <span>Dashboard</span>
+            </a>
+            <span class="text-slate-300">/</span>
+            <span class="text-[#102A2A] font-bold">Organizations</span>
+          </div>
+
           <div class="flex items-center gap-2.5">
-            <span class="p-2.5 rounded-2xl bg-[#DDF7F2] text-[#087F73]">
+            <div class="p-2.5 rounded-2xl bg-[#DDF7F2] text-[#087F73] flex items-center justify-center shrink-0 shadow-xs">
               <span class="material-symbols-outlined text-2xl">domain</span>
-            </span>
+            </div>
             <div>
               <h1 class="text-2xl sm:text-3xl font-extrabold text-[#102A2A] tracking-tight font-heading">
-                Organizations
+                Tenant Organizations
               </h1>
               <p class="text-xs sm:text-sm text-[#718686] mt-0.5 font-medium">
-                Manage organizations and their Workora workspace.
+                Provision customer workspaces, monitor multi-tenant branch operations, and govern subscription tiers.
               </p>
             </div>
           </div>
         </div>
 
-        <div class="flex items-center gap-3">
-          <button 
-            type="button" 
-            (click)="openCreateModal()"
-            class="workora-btn-primary text-xs shadow-sm">
-            <span class="material-symbols-outlined text-base">add_business</span>
-            <span>+ Create Organization</span>
-          </button>
-        </div>
+        @if (authService.hasRole('SuperAdmin')) {
+          <div class="flex items-center gap-3 shrink-0">
+            <button 
+              type="button" 
+              (click)="openCreateModal()"
+              class="workora-btn-primary text-xs shadow-md flex items-center gap-2 cursor-pointer">
+              <span class="material-symbols-outlined text-base">add_business</span>
+              <span>+ Create Organization</span>
+            </button>
+          </div>
+        }
       </div>
 
-      <!-- Quick Platform Health Cards (Real Database Driven) -->
-      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <div class="workora-card p-5 space-y-1.5 border-l-4 border-l-[#087F73]">
-          <span class="text-[11px] font-bold uppercase tracking-wider text-[#718686]">Total Organizations</span>
-          <p class="text-3xl font-extrabold text-[#102A2A] font-heading">{{ totalCount() }}</p>
-          <p class="text-[11px] text-[#718686] font-medium">Customer enterprise workspaces</p>
+      <!-- Quick Platform Metric Cards (4 Equal Height Cards) -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5 sm:gap-4">
+        
+        <!-- Total Organizations -->
+        <div class="workora-card p-4 sm:p-5 border-l-4 border-l-[#087F73] flex flex-col justify-between min-h-[116px]">
+          <div class="flex items-center justify-between">
+            <span class="text-[11px] font-bold uppercase tracking-wider text-[#718686]">Total Organizations</span>
+            <span class="w-9 h-9 rounded-xl bg-[#DDF7F2] text-[#087F73] flex items-center justify-center shrink-0">
+              <span class="material-symbols-outlined text-lg">domain</span>
+            </span>
+          </div>
+          <div>
+            <p class="text-2xl sm:text-3xl font-extrabold text-[#102A2A] font-heading leading-tight my-0.5">{{ totalCount() }}</p>
+            <p class="text-[11px] text-[#718686] font-medium">Customer tenant workspaces</p>
+          </div>
         </div>
 
-        <div class="workora-card p-5 space-y-1.5 border-l-4 border-l-[#16A085]">
-          <span class="text-[11px] font-bold uppercase tracking-wider text-[#718686]">Active Workspaces</span>
-          <p class="text-3xl font-extrabold text-[#16A085] font-heading">{{ activeCount() }}</p>
-          <p class="text-[11px] text-[#16A085] font-semibold">Operational tenants</p>
+        <!-- Active Workspaces -->
+        <div class="workora-card p-4 sm:p-5 border-l-4 border-l-emerald-500 flex flex-col justify-between min-h-[116px]">
+          <div class="flex items-center justify-between">
+            <span class="text-[11px] font-bold uppercase tracking-wider text-[#718686]">Active Workspaces</span>
+            <span class="w-9 h-9 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0">
+              <span class="material-symbols-outlined text-lg">verified</span>
+            </span>
+          </div>
+          <div>
+            <p class="text-2xl sm:text-3xl font-extrabold text-emerald-600 font-heading leading-tight my-0.5">{{ activeCount() }}</p>
+            <p class="text-[11px] text-emerald-700 font-semibold">Operational tenants</p>
+          </div>
         </div>
 
-        <div class="workora-card p-5 space-y-1.5 border-l-4 border-l-[#0E9F8E]">
-          <span class="text-[11px] font-bold uppercase tracking-wider text-[#718686]">Total Branches</span>
-          <p class="text-3xl font-extrabold text-[#087F73] font-heading">{{ totalBranchesCount() }}</p>
-          <p class="text-[11px] text-[#718686] font-medium">Headquarters &amp; regional offices</p>
+        <!-- Total Branches -->
+        <div class="workora-card p-4 sm:p-5 border-l-4 border-l-[#16A085] flex flex-col justify-between min-h-[116px]">
+          <div class="flex items-center justify-between">
+            <span class="text-[11px] font-bold uppercase tracking-wider text-[#718686]">Total Branches</span>
+            <span class="w-9 h-9 rounded-xl bg-teal-50 text-[#16A085] flex items-center justify-center shrink-0">
+              <span class="material-symbols-outlined text-lg">location_city</span>
+            </span>
+          </div>
+          <div>
+            <p class="text-2xl sm:text-3xl font-extrabold text-[#16A085] font-heading leading-tight my-0.5">{{ totalBranchesCount() }}</p>
+            <p class="text-[11px] text-[#718686] font-medium">Headquarters &amp; offices</p>
+          </div>
         </div>
 
-        <div class="workora-card p-5 space-y-1.5 border-l-4 border-l-[#168AAD]">
-          <span class="text-[11px] font-bold uppercase tracking-wider text-[#718686]">Managed Personnel</span>
-          <p class="text-3xl font-extrabold text-[#168AAD] font-heading">{{ totalEmployeesCount() }}</p>
-          <p class="text-[11px] text-[#718686] font-medium">Total active employees</p>
+        <!-- Managed Personnel -->
+        <div class="workora-card p-4 sm:p-5 border-l-4 border-l-purple-500 flex flex-col justify-between min-h-[116px]">
+          <div class="flex items-center justify-between">
+            <span class="text-[11px] font-bold uppercase tracking-wider text-[#718686]">Managed Personnel</span>
+            <span class="w-9 h-9 rounded-xl bg-purple-50 text-purple-600 flex items-center justify-center shrink-0">
+              <span class="material-symbols-outlined text-lg">groups</span>
+            </span>
+          </div>
+          <div>
+            <p class="text-2xl sm:text-3xl font-extrabold text-purple-700 font-heading leading-tight my-0.5">{{ totalEmployeesCount() }}</p>
+            <p class="text-[11px] text-[#718686] font-medium">Total active personnel</p>
+          </div>
         </div>
+
       </div>
 
-      <!-- Controls & Filter Toolbar -->
-      <div class="workora-card p-4 space-y-3">
-        <div class="flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3">
+      <!-- Controls & Filter Toolbar (Standardized 40px Height Controls & Uniform Grid) -->
+      <div class="workora-card p-4 sm:p-5 space-y-3">
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 items-center">
           
-          <!-- Search Box -->
-          <div class="relative flex-1 max-w-md">
-            <span class="material-symbols-outlined absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-lg">search</span>
+          <!-- 1. Search Box -->
+          <div class="relative w-full">
+            <span class="material-symbols-outlined absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-lg pointer-events-none">
+              search
+            </span>
             <input 
               type="text" 
               [(ngModel)]="searchTerm" 
               (ngModelChange)="onSearch()"
-              placeholder="Search organizations..." 
-              class="w-full pl-10 pr-4 py-2.5 bg-[#F6FAF9] text-xs text-[#102A2A] rounded-xl border border-[#DDE9E6] focus:border-[#087F73] focus:bg-white outline-none font-medium transition-all"
+              (keydown.escape)="searchTerm = ''; onSearch()"
+              placeholder="Search organizations by name, code or industry..." 
+              class="w-full h-10 pl-10 pr-9 bg-[#F6FAF9] text-xs text-[#102A2A] rounded-xl border border-[#DDE9E6] focus:border-[#087F73] focus:bg-white outline-none font-medium transition-all placeholder:text-[#718686]"
             />
+            @if (searchTerm) {
+              <button
+                type="button"
+                (click)="searchTerm = ''; onSearch()"
+                class="absolute right-2.5 top-1/2 -translate-y-1/2 p-1 text-slate-400 hover:text-rose-500 rounded-lg hover:bg-slate-100 transition-colors border-none bg-transparent cursor-pointer flex items-center justify-center"
+                title="Clear search">
+                <span class="material-symbols-outlined text-sm">close</span>
+              </button>
+            }
           </div>
 
-          <!-- Filters -->
-          <div class="flex flex-wrap items-center gap-2.5">
-            <div class="w-44">
-              <app-workora-select
-                [(ngModel)]="selectedStatusFilter"
-                (selectionChange)="onFilterChange()"
-                [options]="statusOptions"
-                [clearable]="true"
-                placeholder="All Statuses"
-                icon="filter_alt"
-              ></app-workora-select>
-            </div>
+          <!-- 2. Status Filter -->
+          <div class="w-full">
+            <app-workora-select
+              [(ngModel)]="selectedStatusFilter"
+              (selectionChange)="onFilterChange()"
+              [options]="statusOptions"
+              [clearable]="true"
+              placeholder="All Statuses"
+              icon="filter_alt"
+            ></app-workora-select>
+          </div>
 
+        </div>
+
+        <!-- Reset Active Filters Bar -->
+        @if (searchTerm || selectedStatusFilter) {
+          <div class="flex items-center justify-between pt-2 border-t border-[#DDE9E6]/60 text-xs">
+            <div class="flex items-center gap-1.5 text-[#718686]">
+              <span class="material-symbols-outlined text-sm text-[#087F73]">filter_alt</span>
+              <span class="font-medium">Active filters applied</span>
+            </div>
             <button
               type="button"
-              (click)="loadOrganizations()"
-              class="workora-btn-secondary !p-2.5"
-              title="Refresh List">
-              <span class="material-symbols-outlined text-lg">refresh</span>
+              (click)="searchTerm = ''; selectedStatusFilter = null; onFilterChange()"
+              class="h-8 px-3 rounded-lg text-xs font-bold text-rose-600 hover:bg-rose-50 border border-rose-200 transition-colors cursor-pointer flex items-center justify-center gap-1">
+              <span class="material-symbols-outlined text-sm">filter_alt_off</span>
+              <span>Reset Filters</span>
             </button>
           </div>
-        </div>
+        }
       </div>
 
       <!-- Organizations Data Table -->
@@ -221,7 +288,7 @@ const INDUSTRY_OPTIONS = [
                     <td class="py-3.5 px-4 text-center">
                       <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-lg bg-teal-50 text-teal-700 font-bold border border-teal-200/60">
                         <span class="material-symbols-outlined text-[13px]">location_city</span>
-                        <span>{{ org.branchCount || 1 }}</span>
+                        <span>{{ org.branchCount ?? 0 }}</span>
                       </span>
                     </td>
 
@@ -261,24 +328,26 @@ const INDUSTRY_OPTIONS = [
                         <button
                           type="button"
                           (click)="goToDetail(org.id)"
-                          class="px-2.5 py-1 rounded-lg bg-[#F4F8F7] hover:bg-[#DCEBE7] text-[#063B39] text-[11px] font-bold transition-colors border border-[#DCEBE7] cursor-pointer"
-                          title="View Details">
-                          View
+                          class="w-8 h-8 rounded-xl flex items-center justify-center text-slate-500 hover:text-[#087F73] hover:bg-[#DDF7F2] transition-colors border-none bg-transparent cursor-pointer"
+                          title="View Organization Workspace">
+                          <span class="material-symbols-outlined text-base">visibility</span>
                         </button>
 
                         @if (org.isActive) {
                           <button
                             type="button"
                             (click)="onSuspend(org)"
-                            class="px-2.5 py-1 rounded-lg bg-rose-50 hover:bg-rose-100 text-rose-700 text-[11px] font-bold transition-colors border border-rose-200 cursor-pointer">
-                            Suspend
+                            class="w-8 h-8 rounded-xl flex items-center justify-center text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition-colors border-none bg-transparent cursor-pointer"
+                            title="Suspend Organization">
+                            <span class="material-symbols-outlined text-base">block</span>
                           </button>
                         } @else {
                           <button
                             type="button"
                             (click)="onReactivate(org)"
-                            class="px-2.5 py-1 rounded-lg bg-emerald-50 hover:bg-emerald-100 text-emerald-700 text-[11px] font-bold transition-colors border border-emerald-200 cursor-pointer">
-                            Reactivate
+                            class="w-8 h-8 rounded-xl flex items-center justify-center text-slate-400 hover:text-emerald-600 hover:bg-emerald-50 transition-colors border-none bg-transparent cursor-pointer"
+                            title="Reactivate Organization">
+                            <span class="material-symbols-outlined text-base">check_circle</span>
                           </button>
                         }
                       </div>
@@ -368,7 +437,7 @@ const INDUSTRY_OPTIONS = [
             
             <!-- Step 1: Corporate & Legal Information -->
             @if (currentStep() === 1) {
-              <div class="space-y-4 animate-in fade-in duration-150">
+              <div class="space-y-4">
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   
                   <div class="sm:col-span-2">
@@ -434,7 +503,7 @@ const INDUSTRY_OPTIONS = [
 
             <!-- Step 2: Primary Contact & Address -->
             @if (currentStep() === 2) {
-              <div class="space-y-4 animate-in fade-in duration-150">
+              <div class="space-y-4">
                 
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
@@ -486,15 +555,14 @@ const INDUSTRY_OPTIONS = [
 
             <!-- Step 3: Plan & Financial Defaults -->
             @if (currentStep() === 3) {
-              <div class="space-y-4 animate-in fade-in duration-150">
-                <div class="p-4 rounded-2xl bg-teal-50/70 border border-teal-200/80 space-y-2">
-                  <div class="flex items-center gap-2 text-[#0E6E68] font-bold text-xs">
-                    <span class="material-symbols-outlined text-base">verified</span>
-                    <span>India-First SaaS Multi-Tenancy Provisioning</span>
+              <div class="space-y-4">
+                <div class="p-4 rounded-2xl bg-[#DDF7F2]/70 border border-[#087F73]/20 space-y-1.5">
+                  <div class="flex items-center gap-2 text-[#075E58] font-bold text-xs">
+                    <span class="material-symbols-outlined text-base text-[#087F73]">domain</span>
+                    <span>Clean Tenant Workspace Onboarding</span>
                   </div>
-                  <p class="text-[11px] text-slate-600 leading-relaxed">
-                    Workora will automatically provision a <strong>Headquarters Branch</strong> and 
-                    an <strong>Organization Administrator Account</strong> with Indian payroll configuration (April–March Financial Year, INR Currency).
+                  <p class="text-[11px] text-[#405656] leading-relaxed">
+                    The tenant workspace will be initialized cleanly with Indian localization defaults (April–March Financial Year, INR Currency). Branches and departments can be added directly via the Organization details page.
                   </p>
                 </div>
 
@@ -515,7 +583,7 @@ const INDUSTRY_OPTIONS = [
                       type="text" 
                       value="INR (₹) - Indian Rupee" 
                       disabled
-                      class="workora-input !py-2.5 bg-slate-50 text-slate-600 font-bold"
+                      class="workora-input !py-2.5 bg-slate-50 text-[#102A2A] font-bold cursor-not-allowed"
                     />
                   </div>
 
@@ -523,19 +591,19 @@ const INDUSTRY_OPTIONS = [
                     <label class="workora-label">Financial Year Cycle</label>
                     <input 
                       type="text" 
-                      value="April 1 to March 31" 
+                      value="April 1 to March 31 (Indian Standard)" 
                       disabled
-                      class="workora-input !py-2.5 bg-slate-50 text-slate-600 font-bold"
+                      class="workora-input !py-2.5 bg-slate-50 text-[#102A2A] font-bold cursor-not-allowed"
                     />
                   </div>
 
                   <div>
-                    <label class="workora-label">Initial Admin Default Password</label>
+                    <label class="workora-label">Multi-Tenancy Mode</label>
                     <input 
                       type="text" 
-                      value="Admin@123 (Change on first login)" 
+                      value="Strict Scoped Tenant Isolation" 
                       disabled
-                      class="workora-input !py-2.5 bg-slate-50 text-slate-500 font-mono text-xs"
+                      class="workora-input !py-2.5 bg-slate-50 text-[#075E58] font-bold cursor-not-allowed"
                     />
                   </div>
                 </div>
@@ -606,6 +674,7 @@ const INDUSTRY_OPTIONS = [
 })
 export class OrganizationPageComponent implements OnInit {
   private readonly superAdminRepo = inject(SuperAdminApiRepository);
+  private readonly organizationRepo = inject(OrganizationApiRepository);
   private readonly notificationService = inject(NotificationService);
   readonly authService = inject(AuthService);
   private readonly fb = inject(FormBuilder);
@@ -665,10 +734,49 @@ export class OrganizationPageComponent implements OnInit {
   });
 
   ngOnInit(): void {
+    if (!this.authService.hasRole('SuperAdmin')) {
+      const user = this.authService.currentUser();
+      if (user?.companyId) {
+        this.router.navigate(['/organization', user.companyId]);
+        return;
+      }
+      this.authService.loadProfile().subscribe({
+        next: profile => {
+          if (profile?.companyId) {
+            this.router.navigate(['/organization', profile.companyId]);
+          } else {
+            this.loadNonSuperAdminCompany();
+          }
+        },
+        error: () => {
+          this.loadNonSuperAdminCompany();
+        }
+      });
+      return;
+    }
     this.loadOrganizations();
   }
 
+  private loadNonSuperAdminCompany(): void {
+    this.organizationRepo.getCompanyProfile().subscribe({
+      next: (comp: Company) => {
+        if (comp?.id) {
+          this.router.navigate(['/organization', comp.id]);
+        } else {
+          this.isLoading.set(false);
+        }
+      },
+      error: (err: any) => {
+        this.isLoading.set(false);
+        this.notificationService.error(err.message || 'Failed to load organization profile.');
+      }
+    });
+  }
+
   loadOrganizations(): void {
+    if (!this.authService.hasRole('SuperAdmin')) {
+      return;
+    }
     this.isLoading.set(true);
     this.superAdminRepo.getOrganizations(this.currentPage(), this.pageSize, this.selectedStatusFilter || undefined)
       .pipe(finalize(() => this.isLoading.set(false)))
@@ -728,7 +836,7 @@ export class OrganizationPageComponent implements OnInit {
     this.orgForm.reset({
       name: '',
       code: '',
-      industry: 'Information Technology & Software',
+      industry: '',
       registrationNumber: '',
       taxId: '',
       email: '',
@@ -781,7 +889,7 @@ export class OrganizationPageComponent implements OnInit {
     .pipe(finalize(() => this.isSaving.set(false)))
     .subscribe({
       next: created => {
-        this.notificationService.success(`Organization "${created.name}" registered successfully with default Headquarters branch.`);
+        this.notificationService.success(`Organization "${created.name}" registered successfully.`);
         this.closeCreateModal();
         this.loadOrganizations();
       },

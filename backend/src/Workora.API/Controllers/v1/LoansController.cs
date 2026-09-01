@@ -1,4 +1,4 @@
-﻿using MediatR;
+using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Workora.Application.Features.Loans.Commands.ApplyForLoan;
@@ -32,12 +32,13 @@ public class LoansController : ControllerBase
     }
 
     /// <summary>
-    /// Lists all company loans with optional filtering.
+    /// Lists all company loans with dynamic pagination and optional status filters.
     /// </summary>
     [HttpGet]
     [Authorize(Policy = "loans.view")]
-    public async Task<ApiResponse<List<LoanDto>>> GetCompanyLoans([FromQuery] int? companyId, [FromQuery] LoanStatus? status)
-        => await _mediator.Send(new ListCompanyLoansQuery(companyId, status));
+    public async Task<ApiResponse<PagedResponse<LoanDto>>> GetCompanyLoans([FromQuery] ListCompanyLoansQuery query)
+        => await _mediator.Send(query);
+
 
     /// <summary>
     /// Gets all active and past loans for the currently authenticated employee.

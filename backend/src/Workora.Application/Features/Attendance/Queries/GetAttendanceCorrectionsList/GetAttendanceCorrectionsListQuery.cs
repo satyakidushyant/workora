@@ -1,17 +1,24 @@
-using AutoMapper;
 using MediatR;
+using Workora.Application.Common.Models;
 using Workora.Application.Features.Attendance.DTOs;
 using Workora.Domain.Enums;
-using Workora.Domain.Interfaces;
 using Workora.Shared.Responses;
 
 namespace Workora.Application.Features.Attendance.Queries.GetAttendanceCorrectionsList;
 
 /// <summary>
-/// Query to retrieve a paginated list of attendance correction requests.
+/// Query to retrieve a paginated list of attendance correction requests with dynamic pagination and filtering.
 /// </summary>
-public record GetAttendanceCorrectionsListQuery(
-    int PageNumber = 1,
-    int PageSize = 25,
-    CorrectionStatus? Status = null,
-    int? CompanyId = null) : IRequest<ApiResponse<PagedResponse<AttendanceCorrectionDto>>>;
+public record GetAttendanceCorrectionsListQuery : PagedQueryBase, IRequest<ApiResponse<PagedResponse<AttendanceCorrectionDto>>>
+{
+    /// <summary>
+    /// Gets or init optional filter for correction status.
+    /// </summary>
+    public CorrectionStatus? Status { get; init; }
+
+    /// <summary>
+    /// Gets or init optional filter for target company ID.
+    /// </summary>
+    public int? CompanyId { get; init; }
+}
+

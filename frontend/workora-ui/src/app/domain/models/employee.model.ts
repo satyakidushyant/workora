@@ -108,6 +108,7 @@ export interface EmployeeQueryParams {
   designationId?: number;
   branchId?: number;
   status?: string;
+  companyId?: number;
 }
 
 /**

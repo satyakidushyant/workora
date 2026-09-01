@@ -20,11 +20,17 @@ export class UserMapper {
       lastName: dto.lastName,
       fullName: dto.fullName || `${dto.firstName} ${dto.lastName}`.trim(),
       employeeId: dto.employeeId ?? null,
+      employeeCode: dto.employeeCode ?? null,
+      departmentName: dto.departmentName ?? null,
+      companyId: dto.companyId ?? null,
+      companyName: dto.companyName ?? null,
+      companyCode: dto.companyCode ?? null,
       isActive: dto.isActive,
       createdAt: dto.createdAt,
       roles: dto.roles || []
     };
   }
+
 
   /**
    * Maps a UserDetailDto to a UserDetail domain model.

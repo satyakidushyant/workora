@@ -17,23 +17,23 @@ import { RoleDetail, ModulePermissions, Permission } from '../../../../domain/mo
       <div class="workora-modal-card max-w-4xl max-h-[90vh] flex flex-col" (click)="$event.stopPropagation()">
         
         <!-- Header -->
-        <div class="p-5 sm:p-6 border-b border-[#DCEBE7] flex items-center justify-between gap-4 bg-[#F4F8F7]/50 shrink-0">
+        <div class="p-5 sm:p-6 border-b border-[#DDE9E6] flex items-center justify-between gap-4 bg-[#F6FAF9] shrink-0">
           <div class="flex items-center gap-3.5">
-            <div class="w-11 h-11 rounded-2xl bg-gradient-to-tr from-[#063B39] to-[#0E6E68] text-white flex items-center justify-center font-extrabold shadow-sm">
+            <div class="w-11 h-11 rounded-2xl bg-[#DDF7F2] text-[#087F73] flex items-center justify-center font-extrabold shadow-2xs shrink-0">
               <span class="material-symbols-outlined text-2xl">shield_lock</span>
             </div>
             <div>
               <div class="flex items-center gap-2.5">
-                <h3 class="text-lg font-extrabold text-[#063B39] font-heading">
+                <h3 class="text-lg font-extrabold text-[#102A2A] font-heading">
                   Permissions: {{ roleDetail?.name }}
                 </h3>
                 @if (roleDetail?.isSystemRole) {
-                  <span class="px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-blue-100 text-blue-800 border border-blue-200">
-                    System Role
+                  <span class="px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-blue-50 text-blue-800 border border-blue-200">
+                    System Core Role
                   </span>
                 }
               </div>
-              <p class="text-xs text-slate-500 mt-0.5">
+              <p class="text-xs text-[#718686] mt-0.5">
                 Configured permissions define feature access and security barriers across all 37 modules.
               </p>
             </div>
@@ -42,25 +42,25 @@ import { RoleDetail, ModulePermissions, Permission } from '../../../../domain/mo
           <button 
             type="button" 
             (click)="closeModal.emit()"
-            class="text-slate-400 hover:text-slate-600 rounded-lg p-1.5 transition-colors border-none bg-transparent cursor-pointer">
+            class="text-slate-400 hover:text-[#102A2A] rounded-xl p-1.5 transition-colors border-none bg-transparent cursor-pointer">
             <span class="material-symbols-outlined text-2xl">close</span>
           </button>
         </div>
 
         <!-- Toolbar & Search -->
-        <div class="p-4 border-b border-[#DCEBE7] bg-white flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 shrink-0">
+        <div class="p-4 border-b border-[#DDE9E6] bg-white flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 shrink-0">
           <div class="relative flex-1 max-w-md">
             <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-lg">search</span>
             <input 
               type="text" 
               [(ngModel)]="searchFilter" 
               placeholder="Filter by permission name or code (e.g. attendance.approve)..."
-              class="w-full pl-9 pr-4 py-2 bg-[#F4F8F7] text-xs text-[#063B39] rounded-xl border border-[#DCEBE7] focus:border-[#0E6E68] outline-none font-medium transition-all"
+              class="w-full h-10 pl-9 pr-4 bg-[#F6FAF9] text-xs text-[#102A2A] rounded-xl border border-[#DDE9E6] focus:border-[#087F73] focus:bg-white outline-none font-medium transition-all"
             />
           </div>
 
           <div class="flex items-center justify-between sm:justify-end gap-3">
-            <div class="px-3 py-1.5 rounded-xl bg-[#3FA79B]/15 text-[#0E6E68] text-xs font-extrabold flex items-center gap-1.5 border border-[#3FA79B]/30">
+            <div class="px-3 py-1.5 rounded-xl bg-[#DDF7F2] text-[#087F73] text-xs font-extrabold flex items-center gap-1.5 border border-[#087F73]/20">
               <span class="material-symbols-outlined text-sm">verified_user</span>
               <span>{{ selectedPermissionIds().size }} / {{ totalAvailablePermissions() }} Selected</span>
             </div>
@@ -69,13 +69,13 @@ import { RoleDetail, ModulePermissions, Permission } from '../../../../domain/mo
               <button 
                 type="button" 
                 (click)="selectAll()"
-                class="px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-[#063B39] text-xs font-bold transition-all cursor-pointer border-none">
+                class="px-3 py-1.5 rounded-xl bg-[#F6FAF9] hover:bg-[#DDF7F2] text-[#102A2A] text-xs font-bold transition-all cursor-pointer border border-[#DDE9E6]">
                 Select All
               </button>
               <button 
                 type="button" 
                 (click)="clearAll()"
-                class="px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-600 text-xs font-bold transition-all cursor-pointer border-none">
+                class="px-3 py-1.5 rounded-xl bg-[#F6FAF9] hover:bg-rose-50 hover:text-rose-600 text-slate-600 text-xs font-bold transition-all cursor-pointer border border-[#DDE9E6]">
                 Clear All
               </button>
             </div>
@@ -83,16 +83,16 @@ import { RoleDetail, ModulePermissions, Permission } from '../../../../domain/mo
         </div>
 
         <!-- Permissions Accordion / Matrix Container -->
-        <div class="flex-1 overflow-y-auto p-4 sm:p-6 space-y-5 bg-[#F4F8F7]/30">
+        <div class="flex-1 overflow-y-auto p-4 sm:p-6 space-y-5 bg-[#F6FAF9]/50 custom-scrollbar">
           @for (group of filteredModuleGroups(); track group.module) {
-            <div class="bg-white rounded-2xl border border-[#DCEBE7] shadow-2xs overflow-hidden transition-all">
+            <div class="bg-white rounded-2xl border border-[#DDE9E6] shadow-2xs overflow-hidden transition-all">
               
               <!-- Module Header -->
-              <div class="p-3.5 sm:px-5 sm:py-3.5 bg-[#F4F8F7]/70 border-b border-[#DCEBE7] flex items-center justify-between">
+              <div class="p-3.5 sm:px-5 sm:py-3.5 bg-[#F6FAF9] border-b border-[#DDE9E6] flex items-center justify-between">
                 <div class="flex items-center gap-3">
-                  <span class="material-symbols-outlined text-[#0E6E68] text-lg">folder_open</span>
-                  <h4 class="text-xs font-extrabold uppercase tracking-wider text-[#063B39]">{{ group.module }} Module</h4>
-                  <span class="px-2 py-0.5 rounded-md text-[10px] font-bold bg-[#DCEBE7] text-[#063B39]">
+                  <span class="material-symbols-outlined text-[#087F73] text-lg">folder_open</span>
+                  <h4 class="text-xs font-extrabold uppercase tracking-wider text-[#102A2A] font-heading">{{ group.module }} Module</h4>
+                  <span class="px-2 py-0.5 rounded-md text-[10px] font-bold bg-[#DDF7F2] text-[#075E58]">
                     {{ getSelectedCountInModule(group) }} / {{ group.permissions.length }}
                   </span>
                 </div>
@@ -100,7 +100,7 @@ import { RoleDetail, ModulePermissions, Permission } from '../../../../domain/mo
                 <button 
                   type="button" 
                   (click)="toggleModule(group)"
-                  class="text-[11px] font-bold text-[#0E6E68] hover:text-[#063B39] hover:underline transition-colors border-none bg-transparent cursor-pointer">
+                  class="text-[11px] font-bold text-[#087F73] hover:text-[#063B39] hover:underline transition-colors border-none bg-transparent cursor-pointer">
                   {{ isModuleAllSelected(group) ? 'Deselect Module' : 'Select All in Module' }}
                 </button>
               </div>
@@ -111,19 +111,19 @@ import { RoleDetail, ModulePermissions, Permission } from '../../../../domain/mo
                   <label 
                     class="flex items-start gap-2.5 p-2.5 rounded-xl border transition-all cursor-pointer select-none"
                     [ngClass]="selectedPermissionIds().has(perm.id) 
-                      ? 'bg-[#3FA79B]/10 border-[#3FA79B]/50 shadow-2xs' 
-                      : 'bg-white border-[#DCEBE7] hover:bg-slate-50'">
+                      ? 'bg-[#DDF7F2]/40 border-[#087F73]/50 shadow-2xs' 
+                      : 'bg-white border-[#DDE9E6] hover:bg-slate-50'">
                     <input 
                       type="checkbox" 
                       [checked]="selectedPermissionIds().has(perm.id)"
                       (change)="togglePermission(perm.id)"
-                      class="w-4 h-4 mt-0.5 text-[#0E6E68] rounded-md border-slate-300 focus:ring-[#0E6E68]"
+                      class="w-4 h-4 mt-0.5 text-[#087F73] rounded-md border-slate-300 focus:ring-[#087F73]"
                     />
                     <div class="flex-1 min-w-0">
-                      <p class="text-xs font-bold text-[#063B39] leading-tight">{{ perm.name }}</p>
+                      <p class="text-xs font-bold text-[#102A2A] leading-tight">{{ perm.name }}</p>
                       <p class="text-[10px] font-mono text-slate-400 mt-0.5 truncate">{{ perm.code }}</p>
                       @if (perm.description) {
-                        <p class="text-[10px] text-slate-500 mt-1 leading-snug line-clamp-2">{{ perm.description }}</p>
+                        <p class="text-[10px] text-[#718686] mt-1 leading-snug line-clamp-2">{{ perm.description }}</p>
                       }
                     </div>
                   </label>
@@ -134,16 +134,16 @@ import { RoleDetail, ModulePermissions, Permission } from '../../../../domain/mo
           }
 
           @if (filteredModuleGroups().length === 0) {
-            <div class="p-8 text-center bg-white rounded-2xl border border-[#DCEBE7]">
+            <div class="p-8 text-center bg-white rounded-2xl border border-[#DDE9E6]">
               <span class="material-symbols-outlined text-3xl text-slate-400">search_off</span>
-              <p class="text-xs font-bold text-[#063B39] mt-2">No permissions matched "{{ searchFilter }}"</p>
+              <p class="text-xs font-bold text-[#102A2A] mt-2">No permissions matched "{{ searchFilter }}"</p>
             </div>
           }
         </div>
 
         <!-- Footer Actions -->
-        <div class="p-4 sm:p-5 border-t border-[#DCEBE7] bg-white flex items-center justify-between shrink-0">
-          <span class="text-xs text-slate-500 font-medium hidden sm:inline">
+        <div class="p-4 sm:p-5 border-t border-[#DDE9E6] bg-white flex items-center justify-between shrink-0">
+          <span class="text-xs text-[#718686] font-medium hidden sm:inline">
             Changes will take effect upon the user's next API request.
           </span>
 
@@ -151,14 +151,14 @@ import { RoleDetail, ModulePermissions, Permission } from '../../../../domain/mo
             <button 
               type="button" 
               (click)="closeModal.emit()"
-              class="px-4 py-2.5 text-xs font-bold text-slate-600 hover:bg-slate-100 rounded-xl transition-colors cursor-pointer border-none bg-transparent">
+              class="workora-btn-secondary text-xs px-4 py-2.5">
               Cancel
             </button>
             <button 
               type="button" 
               (click)="onSave()"
               [disabled]="isSubmitting"
-              class="inline-flex items-center gap-2 px-6 py-2.5 rounded-xl bg-[#0E6E68] hover:bg-[#063B39] text-white text-xs font-bold shadow-md hover:shadow-lg disabled:opacity-50 transition-all cursor-pointer border-none">
+              class="workora-btn-primary text-xs px-6 py-2.5 shadow-md flex items-center gap-2 disabled:opacity-50 cursor-pointer">
               @if (isSubmitting) {
                 <span class="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
                 <span>Saving Permissions...</span>

@@ -1,4 +1,4 @@
-﻿using MediatR;
+using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Workora.Application.Features.Helpdesk.Commands.AddTicketComment;
@@ -33,16 +33,13 @@ public class HelpdeskController : ControllerBase
     }
 
     /// <summary>
-    /// Lists company support tickets with filtering options.
+    /// Lists company support tickets with dynamic pagination and filtering options.
     /// </summary>
     [HttpGet]
     [Authorize(Policy = "helpdesk.view")]
-    public async Task<ApiResponse<List<HelpdeskTicketDto>>> GetTickets(
-        [FromQuery] int? companyId,
-        [FromQuery] TicketStatus? status,
-        [FromQuery] TicketCategory? category,
-        [FromQuery] TicketPriority? priority)
-        => await _mediator.Send(new ListHelpdeskTicketsQuery(companyId, status, category, priority));
+    public async Task<ApiResponse<PagedResponse<HelpdeskTicketDto>>> GetTickets([FromQuery] ListHelpdeskTicketsQuery query)
+        => await _mediator.Send(query);
+
 
     /// <summary>
     /// Gets tickets raised by the currently authenticated employee.

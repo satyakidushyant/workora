@@ -1,4 +1,4 @@
-﻿using MediatR;
+using MediatR;
 using Workora.Application.Common.Exceptions;
 using Workora.Application.Common.Interfaces;
 using Workora.Application.Features.Authentication.DTOs;
@@ -18,6 +18,8 @@ public class GetMyProfileQueryHandler : IRequestHandler<GetMyProfileQuery, ApiRe
     private readonly IUserRepository _userRepository;
     private readonly IEmployeeRepository _employeeRepository;
     private readonly IPermissionRepository _permissionRepository;
+    private readonly ITenantResolutionService _tenantResolutionService;
+    private readonly ICompanyRepository _companyRepository;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="GetMyProfileQueryHandler"/> class.
@@ -26,16 +28,22 @@ public class GetMyProfileQueryHandler : IRequestHandler<GetMyProfileQuery, ApiRe
     /// <param name="userRepository">The user repository.</param>
     /// <param name="employeeRepository">The employee repository.</param>
     /// <param name="permissionRepository">The permission repository.</param>
+    /// <param name="tenantResolutionService">The tenant resolution service.</param>
+    /// <param name="companyRepository">The company repository.</param>
     public GetMyProfileQueryHandler(
         ICurrentUserService currentUserService,
         IUserRepository userRepository,
         IEmployeeRepository employeeRepository,
-        IPermissionRepository permissionRepository)
+        IPermissionRepository permissionRepository,
+        ITenantResolutionService tenantResolutionService,
+        ICompanyRepository companyRepository)
     {
         _currentUserService = currentUserService;
         _userRepository = userRepository;
         _employeeRepository = employeeRepository;
         _permissionRepository = permissionRepository;
+        _tenantResolutionService = tenantResolutionService;
+        _companyRepository = companyRepository;
     }
 
     /// <summary>
@@ -108,6 +116,31 @@ public class GetMyProfileQueryHandler : IRequestHandler<GetMyProfileQuery, ApiRe
                     companyId = employee.Branch.CompanyId;
                     companyName = employee.Branch.Company?.Name;
                     companyCode = employee.Branch.Company?.Code;
+                }
+            }
+        }
+
+        if (!companyId.HasValue)
+        {
+            var resolvedCompanyId = await _tenantResolutionService.GetCurrentCompanyIdAsync(null, cancellationToken);
+            if (resolvedCompanyId.HasValue && resolvedCompanyId.Value > 0)
+            {
+                var comp = await _companyRepository.GetByIdAsync(resolvedCompanyId.Value, cancellationToken);
+                if (comp != null)
+                {
+                    companyId = comp.Id;
+                    companyName = comp.Name;
+                    companyCode = comp.Code;
+                }
+            }
+            else
+            {
+                var defaultComp = await _companyRepository.GetDefaultCompanyAsync(cancellationToken);
+                if (defaultComp != null)
+                {
+                    companyId = defaultComp.Id;
+                    companyName = defaultComp.Name;
+                    companyCode = defaultComp.Code;
                 }
             }
         }

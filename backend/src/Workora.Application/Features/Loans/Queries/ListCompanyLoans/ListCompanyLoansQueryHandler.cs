@@ -1,4 +1,4 @@
-﻿using AutoMapper;
+using AutoMapper;
 using MediatR;
 using Workora.Application.Features.Loans.DTOs;
 using Workora.Domain.Enums;
@@ -10,7 +10,7 @@ namespace Workora.Application.Features.Loans.Queries.ListCompanyLoans;
 /// <summary>
 /// Handler for <see cref="ListCompanyLoansQuery"/>.
 /// </summary>
-public class ListCompanyLoansQueryHandler : IRequestHandler<ListCompanyLoansQuery, ApiResponse<List<LoanDto>>>
+public class ListCompanyLoansQueryHandler : IRequestHandler<ListCompanyLoansQuery, ApiResponse<PagedResponse<LoanDto>>>
 {
     private readonly ILoanRepository _loanRepository;
     private readonly IMapper _mapper;
@@ -25,10 +25,23 @@ public class ListCompanyLoansQueryHandler : IRequestHandler<ListCompanyLoansQuer
     }
 
     /// <inheritdoc />
-    public async Task<ApiResponse<List<LoanDto>>> Handle(ListCompanyLoansQuery request, CancellationToken ct)
+    public async Task<ApiResponse<PagedResponse<LoanDto>>> Handle(ListCompanyLoansQuery request, CancellationToken ct)
     {
         var loans = await _loanRepository.GetCompanyLoansAsync(request.CompanyId, request.Status, ct);
-        var dtos = _mapper.Map<List<LoanDto>>(loans);
-        return ApiResponse<List<LoanDto>>.Success(dtos);
+        var filtered = loans
+            .Where(l => string.IsNullOrWhiteSpace(request.SearchTerm) ||
+                        l.Reason.Contains(request.SearchTerm, StringComparison.OrdinalIgnoreCase))
+            .ToList();
+
+        var totalCount = filtered.Count;
+        var pagedLoans = filtered
+            .Skip((request.PageNumber - 1) * request.PageSize)
+            .Take(request.PageSize)
+            .ToList();
+
+        var dtos = _mapper.Map<IReadOnlyList<LoanDto>>(pagedLoans);
+        var pagedResponse = new PagedResponse<LoanDto>(dtos, totalCount, request.PageNumber, request.PageSize);
+        return ApiResponse<PagedResponse<LoanDto>>.Success(pagedResponse);
     }
 }
+

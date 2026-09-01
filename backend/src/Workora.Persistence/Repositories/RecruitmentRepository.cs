@@ -82,7 +82,7 @@ public class RecruitmentRepository : GenericRepository<JobPosting>, IRecruitment
         if (!string.IsNullOrWhiteSpace(searchTerm))
         {
             var term = searchTerm.Trim().ToLower();
-            query = query.Where(c => c.FirstName.ToLower().Contains(term) || c.LastName.ToLower().Contains(term) || EF.Property<string>(c, "Email").ToLower().Contains(term));
+            query = query.Where(c => c.FirstName.ToLower().Contains(term) || c.LastName.ToLower().Contains(term) || ((string)(object)c.Email).ToLower().Contains(term));
         }
 
         return await query
@@ -119,7 +119,7 @@ public class RecruitmentRepository : GenericRepository<JobPosting>, IRecruitment
         if (!string.IsNullOrWhiteSpace(searchTerm))
         {
             var term = searchTerm.Trim().ToLower();
-            query = query.Where(c => c.FirstName.ToLower().Contains(term) || c.LastName.ToLower().Contains(term) || EF.Property<string>(c, "Email").ToLower().Contains(term));
+            query = query.Where(c => c.FirstName.ToLower().Contains(term) || c.LastName.ToLower().Contains(term) || ((string)(object)c.Email).ToLower().Contains(term));
         }
 
         return await query.CountAsync(ct);

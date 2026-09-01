@@ -9,6 +9,11 @@ export interface UserDto {
   lastName: string;
   fullName: string;
   employeeId?: number | null;
+  employeeCode?: string | null;
+  departmentName?: string | null;
+  companyId?: number | null;
+  companyName?: string | null;
+  companyCode?: string | null;
   isActive: boolean;
   createdAt: string;
   roles?: string[];
@@ -33,7 +38,9 @@ export interface CreateUserRequestDto {
   lastName: string;
   password: string;
   employeeId?: number | null;
+  roleId?: number | null;
 }
+
 
 /**
  * Payload DTO for updating a user profile.

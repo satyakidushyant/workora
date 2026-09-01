@@ -49,6 +49,7 @@ export class UserApiRepository implements IUserRepository {
       if (params.pageNumber) httpParams = httpParams.set('pageNumber', params.pageNumber.toString());
       if (params.pageSize) httpParams = httpParams.set('pageSize', params.pageSize.toString());
       if (params.searchTerm) httpParams = httpParams.set('searchTerm', params.searchTerm);
+      if (params.companyId) httpParams = httpParams.set('companyId', params.companyId.toString());
       if (params.isActive !== undefined && params.isActive !== null) {
         httpParams = httpParams.set('isActive', params.isActive.toString());
       }
@@ -111,8 +112,10 @@ export class UserApiRepository implements IUserRepository {
       firstName: params.firstName,
       lastName: params.lastName,
       password: params.password,
-      employeeId: params.employeeId
+      employeeId: params.employeeId ?? null,
+      roleId: params.roleId ?? null
     };
+
 
     return this.http.post<ApiResponse<UserDto>>(this.baseUrl, payload).pipe(
       map(response => {

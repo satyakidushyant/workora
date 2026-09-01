@@ -52,6 +52,9 @@ export class EmployeeApiRepository implements IEmployeeRepository {
       if (params.designationId) httpParams = httpParams.set('designationId', params.designationId.toString());
       if (params.branchId) httpParams = httpParams.set('branchId', params.branchId.toString());
       if (params.status) httpParams = httpParams.set('status', params.status);
+      if (params.companyId && !isNaN(Number(params.companyId)) && Number(params.companyId) > 0) {
+        httpParams = httpParams.set('companyId', params.companyId.toString());
+      }
     }
 
     return this.http.get<ApiResponse<PagedResponse<EmployeeDto>>>(this.baseUrl, { params: httpParams }).pipe(

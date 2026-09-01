@@ -1,4 +1,4 @@
-﻿using FluentValidation;
+using FluentValidation;
 using Workora.Domain.Enums;
 using Workora.Domain.Extensions;
 using MediatR;
@@ -65,11 +65,17 @@ public class UpdateOrganizationCommandHandler : IRequestHandler<UpdateOrganizati
             Phone = company.Phone,
             Website = company.Website,
             LogoUrl = company.LogoUrl,
+            Address = company.Address,
+            FiscalYearStartMonth = company.FiscalYearStartMonth,
             Currency = company.Currency,
+            SubscriptionPlan = "Growth",
+            Industry = "Information Technology",
+            PrimaryContactName = company.Name + " Admin",
             IsActive = company.IsActive,
             CreatedAt = company.CreatedAt
         };
 
         return ApiResponse<OrganizationDto>.Success(dto, ResponseMessage.OrganizationUpdated.GetDescription());
+
     }
 }

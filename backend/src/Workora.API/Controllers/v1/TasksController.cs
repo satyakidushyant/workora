@@ -1,4 +1,4 @@
-﻿using MediatR;
+using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Workora.Application.Features.Tasks.Commands.AssignTask;
@@ -32,12 +32,13 @@ public class TasksController : ControllerBase
     }
 
     /// <summary>
-    /// Gets company tasks with optional status and priority filters.
+    /// Gets company tasks with dynamic pagination and optional status/priority filters.
     /// </summary>
     [HttpGet]
     [Authorize(Policy = "tasks.view")]
-    public async Task<ApiResponse<List<TaskItemDto>>> GetTasks([FromQuery] int? companyId, [FromQuery] TaskItemStatus? status, [FromQuery] TaskPriority? priority)
-        => await _mediator.Send(new ListTeamTasksQuery(companyId, status, priority));
+    public async Task<ApiResponse<PagedResponse<TaskItemDto>>> GetTasks([FromQuery] ListTeamTasksQuery query)
+        => await _mediator.Send(query);
+
 
     /// <summary>
     /// Gets tasks assigned to the currently authenticated employee.

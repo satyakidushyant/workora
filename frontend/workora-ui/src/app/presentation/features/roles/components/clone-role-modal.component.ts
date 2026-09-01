@@ -18,20 +18,20 @@ import { Role, CloneRoleParams } from '../../../../domain/models/role-permission
         <!-- Header -->
         <div class="workora-modal-header">
           <div class="flex items-center gap-3">
-            <div class="w-10 h-10 rounded-xl bg-[#3FA79B]/15 text-[#0E6E68] flex items-center justify-center font-bold">
-              <span class="material-symbols-outlined">content_copy</span>
+            <div class="w-10 h-10 rounded-2xl bg-[#DDF7F2] text-[#087F73] flex items-center justify-center font-extrabold shadow-2xs shrink-0">
+              <span class="material-symbols-outlined text-xl">content_copy</span>
             </div>
             <div>
-              <h3 class="text-base font-extrabold text-[#063B39] font-heading">
+              <h3 class="text-base font-extrabold text-[#102A2A] font-heading">
                 Clone Role: {{ role?.name }}
               </h3>
-              <p class="text-xs text-slate-500">Duplicate this role and all of its assigned permissions.</p>
+              <p class="text-xs text-[#718686]">Duplicate this role and all assigned permissions.</p>
             </div>
           </div>
           <button 
             type="button" 
             (click)="closeModal.emit()"
-            class="text-slate-400 hover:text-slate-600 rounded-lg p-1.5 transition-colors border-none bg-transparent cursor-pointer">
+            class="text-slate-400 hover:text-[#102A2A] rounded-xl p-1.5 transition-colors border-none bg-transparent cursor-pointer">
             <span class="material-symbols-outlined text-xl">close</span>
           </button>
         </div>

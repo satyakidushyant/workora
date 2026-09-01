@@ -10,7 +10,9 @@ import {
   ElementRef, 
   inject, 
   ChangeDetectionStrategy,
-  ViewChild
+  ChangeDetectorRef,
+  ViewChild,
+  OnDestroy
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR, FormsModule } from '@angular/forms';
@@ -23,6 +25,14 @@ export interface WorkoraSelectOption<T = any> {
   badge?: string;
   badgeClass?: string;
   disabled?: boolean;
+}
+
+export interface DropdownPosition {
+  top: number;
+  bottom: number;
+  left: number;
+  width: number;
+  isUpwards: boolean;
 }
 
 @Component({
@@ -52,7 +62,7 @@ export interface WorkoraSelectOption<T = any> {
           'bg-[#F6FAF9] border-[#DDE9E6] hover:border-[#087F73] hover:bg-[#F0FAF8]': !isOpen() && !hasError,
           'bg-red-50/50 border-red-300 ring-2 ring-red-200': hasError
         }"
-        class="w-full flex items-center justify-between gap-2.5 px-3.5 py-2.5 rounded-2xl border text-xs font-semibold text-[#102A2A] transition-all cursor-pointer outline-none text-left min-h-[42px]">
+        class="w-full flex items-center justify-between gap-2.5 px-3.5 h-10 rounded-xl border text-xs font-semibold text-[#102A2A] transition-all cursor-pointer outline-none text-left">
         
         <div class="flex items-center gap-2 overflow-hidden flex-1 min-w-0">
           @if (loading) {
@@ -72,7 +82,7 @@ export interface WorkoraSelectOption<T = any> {
         </div>
 
         <div class="flex items-center gap-1 shrink-0">
-          @if (clearable && selectedValue !== null && selectedValue !== undefined && !disabled) {
+          @if (clearable && selectedValue() !== null && selectedValue() !== undefined && !disabled) {
             <span 
               (click)="onClear($event)"
               class="material-symbols-outlined text-sm text-slate-400 hover:text-rose-500 p-0.5 rounded-md transition-colors cursor-pointer"
@@ -88,11 +98,13 @@ export interface WorkoraSelectOption<T = any> {
         </div>
       </button>
 
-      <!-- Dropdown Menu Panel -->
+      <!-- Dropdown Menu Panel (Teleported to document.body on open to avoid modal backdrop/transform clipping) -->
       @if (isOpen()) {
         <div 
-          [ngClass]="openUpwards() ? 'bottom-full mb-1.5' : 'top-full mt-1.5'"
-          class="absolute left-0 right-0 z-[9999] bg-white border border-[#DDE9E6] rounded-2xl shadow-xl p-1.5 flex flex-col animate-in fade-in zoom-in-95 duration-150"
+          #menuPanel
+          (click)="$event.stopPropagation()"
+          [ngStyle]="dropdownStyles()"
+          class="fixed z-[2147483647] bg-white border border-[#DDE9E6] rounded-xl shadow-2xl p-1.5 flex flex-col animate-in fade-in zoom-in-95 duration-150 min-w-[160px]"
           [class]="dropdownClass">
           
           <!-- Search Bar (Optional) -->
@@ -130,7 +142,7 @@ export interface WorkoraSelectOption<T = any> {
                 {{ emptyText }}
               </div>
             } @else {
-              @for (opt of filteredOptions(); track opt.value; let idx = $index) {
+              @for (opt of filteredOptions(); track (opt.value !== null && opt.value !== undefined ? (opt.value + '_' + idx) : idx); let idx = $index) {
                 <div
                   (click)="selectOption(opt, $event)"
                   [ngClass]="{
@@ -175,12 +187,14 @@ export interface WorkoraSelectOption<T = any> {
     </div>
   `
 })
-export class WorkoraSelectComponent implements ControlValueAccessor {
+export class WorkoraSelectComponent implements ControlValueAccessor, OnDestroy {
   private readonly elementRef = inject(ElementRef);
+  private readonly cdr = inject(ChangeDetectorRef);
 
   @ViewChild('triggerBtn') triggerBtn?: ElementRef<HTMLButtonElement>;
   @ViewChild('searchInput') searchInput?: ElementRef<HTMLInputElement>;
   @ViewChild('optionsContainer') optionsContainer?: ElementRef<HTMLDivElement>;
+  @ViewChild('menuPanel') menuPanel?: ElementRef<HTMLDivElement>;
 
   @Input() placeholder = 'Select an option';
   @Input() emptyText = 'No options available';
@@ -231,14 +245,14 @@ export class WorkoraSelectComponent implements ControlValueAccessor {
     });
   });
 
-  selectedValue: any = null;
+  readonly selectedValue = signal<any>(null);
   readonly isOpen = signal<boolean>(false);
-  readonly openUpwards = signal<boolean>(false);
+  readonly dropdownPosition = signal<DropdownPosition | null>(null);
   readonly searchTerm = signal<string>('');
   readonly highlightedIndex = signal<number>(-1);
 
   readonly selectedOption = computed<WorkoraSelectOption | null>(() => {
-    const val = this.selectedValue;
+    const val = this.selectedValue();
     if (val === null || val === undefined) return null;
     const opts = this.normalizedOptions();
     return opts.find(o => o.value === val || String(o.value) === String(val)) || null;
@@ -254,11 +268,45 @@ export class WorkoraSelectComponent implements ControlValueAccessor {
     );
   });
 
+  readonly dropdownStyles = computed(() => {
+    if (!this.isOpen()) return {};
+    const pos = this.dropdownPosition();
+    if (!pos) return {};
+
+    const styles: Record<string, string> = {
+      position: 'fixed',
+      left: `${pos.left}px`,
+      width: `${pos.width}px`,
+      minWidth: `${pos.width}px`,
+      zIndex: '2147483647'
+    };
+
+    if (pos.isUpwards) {
+      styles['bottom'] = `${window.innerHeight - pos.top + 6}px`;
+    } else {
+      styles['top'] = `${pos.bottom + 6}px`;
+    }
+
+    return styles;
+  });
+
   private onChange: (value: any) => void = () => {};
   private onTouched: () => void = () => {};
 
+  private onScrollOrResizeCapture = (event: Event): void => {
+    if (this.isOpen()) {
+      this.updateDropdownPosition();
+    }
+  };
+
+  ngOnDestroy(): void {
+    this.detachScrollListeners();
+    this.removeMenuFromDocument();
+  }
+
   writeValue(value: any): void {
-    this.selectedValue = value;
+    this.selectedValue.set(value);
+    this.cdr.markForCheck();
   }
 
   registerOnChange(fn: (value: any) => void): void {
@@ -271,6 +319,7 @@ export class WorkoraSelectComponent implements ControlValueAccessor {
 
   setDisabledState?(isDisabled: boolean): void {
     this.disabled = isDisabled;
+    this.cdr.markForCheck();
   }
 
   toggleOpen(event: Event): void {
@@ -285,10 +334,20 @@ export class WorkoraSelectComponent implements ControlValueAccessor {
   }
 
   openDropdown(): void {
-    this.checkDropdownPosition();
     this.isOpen.set(true);
     this.searchTerm.set('');
     this.highlightedIndex.set(-1);
+
+    // Force Angular to render the view child in template before moving to document.body
+    this.cdr.detectChanges();
+
+    if (this.menuPanel?.nativeElement && this.menuPanel.nativeElement.parentNode !== document.body) {
+      document.body.appendChild(this.menuPanel.nativeElement);
+    }
+
+    this.updateDropdownPosition();
+    this.attachScrollListeners();
+    this.cdr.markForCheck();
 
     if (this.searchable) {
       setTimeout(() => {
@@ -299,48 +358,85 @@ export class WorkoraSelectComponent implements ControlValueAccessor {
 
   closeDropdown(): void {
     if (this.isOpen()) {
+      this.detachScrollListeners();
+      this.removeMenuFromDocument();
       this.isOpen.set(false);
       this.onTouched();
+      this.cdr.markForCheck();
     }
   }
 
-  private checkDropdownPosition(): void {
-    if (this.placement === 'down') {
-      this.openUpwards.set(false);
-      return;
+  private removeMenuFromDocument(): void {
+    if (this.menuPanel?.nativeElement && this.menuPanel.nativeElement.parentNode === document.body) {
+      document.body.removeChild(this.menuPanel.nativeElement);
     }
-    if (this.placement === 'up') {
-      this.openUpwards.set(true);
-      return;
-    }
+  }
 
+  private attachScrollListeners(): void {
+    if (typeof window !== 'undefined') {
+      window.addEventListener('scroll', this.onScrollOrResizeCapture, true);
+      window.addEventListener('resize', this.onScrollOrResizeCapture, true);
+    }
+  }
+
+  private detachScrollListeners(): void {
+    if (typeof window !== 'undefined') {
+      window.removeEventListener('scroll', this.onScrollOrResizeCapture, true);
+      window.removeEventListener('resize', this.onScrollOrResizeCapture, true);
+    }
+  }
+
+  private updateDropdownPosition(): void {
     if (!this.triggerBtn) return;
     const rect = this.triggerBtn.nativeElement.getBoundingClientRect();
     const spaceBelow = window.innerHeight - rect.bottom;
     const spaceAbove = rect.top;
-    this.openUpwards.set(spaceBelow < 200 && spaceAbove > 220);
+
+    let isUpwards = false;
+    if (this.placement === 'up') {
+      isUpwards = true;
+    } else if (this.placement === 'down') {
+      isUpwards = false;
+    } else {
+      isUpwards = spaceBelow < 240 && spaceAbove > 240;
+    }
+
+    const width = rect.width;
+    const maxLeft = Math.max(12, window.innerWidth - width - 16);
+    const left = Math.min(Math.max(12, rect.left), maxLeft);
+
+    this.dropdownPosition.set({
+      top: rect.top,
+      bottom: rect.bottom,
+      left,
+      width,
+      isUpwards
+    });
   }
 
   selectOption(opt: WorkoraSelectOption, event?: Event): void {
     if (event) event.stopPropagation();
     if (opt.disabled) return;
 
-    this.selectedValue = opt.value;
+    this.selectedValue.set(opt.value);
     this.onChange(opt.value);
     this.selectionChange.emit(opt.value);
     this.closeDropdown();
     this.triggerBtn?.nativeElement.focus();
+    this.cdr.markForCheck();
   }
 
   onClear(event: Event): void {
     event.stopPropagation();
-    this.selectedValue = null;
+    this.selectedValue.set(null);
     this.onChange(null);
     this.selectionChange.emit(null);
+    this.cdr.markForCheck();
   }
 
   isSelected(val: any): boolean {
-    return this.selectedValue === val || (this.selectedValue !== null && String(this.selectedValue) === String(val));
+    const current = this.selectedValue();
+    return current === val || (current !== null && current !== undefined && String(current) === String(val));
   }
 
   onSearchChange(term: string): void {
@@ -411,12 +507,27 @@ export class WorkoraSelectComponent implements ControlValueAccessor {
     if (next < 0) next = opts.length - 1;
     if (next >= opts.length) next = 0;
     this.highlightedIndex.set(next);
+
+    setTimeout(() => {
+      if (this.optionsContainer?.nativeElement) {
+        const container = this.optionsContainer.nativeElement;
+        const items = container.children;
+        if (items[next]) {
+          (items[next] as HTMLElement).scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+        }
+      }
+    }, 10);
   }
 
   @HostListener('document:click', ['$event'])
   onDocumentClick(event: MouseEvent): void {
-    if (!this.elementRef.nativeElement.contains(event.target)) {
+    if (!this.isOpen()) return;
+    const target = event.target as Node;
+    const insideHost = this.elementRef.nativeElement.contains(target);
+    const insideMenu = this.menuPanel?.nativeElement.contains(target);
+    if (!insideHost && !insideMenu) {
       this.closeDropdown();
     }
   }
 }
+

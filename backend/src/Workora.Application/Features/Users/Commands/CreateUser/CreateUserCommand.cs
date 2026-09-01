@@ -12,10 +12,13 @@ namespace Workora.Application.Features.Users.Commands.CreateUser;
 /// <param name="LastName">The user's last name.</param>
 /// <param name="Password">The initial plain-text password for the user.</param>
 /// <param name="EmployeeId">Optional linked employee ID.</param>
+/// <param name="RoleId">Optional role ID to assign.</param>
 public record CreateUserCommand(
     string Email,
     string FirstName,
     string LastName,
     string Password,
-    int? EmployeeId = null
+    int? EmployeeId = null,
+    int? RoleId = null
 ) : IRequest<ApiResponse<UserDto>>;
+

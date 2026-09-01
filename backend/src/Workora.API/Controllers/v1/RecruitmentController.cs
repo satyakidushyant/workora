@@ -1,4 +1,4 @@
-﻿using MediatR;
+using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Workora.Application.Features.Recruitment.Commands.AcceptJobOffer;
@@ -171,19 +171,15 @@ public class RecruitmentController : ControllerBase
         => await _mediator.Send(command);
 
     /// <summary>
-    /// Gets a list of scheduled interviews.
+    /// Gets a paginated list of scheduled interviews with dynamic filtering options.
     /// </summary>
-    /// <param name="interviewerId">Optional interviewer ID filter.</param>
-    /// <param name="candidateId">Optional candidate ID filter.</param>
-    /// <param name="status">Optional status filter.</param>
-    /// <returns>A list of interviews.</returns>
+    /// <param name="query">Pagination and filtering parameters.</param>
+    /// <returns>A paginated list of interviews.</returns>
     [HttpGet("interviews")]
     [Authorize(Policy = "recruitment.view")]
-    public async Task<ApiResponse<IReadOnlyList<InterviewDto>>> GetInterviews(
-        [FromQuery] int? interviewerId = null,
-        [FromQuery] int? candidateId = null,
-        [FromQuery] InterviewStatus? status = null)
-        => await _mediator.Send(new GetInterviewsListQuery(interviewerId, candidateId, status));
+    public async Task<ApiResponse<PagedResponse<InterviewDto>>> GetInterviews([FromQuery] GetInterviewsListQuery query)
+        => await _mediator.Send(query);
+
 
     /// <summary>
     /// Submits qualitative feedback and rating score for an interview.

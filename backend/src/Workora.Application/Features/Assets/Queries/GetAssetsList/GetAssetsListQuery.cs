@@ -1,19 +1,29 @@
-﻿using AutoMapper;
 using MediatR;
+using Workora.Application.Common.Models;
 using Workora.Application.Features.Assets.DTOs;
 using Workora.Domain.Enums;
-using Workora.Domain.Interfaces;
 using Workora.Shared.Responses;
 
 namespace Workora.Application.Features.Assets.Queries.GetAssetsList;
 
 /// <summary>
-/// Query to retrieve a paginated list of assets.
+/// Query to retrieve a paginated list of assets with dynamic pagination and filtering.
 /// </summary>
-public record GetAssetsListQuery(
-    int PageNumber = 1,
-    int PageSize = 25,
-    int? CompanyId = null,
-    string? Category = null,
-    AssetStatus? Status = null,
-    string? SearchTerm = null) : IRequest<ApiResponse<PagedResponse<AssetDto>>>;
+public record GetAssetsListQuery : PagedQueryBase, IRequest<ApiResponse<PagedResponse<AssetDto>>>
+{
+    /// <summary>
+    /// Gets or init optional filter for target company ID.
+    /// </summary>
+    public int? CompanyId { get; init; }
+
+    /// <summary>
+    /// Gets or init optional filter for asset category.
+    /// </summary>
+    public string? Category { get; init; }
+
+    /// <summary>
+    /// Gets or init optional filter for asset status.
+    /// </summary>
+    public AssetStatus? Status { get; init; }
+}
+

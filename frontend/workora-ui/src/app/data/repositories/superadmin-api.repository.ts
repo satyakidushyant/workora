@@ -7,15 +7,18 @@ import {
   TenantOrganization,
   SubscriptionPlan,
   SuperAdminMetrics,
-  RegisterOrganizationParams
+  RegisterOrganizationParams,
+  UpdateOrganizationParams
 } from '../../domain/models/superadmin.model';
 import { ApiResponse, PagedResponse } from '../../domain/models/api-response.model';
 import {
   OrganizationDto,
   SubscriptionPlanDto,
   SuperAdminMetricsDto,
-  RegisterOrganizationRequestDto
+  RegisterOrganizationRequestDto,
+  UpdateOrganizationRequestDto
 } from '../dtos/superadmin.dto';
+
 import { SuperAdminMapper } from '../mappers/superadmin.mapper';
 import { environment } from '../../../environments/environment';
 
@@ -84,6 +87,30 @@ export class SuperAdminApiRepository implements ISuperAdminRepository {
       })
     );
   }
+
+  updateOrganization(id: number, params: UpdateOrganizationParams): Observable<TenantOrganization> {
+    const payload: UpdateOrganizationRequestDto = {
+      name: params.name,
+      registrationNumber: params.registrationNumber || null,
+      taxId: params.taxId || null,
+      email: params.email || null,
+      phone: params.phone || null,
+      website: params.website || null,
+      fiscalYearStartMonth: params.fiscalYearStartMonth || 1,
+      currency: (params.currency || 'INR').trim().toUpperCase(),
+      address: params.address || null
+    };
+
+    return this.http.put<ApiResponse<OrganizationDto>>(`${this.baseUrl}/organizations/${id}`, payload).pipe(
+      map(response => {
+        if (!response.isSuccess || !response.data) {
+          throw new Error(response.message || 'Failed to update organization profile.');
+        }
+        return SuperAdminMapper.fromOrgDto(response.data);
+      })
+    );
+  }
+
 
   suspendOrganization(id: number): Observable<boolean> {
     return this.http.patch<ApiResponse<boolean>>(`${this.baseUrl}/organizations/${id}/suspend`, {}).pipe(

@@ -1,10 +1,13 @@
-import { Component, Output, EventEmitter, inject, signal, ChangeDetectionStrategy, HostListener } from '@angular/core';
+import { Component, Input, Output, EventEmitter, inject, signal, ChangeDetectionStrategy, HostListener, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { finalize } from 'rxjs/operators';
 import { WorkoraAiApiRepository } from '../../../../data/repositories/workora-ai-api.repository';
 import { AiAssistantResponse } from '../../../../domain/models/workora-ai.model';
 
+/**
+ * Chat message model for Workora AI conversation stream.
+ */
 interface ChatMessage {
   sender: 'user' | 'assistant';
   text: string;
@@ -12,6 +15,10 @@ interface ChatMessage {
   time: Date;
 }
 
+/**
+ * Modal dialog component for Workora AI Copilot assistant.
+ * Supports interactive chat, policy inquiries, leave balance checks, and auto-submitted search prompts.
+ */
 @Component({
   selector: 'app-ai-assistant-modal',
   standalone: true,
@@ -112,7 +119,15 @@ interface ChatMessage {
     </div>
   `
 })
-export class AiAssistantModalComponent {
+export class AiAssistantModalComponent implements OnInit {
+  /**
+   * Optional initial prompt to auto-submit when opening AI modal from topbar search.
+   */
+  @Input() initialPrompt = '';
+
+  /**
+   * Event emitter firing when modal dialog is closed.
+   */
   @Output() closeModal = new EventEmitter<void>();
 
   private readonly aiRepo = inject(WorkoraAiApiRepository);
@@ -127,6 +142,12 @@ export class AiAssistantModalComponent {
       time: new Date()
     }
   ]);
+
+  ngOnInit(): void {
+    if (this.initialPrompt && this.initialPrompt.trim()) {
+      this.sendMessage(this.initialPrompt.trim());
+    }
+  }
 
   @HostListener('document:keydown.escape')
   onEscape(): void {

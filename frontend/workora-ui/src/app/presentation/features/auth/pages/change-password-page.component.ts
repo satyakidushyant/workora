@@ -1,4 +1,4 @@
-import { Component, ElementRef, AfterViewInit, OnDestroy, inject, signal, PLATFORM_ID } from '@angular/core';
+import { Component, ElementRef, AfterViewInit, OnDestroy, inject, signal, computed, PLATFORM_ID } from '@angular/core';
 import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
@@ -7,222 +7,246 @@ import { AuthService } from '../../../../core/services/auth.service';
 import { NotificationService } from '../../../../core/services/notification.service';
 
 /**
- * Workora Change Password & Security Page Component.
- * Clean, modern interface with all notifications and validations delivered via toaster.
+ * Enterprise Workora Account Security & Password Console.
+ * Features live password complexity analysis, real-time match verification, and modern security card layout.
  */
 @Component({
   selector: 'app-change-password-page',
   standalone: true,
   imports: [CommonModule, FormsModule, RouterLink],
   template: `
-    <div class="p-3.5 xs:p-5 sm:p-6 lg:p-8 space-y-4 sm:space-y-6 max-w-7xl 2xl:max-w-8xl mx-auto w-full relative z-10">
+    <div class="p-4 sm:p-6 lg:p-8 max-w-7xl 2xl:max-w-8xl mx-auto space-y-5 sm:space-y-6 w-full">
       
-      <!-- Header Section -->
+      <!-- Top Navigation & Header Section -->
       <div class="security-header">
-        <div class="flex items-center gap-2 text-xs text-[#0E6E68]/70 mb-1">
-          <a routerLink="/dashboard" class="hover:text-[#0E6E68] transition-colors flex items-center gap-1">
+        <div class="flex items-center gap-1.5 text-xs text-[#718686] font-medium mb-1">
+          <a routerLink="/dashboard" class="hover:text-[#087F73] transition-colors flex items-center gap-1 text-slate-500 font-semibold no-underline">
             <span class="material-symbols-outlined text-sm">dashboard</span>
             <span>Dashboard</span>
           </a>
-          <span>/</span>
-          <span class="text-[#063B39] font-bold">Security Settings</span>
+          <span class="text-slate-300">/</span>
+          <span class="text-[#102A2A] font-bold">Account Security</span>
         </div>
-        <h1 class="text-xl xs:text-2xl sm:text-3xl font-extrabold text-[#063B39] tracking-tight font-heading">Account &amp; Password Security</h1>
-        <p class="text-xs sm:text-sm text-slate-600 mt-0.5">Keep your account safe and manage your login credentials.</p>
-      </div>
 
-      <!-- Bento Grid Layout -->
-      <div class="grid grid-cols-12 gap-4 sm:gap-6 security-grid">
-        
-        <!-- Main Update Password Form (8 Columns) -->
-        <div class="col-span-12 lg:col-span-8 space-y-4 sm:space-y-6">
-          <section class="bg-white rounded-3xl p-5 xs:p-6 sm:p-8 border border-[#DCEBE7] shadow-sm workora-card">
-            <div class="flex items-center gap-3 mb-5 sm:mb-6 pb-4 border-b border-[#DCEBE7]">
-              <div class="w-10 h-10 rounded-2xl bg-[#DCEBE7] text-[#0E6E68] flex items-center justify-center shrink-0">
-                <span class="material-symbols-outlined text-2xl">lock_reset</span>
-              </div>
-              <div>
-                <h2 class="text-base sm:text-lg font-bold text-[#063B39] font-heading">Change Your Password</h2>
-                <p class="text-xs text-slate-500">Enter your current password followed by your chosen new password.</p>
-              </div>
-            </div>
-
-            <form class="space-y-4" (ngSubmit)="onSubmit()">
-              <!-- Current Password -->
-              <div class="space-y-1">
-                <label class="text-xs font-bold text-[#063B39]">Current Password</label>
-                <div class="relative flex items-center">
-                  <input 
-                    class="workora-input pl-4 pr-11 !py-2.5 text-xs w-full" 
-                    name="currentPassword"
-                    [(ngModel)]="currentPassword"
-                    placeholder="••••••••••••" 
-                    [type]="showCurrentPassword() ? 'text' : 'password'"
-                    required
-                  />
-                  <button 
-                    class="material-symbols-outlined text-slate-400 hover:text-[#063B39] transition-colors cursor-pointer text-lg absolute right-3.5 flex items-center justify-center border-none bg-transparent" 
-                    type="button"
-                    (click)="showCurrentPassword.set(!showCurrentPassword())"
-                    aria-label="Toggle current password visibility"
-                  >
-                    {{ showCurrentPassword() ? 'visibility_off' : 'visibility' }}
-                  </button>
-                </div>
-              </div>
-
-              <!-- New & Confirm Password Grid -->
-              <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div class="space-y-1">
-                  <label class="text-xs font-bold text-[#063B39]">New Password</label>
-                  <div class="relative flex items-center">
-                    <input 
-                      class="workora-input pl-4 pr-11 !py-2.5 text-xs w-full" 
-                      name="newPassword"
-                      [(ngModel)]="newPassword"
-                      (ngModelChange)="onPasswordChange($event)"
-                      placeholder="Minimum 8 characters" 
-                      [type]="showNewPassword() ? 'text' : 'password'"
-                      required
-                    />
-                    <button 
-                      class="material-symbols-outlined text-slate-400 hover:text-[#063B39] transition-colors cursor-pointer text-lg absolute right-3.5 flex items-center justify-center border-none bg-transparent" 
-                      type="button"
-                      (click)="showNewPassword.set(!showNewPassword())"
-                      aria-label="Toggle new password visibility"
-                    >
-                      {{ showNewPassword() ? 'visibility_off' : 'visibility' }}
-                    </button>
-                  </div>
-                </div>
-
-                <div class="space-y-1">
-                  <label class="text-xs font-bold text-[#063B39]">Confirm New Password</label>
-                  <div class="relative flex items-center">
-                    <input 
-                      class="workora-input pl-4 pr-11 !py-2.5 text-xs w-full" 
-                      name="confirmPassword"
-                      [(ngModel)]="confirmPassword"
-                      placeholder="Repeat new password" 
-                      [type]="showConfirmPassword() ? 'text' : 'password'"
-                      required
-                    />
-                    <button 
-                      class="material-symbols-outlined text-slate-400 hover:text-[#063B39] transition-colors cursor-pointer text-lg absolute right-3.5 flex items-center justify-center border-none bg-transparent" 
-                      type="button"
-                      (click)="showConfirmPassword.set(!showConfirmPassword())"
-                      aria-label="Toggle confirm password visibility"
-                    >
-                      {{ showConfirmPassword() ? 'visibility_off' : 'visibility' }}
-                    </button>
-                  </div>
-                </div>
-              </div>
-
-              <!-- Form Actions -->
-              <div class="pt-4 flex flex-col-reverse sm:flex-row items-stretch sm:items-center justify-end gap-2.5 sm:gap-3 border-t border-[#DCEBE7]">
-                <button 
-                  class="px-4 py-2.5 text-xs font-bold text-slate-600 hover:bg-[#DCEBE7]/30 rounded-xl transition-colors border-none bg-transparent cursor-pointer text-center" 
-                  type="button"
-                  (click)="onCancel()"
-                >
-                  Clear Form
-                </button>
-                <button 
-                  [disabled]="isLoading()"
-                  class="px-6 py-2.5 workora-btn-primary text-xs font-bold shadow-md flex items-center justify-center gap-2 disabled:opacity-75" 
-                  type="submit"
-                >
-                  @if (isLoading()) {
-                    <span class="material-symbols-outlined text-sm animate-spin">progress_activity</span>
-                    <span>Saving password...</span>
-                  } @else {
-                    <span>Update Password</span>
-                    <span class="material-symbols-outlined text-sm">check</span>
-                  }
-                </button>
-              </div>
-            </form>
-          </section>
-
-          <!-- Advanced Security Options -->
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div class="bg-white rounded-3xl p-5 border border-[#DCEBE7] shadow-sm flex items-start gap-3.5 workora-card">
-              <div class="p-3 bg-[#DCEBE7] text-[#0E6E68] rounded-2xl shrink-0">
-                <span class="material-symbols-outlined text-2xl">fingerprint</span>
-              </div>
-              <div>
-                <h3 class="text-xs font-bold text-[#063B39]">Biometric &amp; Passkeys</h3>
-                <p class="text-[11px] text-slate-500 mt-0.5 leading-relaxed">Sign in faster with Touch ID, Windows Hello, or your security key.</p>
-                <button (click)="onPasskeysClick()" class="mt-2 text-[#0E6E68] font-bold text-[11px] flex items-center gap-1 hover:underline cursor-pointer border-none bg-transparent p-0">
-                  Manage Passkeys <span class="material-symbols-outlined text-xs">arrow_forward</span>
-                </button>
-              </div>
-            </div>
-
-            <div class="bg-white rounded-3xl p-5 border border-[#DCEBE7] shadow-sm flex items-start gap-3.5 workora-card">
-              <div class="p-3 bg-[#DCEBE7] text-[#3FA79B] rounded-2xl shrink-0">
-                <span class="material-symbols-outlined text-2xl">devices</span>
-              </div>
-              <div>
-                <h3 class="text-xs font-bold text-[#063B39]">Active Device Sessions</h3>
-                <p class="text-[11px] text-slate-500 mt-0.5 leading-relaxed">You are currently signed in on this desktop browser.</p>
-                <button (click)="onSessionsClick()" class="mt-2 text-[#0E6E68] font-bold text-[11px] flex items-center gap-1 hover:underline cursor-pointer border-none bg-transparent p-0">
-                  View Active Logins <span class="material-symbols-outlined text-xs">arrow_forward</span>
-                </button>
-              </div>
-            </div>
+        <div class="flex items-center gap-3">
+          <div class="p-2.5 rounded-2xl bg-[#DDF7F2] text-[#087F73] flex items-center justify-center shrink-0 shadow-xs">
+            <span class="material-symbols-outlined text-2xl">lock_reset</span>
+          </div>
+          <div>
+            <h1 class="text-2xl sm:text-3xl font-extrabold text-[#102A2A] tracking-tight font-heading">
+              Account Password &amp; Security
+            </h1>
+            <p class="text-xs sm:text-sm text-[#718686] mt-0.5 font-medium">
+              Protect your workspace profile by managing your login credentials and password strength.
+            </p>
           </div>
         </div>
+      </div>
 
-        <!-- Sidebar Checklist & 2FA (4 Columns) -->
-        <div class="col-span-12 lg:col-span-4 space-y-4">
+      <!-- Main Security Container Grid -->
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start security-grid">
+        
+        <!-- Left: Password Form (7 Columns) -->
+        <div class="lg:col-span-7 workora-card p-6 sm:p-8 space-y-6">
+          <div class="flex items-center justify-between border-b border-[#DDE9E6] pb-4">
+            <div>
+              <h2 class="text-base font-extrabold text-[#102A2A] font-heading flex items-center gap-2">
+                <span class="material-symbols-outlined text-[#087F73]">key</span>
+                <span>Change Password</span>
+              </h2>
+              <p class="text-xs text-[#718686] mt-0.5">Enter your existing password and choose a secure new password.</p>
+            </div>
+            <span class="text-[10px] font-extrabold px-2.5 py-0.5 rounded-full bg-[#EBF5F3] text-[#087F73] border border-[#087F73]/20 uppercase">
+              Encrypted
+            </span>
+          </div>
+
+          <form class="space-y-4.5" (ngSubmit)="onSubmit()">
+            
+            <!-- Current Password -->
+            <div class="space-y-1.5">
+              <label class="block text-xs font-bold text-[#102A2A]">
+                Current Password <span class="text-rose-500">*</span>
+              </label>
+              <div class="relative flex items-center">
+                <span class="material-symbols-outlined absolute left-3.5 text-[#087F73] text-base pointer-events-none">lock_open</span>
+                <input 
+                  class="w-full h-10 pl-10 pr-11 bg-[#F6FAF9] text-xs font-semibold text-[#102A2A] rounded-xl border border-[#DDE9E6] focus:border-[#087F73] focus:bg-white outline-none transition-all placeholder:text-[#718686]" 
+                  name="currentPassword"
+                  [(ngModel)]="currentPassword"
+                  placeholder="Enter your current password" 
+                  [type]="showCurrentPassword() ? 'text' : 'password'"
+                  required
+                />
+                <button 
+                  class="material-symbols-outlined text-slate-400 hover:text-[#087F73] transition-colors cursor-pointer text-lg absolute right-3.5 flex items-center justify-center border-none bg-transparent" 
+                  type="button"
+                  (click)="showCurrentPassword.set(!showCurrentPassword())"
+                  aria-label="Toggle current password visibility"
+                >
+                  {{ showCurrentPassword() ? 'visibility_off' : 'visibility' }}
+                </button>
+              </div>
+            </div>
+
+            <!-- New Password -->
+            <div class="space-y-1.5">
+              <div class="flex items-center justify-between">
+                <label class="block text-xs font-bold text-[#102A2A]">
+                  New Password <span class="text-rose-500">*</span>
+                </label>
+                @if (newPassword) {
+                  <span class="text-[10px] font-bold" [ngClass]="strengthLabelColor()">
+                    {{ strengthLabel() }}
+                  </span>
+                }
+              </div>
+
+              <div class="relative flex items-center">
+                <span class="material-symbols-outlined absolute left-3.5 text-[#087F73] text-base pointer-events-none">vpn_key</span>
+                <input 
+                  class="w-full h-10 pl-10 pr-11 bg-[#F6FAF9] text-xs font-semibold text-[#102A2A] rounded-xl border border-[#DDE9E6] focus:border-[#087F73] focus:bg-white outline-none transition-all placeholder:text-[#718686]" 
+                  name="newPassword"
+                  [(ngModel)]="newPassword"
+                  (ngModelChange)="onPasswordChange($event)"
+                  placeholder="At least 8 characters with numbers &amp; symbols" 
+                  [type]="showNewPassword() ? 'text' : 'password'"
+                  required
+                />
+                <button 
+                  class="material-symbols-outlined text-slate-400 hover:text-[#087F73] transition-colors cursor-pointer text-lg absolute right-3.5 flex items-center justify-center border-none bg-transparent" 
+                  type="button"
+                  (click)="showNewPassword.set(!showNewPassword())"
+                  aria-label="Toggle new password visibility"
+                >
+                  {{ showNewPassword() ? 'visibility_off' : 'visibility' }}
+                </button>
+              </div>
+
+              <!-- Password Strength Meter Bar -->
+              @if (newPassword) {
+                <div class="grid grid-cols-4 gap-1.5 pt-1">
+                  <div class="h-1.5 rounded-full transition-all" [ngClass]="strengthScore() >= 1 ? strengthBarColor() : 'bg-slate-200'"></div>
+                  <div class="h-1.5 rounded-full transition-all" [ngClass]="strengthScore() >= 2 ? strengthBarColor() : 'bg-slate-200'"></div>
+                  <div class="h-1.5 rounded-full transition-all" [ngClass]="strengthScore() >= 3 ? strengthBarColor() : 'bg-slate-200'"></div>
+                  <div class="h-1.5 rounded-full transition-all" [ngClass]="strengthScore() >= 4 ? strengthBarColor() : 'bg-slate-200'"></div>
+                </div>
+              }
+            </div>
+
+            <!-- Confirm New Password -->
+            <div class="space-y-1.5">
+              <div class="flex items-center justify-between">
+                <label class="block text-xs font-bold text-[#102A2A]">
+                  Confirm New Password <span class="text-rose-500">*</span>
+                </label>
+                @if (confirmPassword && newPassword) {
+                  <span class="text-[10px] font-bold flex items-center gap-1" [ngClass]="passwordsMatch() ? 'text-emerald-600' : 'text-rose-600'">
+                    <span class="material-symbols-outlined text-[13px]">{{ passwordsMatch() ? 'check_circle' : 'cancel' }}</span>
+                    <span>{{ passwordsMatch() ? 'Passwords match' : 'Passwords do not match' }}</span>
+                  </span>
+                }
+              </div>
+
+              <div class="relative flex items-center">
+                <span class="material-symbols-outlined absolute left-3.5 text-[#087F73] text-base pointer-events-none">verified_user</span>
+                <input 
+                  class="w-full h-10 pl-10 pr-11 bg-[#F6FAF9] text-xs font-semibold text-[#102A2A] rounded-xl border border-[#DDE9E6] focus:border-[#087F73] focus:bg-white outline-none transition-all placeholder:text-[#718686]" 
+                  name="confirmPassword"
+                  [(ngModel)]="confirmPassword"
+                  placeholder="Repeat your new password" 
+                  [type]="showConfirmPassword() ? 'text' : 'password'"
+                  required
+                />
+                <button 
+                  class="material-symbols-outlined text-slate-400 hover:text-[#087F73] transition-colors cursor-pointer text-lg absolute right-3.5 flex items-center justify-center border-none bg-transparent" 
+                  type="button"
+                  (click)="showConfirmPassword.set(!showConfirmPassword())"
+                  aria-label="Toggle confirm password visibility"
+                >
+                  {{ showConfirmPassword() ? 'visibility_off' : 'visibility' }}
+                </button>
+              </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="pt-4 flex items-center justify-end gap-3 border-t border-[#DDE9E6]">
+              <button 
+                type="button"
+                (click)="onCancel()"
+                class="workora-btn-secondary text-xs px-4 py-2.5">
+                Clear
+              </button>
+              
+              <button 
+                type="submit"
+                [disabled]="isLoading() || !isFormValid()"
+                class="workora-btn-primary text-xs px-6 py-2.5 shadow-md flex items-center gap-2 disabled:opacity-50 cursor-pointer">
+                @if (isLoading()) {
+                  <span class="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
+                  <span>Updating...</span>
+                } @else {
+                  <span class="material-symbols-outlined text-base">lock</span>
+                  <span>Update Password</span>
+                }
+              </button>
+            </div>
+
+          </form>
+        </div>
+
+        <!-- Right: Security Checklist & Guidelines (5 Columns) -->
+        <div class="lg:col-span-5 space-y-4">
           
-          <!-- Password Guidance Checklist -->
-          <section class="bg-white rounded-3xl p-5 sm:p-6 border border-[#DCEBE7] shadow-sm workora-card space-y-3">
-            <h2 class="text-xs font-bold text-[#063B39] tracking-wider uppercase">Good Password Checklist</h2>
-            <ul class="space-y-2 text-xs">
-              <li [ngClass]="ruleMinLength() ? 'text-emerald-700 font-semibold' : 'text-slate-500'" class="flex items-center gap-2">
-                <span class="material-symbols-outlined text-base">{{ ruleMinLength() ? 'check_circle' : 'radio_button_unchecked' }}</span>
-                <span>At least 8 characters</span>
+          <!-- Requirement Checklist Card -->
+          <div class="workora-card p-6 space-y-4">
+            <div class="flex items-center gap-2 border-b border-[#DDE9E6] pb-3">
+              <span class="material-symbols-outlined text-[#087F73] text-lg">checklist</span>
+              <h2 class="text-xs font-bold text-[#102A2A] tracking-wider uppercase font-heading">
+                Password Criteria
+              </h2>
+            </div>
+
+            <ul class="space-y-3 text-xs">
+              <li [ngClass]="ruleMinLength() ? 'text-emerald-700 font-bold' : 'text-[#718686]'" class="flex items-center gap-2.5">
+                <span class="material-symbols-outlined text-lg shrink-0" [ngClass]="ruleMinLength() ? 'text-emerald-600' : 'text-slate-300'">
+                  {{ ruleMinLength() ? 'check_circle' : 'radio_button_unchecked' }}
+                </span>
+                <span>Minimum 8 characters length</span>
               </li>
-              <li [ngClass]="ruleNumber() ? 'text-emerald-700 font-semibold' : 'text-slate-500'" class="flex items-center gap-2">
-                <span class="material-symbols-outlined text-base">{{ ruleNumber() ? 'check_circle' : 'radio_button_unchecked' }}</span>
-                <span>Contains a number</span>
+
+              <li [ngClass]="ruleNumber() ? 'text-emerald-700 font-bold' : 'text-[#718686]'" class="flex items-center gap-2.5">
+                <span class="material-symbols-outlined text-lg shrink-0" [ngClass]="ruleNumber() ? 'text-emerald-600' : 'text-slate-300'">
+                  {{ ruleNumber() ? 'check_circle' : 'radio_button_unchecked' }}
+                </span>
+                <span>Contains at least one number (0-9)</span>
               </li>
-              <li [ngClass]="ruleSymbol() ? 'text-emerald-700 font-semibold' : 'text-slate-500'" class="flex items-center gap-2">
-                <span class="material-symbols-outlined text-base">{{ ruleSymbol() ? 'check_circle' : 'radio_button_unchecked' }}</span>
-                <span>Contains a symbol (!&#64;#$%^*)</span>
+
+              <li [ngClass]="ruleSymbol() ? 'text-emerald-700 font-bold' : 'text-[#718686]'" class="flex items-center gap-2.5">
+                <span class="material-symbols-outlined text-lg shrink-0" [ngClass]="ruleSymbol() ? 'text-emerald-600' : 'text-slate-300'">
+                  {{ ruleSymbol() ? 'check_circle' : 'radio_button_unchecked' }}
+                </span>
+                <span>Contains a special character (!&#64;#$%^&amp;*)</span>
               </li>
-              <li [ngClass]="ruleLetterVariation() ? 'text-emerald-700 font-semibold' : 'text-slate-500'" class="flex items-center gap-2">
-                <span class="material-symbols-outlined text-base">{{ ruleLetterVariation() ? 'check_circle' : 'radio_button_unchecked' }}</span>
-                <span>Upper &amp; lowercase mix</span>
+
+              <li [ngClass]="ruleLetterVariation() ? 'text-emerald-700 font-bold' : 'text-[#718686]'" class="flex items-center gap-2.5">
+                <span class="material-symbols-outlined text-lg shrink-0" [ngClass]="ruleLetterVariation() ? 'text-emerald-600' : 'text-slate-300'">
+                  {{ ruleLetterVariation() ? 'check_circle' : 'radio_button_unchecked' }}
+                </span>
+                <span>Mix of uppercase &amp; lowercase letters</span>
               </li>
             </ul>
 
-            <div class="pt-2 text-[11px] text-slate-400 italic">
-              Tip: A 3-4 word passphrase (e.g. <em>Forest-Pine-River-99</em>) is easy to remember and very strong.
+            <div class="p-3.5 bg-[#DDF7F2]/40 rounded-2xl border border-[#087F73]/20 space-y-1">
+              <p class="text-xs font-bold text-[#075E58] flex items-center gap-1.5">
+                <span class="material-symbols-outlined text-sm">shield</span>
+                <span>Security Recommendation</span>
+              </p>
+              <p class="text-[11px] text-[#718686] leading-relaxed">
+                Use a password unique to your Workora corporate login and avoid reusing personal passwords.
+              </p>
             </div>
-          </section>
-
-          <!-- 2FA Friendly Card -->
-          <section class="rounded-3xl bg-gradient-to-br from-[#DCEBE7]/70 via-white to-[#DCEBE7]/40 border border-[#DCEBE7] p-5 sm:p-6 shadow-sm space-y-3">
-            <div class="inline-flex p-2.5 bg-[#0E6E68] rounded-2xl text-white">
-              <span class="material-symbols-outlined text-xl">shield</span>
-            </div>
-            <div>
-              <h2 class="text-sm font-bold text-[#063B39]">Two-Factor Authentication</h2>
-              <p class="text-xs text-slate-600 mt-1 leading-relaxed">Add an extra layer of protection to your account with an authenticator app (Google Authenticator, 1Password, or Authy).</p>
-            </div>
-            <button 
-              type="button"
-              (click)="onEnable2FA()"
-              class="w-full py-2.5 workora-btn-primary text-xs font-bold rounded-xl shadow-sm flex items-center justify-center gap-1.5"
-            >
-              <span>Enable 2FA Protection</span>
-              <span class="material-symbols-outlined text-sm">arrow_forward</span>
-            </button>
-          </section>
+          </div>
 
         </div>
 
@@ -251,14 +275,54 @@ export class ChangePasswordPageComponent implements AfterViewInit, OnDestroy {
   readonly ruleSymbol = signal<boolean>(false);
   readonly ruleLetterVariation = signal<boolean>(false);
 
+  readonly strengthScore = computed<number>(() => {
+    let score = 0;
+    if (this.ruleMinLength()) score++;
+    if (this.ruleNumber()) score++;
+    if (this.ruleSymbol()) score++;
+    if (this.ruleLetterVariation()) score++;
+    return score;
+  });
+
+  readonly strengthLabel = computed<string>(() => {
+    const score = this.strengthScore();
+    if (score <= 1) return 'Weak';
+    if (score === 2) return 'Fair';
+    if (score === 3) return 'Good';
+    return 'Strong & Secure';
+  });
+
+  readonly strengthLabelColor = computed<string>(() => {
+    const score = this.strengthScore();
+    if (score <= 1) return 'text-rose-600';
+    if (score === 2) return 'text-amber-600';
+    if (score === 3) return 'text-blue-600';
+    return 'text-emerald-600';
+  });
+
+  readonly strengthBarColor = computed<string>(() => {
+    const score = this.strengthScore();
+    if (score <= 1) return 'bg-rose-500';
+    if (score === 2) return 'bg-amber-500';
+    if (score === 3) return 'bg-blue-500';
+    return 'bg-emerald-500';
+  });
+
+  readonly passwordsMatch = computed<boolean>(() => {
+    return !!this.newPassword && !!this.confirmPassword && this.newPassword === this.confirmPassword;
+  });
+
   private ctx?: gsap.Context;
 
   ngAfterViewInit(): void {
     if (!isPlatformBrowser(this.platformId)) return;
 
+    const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (prefersReducedMotion) return;
+
     this.ctx = gsap.context(() => {
-      gsap.from('.security-header', { y: -10, opacity: 0, duration: 0.5 });
-      gsap.from('.security-grid > div', { y: 15, opacity: 0, stagger: 0.1, duration: 0.6 });
+      gsap.from('.security-header', { y: -10, opacity: 0, duration: 0.4 });
+      gsap.from('.security-grid > div', { y: 15, opacity: 0, stagger: 0.1, duration: 0.4 });
     }, this.elementRef.nativeElement);
   }
 
@@ -280,16 +344,11 @@ export class ChangePasswordPageComponent implements AfterViewInit, OnDestroy {
     this.onPasswordChange('');
   }
 
-  onPasskeysClick(): void {
-    this.notificationService.showInfo('Passkey authentication management is enabled for this workspace.');
-  }
-
-  onSessionsClick(): void {
-    this.notificationService.showInfo('You have 1 active browser session in London, UK (Current).');
-  }
-
-  onEnable2FA(): void {
-    this.notificationService.showSuccess('2FA setup QR code dispatched to your registered work email.');
+  isFormValid(): boolean {
+    return !!this.currentPassword && 
+           !!this.newPassword && 
+           this.newPassword.length >= 8 && 
+           this.newPassword === this.confirmPassword;
   }
 
   onSubmit(): void {
@@ -316,10 +375,13 @@ export class ChangePasswordPageComponent implements AfterViewInit, OnDestroy {
     }).subscribe({
       next: () => {
         this.isLoading.set(false);
+        this.notificationService.showSuccess('Your account password has been updated successfully.');
         this.onCancel();
       },
-      error: () => {
+      error: (err: any) => {
         this.isLoading.set(false);
+        const msg = err?.error?.message || err?.message || 'Failed to update password. Please verify your current password.';
+        this.notificationService.showError(msg);
       }
     });
   }

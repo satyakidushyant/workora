@@ -10,6 +10,11 @@ export interface UserSummary {
   lastName: string;
   fullName: string;
   employeeId?: number | null;
+  employeeCode?: string | null;
+  departmentName?: string | null;
+  companyId?: number | null;
+  companyName?: string | null;
+  companyCode?: string | null;
   isActive: boolean;
   createdAt: string;
   roles?: string[];
@@ -33,6 +38,7 @@ export interface UserQueryParams {
   pageSize?: number;
   searchTerm?: string;
   isActive?: boolean | null;
+  companyId?: number | null;
 }
 
 /**
@@ -44,8 +50,10 @@ export interface CreateUserParams {
   lastName: string;
   password: string;
   employeeId?: number | null;
+  companyId?: number | null;
   roleId?: number | null;
 }
+
 
 /**
  * Parameter payload for updating an existing user account profile.
